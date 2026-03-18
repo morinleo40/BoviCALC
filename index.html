@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ration Bovine</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="rb-header">
+    <div class="rb-header-inner">
+      <h1>🐄 Ration Bovine</h1>
+      <p>Optimisation des rations pour bovins laitiers</p>
+    </div>
+  </header>
+
+  <main class="rb-main">
+    <!-- Accueil -->
+    <section class="rb-section-grid" id="home-grid">
+      <article class="rb-card" data-section="ration-a-z">
+        <h2>📋 Créer ma ration</h2>
+        <p>De A à Z : besoins, ration, analyse et coûts</p>
+        <button class="rb-btn rb-btn-primary">Commencer</button>
+      </article>
+
+      <article class="rb-card" data-section="besoins">
+        <h2>📊 Calculer mes besoins</h2>
+        <p>Sans faire de ration complète</p>
+        <button class="rb-btn">Ouvrir</button>
+      </article>
+
+      <article class="rb-card" data-section="ration-seule">
+        <h2>🌾 Analyser ma ration</h2>
+        <p>ApportsOnly - sans besoins</p>
+        <button class="rb-btn">Ouvrir</button>
+      </article>
+
+      <article class="rb-card" data-section="bilan-fourrager">
+        <h2>🌿 Bilan fourrager</h2>
+        <p>Stocks vs besoins du troupeau</p>
+        <button class="rb-btn">Ouvrir</button>
+      </article>
+    </section>
+
+    <!-- Ration A à Z avec 4 onglets -->
+    <section id="section-ration-a-z" class="rb-section-detail hidden">
+      <div class="rb-section-header">
+        <h2>📋 Créer ma ration de A à Z</h2>
+        <button class="rb-btn rb-btn-ghost" data-close>← Retour</button>
+      </div>
+
+      <div id="csv-status" class="rb-help" style="margin-top:0;"></div>
+
+      <!-- 4 onglets -->
+      <div class="rb-tabs">
+        <button class="rb-tab active" data-tab="besoins">1. Besoins</button>
+        <button class="rb-tab" data-tab="ration">2. Ration</button>
+        <button class="rb-tab" data-tab="analyse">3. Analyse</button>
+        <button class="rb-tab" data-tab="cout">4. Coûts</button>
+      </div>
+
+      <!-- Onglet Besoins -->
+      <div id="tab-besoins" class="rb-tab-content active">
+        <form id="form-besoins-tab">
+          <div class="rb-form-group">
+            <label>Type d'animal</label>
+            <select id="type-animal" required>
+              <option value="">Sélectionner</option>
+              <option value="vache-laitiere">Vache laitière</option>
+              <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
+              <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
+              <option value="genisse">Génisse</option>
+              <option value="genisse-engrais">Génisse à engraisser</option>
+              <option value="vache-reforme">Vache réforme à engraisser</option>
+              <option value="veau">Veau</option>
+            </select>
+          </div>
+          <div class="rb-form-grid">
+            <div class="rb-form-group">
+              <label>Poids vif (kg)</label>
+              <input type="number" id="poids-vif" min="100" step="10" required placeholder="Ex: 650">
+            </div>
+            <div id="prod-group" class="rb-form-group">
+              <label>Production laitière (kg/j)</label>
+              <input type="number" id="production-lait" min="0" step="0.5" placeholder="Ex: 30">
+            </div>
+            <div id="gmq-group" class="rb-form-group" style="display:none;">
+              <label>Objectif GMQ (kg/j)</label>
+              <input type="number" id="gmq" min="0" max="2" step="0.1" placeholder="Ex: 1.0">
+            </div>
+            <div id="age-group" class="rb-form-group" style="display:none;">
+              <label>Âge (mois)</label>
+              <input type="number" id="age-mois" min="0" max="60" step="1" placeholder="Ex: 6">
+            </div>
+            <div class="rb-form-group">
+              <label>Activité</label>
+              <select id="activite">
+                <option value="stabulation">Stabulation</option>
+                <option value="paturage">Pâturage</option>
+              </select>
+            </div>
+            <div id="tb-group" class="rb-form-group">
+              <label>TB (g/L)</label>
+              <input type="number" id="tb" min="20" step="0.5" placeholder="Ex: 40">
+            </div>
+            <div id="tp-group" class="rb-form-group">
+              <label>TP (g/L)</label>
+              <input type="number" id="tp" min="20" step="0.5" placeholder="Ex: 32">
+            </div>
+          </div>
+          <div class="rb-form-actions">
+            <button type="button" id="btn-calc-besoins" class="rb-btn rb-btn-primary">Calculer les besoins</button>
+            <button type="button" id="btn-open-custom-modal" class="rb-btn">+ Ajouter aliment</button>
+          </div>
+        </form>
+        <div id="resultat-besoins" class="rb-panel hidden"></div>
+      </div>
+
+      <!-- Onglet Ration -->
+      <div id="tab-ration" class="rb-tab-content">
+        <div class="rb-help">
+          Saisis les aliments de ta ration en <strong>kg de Matière Sèche (MS)</strong>. 
+          Clique sur "+ Ajouter" pour créer un fourrage absent de la base.
+        </div>
+        <div class="rb-ration-lines">
+          <div class="rb-ration-lines-head">
+            <div>Aliment</div>
+            <div>kg MS</div>
+            <div></div>
+          </div>
+          <div id="ration-lines"></div>
+          <div class="rb-form-actions" style="margin-top:12px;">
+            <button type="button" id="btn-add-line" class="rb-btn">+ Ligne</button>
+            <button type="button" id="btn-calc-apports" class="rb-btn rb-btn-primary">Calculer les apports</button>
+          </div>
+          <datalist id="aliments-list"></datalist>
+        </div>
+        <details class="rb-details">
+          <summary>Saisie rapide (texte)</summary>
+          <div class="rb-help" style="margin-top:8px;">Format: quantité + aliment (ex: 18 maïs)</div>
+          <textarea id="description-ration" rows="3" placeholder="18 maíz&#10;6 ensilage d'herbe"></textarea>
+        </details>
+        <div id="resultat-apports" class="rb-panel hidden"></div>
+      </div>
+
+      <!-- Onglet Analyse -->
+      <div id="tab-analyse" class="rb-tab-content">
+        <div class="rb-help">
+          <strong>Minéraux pour BACA</strong> - Saisis les apports en minéraux (optionnel) pour calculer la Balance Anion-Cation Alimentaire.
+          <br>BACA = (Na + K + Ca + Mg) - (Cl + S) en mEq/kg MS
+        </div>
+        <div class="rb-form-grid" style="margin-bottom:16px;">
+          <div class="rb-form-group"><label>Na (g/kg MS)</label><input type="number" id="mineraux-na" min="0" step="0.1" placeholder="Ex: 1.2"></div>
+          <div class="rb-form-group"><label>K (g/kg MS)</label><input type="number" id="mineraux-k" min="0" step="0.1" placeholder="Ex: 15"></div>
+          <div class="rb-form-group"><label>Ca (g/kg MS)</label><input type="number" id="mineraux-ca" min="0" step="0.1" placeholder="Ex: 8"></div>
+          <div class="rb-form-group"><label>Mg (g/kg MS)</label><input type="number" id="mineraux-mg" min="0" step="0.1" placeholder="Ex: 2.5"></div>
+          <div class="rb-form-group"><label>Cl (g/kg MS)</label><input type="number" id="mineraux-cl" min="0" step="0.1" placeholder="Ex: 6"></div>
+          <div class="rb-form-group"><label>S (g/kg MS)</label><input type="number" id="mineraux-s" min="0" step="0.1" placeholder="Ex: 3"></div>
+        </div>
+        <div class="rb-form-actions">
+          <button type="button" id="btn-calc-bilan" class="rb-btn rb-btn-primary">📊 Voir le bilan complet</button>
+          <button type="button" id="btn-ia-ration" class="rb-btn">📋 Analyse</button>
+          <button type="button" id="btn-export-pdf" class="rb-btn">📄 Exporter PDF</button>
+        </div>
+        <div id="resultat-bilan" class="rb-panel hidden"></div>
+        <div id="resultat-ia" class="rb-panel hidden">
+          <h3>🤖 Analyse IA</h3>
+          <div id="resultat-ia-contenu" style="white-space: pre-wrap;"></div>
+        </div>
+      </div>
+
+      <!-- Onglet Coûts -->
+      <div id="tab-cout" class="rb-tab-content">
+        <div class="rb-help">
+          <strong>Étape 1:</strong> Renseigne le prix de chaque aliment (€/tonne de MS)
+        </div>
+        
+        <div class="rb-form-grid">
+          <div class="rb-form-group">
+            <label>Aliment</label>
+            <select id="cout-aliment-select">
+              <option value="">Sélectionner...</option>
+            </select>
+          </div>
+          <div class="rb-form-group">
+            <label>Prix (€/t MS)</label>
+            <input type="number" id="cout-prix-tms" min="0" step="1" placeholder="Ex: 280">
+          </div>
+        </div>
+        <div class="rb-form-actions">
+          <button type="button" id="btn-save-cout-prix" class="rb-btn rb-btn-primary">Enregistrer le prix</button>
+        </div>
+        
+        <div id="cout-prix-liste" class="rb-panel hidden"></div>
+
+        <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+
+        <div class="rb-help">
+          <strong>Étape 2:</strong> Configure ton troupeau pour voir les coûts
+        </div>
+
+        <div class="rb-form-grid">
+          <div class="rb-form-group">
+            <label>Nombre de VL</label>
+            <input type="number" id="cout-nb-vl" min="1" value="50" placeholder="Ex: 50">
+          </div>
+          <div class="rb-form-group">
+            <label>Production/an (kg)</label>
+            <input type="number" id="cout-ref-lait" min="0" value="9000" placeholder="Ex: 9000">
+          </div>
+        </div>
+
+        <div class="rb-form-actions">
+          <button type="button" id="btn-calc-cout" class="rb-btn rb-btn-primary">💰 Calculer les coûts</button>
+        </div>
+
+        <div id="cout-resultats" class="cost-result hidden">
+          <div class="cost-card">
+            <div class="cost-card-label">Coût / VL / jour</div>
+            <div class="cost-card-value" id="cout-vl-jour">—</div>
+            <div class="cost-card-unit">€/vache/jour</div>
+          </div>
+          <div class="cost-card">
+            <div class="cost-card-label">Coût pour 1000L</div>
+            <div class="cost-card-value" id="cout-1000l">—</div>
+            <div class="cost-card-unit">€/1000 litres</div>
+          </div>
+          <div class="cost-card">
+            <div class="cost-card-label">Coût MS</div>
+            <div class="cost-card-value" id="cout-kg-ms">—</div>
+            <div class="cost-card-unit">€/kg MS</div>
+          </div>
+          <div class="cost-card">
+            <div class="cost-card-label">MS / VL / jour</div>
+            <div class="cost-card-value" id="cout-ms-vl">—</div>
+            <div class="cost-card-unit">kg MS/jour</div>
+          </div>
+        </div>
+
+        <div id="cout-detail" class="rb-panel hidden" style="margin-top:20px;">
+          <h3>Détail par aliment</h3>
+          <table class="rb-table" id="cout-table">
+            <thead><tr><th>Aliment</th><th>kg MS</th><th>€/t MS</th><th>Coût</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modal ajout aliment -->
+      <div id="custom-modal" class="rb-modal hidden">
+        <div class="rb-modal-backdrop" data-modal-close></div>
+        <div class="rb-modal-card">
+          <div class="rb-modal-header">
+            <h3>➕ Ajouter un aliment</h3>
+            <button type="button" class="rb-btn rb-btn-ghost" data-modal-close>✕</button>
+          </div>
+          <div class="rb-form-grid">
+            <div class="rb-form-group"><label>Nom</label><input id="custom-nom" type="text" placeholder="Ex: Enrubannage RG"></div>
+            <div class="rb-form-group"><label>Alias</label><input id="custom-alias" type="text" placeholder="Ex: RG enrub"></div>
+            <div class="rb-form-group"><label>MS (%)</label><input id="custom-ms" type="number" min="0" max="100" step="0.1"></div>
+            <div class="rb-form-group"><label>UFL/kg MS</label><input id="custom-ufl" type="number" min="0" step="0.01"></div>
+            <div class="rb-form-group"><label>PDI (g/kg MS)</label><input id="custom-pdi" type="number" min="0" step="1"></div>
+            <div class="rb-form-group"><label>MAT (%)</label><input id="custom-mat" type="number" min="0" max="100" step="0.1"></div>
+          </div>
+          <div class="rb-form-actions">
+            <button type="button" id="btn-add-custom" class="rb-btn rb-btn-primary">Ajouter</button>
+            <button type="button" class="rb-btn" data-modal-close>Annuler</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Besoins seuls -->
+    <section id="section-besoins" class="rb-section-detail hidden">
+      <div class="rb-section-header">
+        <h2>📊 Mes besoins</h2>
+        <button class="rb-btn rb-btn-ghost" data-close>← Retour</button>
+      </div>
+      <form id="form-besoins" class="rb-form">
+        <div class="rb-form-group">
+          <label>Type d'animal</label>
+          <select id="bes-type-animal" required>
+            <option value="">Sélectionner</option>
+            <option value="vache-laitiere">Vache laitière</option>
+            <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
+            <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
+            <option value="genisse">Génisse</option>
+            <option value="genisse-engrais">Génisse à engraisser</option>
+            <option value="vache-reforme">Vache réforme à engraisser</option>
+            <option value="veau">Veau</option>
+          </select>
+        </div>
+        <div class="rb-form-grid">
+          <div class="rb-form-group"><label>Poids vif (kg)</label><input type="number" id="bes-poids-vif" min="100" step="10" required placeholder="Ex: 650"></div>
+          <div class="rb-form-group" id="bes-prod-group"><label>Production (kg/j)</label><input type="number" id="bes-production-lait" min="0" step="0.5" placeholder="Ex: 30"></div>
+          <div class="rb-form-group" id="bes-gmq-group" style="display:none;"><label>Objectif GMQ (kg/j)</label><input type="number" id="bes-gmq" min="0" max="2" step="0.1" placeholder="Ex: 1.0"></div>
+          <div class="rb-form-group" id="bes-age-group" style="display:none;"><label>Âge (mois)</label><input type="number" id="bes-age-mois" min="0" max="60" step="1" placeholder="Ex: 6"></div>
+          <div class="rb-form-group"><label>Activité</label><select id="bes-activite"><option value="stabulation">Stabulation</option><option value="paturage">Pâturage</option></select></div>
+          <div class="rb-form-group" id="bes-tb-group"><label>TB (g/L)</label><input type="number" id="bes-tb" min="20" step="0.5" placeholder="Ex: 40"></div>
+          <div class="rb-form-group" id="bes-tp-group"><label>TP (g/L)</label><input type="number" id="bes-tp" min="20" step="0.5" placeholder="Ex: 32"></div>
+        </div>
+        <div class="rb-form-actions">
+          <button type="submit" class="rb-btn rb-btn-primary">Calculer</button>
+          <button type="button" id="btn-copy-besoins" class="rb-btn">Copier</button>
+        </div>
+      </form>
+      <div id="resultat-besoins-seuls" class="rb-panel hidden"></div>
+    </section>
+
+    <!-- Ration seule -->
+    <section id="section-ration-seule" class="rb-section-detail hidden">
+      <div class="rb-section-header">
+        <h2>🌾 Ma ration</h2>
+        <button class="rb-btn rb-btn-ghost" data-close>← Retour</button>
+      </div>
+      <div class="rb-help">Saisis tes aliments en kg MS</div>
+      <div class="rb-ration-lines">
+        <div class="rb-ration-lines-head"><div>Aliment</div><div>kg MS</div><div></div></div>
+        <div id="ration-only-lines"></div>
+        <div class="rb-form-actions" style="margin-top:12px;">
+          <button type="button" id="btn-add-line-ration-only" class="rb-btn">+ Ligne</button>
+          <button type="button" id="btn-calc-ration-only" class="rb-btn rb-btn-primary">Calculer</button>
+        </div>
+        <datalist id="aliments-list-ration-only"></datalist>
+      </div>
+      <div id="resultat-ration-only" class="rb-panel hidden"></div>
+    </section>
+
+    <!-- Bilan fourrager AMÉLIORÉ -->
+    <section id="section-bilan-fourrager" class="rb-section-detail hidden">
+      <div class="rb-section-header">
+        <h2>🌿 Bilan fourrager</h2>
+        <button class="rb-btn rb-btn-ghost" data-close>← Retour</button>
+      </div>
+
+      <!-- Onglets pour le bilan fourrager -->
+      <div class="rb-tabs" id="bf-tabs">
+        <button class="rb-tab active" data-tab="bf-stocks">1. Stocks</button>
+        <button class="rb-tab" data-tab="bf-troupeau">2. Troupeau</button>
+        <button class="rb-tab" data-tab="bf-resultat">3. Résultat</button>
+      </div>
+
+      <!-- Onglet 1: Stocks -->
+      <div id="tab-bf-stocks" class="rb-tab-content active">
+        <div class="rb-help">
+          Saisis tes <strong>stocks de fourrages</strong> en tonnes brutes et leur % de MS.
+        </div>
+        <div class="rb-ration-lines">
+          <div class="rb-ration-lines-head" style="grid-template-columns: 1fr 140px 120px 50px;">
+            <div>Fourrage</div>
+            <div>t brut</div>
+            <div>MS %</div>
+            <div></div>
+          </div>
+          <div id="stock-lines"></div>
+          <div class="rb-form-actions" style="margin-top:12px;">
+            <button type="button" id="btn-add-stock" class="rb-btn">+ Ajouter un stock</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 2: Troupeau -->
+      <div id="tab-bf-troupeau" class="rb-tab-content">
+        <div class="rb-help">
+          Configure les <strong>besoins du troupeau</strong> pour la période.
+        </div>
+        <div class="rb-form-grid">
+          <div class="rb-form-group">
+            <label>Nombre de VL</label>
+            <input type="number" id="bf-nb-vaches" min="1" placeholder="Ex: 50">
+          </div>
+          <div class="rb-form-group">
+            <label>Période (jours)</label>
+            <input type="number" id="bf-duree" min="1" placeholder="Ex: 90">
+          </div>
+          <div class="rb-form-group">
+            <label>MS / VL / jour (kg)</label>
+            <input type="number" id="bf-ms-j" min="0" step="0.1" placeholder="Ex: 18">
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 3: Résultat -->
+      <div id="tab-bf-resultat" class="rb-tab-content">
+        <div class="rb-form-actions">
+          <button type="button" id="btn-calc-bilan-fourrager" class="rb-btn rb-btn-primary">📊 Calculer le bilan</button>
+          <button type="button" id="btn-export-bf-pdf" class="rb-btn">📄 Exporter PDF</button>
+        </div>
+
+        <!-- Résultat visuel -->
+        <div id="resultat-bilan-fourrager" class="hidden" style="margin-top:24px;">
+          <div class="bf-visual">
+            <div class="bf-visual-title">🔍 Visualisation</div>
+            <div class="bf-silo-container">
+              <div style="text-align:center;">
+                <div class="bf-silo" style="height:120px;">
+                  <div class="bf-silo-fill positive" id="bf-silo-stock" style="height:100%;"></div>
+                  <div class="bf-silo-pct" id="bf-silo-stock-pct">100%</div>
+                  <div class="bf-silo-label">Stock</div>
+                </div>
+              </div>
+              <div class="bf-silo-arrow">➡</div>
+              <div style="text-align:center;">
+                <div class="bf-silo" style="height:120px;">
+                  <div class="bf-silo-fill" id="bf-silo-besoin" style="height:100%;"></div>
+                  <div class="bf-silo-pct">100%</div>
+                  <div class="bf-silo-label">Besoins</div>
+                </div>
+              </div>
+            </div>
+            <div class="bf-cow-row" id="bf-cow-row"></div>
+            <div class="bf-status-msg positive" id="bf-status-msg">✅ Stocks suffisants !</div>
+          </div>
+
+        <div class="bf-summary">
+          <div class="bf-card" id="bf-card-stock">
+            <div class="bf-card-value" id="bf-stock-total">—</div>
+            <div class="bf-card-label">Stock total (t MS)</div>
+          </div>
+          <div class="bf-card" id="bf-card-besoin">
+            <div class="bf-card-value" id="bf-besoin-total">—</div>
+            <div class="bf-card-label">Besoin total (t MS)</div>
+          </div>
+          <div class="bf-card" id="bf-card-bilan">
+            <div class="bf-card-value" id="bf-bilan-value">—</div>
+            <div class="bf-card-label">Solde (t MS)</div>
+          </div>
+        </div>
+        <div id="bf-detail" class="rb-panel"></div>
+      </div>
+
+      <!-- Onglet 4: Calcul TMS -->
+      <div id="tab-bf-calcul-tms" class="rb-tab-content">
+        <div class="rb-help">
+          <strong>Calcul de la TMS (Tonnes de Matière Sèche) d'un silo</strong><br><br>
+          Pour calculer la TMS d'un silo, saisis les dimensions et les caractéristiques du fourrage.<br>
+          Le calcul se fait automatiquement : <strong>TMS = Volume × Densité × (%MS/100) / 1000</strong>
+        </div>
+
+        <div class="rb-panel">
+          <h4>📐 Calculateur TMS</h4>
+          <div class="rb-form-grid">
+            <div class="rb-form-group">
+              <label>Type de silo</label>
+              <select id="tms-type-silo">
+                <option value="tower">Silo tour (circulaire)</option>
+                <option value="bunker">Silo bunker (rectangulaire)</option>
+                <option value="couloir">Silo couloir</option>
+                <option value="round">Ballon round</option>
+              </select>
+            </div>
+            <div class="rb-form-group">
+              <label>Longueur (m)</label>
+              <input type="number" id="tms-longueur" min="0" step="0.1" placeholder="Ex: 20">
+            </div>
+            <div class="rb-form-group">
+              <label>Largeur (m)</label>
+              <input type="number" id="tms-largeur" min="0" step="0.1" placeholder="Ex: 4">
+            </div>
+            <div class="rb-form-group">
+              <label>Hauteur (m)</label>
+              <input type="number" id="tms-hauteur" min="0" step="0.1" placeholder="Ex: 2.5">
+            </div>
+            <div class="rb-form-group">
+              <label>Diamètre (m) - si silo tour</label>
+              <input type="number" id="tms-diametre" min="0" step="0.1" placeholder="Ex: 6">
+            </div>
+          </div>
+          <div class="rb-form-grid">
+            <div class="rb-form-group">
+              <label>Type de fourrage</label>
+              <select id="tms-fourrage">
+                <option value="mais">Ensilage maïs</option>
+                <option value="herbe">Ensilageherbe</option>
+                <option value="enrub">Enrubannage</option>
+                <option value="foin">Foin</option>
+                <option value="paille">Paille</option>
+              </select>
+            </div>
+            <div class="rb-form-group">
+              <label>Ou densité estimée (kg/m³)</label>
+              <input type="number" id="tms-densite" min="0" placeholder="Laisser vide pour valeur par défaut">
+            </div>
+            <div class="rb-form-group">
+              <label>% MS du fourrage</label>
+              <input type="number" id="tms-pourcent-ms" min="0" max="100" step="0.1" placeholder="Ex: 33">
+            </div>
+          </div>
+          <div class="rb-form-actions">
+            <button type="button" id="btn-calc-tms" class="rb-btn rb-btn-primary">Calculer la TMS</button>
+            <button type="button" id="btn-add-tms-to-stock" class="rb-btn">➕ Ajouter aux stocks</button>
+          </div>
+          <div id="resultat-tms" class="rb-panel hidden" style="margin-top:16px;"></div>
+        </div>
+
+        <div class="rb-panel" style="margin-top:20px;">
+          <h4>📊 Densités moyennes (kg/m³)</h4>
+          <table style="width:100%;">
+            <thead><tr><th>Fourrage</th><th>Densité</th><th>% MS typique</th></tr></thead>
+            <tbody>
+              <tr><td>Ensilage maïs</td><td>650-750 kg/m³</td><td>30-35%</td></tr>
+              <tr><td>Ensilageherbes</td><td>550-650 kg/m³</td><td>25-35%</td></tr>
+              <tr><td>Enrubannage</td><td>400-500 kg/m³</td><td>40-50%</td></tr>
+              <tr><td>Foin</td><td>100-150 kg/m³</td><td>85-90%</td></tr>
+              <tr><td>Paille</td><td>80-120 kg/m³</td><td>85-90%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rb-panel" style="margin-top:20px;">
+          <h4>📐 Formules</h4>
+          <p><strong>Silo tour:</strong> Volume = π × r² × hauteur (m³)</p>
+          <p><strong>Silo bunker:</strong> Volume = longueur × largeur × hauteur (m³)</p>
+          <p><strong>TMS:</strong> Volume (m³) × densité (kg/m³) × (%MS/100) / 1000 = TMS</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rb-footer">
+    <p>© 2026 - Ration Bovine | Outil gratuit pour les élevages</p>
+  </footer>
+
+  <script>
+    // Base d'aliments embarquée (fonctionne en local file://)
+    window.RB_ALIMENTS_CSV = `Nom,MS,UFL INRA 2018 par kg,MAT %,PDI INRA 2018 g/kg
+Avoine,87.6,0.87,9.4,64.0
+Avoine décortiquée,85.7,1.0,11.0,71.0
+Avoine floconnée,87.6,0.87,9.4,68.0
+Blé dur,87.8,1.06,14.4,84.0
+Blé tendre,86.9,1.04,11.0,77.0
+Maïs,86.3,1.11,7.6,82.0
+Maïs extrudé,86.3,1.11,7.6,93.0
+Maïs floconné,86.3,1.11,7.6,96.0
+Maïs humide,67.0,0.86,6.2,53.0
+Mil,89.6,1.18,11.2,97.0
+Millet commun,90.6,1.2,12.9,78.0
+Orge,87.2,0.97,9.9,76.0
+Riz cargo,88.0,1.06,9.2,71.0
+Riz paddy,88.0,0.76,7.5,59.0
+"Riz poli, brisures",87.6,1.08,8.1,71.0
+Seigle,86.7,1.04,8.5,70.0
+Sorgho,87.8,1.06,9.3,86.0
+Triticale,86.8,1.02,10.0,74.0
+"Tourteau de canola, huile < 5 %",90.4,0.94,37.0,154.0
+"Tourteau de colza, huile 5-20 %",92.0,1.1,31.0,123.0
+"Tourteau de colza, huile < 5%",89.0,0.88,33.9,128.0
+"Tourteau de lin, huile < 5%",87.9,0.9,32.0,162.0
+"Tourteau de lin, huile > 5%",91.2,1.04,32.3,164.0
+"Tourteau de soja, huile 5-20 %",93.2,1.27,43.8,194.0
+"Tourteau de soja, huile < 5%, 46% protéine + huile",87.7,1.1,43.5,191.0
+"Tourteau de soja, huile < 5%, 48% protéine + huile",88.0,1.11,46.2,200.0
+"Tourteau de soja, huile < 5%, 48% protéine + huile, extrudé",88.0,1.11,46.2,211.0
+Pulpe de betterave déshydratée,88.9,0.92,7.9,82.0
+Pulpe de betterave surpressée,24.3,0.25,2.1,21.0
+"Luzerne déshydratée, protéines 17-19 % sur sec",90.6,0.68,16.2,91.0
+Paille de blé,90.3,0.45,3.5,50.0
+Ensilage maïs,32.0,0.83,7.5,65.0
+Ensilage herbe,35.0,0.65,12.0,70.0
+`;
+  </script>
+  <script>
+    // === NAVIGATION ===
+    const homeGrid = document.getElementById('home-grid');
+    const detailSections = ['ration-a-z', 'besoins', 'ration-seule', 'bilan-fourrager'];
+
+    function showSection(id) {
+      homeGrid.classList.add('hidden');
+      detailSections.forEach(sid => {
+        const el = document.getElementById('section-' + sid);
+        if (el) el.classList.toggle('hidden', sid !== id);
+      });
+    }
+
+    function backToHome() {
+      homeGrid.classList.remove('hidden');
+      detailSections.forEach(sid => {
+        const el = document.getElementById('section-' + sid);
+        if (el) el.classList.add('hidden');
+      });
+    }
+
+    // Cards click
+    document.querySelectorAll('.rb-card[data-section]').forEach(card => {
+      card.addEventListener('click', () => showSection(card.dataset.section));
+    });
+
+    // Back buttons
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', backToHome);
+    });
+
+    // === TABS ===
+    document.querySelectorAll('.rb-tabs').forEach(tabs => {
+      const section = tabs.closest('.rb-section-detail');
+      tabs.querySelectorAll('.rb-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.querySelectorAll('.rb-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const tabId = tab.dataset.tab;
+          section.querySelectorAll('.rb-tab-content').forEach(content => {
+            content.classList.toggle('active', content.id === 'tab-' + tabId);
+          });
+        });
+      });
+    });
+
+    // === DATA ===
+    let alimentsDb = [], alimentsAliases = [], costsByFeed = {};
+    const LS = {
+      custom: 'rb_custom_v1',
+      aliases: 'rb_aliases_v1',
+      costs: 'rb_costs_by_feed_v1'
+    };
+
+    function loadJson(k, f) { try { return JSON.parse(localStorage.getItem(k)) || f; } catch { return f; } }
+    function saveJson(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+    function normalizeName(s) { return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+
+    function parseCsvLine(l) {
+      const out = []; let cur = ''; let q = false;
+      for (let i = 0; i < l.length; i++) {
+        const ch = l[i];
+        if (ch === '"') { if (q && l[i+1] === '"') { cur += '"'; i++; } else q = !q; }
+        else if (ch === ',' && !q) { out.push(cur); cur = ''; }
+        else cur += ch;
+      }
+      out.push(cur);
+      return out.map(v => v.trim());
+    }
+
+    function parseAlimentsCsv(txt) {
+      const lines = String(txt||'').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      if (lines.length < 2) return [];
+      const h = parseCsvLine(lines[0]).map(normalizeName);
+      const iNom = h.findIndex(x => x === 'nom'), iMs = h.findIndex(x => x === 'ms'), iUfl = h.findIndex(x => x.includes('ufl')), iPdi = h.findIndex(x => x.includes('pdi'));
+      if (iNom === -1 || iMs === -1 || iUfl === -1 || iPdi === -1) return [];
+      const db = [];
+      for (let i = 1; i < lines.length; i++) {
+        const c = parseCsvLine(lines[i]);
+        const nom = c[iNom];
+        if (!nom) continue;
+        const ms = Number(String(c[iMs]||'').replace(',','.'));
+        const ufl = Number(String(c[iUfl]||'').replace(',','.'));
+        const pdi = Number(String(c[iPdi]||'').replace(',','.'));
+        if (!Number.isFinite(ms) || !Number.isFinite(ufl) || !Number.isFinite(pdi)) continue;
+        db.push({ nom: String(nom).trim(), key: normalizeName(nom), msPct: ms, uflPerKgMS: ufl, pdiPerKgMS: pdi });
+      }
+      return db;
+    }
+
+    function findAlimentByText(t) {
+      const tt = normalizeName(t);
+      if (!tt) return null;
+      const ah = alimentsAliases.find(a => a.aliasKey === tt);
+      if (ah) { const bx = alimentsDb.find(x => x.key === ah.alimentKey); if (bx) return bx; }
+      const ex = alimentsDb.find(a => a.key === tt);
+      if (ex) return ex;
+      const hits = alimentsDb.filter(a => a.key.includes(tt) || tt.includes(a.key));
+      if (hits.length === 1) return hits[0];
+      if (hits.length > 1) { hits.sort((a,b) => a.key.length - b.key.length); return hits[0]; }
+      return null;
+    }
+
+    function hydrate() {
+      const opts = alimentsDb.map(a => `<option value="${a.nom}">`).join('');
+      document.querySelectorAll('datalist').forEach(dl => { if (dl.id.includes('aliments-list')) dl.innerHTML = opts; });
+      const sel = document.getElementById('cout-aliment-select');
+      if (sel) sel.innerHTML = '<option value="">Sélectionner...</option>' + alimentsDb.map(a => `<option value="${a.key}">${a.nom}</option>`).join('');
+    }
+
+    // === COW GAUGE ===
+    function gaugeColor(r) {
+      if (!Number.isFinite(r) || r <= 0) return 'gray';
+      if (r < 0.85) return 'low';
+      if (r > 1.15) return 'high';
+      return 'ok';
+    }
+
+    function cowGauge(title, unit, apport, besoin, ratio) {
+      const pct = Math.min(100, Math.max(0, ratio * 100));
+      const cls = gaugeColor(ratio);
+      return `<div class="rb-cow-card">
+        <div class="rb-cow-title">${title}</div>
+        <div class="rb-cow-sub">${apport.toFixed(1)} / ${besoin.toFixed(1)} ${unit}</div>
+        <div class="rb-cow">
+          <div class="rb-cow-body">
+            <div class="rb-cow-fill ${cls}" style="width:${pct}%"></div>
+            <div class="rb-cow-label">${pct.toFixed(0)}%</div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // === INIT ===
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load data
+      alimentsDb = parseAlimentsCsv(window.RB_ALIMENTS_CSV || '');
+      const custom = loadJson(LS.custom, []);
+      if (Array.isArray(custom) && custom.length) {
+        custom.forEach(it => {
+          if (!it || !it.nom) return;
+          const item = { nom: String(it.nom).trim(), key: normalizeName(it.nom), msPct: Number(it.msPct), uflPerKgMS: Number(it.uflPerKgMS), pdiPerKgMS: Number(it.pdiPerKgMS) };
+          if (!Number.isFinite(item.msPct)) return;
+          alimentsDb = alimentsDb.filter(a => a.key !== item.key);
+          alimentsDb.unshift(item);
+        });
+      }
+      const aliases = loadJson(LS.aliases, []);
+      alimentsAliases = Array.isArray(aliases) ? aliases : [];
+      costsByFeed = loadJson(LS.costs, {});
+      hydrate();
+
+      document.getElementById('csv-status').innerHTML = alimentsDb.length ? `Base: <strong>${alimentsDb.length}</strong> aliments` : 'Base non chargée';
+
+      // Modal
+      const modal = document.getElementById('custom-modal');
+      document.getElementById('btn-open-custom-modal')?.addEventListener('click', () => modal.classList.remove('hidden'));
+      modal?.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.add('hidden')));
+
+      document.getElementById('btn-add-custom')?.addEventListener('click', () => {
+        const nom = document.getElementById('custom-nom').value.trim();
+        const ms = Number(document.getElementById('custom-ms').value) || 0;
+        const ufl = Number(document.getElementById('custom-ufl').value) || 0;
+        const pdi = Number(document.getElementById('custom-pdi').value) || 0;
+        if (!nom || !ms || !ufl || !pdi) { alert('Nom, MS, UFL, PDI requis'); return; }
+        const item = { nom, key: normalizeName(nom), msPct: ms, uflPerKgMS: ufl, pdiPerKgMS: pdi };
+        alimentsDb = alimentsDb.filter(a => a.key !== item.key);
+        alimentsDb.unshift(item);
+        hydrate();
+        const customNow = loadJson(LS.custom, []);
+        saveJson(LS.custom, [item, ...customNow.filter(x => x.nom !== nom)]);
+        modal.classList.add('hidden');
+      });
+
+      // Ration lines
+      function addLine(containerId, prefill = {}) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        const row = document.createElement('div');
+        row.className = 'rb-ration-row';
+        row.innerHTML = `<div><input class="rb-ration-aliment" type="text" list="aliments-list" placeholder="Ex: Maïs" value="${prefill.aliment||''}"></div><div><input class="rb-ration-qty" type="number" min="0" step="0.1" placeholder="kg MS" value="${prefill.qty||''}"></div><div><button type="button" class="rb-btn rb-btn-ghost">✕</button></div>`;
+        row.querySelector('button').addEventListener('click', () => row.remove());
+        el.appendChild(row);
+      }
+      document.getElementById('btn-add-line')?.addEventListener('click', () => addLine('ration-lines'));
+      for (let i = 0; i < 3; i++) addLine('ration-lines');
+      document.getElementById('btn-add-line-ration-only')?.addEventListener('click', () => addLine('ration-only-lines'));
+      for (let i = 0; i < 3; i++) addLine('ration-only-lines');
+
+      // Stock lines
+      function addStock(prefill = {}) {
+        const el = document.getElementById('stock-lines');
+        const row = document.createElement('div');
+        row.className = 'rb-ration-row';
+        row.style.gridTemplateColumns = '1fr 140px 120px 50px';
+        const nom = prefill.nom || '';
+        const tonnes = prefill.tonnes || '';
+        const ms = prefill.ms || '';
+        row.innerHTML = `<div><input class="rb-stock-name" type="text" placeholder="Fourrage" value="${nom}"></div><div><input class="rb-stock-tonnes" type="number" min="0" step="0.1" placeholder="t" value="${tonnes}"></div><div><input class="rb-stock-ms" type="number" min="0" max="100" step="0.1" placeholder="%" value="${ms}"></div><div><button type="button" class="rb-btn rb-btn-ghost">✕</button></div>`;
+        row.querySelector('button').addEventListener('click', () => row.remove());
+        el.appendChild(row);
+      }
+      document.getElementById('btn-add-stock')?.addEventListener('click', () => addStock());
+
+      // === CALCULS ===
+      function computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq = 0) {
+        const pv075 = Math.pow(pv, 0.75);
+        let bUFL, bPDI, uflParKg, buLait, pdiLait, typeLabel;
+        
+        // Calculate based on animal type
+        if (typeAnimal === 'vache-laitiere' || !typeAnimal) {
+          // Dairy cow
+          typeLabel = 'Vache laitière';
+          const coefAct = act === 'paturage' ? 1.08 : 1;
+          const buEntret = 0.054 * pv075 * coefAct;
+          uflParKg = Math.max(0.35, 0.44 + (tb - 40) * 0.0012 + (tp - 32) * 0.0008);
+          buLait = prod * uflParKg;
+          bUFL = buEntret + buLait;
+          bPDI = 3.25 * pv075 + prod * 45;
+        } else if (typeAnimal === 'genisse') {
+          // Growing heifer - needs for maintenance + growth
+          typeLabel = 'Génisse';
+          const coefAct = act === 'paturage' ? 1.1 : 1;
+          const buEntret = 0.054 * pv075 * coefAct;
+          // Growth: ~0.5-0.8 kg/day gain needs additional UFL
+          const gain = 0.6; // kg/day average
+          const buGrowth = gain * 1.4; // UFL for growth
+          bUFL = buEntret + buGrowth;
+          // PDI for growth: ~80g per kg gain
+          bPDI = 3.25 * pv075 + gain * 80;
+        } else if (typeAnimal === 'genisse-engrais') {
+          // Fattening heifer - higher energy needs
+          typeLabel = 'Génisse à engraisser';
+          const coefAct = act === 'paturage' ? 1.05 : 1;
+          const buEntret = 0.054 * pv075 * coefAct;
+          // Use user-specified GMQ or default
+          const gain = gmq || 1.0; // kg/day
+          const buGrowth = gain * 1.8; // More UFL for fattening
+          bUFL = buEntret + buGrowth;
+          bPDI = 3.25 * pv075 + gain * 100;
+        } else if (typeAnimal === 'veau') {
+          // Veal calf
+          typeLabel = 'Veau';
+          const buEntret = 0.06 * pv075; // Higher maintenance
+          const gain = Math.max(0.8, prod); // Production = weight gain
+          const buGrowth = gain * 1.6;
+          bUFL = buEntret + buGrowth;
+          bPDI = 3.5 * pv075 + gain * 90;
+        } else if (typeAnimal === 'vache-tarie') {
+          // Dry cow - early dry period (0-4 weeks)
+          typeLabel = 'Vache tarie (0-4 sem.)';
+          const coefAct = act === 'paturage' ? 1.05 : 1;
+          const buEntret = 0.054 * pv075 * coefAct;
+          // Early dry period - lower needs, mainly maintenance
+          const buGest = 1.5; // Early gestation requirement
+          bUFL = buEntret + buGest;
+          // PDI for early dry cow
+          bPDI = 3.25 * pv075 + 120;
+        } else if (typeAnimal === 'vache-prepa-velage') {
+          // Dry cow in pre-calving period (4-8 weeks) - higher needs for colostrum
+          typeLabel = 'Vache en prépa vêlage (4-8 sem.)';
+          const coefAct = act === 'paturage' ? 1.05 : 1;
+          const buEntret = 0.054 * pv075 * coefAct;
+          // Late gestation - higher needs for colostrum production
+          const buGest = 3.5; // Late gestation requirement - higher for colostrum
+          bUFL = buEntret + buGest;
+          // PDI for late dry cow: higher for colostrum
+          bPDI = 3.25 * pv075 + 280;
+        } else if (typeAnimal === 'vache-reforme') {
+          // Cull cow for fattening
+          typeLabel = 'Vache réforme à engraisser';
+          const coefAct = act === 'paturage' ? 1.05 : 1;
+          const buEntret = 0.054 * pv075 * coefAct;
+          // Use user-specified GMQ or default
+          const gain = gmq || 1.2; // kg/day - faster than heifers
+          const buGrowth = gain * 1.9;
+          bUFL = buEntret + buGrowth;
+          bPDI = 3.25 * pv075 + gain * 110;
+        } else {
+          // Default dairy cow
+          typeLabel = 'Vache laitière';
+          const coefAct = act === 'paturage' ? 1.08 : 1;
+          const buEntret = 0.054 * pv075 * coefAct;
+          uflParKg = Math.max(0.35, 0.44 + (tb - 40) * 0.0012 + (tp - 32) * 0.0008);
+          buLait = prod * uflParKg;
+          bUFL = buEntret + buLait;
+          bPDI = 3.25 * pv075 + prod * 45;
+        }
+        
+        return { bUFL, bPDI, typeLabel, pv075 };
+      }
+
+      function parseRation(containerId, descId) {
+        const items = [];
+        document.querySelectorAll(`#${containerId} .rb-ration-row`).forEach(row => {
+          const nom = row.querySelector('.rb-ration-aliment')?.value.trim();
+          const qty = Number(row.querySelector('.rb-ration-qty')?.value) || 0;
+          if (!nom || !qty) return;
+          const a = findAlimentByText(nom);
+          if (a) items.push({ nom: a.nom, qty, ufl: a.uflPerKgMS * qty, pdi: a.pdiPerKgMS * qty, key: a.key });
+        });
+        if (!items.length && descId) {
+          document.getElementById(descId)?.value.split('\n').forEach(line => {
+            const m = line.match(/([0-9]+(?:[.,][0-9]+)?)\s*(.*)$/i);
+            if (m) {
+              const qty = Number(String(m[1]).replace(',', '.'));
+              const nom = String(m[2] || '').trim();
+              const a = findAlimentByText(nom);
+              if (a && qty) items.push({ nom: a.nom, qty, ufl: a.uflPerKgMS * qty, pdi: a.pdiPerKgMS * qty, key: a.key });
+            }
+          });
+        }
+        const totalMS = items.reduce((s, i) => s + i.qty, 0);
+        const totalUFL = items.reduce((s, i) => s + i.ufl, 0);
+        const totalPDI = items.reduce((s, i) => s + i.pdi, 0);
+        // Cost
+        let cost = 0;
+        items.forEach(i => { if (i.key && costsByFeed[i.key]) cost += i.qty * costsByFeed[i.key]; });
+        return { items, totalMS, totalUFL, totalPDI, cost, costPerKg: totalMS > 0 ? cost / totalMS : 0 };
+      }
+
+      let lastB = null;
+
+      // Besoins - Show/hide production field based on animal type
+      const prodGroup = document.getElementById('prod-group');
+      const typeAnimalSelect = document.getElementById('type-animal');
+      const prodInput = document.getElementById('production-lait');
+      const tbGroup = document.getElementById('tb-group');
+      const tpGroup = document.getElementById('tp-group');
+      function updateProdField() {
+        const ta = typeAnimalSelect?.value;
+        if (prodGroup) {
+          prodGroup.style.display = (ta === 'vache-laitiere') ? 'block' : 'none';
+        }
+        if (tbGroup) tbGroup.style.display = (ta === 'vache-laitiere') ? 'block' : 'none';
+        if (tpGroup) tpGroup.style.display = (ta === 'vache-laitiere') ? 'block' : 'none';
+        // Show GMQ field for fattening animals
+        const gmqGroup = document.getElementById('gmq-group');
+        if (gmqGroup) {
+          gmqGroup.style.display = (ta === 'genisse-engrais' || ta === 'vache-reforme') ? 'block' : 'none';
+        }
+        // Show age field for veaux and génisses
+        const ageGroup = document.getElementById('age-group');
+        if (ageGroup) {
+          ageGroup.style.display = (ta === 'veau' || ta === 'genisse' || ta === 'genisse-engrais') ? 'block' : 'none';
+        }
+      }
+      typeAnimalSelect?.addEventListener('change', updateProdField);
+      updateProdField();
+
+      document.getElementById('btn-calc-besoins')?.addEventListener('click', () => {
+        const pv = Number(document.getElementById('poids-vif').value) || 0;
+        const prod = Number(document.getElementById('production-lait').value) || 0;
+        const act = document.getElementById('activite').value;
+        const tb = Number(document.getElementById('tb').value) || 40;
+        const tp = Number(document.getElementById('tp').value) || 32;
+        const typeAnimal = document.getElementById('type-animal').value || 'vache-laitiere';
+        const gmq = Number(document.getElementById('gmq').value) || 0;
+        
+        if (!pv) { alert('Poids requis'); return; }
+        
+        // Use the new computeBesoins function with animal type
+        const result = computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq);
+        lastB = result;
+        
+        // Display based on animal type
+        let html = '<h3>📊 Calcul des besoins - ' + result.typeLabel + '</h3>';
+        html += '<div class="rb-panel"><h4>🔢 Données saisies</h4>';
+        html += '<p><strong>Type:</strong> ' + result.typeLabel + '</p>';
+        html += '<p><strong>Poids vif:</strong> ' + pv + ' kg</p>';
+        if (typeAnimal === 'vache-laitiere') {
+          html += '<p><strong>Production laitière:</strong> ' + prod + ' kg/j</p>';
+          html += '<p><strong>TB:</strong> ' + tb + ' g/L</p>';
+          html += '<p><strong>TP:</strong> ' + tp + ' g/L</p>';
+        }
+        html += '<p><strong>Activité:</strong> ' + (act === 'paturage' ? 'Pâturage' : 'Stabulation') + '</p>';
+        html += '</div>';
+        
+        // UFL calculation
+        html += '<div class="rb-panel"><h4>⚡ Calcul UFL</h4>';
+        if (typeAnimal === 'vache-laitiere') {
+          const coefAct = act === 'paturage' ? 1.08 : 1;
+          const buEntret = 0.054 * result.pv075 * coefAct;
+          const uflParKg = Math.max(0.35, 0.44 + (tb - 40) * 0.0012 + (tp - 32) * 0.0008);
+          const buLait = prod * uflParKg;
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">PV<sup>0.75</sup> = ' + pv + '<sup>0.75</sup> = ' + result.pv075.toFixed(2) + ' kg</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 0.054 × ' + result.pv075.toFixed(2) + ' × ' + coefAct + ' = <strong>' + buEntret.toFixed(2) + ' UFL</strong></p>';
+          html += '<p><strong>Besoins pour la production:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">UFL/kg lait = ' + uflParKg.toFixed(3) + '</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + prod + ' × ' + uflParKg.toFixed(3) + ' = <strong>' + buLait.toFixed(2) + ' UFL</strong></p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total UFL = ' + buEntret.toFixed(2) + ' + ' + buLait.toFixed(2) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bUFL.toFixed(2) + ' UFL/jour</span></strong></p>';
+        } else if (typeAnimal === 'genisse' || typeAnimal === 'genisse-engrais') {
+          const gain = typeAnimal === 'genisse-engrais' ? 1.0 : 0.6;
+          const coefAct = act === 'paturage' ? 1.1 : 1;
+          const buEntret = 0.054 * result.pv075 * coefAct;
+          const buGrowth = gain * (typeAnimal === 'genisse-engrais' ? 1.8 : 1.4);
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">PV<sup>0.75</sup> = ' + pv + '<sup>0.75</sup> = ' + result.pv075.toFixed(2) + ' kg</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 0.054 × ' + result.pv075.toFixed(2) + ' × ' + coefAct + ' = <strong>' + buEntret.toFixed(2) + ' UFL</strong></p>';
+          html += '<p><strong>Besoins pour croissance:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Croissance: ' + gain + ' kg/j</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + gain + ' × ' + (typeAnimal === 'genisse-engrais' ? '1.8' : '1.4') + ' = <strong>' + buGrowth.toFixed(2) + ' UFL</strong></p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total UFL = ' + buEntret.toFixed(2) + ' + ' + buGrowth.toFixed(2) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bUFL.toFixed(2) + ' UFL/jour</span></strong></p>';
+        } else if (typeAnimal === 'vache-tarie') {
+          // Dry cow display
+          const coefAct = act === 'paturage' ? 1.05 : 1;
+          const buEntret = 0.054 * result.pv075 * coefAct;
+          const buGest = 2.5;
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">PV<sup>0.75</sup> = ' + pv + '<sup>0.75</sup> = ' + result.pv075.toFixed(2) + ' kg</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 0.054 × ' + result.pv075.toFixed(2) + ' × ' + coefAct + ' = <strong>' + buEntret.toFixed(2) + ' UFL</strong></p>';
+          html += '<p><strong>Besoins gestation (tarissement):</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = <strong>' + buGest.toFixed(2) + ' UFL</strong> (colostrum)</p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total UFL = ' + buEntret.toFixed(2) + ' + ' + buGest.toFixed(2) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bUFL.toFixed(2) + ' UFL/jour</span></strong></p>';
+        } else if (typeAnimal === 'vache-reforme') {
+          // Cull cow for fattening display
+          const coefAct = act === 'paturage' ? 1.05 : 1;
+          const buEntret = 0.054 * result.pv075 * coefAct;
+          const gain = 1.2;
+          const buGrowth = gain * 1.9;
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">PV<sup>0.75</sup> = ' + pv + '<sup>0.75</sup> = ' + result.pv075.toFixed(2) + ' kg</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 0.054 × ' + result.pv075.toFixed(2) + ' × ' + coefAct + ' = <strong>' + buEntret.toFixed(2) + ' UFL</strong></p>';
+          html += '<p><strong>Besoins engraissement:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">GMQ: ' + gain + ' kg/j</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + gain + ' × 1.9 = <strong>' + buGrowth.toFixed(2) + ' UFL</strong></p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total UFL = ' + buEntret.toFixed(2) + ' + ' + buGrowth.toFixed(2) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bUFL.toFixed(2) + ' UFL/jour</span></strong></p>';
+        } else {
+          // Veau
+          const gain = Math.max(0.8, prod);
+          const buEntret = 0.06 * result.pv075;
+          const buGrowth = gain * 1.6;
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">PV<sup>0.75</sup> = ' + result.pv075.toFixed(2) + ' kg</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 0.06 × ' + result.pv075.toFixed(2) + ' = <strong>' + buEntret.toFixed(2) + ' UFL</strong></p>';
+          html += '<p><strong>Besoins pour croissance:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">GMQ: ' + gain + ' kg/j</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + gain + ' × 1.6 = <strong>' + buGrowth.toFixed(2) + ' UFL</strong></p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total UFL = ' + buEntret.toFixed(2) + ' + ' + buGrowth.toFixed(2) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bUFL.toFixed(2) + ' UFL/jour</span></strong></p>';
+        }
+        html += '</div>';
+        
+        // PDI calculation
+        html += '<div class="rb-panel"><h4>🥩 Calcul PDI</h4>';
+        const pdiEntret = 3.25 * result.pv075;
+        if (typeAnimal === 'vache-laitiere') {
+          const pdiLait = prod * 45;
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 3.25 × ' + result.pv075.toFixed(2) + ' = <strong>' + pdiEntret.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p><strong>Besoins pour la production:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + prod + ' × 45 = <strong>' + pdiLait.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total PDI = ' + pdiEntret.toFixed(0) + ' + ' + pdiLait.toFixed(0) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bPDI.toFixed(0) + ' g PDI/jour</span></strong></p>';
+        } else if (typeAnimal === 'vache-tarie') {
+          // Dry cow PDI
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 3.25 × ' + result.pv075.toFixed(2) + ' = <strong>' + pdiEntret.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p><strong>Besoins tarissement (colostrum):</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = <strong>200 g PDI</strong> (production colostrum)</p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total PDI = ' + pdiEntret.toFixed(0) + ' + 200 = <span style="color:var(--primary);font-size:1.2em;">' + result.bPDI.toFixed(0) + ' g PDI/jour</span></strong></p>';
+        } else if (typeAnimal === 'vache-reforme') {
+          // Cull cow PDI
+          const gain = 1.2;
+          const pdiGrowth = gain * 110;
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 3.25 × ' + result.pv075.toFixed(2) + ' = <strong>' + pdiEntret.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p><strong>Besoins engraissement:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">GMQ: ' + gain + ' kg/j</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + gain + ' × 110 = <strong>' + pdiGrowth.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total PDI = ' + pdiEntret.toFixed(0) + ' + ' + pdiGrowth.toFixed(0) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bPDI.toFixed(0) + ' g PDI/jour</span></strong></p>';
+        } else {
+          const gain = typeAnimal === 'genisse-engrais' ? 1.0 : (typeAnimal === 'veau' ? Math.max(0.8, prod) : 0.6);
+          const pdiGrowth = gain * (typeAnimal === 'genisse-engrais' ? 100 : (typeAnimal === 'veau' ? 90 : 80));
+          html += '<p><strong>Besoins d\'entretien:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 3.25 × ' + result.pv075.toFixed(2) + ' = <strong>' + pdiEntret.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p><strong>Besoins pour croissance:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + gain + ' × ' + (typeAnimal === 'genisse-engrais' ? '100' : (typeAnimal === 'veau' ? '90' : '80')) + ' = <strong>' + pdiGrowth.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total PDI = ' + pdiEntret.toFixed(0) + ' + ' + pdiGrowth.toFixed(0) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bPDI.toFixed(0) + ' g PDI/jour</span></strong></p>';
+        }
+        html += '</div>';
+        
+        document.getElementById('resultat-besoins').innerHTML = html;
+        document.getElementById('resultat-besoins').classList.remove('hidden');
+      });
+
+      // Apports
+      document.getElementById('btn-calc-apports')?.addEventListener('click', () => {
+        const a = parseRation('ration-lines', 'description-ration');
+        document.getElementById('resultat-apports').innerHTML = `<h3>Apports</h3><p><strong>MS:</strong> ${a.totalMS.toFixed(1)} kg</p><p><strong>UFL:</strong> ${a.totalUFL.toFixed(1)}</p><p><strong>PDI:</strong> ${a.totalPDI.toFixed(0)} g</p>`;
+        document.getElementById('resultat-apports').classList.remove('hidden');
+      });
+
+      // Bilan
+      document.getElementById('btn-calc-bilan')?.addEventListener('click', () => {
+        if (!lastB) { alert('Calcule d\'abord les besoins'); return; }
+        const pv = Number(document.getElementById('poids-vif').value) || 650;
+        const a = parseRation('ration-lines', 'description-ration');
+        const rUFL = a.totalMS > 0 ? a.totalUFL / lastB.bUFL : 0;
+        const rPDI = a.totalMS > 0 ? a.totalPDI / lastB.bPDI : 0;
+        const pdiParUfl = a.totalUFL > 0 ? a.totalPDI / a.totalUFL : 0;
+        
+        // BACA Calculation: (Na + K + Ca + Mg) - (Cl + S) in mEq/kg MS
+        // Conversion: Na (g) * 43.5, K * 25.6, Ca * 49.9, Mg * 82.2, Cl * 28.2, S * 62.4
+        const na = Number(document.getElementById('mineraux-na').value) || 0;
+        const k = Number(document.getElementById('mineraux-k').value) || 0;
+        const ca = Number(document.getElementById('mineraux-ca').value) || 0;
+        const mg = Number(document.getElementById('mineraux-mg').value) || 0;
+        const cl = Number(document.getElementById('mineraux-cl').value) || 0;
+        const s = Number(document.getElementById('mineraux-s').value) || 0;
+        
+        const baca = (na * 43.5 + k * 25.6 + ca * 49.9 + mg * 82.2) - (cl * 28.2 + s * 62.4);
+        let bacaStatus = { label: 'À surveiller', cls: 'rb-badge-orange' };
+        if (Math.abs(baca) < 50) { bacaStatus = { label: 'Optimal', cls: 'rb-badge-green' }; }
+        else if (baca > 100) { bacaStatus = { label: 'Excès cations', cls: 'rb-badge-orange' }; }
+        else if (baca < -100) { bacaStatus = { label: 'Excès anions', cls: 'rb-badge-red' }; }
+        const hasMineraux = na > 0 || k > 0 || ca > 0 || mg > 0 || cl > 0 || s > 0;
+        
+        // Calculate MS intake vs recommended based on animal type
+        // Vache tarie 0-4 sem: 1.5-2% du poids
+        // Prépa vêlage 4-8 sem: 1.8-2.2% du poids
+        // Vache laitière: 17-19 kg MS default
+        let msRecoMin, msRecoMax;
+        const typeAnimal = lastB?.typeLabel || '';
+        if (typeAnimal.includes('tarie') && !typeAnimal.includes('prépa')) {
+          // Vache tarie 0-4 sem
+          msRecoMin = pv * 0.015;
+          msRecoMax = pv * 0.02;
+        } else if (typeAnimal.includes('prépa') || typeAnimal.includes('vêlage')) {
+          // Prépa vêlage 4-8 sem
+          msRecoMin = pv * 0.018;
+          msRecoMax = pv * 0.022;
+        } else {
+          // Default for dairy cows
+          msRecoMin = 17;
+          msRecoMax = 19;
+        }
+        const msRatio = a.totalMS > 0 ? a.totalMS / msRecoMin : 0;
+        
+        // Fiber estimation (based on average fiber content)
+        const fiberEst = 15; // Estimated fiber % MS
+        const fibRecco = 15; // Recommended fiber % MS
+        
+        // Azote estimation
+        const azoteEst = a.totalMS > 0 ? (a.totalPDI / a.totalMS / 10) : 0;
+        const azoteRecco = 15; // Recommended MAT % MS
+        
+        // Mineral estimation (rough)
+        const mgEst = 3;
+        const mgRecco = 5;
+        
+        // Acidose risk: high energy, low fiber, low PDI/UFL ratio
+        const acidoseRisk = (rUFL > 1.1 || pdiParUfl > 110 || pdiParUfl < 80);
+        const acidoseLevel = acidoseRisk ? (rUFL > 1.2 ? 'ÉLEVÉ' : (rUFL > 1.1 ? 'MODÉRÉ' : 'FAIBLE')) : 'FAIBLE';
+        
+        let status = { label: 'OK', cls: 'rb-badge-green' };
+        if (pdiParUfl < 90) { status = { label: 'Manque PDI', cls: 'rb-badge-red' }; }
+        else if (pdiParUfl > 105) { status = { label: 'Excès PDI', cls: 'rb-badge-orange' }; }
+
+        // MS status
+        let msStatus = { label: 'OK', cls: 'rb-badge-green' };
+        if (a.totalMS < msRecoMin) { msStatus = { label: 'Trop faible', cls: 'rb-badge-red' }; }
+        else if (a.totalMS > msRecoMax + 2) { msStatus = { label: 'Trop élevé', cls: 'rb-badge-orange' }; }
+
+        document.getElementById('resultat-bilan').innerHTML = `
+          <h3>Bilan complet de la ration</h3>
+          
+          <!-- BACA Display -->
+          ${hasMineraux ? `
+          <div class="rb-panel" style="border-color:var(--primary);margin-bottom:16px;">
+            <h4>⚖️ BACA (Balance Anion-Cation Alimentaire)</h4>
+            <div style="display:flex;align-items:center;gap:20px;">
+              <div style="font-size:2rem;">⚖️</div>
+              <div>
+                <p style="font-size:1.5rem;font-weight:bold;color:var(--primary);">${baca.toFixed(1)} mEq/kg MS</p>
+                <p style="font-size:0.9rem;">Statut: <span class="rb-badge ${bacaStatus.cls}">${bacaStatus.label}</span></p>
+                <p style="font-size:0.85rem;color:var(--text-light);">cible: -50 à +50 mEq/kg MS pour vache tarie</p>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+          
+          <!-- Acidose Risk -->
+          <div class="rb-panel" style="border-color:${acidoseRisk ? 'var(--danger)' : 'var(--primary)'};">
+            <h4>⚠️ Risque Acidose</h4>
+            <div style="display:flex;align-items:center;gap:20px;">
+              <div style="font-size:2rem;">${acidoseRisk ? '⚠️' : '✅'}</div>
+              <div>
+                <p style="font-size:1.3rem;font-weight:bold;color:${acidoseRisk ? 'var(--danger)' : 'var(--primary)'};">${acidoseLevel}</p>
+                <p style="font-size:0.9rem;color:var(--text-light);">${acidoseRisk ? 'Surveiller la ration' : 'Risque faible'}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Équilibre de la ration -->
+          <div class="rb-panel" style="margin-top:16px;">
+            <h4>⚖️ Équilibre de la ration</h4>
+            <div class="rb-form-grid">
+              <div><p><strong>Matière sèche ingérée totale:</strong></p><p style="font-size:1.3rem;color:var(--primary);">${a.totalMS.toFixed(1)} kg MS/j</p></div>
+              <div><p><strong>Niveau d'ingestion:</strong></p><p style="font-size:1.3rem;">${a.totalMS.toFixed(1)} / ${msRecoMin}-${msRecoMax} kg</p><span class="rb-badge ${msStatus.cls}">${msStatus.label}</span></div>
+              <div><p><strong>Efficacité PDI:</strong></p><p style="font-size:1.3rem;">${pdiParUfl.toFixed(0)} g/UFL</p><span class="rb-badge ${status.cls}">${status.label}</span></div>
+              <div><p><strong>Besoins PDI Totaux:</strong></p><p style="font-size:1.3rem;">${lastB.bPDI.toFixed(0)} g/j</p></div>
+              <div><p><strong>PDI/UFL:</strong></p><p style="font-size:1.3rem;color:var(--primary);">${pdiParUfl.toFixed(0)} g/UFL</p></div>
+            </div>
+          </div>
+          
+          <!-- Jauges -->
+          <div class="rb-panel" style="margin-top:16px;">
+            <h4>📊 Jauges nutritionnelles</h4>
+            <div class="rb-cow-grid">
+              ${cowGauge('UFL (Énergie)', 'UFL/j', a.totalUFL, lastB.bUFL, rUFL)}
+              ${cowGauge('PDI (Azote)', 'g/j', a.totalPDI, lastB.bPDI, rPDI)}
+              ${cowGauge('Matière Sèche', 'kg/j', a.totalMS, msRecoMin, a.totalMS/msRecoMin)}
+            </div>
+          </div>
+          
+          <!-- Équilibre détaillé -->
+          <div class="rb-panel" style="margin-top:16px;">
+            <h4>🔬 Équilibre détaillé</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+              
+              <div class="rb-cow-card">
+                <div class="rb-cow-title">🌿 Fibre</div>
+                <div class="rb-cow-sub">~${fiberEst}% MS <span class="rb-badge rb-badge-green">OK</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Recommandé: >${fibRecco}% MS</p>
+              </div>
+              
+              <div class="rb-cow-card">
+                <div class="rb-cow-title">🧪 Azote (MAT)</div>
+                <div class="rb-cow-sub">~${azoteEst}% MS <span class="rb-badge rb-badge-green">OK</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Recommandé: ~${azoteRecco}% MS</p>
+              </div>
+              
+              <div class="rb-cow-card">
+                <div class="rb-cow-title">🦴 Minéraux</div>
+                <div class="rb-cow-sub">~${mgEst}% MS <span class="rb-badge rb-badge-orange">À voir</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Recommandé: ~${mgRecco}% MS</p>
+              </div>
+              
+              <div class="rb-cow-card">
+                <div class="rb-cow-title">💧 Matières grasses</div>
+                <div class="rb-cow-sub">~3-4% MS <span class="rb-badge rb-badge-green">OK</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Max: 6-7% MS</p>
+              </div>
+              
+              <div class="rb-cow-card">
+                <div class="rb-cow-title">⚡ Énergie</div>
+                <div class="rb-cow-sub">${a.totalUFL.toFixed(1)} UFL <span class="rb-badge ${rUFL >= 0.9 && rUFL <= 1.1 ? 'rb-badge-green' : 'rb-badge-orange'}">${rUFL >= 0.9 && rUFL <= 1.1 ? 'OK' : (rUFL * 100).toFixed(0) + '%'}</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Cible: ${lastB.bUFL.toFixed(1)} UFL</p>
+              </div>
+              
+              <div class="rb-cow-card">
+                <div class="rb-cow-title">🧬 Acides aminés</div>
+                <div class="rb-cow-sub">Limitant: Méthionine <span class="rb-badge rb-badge-orange">À optimiser</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Dépend du régime</p>
+              </div>
+              
+            </div>
+          </div>
+          
+          <!-- Détail ration -->
+          <div class="rb-panel" style="margin-top:16px;">
+            <h4>🌾 Détail de la ration</h4>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr style="border-bottom:2px solid var(--border);"><th style="text-align:left;padding:8px;">Aliment</th><th style="text-align:right;padding:8px;">kg MS</th><th style="text-align:right;padding:8px;">UFL</th><th style="text-align:right;padding:8px;">PDI</th></tr></thead>
+              <tbody>
+                ${a.items.map(i => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">${i.nom}</td><td style="text-align:right;padding:8px;">${i.qty.toFixed(1)}</td><td style="text-align:right;padding:8px;">${i.ufl.toFixed(1)}</td><td style="text-align:right;padding:8px;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
+                <tr style="font-weight:bold;border-top:2px solid var(--border);"><td style="padding:8px;">TOTAL</td><td style="text-align:right;padding:8px;">${a.totalMS.toFixed(1)}</td><td style="text-align:right;padding:8px;">${a.totalUFL.toFixed(1)}</td><td style="text-align:right;padding:8px;">${a.totalPDI.toFixed(0)}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+        document.getElementById('resultat-bilan').classList.remove('hidden');
+      });
+
+      // Export PDF
+      document.getElementById('btn-export-pdf')?.addEventListener('click', () => {
+        if (!lastB) { alert('Calcule dabord les besoins et le bilan'); return; }
+        const a = parseRation('ration-lines', 'description-ration');
+        if (!a.items.length) { alert('Saisis dabord une ration'); return; }
+        
+        const rUFL = a.totalUFL / lastB.bUFL;
+        const rPDI = a.totalPDI / lastB.bPDI;
+        const pdiParUfl = a.totalUFL > 0 ? a.totalPDI / a.totalUFL : 0;
+        
+        const isUFLOK = rUFL >= 0.95 && rUFL <= 1.05;
+        const isPDIOOK = rPDI >= 0.95 && rPDI <= 1.05;
+        const isPDIPerUFLOK = pdiParUfl >= 90 && pdiParUfl <= 105;
+        const isBalanced = isUFLOK && isPDIOOK && isPDIPerUFLOK;
+        
+        const content = 
+'===========================================\nRATION BOVINE - BILAN\n===========================================\nDate: ' + new Date().toLocaleDateString('fr-FR') + '\n\n' +
+'DONNEES DE L ANIMAL:\n' +
+'- Poids vif: ' + (document.getElementById('poids-vif').value || '-') + ' kg\n' +
+'- Production: ' + (document.getElementById('production-lait').value || '-') + ' kg/j\n' +
+'- TB: ' + (document.getElementById('tb').value || '-') + ' g/L\n' +
+'- TP: ' + (document.getElementById('tp').value || '-') + ' g/L\n' +
+'- Activite: ' + (document.getElementById('activite').value === 'paturage' ? 'Paturage' : 'Stabulation') + '\n\n' +
+'BESOINS NUTRITIONNELS:\n' +
+'- Energie (UFL): ' + lastB.bUFL.toFixed(2) + ' UFL/jour\n' +
+'- PDI: ' + lastB.bPDI.toFixed(0) + ' g/jour\n\n' +
+'DETAIL DE LA RATION:\n' +
+a.items.map(i => '- ' + i.nom + ': ' + i.qty.toFixed(1) + ' kg MS (UFL: ' + i.ufl.toFixed(1) + ', PDI: ' + i.pdi.toFixed(0) + ' g)').join('\n') + '\n\n' +
+'TOTAL:\n' +
+'- MS: ' + a.totalMS.toFixed(1) + ' kg\n' +
+'- UFL: ' + a.totalUFL.toFixed(1) + ' (' + (rUFL*100).toFixed(0) + '% des besoins) ' + (isUFLOK ? 'OK' : 'PROBLEME') + '\n' +
+'- PDI: ' + a.totalPDI.toFixed(0) + ' g (' + (rPDI*100).toFixed(0) + '% des besoins) ' + (isPDIOOK ? 'OK' : 'PROBLEME') + '\n' +
+'- Ratio PDI/UFL: ' + pdiParUfl.toFixed(0) + ' g/UFL ' + (isPDIPerUFLOK ? 'OK' : 'PROBLEME') + '\n\n' +
+'===========================================\nSTATUT: ' + (isBalanced ? 'RATION EQUILIBREE' : 'DESEQUILIBRE DETECTE') + '\n===========================================\n';
+        
+        // Download as text file
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'bilan-ration-' + new Date().toISOString().slice(0,10) + '.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+
+      // IA
+      document.getElementById('btn-ia-ration')?.addEventListener('click', () => {
+        if (!lastB) { alert('Calcule les besoins et le bilan'); return; }
+        const a = parseRation('ration-lines', 'description-ration');
+        const rUFL = a.totalUFL / lastB.bUFL;
+        const rPDI = a.totalPDI / lastB.bPDI;
+        
+        const actions = [];
+        const defUFL = Math.max(0, lastB.bUFL - a.totalUFL);
+        const defPDI = Math.max(0, lastB.bPDI - a.totalPDI);
+        const surUFL = Math.max(0, a.totalUFL - lastB.bUFL);
+        const surPDI = Math.max(0, a.totalPDI - lastB.bPDI);
+
+        if (defUFL > 0.2) {
+          const best = [...alimentsDb].sort((x, y) => y.uflPerKgMS - x.uflPerKgMS)[0];
+          if (best) actions.push(`➕ Ajouter ${(defUFL / best.uflPerKgMS).toFixed(1)} kg MS de "${best.nom}" pour l'énergie`);
+        }
+        if (defPDI > 50) {
+          const best = [...alimentsDb].sort((x, y) => y.pdiPerKgMS - x.pdiPerKgMS)[0];
+          if (best) actions.push(`➕ Ajouter ${(defPDI / best.pdiPerKgMS).toFixed(1)} kg MS de "${best.nom}" pour les protéines`);
+        }
+        if (surUFL > 0.2) actions.push(`➖ Réduire l'énergie (surplus de ${surUFL.toFixed(1)} UFL)`);
+        if (surPDI > 50) actions.push(`➖ Réduire les protéines (surplus de ${surPDI.toFixed(0)} g PDI)`);
+        if (!actions.length) actions.push('✅ Ration équilibrée !');
+
+        const panel = document.getElementById('resultat-ia');
+        document.getElementById('resultat-ia-contenu').textContent = actions.join('\n\n');
+        panel.classList.remove('hidden');
+      });
+
+      // Coûts
+      document.getElementById('btn-save-cout-prix')?.addEventListener('click', () => {
+        const select = document.getElementById('cout-aliment-select');
+        const prix = Number(document.getElementById('cout-prix-tms').value) || 0;
+        const key = select?.value;
+        if (!key || !prix) { alert('Sélectionne un aliment et un prix'); return; }
+        costsByFeed[key] = prix / 1000;
+        saveJson(LS.costs, costsByFeed);
+        const found = alimentsDb.find(a => a.key === key);
+        document.getElementById('cout-prix-liste').innerHTML = `<p>✅ Prix enregistré: <strong>${prix} €/t MS</strong> pour ${found?.nom || key}</p>`;
+        document.getElementById('cout-prix-liste').classList.remove('hidden');
+      });
+
+      document.getElementById('btn-calc-cout')?.addEventListener('click', () => {
+        const a = parseRation('ration-lines', 'description-ration');
+        const nbVL = Number(document.getElementById('cout-nb-vl').value) || 1;
+        const refLait = Number(document.getElementById('cout-ref-lait').value) || 9000;
+
+        if (!a.items.length) { alert('Saisis d\'abord une ration'); return; }
+
+        const coutVL = a.cost;
+        const laitVL = refLait / 365;
+        const cout1000L = laitVL > 0 ? (coutVL / laitVL) * 1000 : 0;
+
+        document.getElementById('cout-vl-jour').textContent = coutVL.toFixed(2) + ' €';
+        document.getElementById('cout-1000l').textContent = cout1000L.toFixed(2) + ' €';
+        document.getElementById('cout-kg-ms').textContent = a.costPerKg.toFixed(3) + ' €';
+        document.getElementById('cout-ms-vl').textContent = a.totalMS.toFixed(1);
+        document.getElementById('cout-resultats').classList.remove('hidden');
+
+        // Detail table
+        const tbody = document.querySelector('#cout-table tbody');
+        tbody.innerHTML = a.items.map(i => {
+          const prix = i.key && costsByFeed[i.key] ? costsByFeed[i.key] * 1000 : 0;
+          return `<tr><td>${i.nom}</td><td>${i.qty.toFixed(1)}</td><td>${prix > 0 ? prix.toFixed(0) : '—'}</td><td>${(i.qty * (prix/1000)).toFixed(2)} €</td></tr>`;
+        }).join('') + `<tr><td><strong>Total</strong></td><td><strong>${a.totalMS.toFixed(1)}</strong></td><td></td><td><strong>${a.cost.toFixed(2)} €</strong></td></tr>`;
+        document.getElementById('cout-detail').classList.remove('hidden');
+      });
+
+      // Bilan fourrager tabs
+      document.querySelectorAll('#bf-tabs .rb-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('#bf-tabs .rb-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const tabId = tab.dataset.tab;
+          ['bf-stocks', 'bf-troupeau', 'bf-resultat'].forEach(id => {
+            const el = document.getElementById('tab-' + id);
+            if (el) el.classList.toggle('active', id === tabId);
+          });
+        });
+      });
+
+      // Global variable to store last TMS calculation
+      let lastTMSCalculation = null;
+
+      // TMS calculation
+      document.getElementById('btn-calc-tms')?.addEventListener('click', () => {
+        const typeSilo = document.getElementById('tms-type-silo').value;
+        const long = Number(document.getElementById('tms-longueur').value) || 0;
+        const larg = Number(document.getElementById('tms-largeur').value) || 0;
+        const haut = Number(document.getElementById('tms-hauteur').value) || 0;
+        const diam = Number(document.getElementById('tms-diametre').value) || 0;
+        const fourrage = document.getElementById('tms-fourrage').value;
+        let densite = Number(document.getElementById('tms-densite').value) || 0;
+        const ms = Number(document.getElementById('tms-pourcent-ms').value) || 0;
+        
+        if (!long || !ms) {
+          alert('Veuillez entrer les dimensions et le % MS');
+          return;
+        }
+        
+        // Default densities by forage type
+        const densitesDefaut = {
+          'mais': 700, 'herbe': 600, 'enrub': 450, 'foin': 120, 'paille': 100
+        };
+        if (!densite) densite = densitesDefaut[fourrage] || 500;
+        
+        let volume = 0;
+        if (typeSilo === 'tower') {
+          // Silo tour
+          const r = diam / 2;
+          volume = Math.PI * r * r * long;
+        } else if (typeSilo === 'bunker' || typeSilo === 'couloir') {
+          volume = long * larg * haut;
+        } else if (typeSilo === 'round') {
+          // Ballon - approximate as cylinder
+          volume = Math.PI * (larg/2) * (larg/2) * long;
+        }
+        
+        const tMS = volume * densite * ms / 100 / 1000;
+        const tBrut = volume * densite / 1000;
+        
+        // Store for later use
+        lastTMSCalculation = { tMS, tBrut, ms, fourrage, typeSilo };
+        
+        const fourrageNames = { 'mais': 'Ensilage maïs', 'herbe': 'Ensilageherbes', 'enrub': 'Enrubannage', 'foin': 'Foin', 'paille': 'Paille' };
+        
+        document.getElementById('resultat-tms').innerHTML = `
+          <h4 style="color:var(--primary);">Résultat</h4>
+          <p><strong>Type de silo:</strong> ${typeSilo === 'tower' ? 'Silo tour' : (typeSilo === 'bunker' ? 'Silo bunker' : (typeSilo === 'couloir' ? 'Silo couloir' : 'Ballon round'))}</p>
+          <p><strong>Volume:</strong> ${volume.toFixed(1)} m³</p>
+          <p><strong>Poids brut:</strong> ${tBrut.toFixed(1)} tonnes</p>
+          <p><strong>TMS (Tonnes MS):</strong> <span style="font-size:1.5rem;color:var(--primary);font-weight:bold;">${tMS.toFixed(2)} t MS</span></p>
+          <p style="font-size:0.9rem;color:var(--text-light);">Soit ${(tMS * 1000).toFixed(0)} kg de matière sèche</p>
+          <p><strong>Fourrage:</strong> ${fourrageNames[fourrage] || fourrage}</p>
+        `;
+        document.getElementById('resultat-tms').classList.remove('hidden');
+      });
+
+      // Add TMS to stocks
+      document.getElementById('btn-add-tms-to-stock')?.addEventListener('click', () => {
+        if (!lastTMSCalculation) {
+          alert('Calculez d\'abord la TMS');
+          return;
+        }
+        
+        const fourrageNames = { 'mais': 'Ensilage maïs', 'herbe': 'Ensilageherbes', 'enrub': 'Enrubannage', 'foin': 'Foin', 'paille': 'Paille' };
+        const nom = fourrageNames[lastTMSCalculation.fourrage] || lastTMSCalculation.fourrage;
+        const tBrut = lastTMSCalculation.tBrut.toFixed(1);
+        const ms = lastTMSCalculation.ms;
+        
+        // Switch to stocks tab
+        document.querySelectorAll('#bf-tabs .rb-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#bf-tabs .rb-tab[data-tab="bf-stocks"]').forEach(t => t.classList.add('active'));
+        document.querySelectorAll('.rb-tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-bf-stocks')?.classList.add('active');
+        
+        // Add new stock line
+        addStock({ nom: nom, tonnes: tBrut, ms: ms });
+        
+        alert(`Ajouté: ${nom} - ${tBrut} t brutes à ${ms}% MS = ${lastTMSCalculation.tMS.toFixed(2)} t MS`);
+      });
+
+      // Export PDF for bilan fourrager
+      document.getElementById('btn-export-bf-pdf')?.addEventListener('click', () => {
+        const nb = Number(document.getElementById('bf-nb-vaches').value) || 0;
+        const jours = Number(document.getElementById('bf-duree').value) || 0;
+        const msj = Number(document.getElementById('bf-ms-j').value) || 0;
+        
+        const stocks = [];
+        document.querySelectorAll('#stock-lines .rb-ration-row').forEach(row => {
+          const nom = row.querySelector('.rb-stock-name')?.value || '';
+          const t = Number(row.querySelector('.rb-stock-tonnes')?.value) || 0;
+          const ms = Number(row.querySelector('.rb-stock-ms')?.value) || 0;
+          if (t && ms) stocks.push({ nom, t, ms, tMS: t * ms / 100 });
+        });
+
+        const totalStock = stocks.reduce((s, x) => s + x.tMS, 0);
+        const totalBesoin = nb * jours * msj / 1000;
+        const bilan = totalStock - totalBesoin;
+        
+        const pdfHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan Fourrager</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1e293b;max-width:800px;margin:0 auto;}h1{color:#059669;text-align:center;border-bottom:3px solid #059669;padding-bottom:15px;}.section{margin:20px 0;}.box{border:2px solid #059669;padding:15px;}.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;}.total{background:#f1f5f9;padding:15px;border-radius:5px;margin:15px 0;}.status{text-align:center;padding:20px;border-radius:10px;font-size:20px;font-weight:bold;}.ok{background:#d1fae5;border:2px solid #059669;color:#059669;}.error{background:#fee2e2;border:2px solid #dc2626;color:#dc2626;}table{width:100%;border-collapse:collapse;margin-top:15px;}th{background:#f1f5f9;padding:12px;border:1px solid #ddd;}td{padding:12px;border:1px solid #ddd;}footer{text-align:center;margin-top:30px;color:#999;font-size:12px;}</style></head><body><h1>Bilan Fourrager</h1><p style="text-align:center;">' + new Date().toLocaleDateString('fr-FR') + '</p><div class="section"><h2 style="background:#059669;color:white;padding:10px;">Stocks</h2><div class="box"><table><thead><tr><th>Fourrage</th><th style="text-align:right;">Tonnage</th><th style="text-align:right;">% MS</th><th style="text-align:right;">TMS</th></tr></thead><tbody>' + stocks.map(s => '<tr><td>' + s.nom + '</td><td style="text-align:right;">' + s.t.toFixed(1) + ' t</td><td style="text-align:right;">' + s.ms + '%</td><td style="text-align:right;">' + s.tMS.toFixed(2) + ' t</td></tr>').join('') + '</tbody></table><div class="total"><strong>Total Stock: ' + totalStock.toFixed(2) + ' t MS</strong></div></div></div><div class="section"><h2 style="background:#059669;color:white;padding:10px;">Troupeau</h2><div class="box"><div class="row"><span>Nombre de VL</span><strong>' + nb + '</strong></div><div class="row"><span>Période</span><strong>' + jours + ' jours</strong></div><div class="row"><span>MS/VL/jour</span><strong>' + msj + ' kg</strong></div><div class="total"><strong>Total besoin: ' + totalBesoin.toFixed(2) + ' t MS</strong></div></div></div><div class="status ' + (bilan >= 0 ? 'ok' : 'error') + '">' + (bilan >= 0 ? '✅ STOCKS SUFFISANTS' : '🚨 STOCKS INSUFFISANTS') + '</div><div style="text-align:center;font-size:24px;font-weight:bold;">' + (bilan >= 0 ? '+' : '') + bilan.toFixed(2) + ' t MS</div><footer>Bilan Fourrager - ' + new Date().toLocaleDateString('fr-FR') + '</footer></body></html>';
+        
+        const blob = new Blob([pdfHtml], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'bilan-fourrager-' + new Date().toISOString().slice(0,10) + '.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+
+      // Bilan fourrager
+      document.getElementById('btn-calc-bilan-fourrager')?.addEventListener('click', () => {
+        const nb = Number(document.getElementById('bf-nb-vaches').value) || 0;
+        const jours = Number(document.getElementById('bf-duree').value) || 0;
+        const msj = Number(document.getElementById('bf-ms-j').value) || 0;
+
+        const stocks = [];
+        document.querySelectorAll('#stock-lines .rb-ration-row').forEach(row => {
+          const nom = row.querySelector('.rb-stock-name')?.value || '';
+          const t = Number(row.querySelector('.rb-stock-tonnes')?.value) || 0;
+          const ms = Number(row.querySelector('.rb-stock-ms')?.value) || 0;
+          if (t && ms) stocks.push({ nom, t, ms, tMS: t * ms / 100 });
+        });
+
+        const totalStock = stocks.reduce((s, x) => s + x.tMS, 0);
+        const totalBesoin = nb * jours * msj / 1000;
+        const bilan = totalStock - totalBesoin;
+
+        document.getElementById('bf-stock-total').textContent = totalStock.toFixed(1);
+        document.getElementById('bf-besoin-total').textContent = totalBesoin.toFixed(1);
+        document.getElementById('bf-bilan-value').textContent = (bilan >= 0 ? '+' : '') + bilan.toFixed(1);
+
+        const cardBilan = document.getElementById('bf-card-bilan');
+        cardBilan.className = 'bf-card ' + (bilan >= 0 ? 'positive' : 'negative');
+
+        document.getElementById('bf-detail').innerHTML = `<h3>Détail des stocks</h3>` + stocks.map(s => `<p><strong>${s.nom}:</strong> ${s.t.toFixed(1)} t @ ${s.ms}% = ${s.tMS.toFixed(1)} t MS</p>`).join('') + '';
+        
+        // === VISUEL SILO ===
+        const ratio = totalBesoin > 0 ? Math.min(100, (totalStock / totalBesoin) * 100) : 100;
+        const siloStock = document.getElementById('bf-silo-stock');
+        const siloNeed = document.getElementById('bf-silo-besoin');
+        const statusMsg = document.getElementById('bf-status-msg');
+        
+        // Stock fill
+        siloStock.style.height = ratio + '%';
+        document.getElementById('bf-silo-stock-pct').textContent = ratio.toFixed(0) + '%';
+        
+        // Color based on ratio
+        let colorClass = 'positive';
+        if (ratio < 70) colorClass = 'negative';
+        else if (ratio < 100) colorClass = 'warning';
+        
+        siloStock.className = 'bf-silo-fill ' + colorClass;
+        siloNeed.className = 'bf-silo-fill positive';
+        siloNeed.style.height = '100%';
+        
+        // Status message
+        if (ratio >= 100) {
+          statusMsg.textContent = '✅ Stocks suffisants ! (' + ratio.toFixed(0) + '% des besoins)';
+          statusMsg.className = 'bf-status-msg positive';
+        } else if (ratio >= 70) {
+          statusMsg.textContent = '⚠️ Stocks insuffisants ! (' + ratio.toFixed(0) + '% des besoins)';
+          statusMsg.className = 'bf-status-msg warning';
+        } else {
+          statusMsg.textContent = '🚨 Stocks critique ! (' + ratio.toFixed(0) + '% des besoins)';
+          statusMsg.className = 'bf-status-msg negative';
+        }
+        
+        // Cows - how many are covered
+        const cowRow = document.getElementById('bf-cow-row');
+        const nbCows = Math.min(10, Math.ceil(nb / 10));
+        let cowsHtml = '';
+        for (let i = 0; i < nbCows; i++) {
+          const covered = (i + 1) <= (nbCows * ratio / 100);
+          cowsHtml += '<span class="bf-cow ' + (covered ? 'covered' : '') + '">🐄</span>';
+        }
+        if (nb > 10) cowsHtml += '<span style="font-size:0.9rem;color:var(--text-light);">+' + (nb - 10) + ' VL</span>';
+        cowRow.innerHTML = cowsHtml;
+        
+        document.getElementById('resultat-bilan-fourrager').classList.remove('hidden');
+      });
+
+      // Besoins seuls
+      document.getElementById('form-besoins')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const pv = Number(document.getElementById('bes-poids-vif').value) || 0;
+        const prod = Number(document.getElementById('bes-production-lait').value) || 0;
+        const act = document.getElementById('bes-activite').value;
+        const tb = Number(document.getElementById('bes-tb').value) || 40;
+        const tp = Number(document.getElementById('bes-tp').value) || 32;
+        if (!pv) { alert('Poids requis'); return; }
+        const typeAnimal = document.getElementById('bes-type-animal').value || 'vache-laitiere';
+        const gmq = Number(document.getElementById('bes-gmq').value) || 0;
+        const b = computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq);
+        
+        // Calculate MS intake recommendations based on animal type
+        let msReco = '';
+        if (typeAnimal === 'vache-tarie') {
+          const msMin = (pv * 0.015).toFixed(1);
+          const msMax = (pv * 0.02).toFixed(1);
+          msReco = `<p><strong>Ingestion MS recommandée:</strong> ${msMin}-${msMax} kg MS/jour (1.5-2% du poids vif)</p>`;
+        } else if (typeAnimal === 'vache-prepa-velage') {
+          const msMin = (pv * 0.018).toFixed(1);
+          const msMax = (pv * 0.022).toFixed(1);
+          msReco = `<p><strong>Ingestion MS recommandée:</strong> ${msMin}-${msMax} kg MS/jour (1.8-2.2% du poids vif)</p>`;
+        } else if (typeAnimal === 'vache-laitiere') {
+          msReco = `<p><strong>Ingestion MS recommandée:</strong> 17-19 kg MS/jour</p>`;
+        }
+        
+        const typeLabel = b.typeLabel;
+        let html = `<h3>📊 Calcul des besoins - ${typeLabel}</h3>`;
+        html += `<div class="rb-panel"><h4>🔢 Données saisies</h4>`;
+        html += `<p><strong>Type:</strong> ${typeLabel}</p>`;
+        html += `<p><strong>Poids vif:</strong> ${pv} kg</p>`;
+        if (typeAnimal === 'vache-laitiere') {
+          html += `<p><strong>Production laitière:</strong> ${prod} kg/j</p>`;
+          html += `<p><strong>TB:</strong> ${tb} g/L</p>`;
+          html += `<p><strong>TP:</strong> ${tp} g/L</p>`;
+        }
+        html += `<p><strong>Activité:</strong> ${act === 'paturage' ? 'Pâturage' : 'Stabulation'}</p>`;
+        html += `</div>`;
+        
+        html += `<div class="rb-panel"><h4>⚡ Besoins UFL</h4>`;
+        html += `<p style="font-size:1.5rem;color:var(--primary);"><strong>${b.bUFL.toFixed(1)} UFL/jour</strong></p>`;
+        html += `</div>`;
+        
+        html += `<div class="rb-panel"><h4>🥩 Besoins PDI</h4>`;
+        html += `<p style="font-size:1.5rem;color:var(--primary);"><strong>${b.bPDI.toFixed(0)} g PDI/jour</strong></p>`;
+        html += `</div>`;
+        
+        if (msReco) {
+          html += `<div class="rb-panel"><h4>🌿 Ingestion</h4>${msReco}</div>`;
+        }
+        
+        document.getElementById('resultat-besoins-seuls').innerHTML = html;
+        document.getElementById('resultat-besoins-seuls').classList.remove('hidden');
+      });
+
+      // Show/hide GMQ field for second form
+      const besTypeAnimalSelect = document.getElementById('bes-type-animal');
+      const besGmqGroup = document.getElementById('bes-gmq-group');
+      function updateBesGmqField() {
+        const ta = besTypeAnimalSelect?.value;
+        if (besGmqGroup) {
+          besGmqGroup.style.display = (ta === 'genisse-engrais' || ta === 'vache-reforme' || ta === 'genisse') ? 'block' : 'none';
+        }
+        // Show/hide production field for dairy cows
+        const besProdGroup = document.getElementById('bes-prod-group');
+        if (besProdGroup) {
+          besProdGroup.style.display = (ta === 'vache-laitiere') ? 'block' : 'none';
+        }
+        // Show/hide TB/TP for dairy cows
+        const besTbGroup = document.getElementById('bes-tb-group');
+        const besTpGroup = document.getElementById('bes-tp-group');
+        if (besTbGroup) besTbGroup.style.display = (ta === 'vache-laitiere') ? 'block' : 'none';
+        if (besTpGroup) besTpGroup.style.display = (ta === 'vache-laitiere') ? 'block' : 'none';
+        // Show age field for veaux and génisses
+        const besAgeGroup = document.getElementById('bes-age-group');
+        if (besAgeGroup) {
+          besAgeGroup.style.display = (ta === 'veau' || ta === 'genisse' || ta === 'genisse-engrais') ? 'block' : 'none';
+        }
+      }
+      besTypeAnimalSelect?.addEventListener('change', updateBesGmqField);
+      updateBesGmqField();
+
+      // Ration seule
+      document.getElementById('btn-calc-ration-only')?.addEventListener('click', () => {
+        const a = parseRation('ration-only-lines', null);
+        document.getElementById('resultat-ration-only').innerHTML = `<h3>Résultat</h3><p><strong>MS:</strong> ${a.totalMS.toFixed(1)} kg</p><p><strong>UFL:</strong> ${a.totalUFL.toFixed(1)}</p><p><strong>PDI:</strong> ${a.totalPDI.toFixed(0)} g</p>`;
+        document.getElementById('resultat-ration-only').classList.remove('hidden');
+      });
+    });
+  </script>
+</body>
+</html>
