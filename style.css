@@ -569,6 +569,7 @@ body {
 }
 
 .rb-modal.open { display: flex; }
+.rb-modal:not(.hidden) { display: flex; }
 
 .rb-modal-backdrop {
   position: absolute;

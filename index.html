@@ -110,7 +110,6 @@
           </div>
           <div class="rb-form-actions">
             <button type="button" id="btn-calc-besoins" class="rb-btn rb-btn-primary">Calculer les besoins</button>
-            <button type="button" id="btn-open-custom-modal" class="rb-btn">+ Ajouter aliment</button>
           </div>
         </form>
         <div id="resultat-besoins" class="rb-panel hidden"></div>
@@ -131,6 +130,7 @@
           <div id="ration-lines"></div>
           <div class="rb-form-actions" style="margin-top:12px;">
             <button type="button" id="btn-add-line" class="rb-btn">+ Ligne</button>
+            <button type="button" id="btn-open-custom-modal-ration" class="rb-btn">+ Ajouter aliment</button>
             <button type="button" id="btn-calc-apports" class="rb-btn rb-btn-primary">Calculer les apports</button>
           </div>
           <datalist id="aliments-list"></datalist>
@@ -716,6 +716,7 @@ Ensilage herbe,35.0,0.65,12.0,70.0
       // Modal
       const modal = document.getElementById('custom-modal');
       document.getElementById('btn-open-custom-modal')?.addEventListener('click', () => modal.classList.remove('hidden'));
+      document.getElementById('btn-open-custom-modal-ration')?.addEventListener('click', () => modal.classList.remove('hidden'));
       modal?.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.add('hidden')));
 
       document.getElementById('btn-add-custom')?.addEventListener('click', () => {
@@ -730,7 +731,15 @@ Ensilage herbe,35.0,0.65,12.0,70.0
         hydrate();
         const customNow = loadJson(LS.custom, []);
         saveJson(LS.custom, [item, ...customNow.filter(x => x.nom !== nom)]);
+        // Clear form
+        document.getElementById('custom-nom').value = '';
+        document.getElementById('custom-ms').value = '';
+        document.getElementById('custom-ufl').value = '';
+        document.getElementById('custom-pdi').value = '';
+        document.getElementById('custom-alias').value = '';
+        document.getElementById('custom-mat').value = '';
         modal.classList.add('hidden');
+        alert('✅ Aliment "' + nom + '" ajouté à la base!');
       });
 
       // Ration lines
@@ -763,79 +772,117 @@ Ensilage herbe,35.0,0.65,12.0,70.0
       }
       document.getElementById('btn-add-stock')?.addEventListener('click', () => addStock());
 
-      // === CALCULS ===
-      function computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq = 0) {
+      // === CALCULS INRA 2018 ===
+      // Références: INRA 2018 - Alimentation des ruminants
+      function computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq = 0, ageMois = 0) {
         const pv075 = Math.pow(pv, 0.75);
         let bUFL, bPDI, uflParKg, buLait, pdiLait, typeLabel;
         
         // Calculate based on animal type
         if (typeAnimal === 'vache-laitiere' || !typeAnimal) {
-          // Dairy cow
+          // Dairy cow - INRA 2018
           typeLabel = 'Vache laitière';
           const coefAct = act === 'paturage' ? 1.08 : 1;
-          const buEntret = 0.054 * pv075 * coefAct;
+          const buEntret = 0.054 * pv075 * coefAct; // UFL entretien INRA
+          
+          // UFL/kg lait = 0.44 + 0.0012*(TB-40) + 0.0008*(TP-32) selon INRA 2018
           uflParKg = Math.max(0.35, 0.44 + (tb - 40) * 0.0012 + (tp - 32) * 0.0008);
           buLait = prod * uflParKg;
           bUFL = buEntret + buLait;
-          bPDI = 3.25 * pv075 + prod * 45;
+          
+          // PDI: 3.25 g/kg PV^0.75 entretien + 45-55 g/kg lait selon composition
+          // Plus le TB est élevé, plus il faut de PDI
+          const pdiParKgLait = 45 + (tb - 35) * 0.3; // 45g à 35g TB, +0.3g par g de TB en plus
+          bPDI = 3.25 * pv075 + prod * pdiParKgLait;
         } else if (typeAnimal === 'genisse') {
-          // Growing heifer - needs for maintenance + growth
+          // Growing heifer - INRA 2018 (besoins dépendent de l'âge et du GMQ)
           typeLabel = 'Génisse';
           const coefAct = act === 'paturage' ? 1.1 : 1;
           const buEntret = 0.054 * pv075 * coefAct;
-          // Growth: ~0.5-0.8 kg/day gain needs additional UFL
-          const gain = 0.6; // kg/day average
-          const buGrowth = gain * 1.4; // UFL for growth
+          
+          // Utiliser le GMQ saisi ou calculer selon l'âge si non saisi
+          // Pour génisse: GMQ target = 0.6-0.9 kg/j selon âge
+          let gain = gmq;
+          if (!gain || gain <= 0) {
+            // Estimer GMQ selon l'âge (en mois)
+            if (ageMois < 12) gain = 0.8;      // Jeune: croissance rapide
+            else if (ageMois < 24) gain = 0.7; // Croissance moyenne
+            else gain = 0.5;                   // Fin de croissance
+          }
+          
+          // UFL pour croissance: ~1.0-1.6 UFL/kg gain selon efficacité
+          // Jeune animal = plus efficace
+          const uflParGain = ageMois < 12 ? 1.0 : (ageMois < 24 ? 1.2 : 1.4);
+          const buGrowth = gain * uflParGain;
           bUFL = buEntret + buGrowth;
-          // PDI for growth: ~80g per kg gain
-          bPDI = 3.25 * pv075 + gain * 80;
+          
+          // PDI croissance: 70-90 g/kg gain selon age
+          const pdiParGain = ageMois < 12 ? 70 : (ageMois < 24 ? 80 : 90);
+          bPDI = 3.25 * pv075 + gain * pdiParGain;
         } else if (typeAnimal === 'genisse-engrais') {
-          // Fattening heifer - higher energy needs
+          // Fattening heifer - INRA 2018
           typeLabel = 'Génisse à engraisser';
           const coefAct = act === 'paturage' ? 1.05 : 1;
           const buEntret = 0.054 * pv075 * coefAct;
-          // Use user-specified GMQ or default
-          const gain = gmq || 1.0; // kg/day
-          const buGrowth = gain * 1.8; // More UFL for fattening
-          bUFL = buEntret + buGrowth;
-          bPDI = 3.25 * pv075 + gain * 100;
-        } else if (typeAnimal === 'veau') {
-          // Veal calf
-          typeLabel = 'Veau';
-          const buEntret = 0.06 * pv075; // Higher maintenance
-          const gain = Math.max(0.8, prod); // Production = weight gain
+          
+          // GMQ pour engraissement: 0.8-1.2 kg/j
+          const gain = gmq || 1.0;
+          // UFL engraissement: 1.5-1.8 UFL/kg gain (efficacité modérée)
           const buGrowth = gain * 1.6;
           bUFL = buEntret + buGrowth;
+          // PDI engraissement: 90-100 g/kg gain
+          bPDI = 3.25 * pv075 + gain * 95;
+        } else if (typeAnimal === 'veau') {
+          // Veal calf - INRA 2018
+          typeLabel = 'Veau';
+          const buEntret = 0.06 * pv075; // Entretien supérieur pour jeune
+          // Production = GMQ (croissance)
+          const gain = Math.max(0.6, prod || 0.8);
+          // UFL croissance veau: 1.4-1.7 UFL/kg gain
+          const buGrowth = gain * 1.5;
+          bUFL = buEntret + buGrowth;
+          // PDI veau: 85-95 g/kg gain
           bPDI = 3.5 * pv075 + gain * 90;
         } else if (typeAnimal === 'vache-tarie') {
-          // Dry cow - early dry period (0-4 weeks)
+          // Dry cow - early dry period (0-4 weeks before calving) - INRA 2018
           typeLabel = 'Vache tarie (0-4 sem.)';
           const coefAct = act === 'paturage' ? 1.05 : 1;
           const buEntret = 0.054 * pv075 * coefAct;
-          // Early dry period - lower needs, mainly maintenance
-          const buGest = 1.5; // Early gestation requirement
+          
+          // Gestation early: ~1.5-2.0 UFL/jour pour développement fœtal
+          // Dépend du poids: 0.01 UFL/kg PV pour gestation
+          const buGest = 0.01 * pv + 1.0; // ~1.5-2.5 UFL selon PV
           bUFL = buEntret + buGest;
-          // PDI for early dry cow
-          bPDI = 3.25 * pv075 + 120;
+          
+          // PDI tarissement early: 80-100 g/jour pour gestation
+          // + entretien
+          bPDI = 3.25 * pv075 + 90;
         } else if (typeAnimal === 'vache-prepa-velage') {
-          // Dry cow in pre-calving period (4-8 weeks) - higher needs for colostrum
+          // Dry cow in pre-calving period (4-8 weeks) - INRA 2018
+          // Besoins accrus pour préparation colostrum
           typeLabel = 'Vache en prépa vêlage (4-8 sem.)';
           const coefAct = act === 'paturage' ? 1.05 : 1;
           const buEntret = 0.054 * pv075 * coefAct;
-          // Late gestation - higher needs for colostrum production
-          const buGest = 3.5; // Late gestation requirement - higher for colostrum
+          
+          // Gestation late: 3-4 UFL/jour pour colostrum
+          // 0.015 UFL/kg PV + 1.5
+          const buGest = 0.015 * pv + 1.5;
           bUFL = buEntret + buGest;
-          // PDI for late dry cow: higher for colostrum
+          
+          // PDI late dry: 250-300 g/jour pour synthèse colostrum
           bPDI = 3.25 * pv075 + 280;
         } else if (typeAnimal === 'vache-reforme') {
-          // Cull cow for fattening
+          // Cull cow for fattening - INRA 2018
           typeLabel = 'Vache réforme à engraisser';
           const coefAct = act === 'paturage' ? 1.05 : 1;
           const buEntret = 0.054 * pv075 * coefAct;
-          // Use user-specified GMQ or default
-          const gain = gmq || 1.2; // kg/day - faster than heifers
-          const buGrowth = gain * 1.9;
+          
+          // GMQ engraissement: 0.8-1.4 kg/j
+          const gain = gmq || 1.2;
+          // UFL engraissement réforme: 1.6-2.0 UFL/kg gain (moins efficace)
+          const buGrowth = gain * 1.8;
           bUFL = buEntret + buGrowth;
+          // PDI engraissement: 100-120 g/kg gain
           bPDI = 3.25 * pv075 + gain * 110;
         } else {
           // Default dairy cow
@@ -917,11 +964,12 @@ Ensilage herbe,35.0,0.65,12.0,70.0
         const tp = Number(document.getElementById('tp').value) || 32;
         const typeAnimal = document.getElementById('type-animal').value || 'vache-laitiere';
         const gmq = Number(document.getElementById('gmq').value) || 0;
+        const ageMois = Number(document.getElementById('age-mois').value) || 0;
         
         if (!pv) { alert('Poids requis'); return; }
         
-        // Use the new computeBesoins function with animal type
-        const result = computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq);
+        // Use the new computeBesoins function with animal type and age
+        const result = computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq, ageMois);
         lastB = result;
         
         // Display based on animal type
@@ -1557,7 +1605,8 @@ a.items.map(i => '- ' + i.nom + ': ' + i.qty.toFixed(1) + ' kg MS (UFL: ' + i.uf
         if (!pv) { alert('Poids requis'); return; }
         const typeAnimal = document.getElementById('bes-type-animal').value || 'vache-laitiere';
         const gmq = Number(document.getElementById('bes-gmq').value) || 0;
-        const b = computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq);
+        const ageMois = Number(document.getElementById('bes-age-mois').value) || 0;
+        const b = computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq, ageMois);
         
         // Calculate MS intake recommendations based on animal type
         let msReco = '';
