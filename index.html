@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ration Bovine</title>
+  <title>BoviCalc</title>
   <link rel="stylesheet" href="./style.css">
+  <link rel="icon" type="image/png" href="./Logo Bovicalc.png">
 </head>
 <body>
   <header class="rb-header">
     <div class="rb-header-inner">
-      <h1>🐄 Ration Bovine</h1>
-      <p>Optimisation des rations pour bovins laitiers</p>
+      <img src="Logo Bovicalc.png" alt="BoviCalc Logo" style="height:120px;vertical-align:middle;margin-right:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+      <div style="display:inline-block;vertical-align:middle;">
+        <h1 style="margin:0;font-size:2.5rem;">BoviCalc</h1>
+        <p style="margin:0;font-size:0.9rem;">Optimisation des rations pour bovins</p>
+      </div>
     </div>
   </header>
 
@@ -49,14 +53,15 @@
         <button class="rb-btn rb-btn-ghost" data-close>← Retour</button>
       </div>
 
-      <div id="csv-status" class="rb-help" style="margin-top:0;"></div>
+      <div id="csv-status" class="rb-help" style="margin-top:0;display:inline-block;"></div>
+      <button type="button" class="rb-btn" style="margin-left:8px;" onclick="var c=JSON.parse(localStorage.getItem('rb_custom_v1')||'[]');if(c.length==0){alert('Aucun aliment. Allez dans Ration puis + Ajouter aliment.');}else{var m='Vos aliments: ';c.forEach((a,i)=>{m+=(i+1)+'. '+a.nom+' ';});alert(m);}">🍂 Mes aliments</button>
 
       <!-- 4 onglets -->
       <div class="rb-tabs">
-        <button class="rb-tab active" data-tab="besoins">1. Besoins</button>
-        <button class="rb-tab" data-tab="ration">2. Ration</button>
-        <button class="rb-tab" data-tab="analyse">3. Analyse</button>
-        <button class="rb-tab" data-tab="cout">4. Coûts</button>
+        <button class="rb-tab active" data-tab="besoins">Besoins</button>
+        <button class="rb-tab" data-tab="ration">Ration</button>
+        <button class="rb-tab" data-tab="analyse">Analyse</button>
+        <button class="rb-tab" data-tab="cout">Coûts</button>
       </div>
 
       <!-- Onglet Besoins -->
@@ -66,13 +71,42 @@
             <label>Type d'animal</label>
             <select id="type-animal" required>
               <option value="">Sélectionner</option>
-              <option value="vache-laitiere">Vache laitière</option>
-              <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
-              <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
-              <option value="genisse">Génisse</option>
-              <option value="genisse-engrais">Génisse à engraisser</option>
-              <option value="vache-reforme">Vache réforme à engraisser</option>
-              <option value="veau">Veau</option>
+              <optgroup label="Lait (UFL)">
+                <option value="vache-laitiere">Vache laitière</option>
+                <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
+                <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
+              </optgroup>
+              <optgroup label="Viande (UFV)">
+                <option value="genisse">Génisse (croissance)</option>
+                <option value="genisse-engrais">Génisse à engraisser</option>
+                <option value="vache-reforme">Vache réforme à engraisser</option>
+                <option value="veau">Veau</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="rb-form-group">
+            <label>Race (optionnel)</label>
+            <select id="race-animal">
+              <option value="">Non spécifiée</option>
+              <optgroup label="Laitières">
+                <option value="prim-holstein">Prim'Holstein</option>
+                <option value="montbeliarde">Montbéliarde</option>
+                <option value="normande">Normande</option>
+                <option value="jersiaise">Jersiaise</option>
+                <option value="brune">Brune</option>
+                <option value="pie-rouge">Pie Rouge</option>
+                <option value="tarentaise">Tarentaise</option>
+                <option value="simmental">Simmental</option>
+              </optgroup>
+              <optgroup label="Viandes">
+                <option value="charolaise">Charolaise</option>
+                <option value="limousine">Limousine</option>
+                <option value="blonde-aquitaine">Blonde d'Aquitaine</option>
+                <option value="salers">Salers</option>
+                <option value="aubrac">Aubrac</option>
+                <option value="gasconne">Gasconne</option>
+                <option value="herens">Hérens</option>
+              </optgroup>
             </select>
           </div>
           <div class="rb-form-grid">
@@ -132,13 +166,14 @@
             <button type="button" id="btn-add-line" class="rb-btn">+ Ligne</button>
             <button type="button" id="btn-open-custom-modal-ration" class="rb-btn">+ Ajouter aliment</button>
             <button type="button" id="btn-calc-apports" class="rb-btn rb-btn-primary">Calculer les apports</button>
+            <button type="button" id="btn-export-ration-pdf" class="rb-btn">📄 Exporter PDF</button>
           </div>
           <datalist id="aliments-list"></datalist>
         </div>
         <details class="rb-details">
           <summary>Saisie rapide (texte)</summary>
           <div class="rb-help" style="margin-top:8px;">Format: quantité + aliment (ex: 18 maïs)</div>
-          <textarea id="description-ration" rows="3" placeholder="18 maíz&#10;6 ensilage d'herbe"></textarea>
+          <textarea id="description-ration" rows="3" placeholder="18 maïs&#10;6 ensilage d'herbe"></textarea>
         </details>
         <div id="resultat-apports" class="rb-panel hidden"></div>
       </div>
@@ -163,6 +198,23 @@
           <button type="button" id="btn-export-pdf" class="rb-btn">📄 Exporter PDF</button>
         </div>
         <div id="resultat-bilan" class="rb-panel hidden"></div>
+        <!-- Modal for bilan details -->
+        <div id="bilan-detail-modal" class="rb-modal hidden">
+          <div class="rb-modal-card">
+            <span class="rb-modal-close">&times;</span>
+            <h3 id="modal-detail-title"></h3>
+            <div id="modal-detail-body"></div>
+          </div>
+        </div>
+        <!-- Modal view custom foods -->
+        <div id="view-custom-modal" class="rb-modal hidden">
+          <div class="rb-modal-card">
+            <span class="rb-modal-close">&times;</span>
+            <h3>🍂 Mes aliments personnalisés</h3>
+            <div id="view-custom-content"></div>
+          </div>
+        </div>
+
         <div id="resultat-ia" class="rb-panel hidden">
           <h3>🤖 Analyse IA</h3>
           <div id="resultat-ia-contenu" style="white-space: pre-wrap;"></div>
@@ -172,68 +224,97 @@
       <!-- Onglet Coûts -->
       <div id="tab-cout" class="rb-tab-content">
         <div class="rb-help">
-          <strong>Étape 1:</strong> Renseigne le prix de chaque aliment (€/tonne de MS)
-        </div>
-        
-        <div class="rb-form-grid">
-          <div class="rb-form-group">
-            <label>Aliment</label>
-            <select id="cout-aliment-select">
-              <option value="">Sélectionner...</option>
-            </select>
-          </div>
-          <div class="rb-form-group">
-            <label>Prix (€/t MS)</label>
-            <input type="number" id="cout-prix-tms" min="0" step="1" placeholder="Ex: 280">
-          </div>
-        </div>
-        <div class="rb-form-actions">
-          <button type="button" id="btn-save-cout-prix" class="rb-btn rb-btn-primary">Enregistrer le prix</button>
-        </div>
-        
-        <div id="cout-prix-liste" class="rb-panel hidden"></div>
-
-        <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
-
-        <div class="rb-help">
-          <strong>Étape 2:</strong> Configure ton troupeau pour voir les coûts
+          1) On récupère ta ration (onglet <strong>Ration</strong>)<br>
+          2) Tu renseignes les prix à la tonne de MS (€/t MS) pour les aliments présents<br>
+          3) Tu renseignes le troupeau + la référence laitière pour obtenir le coût.
         </div>
 
-        <div class="rb-form-grid">
-          <div class="rb-form-group">
-            <label>Nombre de VL</label>
-            <input type="number" id="cout-nb-vl" min="1" value="50" placeholder="Ex: 50">
+        <div class="rb-panel" style="margin-top:16px;">
+          <h3 style="margin-top:0;">1) Prix €/t MS (aliments de ta ration)</h3>
+          <div class="rb-form-actions" style="margin-top:10px;">
+            <button type="button" id="btn-cout-charger-ration" class="rb-btn rb-btn-primary">Charger ma ration</button>
           </div>
-          <div class="rb-form-group">
-            <label>Production/an (kg)</label>
-            <input type="number" id="cout-ref-lait" min="0" value="9000" placeholder="Ex: 9000">
+          <div id="cout-prix-ration" class="rb-panel hidden" style="margin-top:16px; background:transparent;">
+            <div class="rb-help" style="margin-bottom:12px;">
+              Renseigne les prix pour chaque aliment : le calcul se fait immédiatement au moment où tu cliques sur <strong>Calculer</strong>.
+            </div>
+            <div class="rb-ration-lines">
+              <div class="rb-ration-lines-head" style="grid-template-columns: 1fr 120px 220px;">
+                <div>Aliment</div>
+                <div style="text-align:right;">kg MS</div>
+                <div style="text-align:right;">Prix (€/t MS)</div>
+              </div>
+              <div id="cout-price-lines"></div>
+            </div>
           </div>
         </div>
 
-        <div class="rb-form-actions">
-          <button type="button" id="btn-calc-cout" class="rb-btn rb-btn-primary">💰 Calculer les coûts</button>
+        <div class="rb-panel" style="margin-top:16px;">
+          <h3 style="margin-top:0;">2) Troupeau & production</h3>
+          <div class="rb-form-grid" style="margin-top:10px;">
+            <div class="rb-form-group">
+              <label>Nombre de VL</label>
+              <input type="number" id="cout-nb-vl" min="1" value="50" placeholder="Ex: 50">
+            </div>
+            <div class="rb-form-group">
+              <label>Production annuelle par vache (kg/an ou L/an)</label>
+              <input type="number" id="cout-ref-lait" min="0" value="9000" placeholder="Ex: 90000">
+            </div>
+            <div class="rb-form-group">
+              <label>Durée de la ration (jours)</label>
+              <input type="number" id="cout-duree" min="1" value="180" placeholder="Ex: 120">
+            </div>
+            <div class="rb-form-group" id="cout-gmq-group">
+              <label>GMQ (kg/jour)</label>
+              <input type="number" id="cout-gmq" min="0.1" step="0.1" value="1.0" placeholder="Ex: 1.2">
+            </div>
+          </div>
+          <div class="rb-form-actions">
+            <button type="button" id="btn-calc-cout" class="rb-btn rb-btn-primary">💰 Calculer le coût</button>
+            <button type="button" id="btn-export-cout-pdf" class="rb-btn">📄 Exporter PDF</button>
+          </div>
         </div>
 
         <div id="cout-resultats" class="cost-result hidden">
-          <div class="cost-card">
-            <div class="cost-card-label">Coût / VL / jour</div>
-            <div class="cost-card-value" id="cout-vl-jour">—</div>
-            <div class="cost-card-unit">€/vache/jour</div>
-          </div>
-          <div class="cost-card">
-            <div class="cost-card-label">Coût pour 1000L</div>
-            <div class="cost-card-value" id="cout-1000l">—</div>
-            <div class="cost-card-unit">€/1000 litres</div>
-          </div>
-          <div class="cost-card">
-            <div class="cost-card-label">Coût MS</div>
-            <div class="cost-card-value" id="cout-kg-ms">—</div>
-            <div class="cost-card-unit">€/kg MS</div>
-          </div>
-          <div class="cost-card">
-            <div class="cost-card-label">MS / VL / jour</div>
-            <div class="cost-card-value" id="cout-ms-vl">—</div>
-            <div class="cost-card-unit">kg MS/jour</div>
+          <div class="rb-metric-grid" style="margin-top:16px;">
+            <div class="rb-metric" id="metric-cout-vl">
+              <div class="rb-metric-head">
+                <div class="rb-metric-title">Coût / VL / jour</div>
+                <div class="rb-metric-sub" id="cout-vl-jour-sub">— €/vache/jour</div>
+              </div>
+              <div class="rb-progress" id="cout-vl-progress">
+                <span style="width:0%"></span>
+              </div>
+              <div class="rb-metric-sub" id="cout-vl-jour" style="font-size:1.3rem;font-weight:bold;">—</div>
+            </div>
+            <div class="rb-metric" id="metric-cout-1000l">
+              <div class="rb-metric-head">
+                <div class="rb-metric-title">Coût pour 1000L</div>
+                <div class="rb-metric-sub" id="cout-1000l-sub">— €/1000 litres</div>
+              </div>
+              <!-- jauge supprimée -->
+              <div class="rb-metric-sub" id="cout-1000l" style="font-size:1.3rem;font-weight:bold;">—</div>
+            </div>
+            <div class="rb-metric" id="metric-cout-ms">
+              <div class="rb-metric-head">
+                <div class="rb-metric-title">Coût MS</div>
+                <div class="rb-metric-sub" id="cout-kg-ms-sub">— €/kg MS</div>
+              </div>
+              <div class="rb-progress" id="cout-ms-progress">
+                <span style="width:0%"></span>
+              </div>
+              <div class="rb-metric-sub" id="cout-kg-ms" style="font-size:1.3rem;font-weight:bold;">—</div>
+            </div>
+            <div class="rb-metric" id="metric-ms-vl">
+              <div class="rb-metric-head">
+                <div class="rb-metric-title">MS / VL / jour</div>
+                <div class="rb-metric-sub" id="cout-ms-vl-sub">— kg MS/jour</div>
+              </div>
+              <div class="rb-progress" id="cout-ms-vl-progress">
+                <span style="width:0%"></span>
+              </div>
+              <div class="rb-metric-sub" id="cout-ms-vl" style="font-size:1.3rem;font-weight:bold;">—</div>
+            </div>
           </div>
         </div>
 
@@ -260,7 +341,16 @@
             <div class="rb-form-group"><label>MS (%)</label><input id="custom-ms" type="number" min="0" max="100" step="0.1"></div>
             <div class="rb-form-group"><label>UFL/kg MS</label><input id="custom-ufl" type="number" min="0" step="0.01"></div>
             <div class="rb-form-group"><label>PDI (g/kg MS)</label><input id="custom-pdi" type="number" min="0" step="1"></div>
-            <div class="rb-form-group"><label>MAT (%)</label><input id="custom-mat" type="number" min="0" max="100" step="0.1"></div>
+            <div class="rb-form-group"><label>Na (g/kg MS)</label><input id="custom-na" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
+            <div class="rb-form-group"><label>K (g/kg MS)</label><input id="custom-k" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
+            <div class="rb-form-group"><label>Ca (g/kg MS)</label><input id="custom-ca" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
+            <div class="rb-form-group"><label>Mg (g/kg MS)</label><input id="custom-mg" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
+            <div class="rb-form-group"><label>Cl (g/kg MS)</label><input id="custom-cl" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
+            <div class="rb-form-group"><label>S (g/kg MS)</label><input id="custom-s" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
+          </div>
+          <div id="custom-baca-display" style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;text-align:center;">
+            <strong>BACA calculée:</strong> <span id="custom-baca-value" style="color:var(--primary);font-size:1.1em;">-</span> mEq/kg MS
+            <p style="margin:4px 0 0;font-size:0.8rem;color:var(--text-light);">BACA = (Na + K + Ca + Mg) - (Cl + S)</p>
           </div>
           <div class="rb-form-actions">
             <button type="button" id="btn-add-custom" class="rb-btn rb-btn-primary">Ajouter</button>
@@ -281,13 +371,42 @@
           <label>Type d'animal</label>
           <select id="bes-type-animal" required>
             <option value="">Sélectionner</option>
-            <option value="vache-laitiere">Vache laitière</option>
-            <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
-            <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
-            <option value="genisse">Génisse</option>
-            <option value="genisse-engrais">Génisse à engraisser</option>
-            <option value="vache-reforme">Vache réforme à engraisser</option>
-            <option value="veau">Veau</option>
+            <optgroup label="Lait (UFL)">
+              <option value="vache-laitiere">Vache laitière</option>
+              <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
+              <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
+            </optgroup>
+            <optgroup label="Viande (UFV)">
+              <option value="genisse">Génisse (croissance)</option>
+              <option value="genisse-engrais">Génisse à engraisser</option>
+              <option value="vache-reforme">Vache réforme à engraisser</option>
+              <option value="veau">Veau</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="rb-form-group">
+          <label>Race (optionnel)</label>
+          <select id="bes-race-animal">
+            <option value="">Non spécifiée</option>
+            <optgroup label="Laitières">
+              <option value="prim-holstein">Prim'Holstein</option>
+              <option value="montbeliarde">Montbéliarde</option>
+              <option value="normande">Normande</option>
+              <option value="jersiaise">Jersiaise</option>
+              <option value="brune">Brune</option>
+              <option value="pie-rouge">Pie Rouge</option>
+              <option value="tarentaise">Tarentaise</option>
+              <option value="simmental">Simmental</option>
+            </optgroup>
+            <optgroup label="Viandes">
+              <option value="charolaise">Charolaise</option>
+              <option value="limousine">Limousine</option>
+              <option value="blonde-aquitaine">Blonde d'Aquitaine</option>
+              <option value="salers">Salers</option>
+              <option value="aubrac">Aubrac</option>
+              <option value="gasconne">Gasconne</option>
+              <option value="herens">Hérens</option>
+            </optgroup>
           </select>
         </div>
         <div class="rb-form-grid">
@@ -302,6 +421,7 @@
         <div class="rb-form-actions">
           <button type="submit" class="rb-btn rb-btn-primary">Calculer</button>
           <button type="button" id="btn-copy-besoins" class="rb-btn">Copier</button>
+          <button type="button" id="btn-export-besoins-pdf" class="rb-btn">📄 Exporter PDF</button>
         </div>
       </form>
       <div id="resultat-besoins-seuls" class="rb-panel hidden"></div>
@@ -320,6 +440,7 @@
         <div class="rb-form-actions" style="margin-top:12px;">
           <button type="button" id="btn-add-line-ration-only" class="rb-btn">+ Ligne</button>
           <button type="button" id="btn-calc-ration-only" class="rb-btn rb-btn-primary">Calculer</button>
+          <button type="button" id="btn-export-ration-seule-pdf" class="rb-btn">📄 Exporter PDF</button>
         </div>
         <datalist id="aliments-list-ration-only"></datalist>
       </div>
@@ -518,46 +639,74 @@
   </main>
 
   <footer class="rb-footer">
-    <p>© 2026 - Ration Bovine | Outil gratuit pour les élevages</p>
+    <p>© 2026 - BoviCalc | Outil pour les élevages</p>
   </footer>
 
   <script>
+    console.log('Script 1 loaded');
     // Base d'aliments embarquée (fonctionne en local file://)
-    window.RB_ALIMENTS_CSV = `Nom,MS,UFL INRA 2018 par kg,MAT %,PDI INRA 2018 g/kg
-Avoine,87.6,0.87,9.4,64.0
-Avoine décortiquée,85.7,1.0,11.0,71.0
-Avoine floconnée,87.6,0.87,9.4,68.0
-Blé dur,87.8,1.06,14.4,84.0
-Blé tendre,86.9,1.04,11.0,77.0
-Maïs,86.3,1.11,7.6,82.0
-Maïs extrudé,86.3,1.11,7.6,93.0
-Maïs floconné,86.3,1.11,7.6,96.0
-Maïs humide,67.0,0.86,6.2,53.0
-Mil,89.6,1.18,11.2,97.0
-Millet commun,90.6,1.2,12.9,78.0
-Orge,87.2,0.97,9.9,76.0
-Riz cargo,88.0,1.06,9.2,71.0
-Riz paddy,88.0,0.76,7.5,59.0
-"Riz poli, brisures",87.6,1.08,8.1,71.0
-Seigle,86.7,1.04,8.5,70.0
-Sorgho,87.8,1.06,9.3,86.0
-Triticale,86.8,1.02,10.0,74.0
-"Tourteau de canola, huile < 5 %",90.4,0.94,37.0,154.0
-"Tourteau de colza, huile 5-20 %",92.0,1.1,31.0,123.0
-"Tourteau de colza, huile < 5%",89.0,0.88,33.9,128.0
-"Tourteau de lin, huile < 5%",87.9,0.9,32.0,162.0
-"Tourteau de lin, huile > 5%",91.2,1.04,32.3,164.0
-"Tourteau de soja, huile 5-20 %",93.2,1.27,43.8,194.0
-"Tourteau de soja, huile < 5%, 46% protéine + huile",87.7,1.1,43.5,191.0
-"Tourteau de soja, huile < 5%, 48% protéine + huile",88.0,1.11,46.2,200.0
-"Tourteau de soja, huile < 5%, 48% protéine + huile, extrudé",88.0,1.11,46.2,211.0
-Pulpe de betterave déshydratée,88.9,0.92,7.9,82.0
-Pulpe de betterave surpressée,24.3,0.25,2.1,21.0
-"Luzerne déshydratée, protéines 17-19 % sur sec",90.6,0.68,16.2,91.0
-Paille de blé,90.3,0.45,3.5,50.0
-Ensilage maïs,32.0,0.83,7.5,65.0
-Ensilage herbe,35.0,0.65,12.0,70.0
-`;
+    window.RB_ALIMENTS_CSV = `Nom,MS,UFL INRA 2018 par kg,PDI INRA 2018 g/kg
+Avoine,87.6,0.87,64.0
+Avoine décortiquée,85.7,1.0,71.0
+Avoine floconnée,87.6,0.87,68.0
+Blé dur,87.8,1.06,84.0
+Blé tendre,86.9,1.04,77.0
+Maïs,86.3,1.11,82.0
+Maïs extrudé,86.3,1.11,93.0
+Maïs floconné,86.3,1.11,96.0
+Maïs humide,67.0,0.86,53.0
+Mil,89.6,1.18,97.0
+Millet commun,90.6,1.2,78.0
+Orge,87.2,0.97,76.0
+Riz cargo,88.0,1.06,71.0
+Riz paddy,88.0,0.76,59.0
+"Riz poli, brisures",87.6,1.08,71.0
+Seigle,86.7,1.04,70.0
+Sorgho,87.8,1.06,86.0
+Triticale,86.8,1.02,74.0
+Tourteau de canola huile moins 5 pour cent,90.4,0.94,154.0
+Tourteau de colza huile 5-20 pour cent,92.0,1.1,123.0
+Tourteau de colza huile moins 5 pour cent,89.0,0.88,128.0
+Tourteau de lin huile moins 5 pour cent,87.9,0.9,162.0
+Tourteau de lin huile plus 5 pour cent,91.2,1.04,164.0
+Tourteau de soja huile 5-20 pour cent,93.2,1.27,194.0
+Tourteau de soja huile moins 5 pour cent 46 proteine,87.7,1.1,191.0
+Tourteau de soja huile moins 5 pour cent 48 proteine,88.0,1.11,200.0
+Tourteau de soja extrudé,88.0,1.11,211.0
+Tourteau de soja tanne au formol,88.0,1.11,334.0
+Tourteau de soja 50 pour cent proteine,88.0,1.12,209.0
+Farine de ble dur gruau D,86.6,1.05,85.0
+Farine de mais cellulose brute moins 2 pour cent,87.6,1.16,82.0
+Farine fourragere de mais cellulose brute 2-10 pour cent,87.4,1.16,88.0
+Betterave fourragere frai che,16.1,0.17,14.0
+Pulpe de betterave deshidratée,88.9,0.92,82.0
+Pulpe de betterave surpressée,24.3,0.25,21.0
+Luzerne deshidratée proteines 16-18 pour cent sur sec,90.8,0.66,88.0
+Luzerne deshidratée proteines 17-19 pour cent sur sec,90.6,0.68,91.0
+Luzerne deshidratée proteines 19-22 pour cent sur sec,90.8,0.72,97.0
+Luzerne deshidratée proteines 22-25 pour cent sur sec,90.4,0.76,109.0
+Luzerne deshidratée proteines moins 16 pour cent sur sec,91.3,0.66,85.0
+Luzerne deshidratée proteines plus 25 pour cent sur sec,90.4,0.74,118.0
+Melasse de betterave,75.4,0.72,52.0
+Melasse de canne,72.3,0.57,42.0
+Melasse de soja,57.6,0.41,34.0
+Paille de ble,90.3,0.45,50.0
+Huile de palme,99.8,3.61,0.0
+Ensilage Mais Riche en épi,35.0,0.96,50.0
+Ensilage Mais Grain Vitreux,35,0.9,50.0
+Ensilage Mais Pateux-Vitreux,30,0.90,52.0
+Ensilage RGI Debut Epiaison,19,0.90,55
+Ensilage RGI Fin Epiaison,21,0.81,52.0
+Ensilage Fétuque Debut Epiaison,21,0.79,56
+Ensilage Fétuque Fin Epiaison,21,0.73,51
+Ensilage Luzerne,20,0.73,51
+Foin Luzerne Debut Bourgeonnement,85.0,0.70,97.0
+Foin Luzerne Bourgeonnement,85.0,0.67,94
+Foin PN Epiaison,85.0,0.80,71.0
+Paturage PN Epiaison,20,0.80,70.0
+Paturage RGA Feuillu,17,1.03,110
+Paturage RGA Debut Epiaison,16,0.94,100
+Uree 46,98,0,1443`;
   </script>
   <script>
     // === NAVIGATION ===
@@ -580,30 +729,7 @@ Ensilage herbe,35.0,0.65,12.0,70.0
       });
     }
 
-    // Cards click
-    document.querySelectorAll('.rb-card[data-section]').forEach(card => {
-      card.addEventListener('click', () => showSection(card.dataset.section));
-    });
 
-    // Back buttons
-    document.querySelectorAll('[data-close]').forEach(btn => {
-      btn.addEventListener('click', backToHome);
-    });
-
-    // === TABS ===
-    document.querySelectorAll('.rb-tabs').forEach(tabs => {
-      const section = tabs.closest('.rb-section-detail');
-      tabs.querySelectorAll('.rb-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          tabs.querySelectorAll('.rb-tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          const tabId = tab.dataset.tab;
-          section.querySelectorAll('.rb-tab-content').forEach(content => {
-            content.classList.toggle('active', content.id === 'tab-' + tabId);
-          });
-        });
-      });
-    });
 
     // === DATA ===
     let alimentsDb = [], alimentsAliases = [], costsByFeed = {};
@@ -692,15 +818,251 @@ Ensilage herbe,35.0,0.65,12.0,70.0
       </div>`;
     }
 
+    // Jauges simplifiées (barres + %), pour une identité visuelle épurée
+    function metricBar(title, unit, apport, besoin, ratio) {
+      const safeRatio = Number.isFinite(ratio) ? ratio : 0;
+      const pctRaw = safeRatio * 100;
+      const pct = Math.min(100, Math.max(0, pctRaw));
+      const cls = gaugeColor(safeRatio); // low / ok / high
+      return `
+        <div class="rb-metric">
+          <div class="rb-metric-head">
+            <div class="rb-metric-title">${title}</div>
+            <div class="rb-metric-sub">${apport.toFixed(1)} / ${besoin.toFixed(1)} ${unit}</div>
+          </div>
+          <div class="rb-progress ${cls}">
+            <span style="width:${pct}%"></span>
+          </div>
+          <div class="rb-metric-sub" style="margin-top:8px;">${pctRaw.toFixed(0)}%</div>
+        </div>
+      `;
+    }
+
     // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded - Starting to register event listeners');
+      // Cards click
+      const cards = document.querySelectorAll('.rb-card[data-section]');
+      console.log('Found ' + cards.length + ' cards with data-section');
+      cards.forEach(card => {
+        card.addEventListener('click', () => showSection(card.dataset.section));
+      });
+
+      // Back buttons
+      document.querySelectorAll('[data-close]').forEach(btn => {
+        btn.addEventListener('click', backToHome);
+      });
+
+      // === Show/Hide GMQ input in cost section based on animal type ===
+      const costTypeSelect = document.getElementById('type-animal');
+      const costGmqGroup = document.getElementById('cout-gmq-group');
+      if (costTypeSelect && costGmqGroup) {
+        costTypeSelect.addEventListener('change', () => {
+          const typeCode = costTypeSelect.value;
+          const isMeat = ['genisse', 'genisse-engrais', 'vache-reforme', 'veau'].includes(typeCode);
+          costGmqGroup.style.display = isMeat ? 'block' : 'none';
+        });
+        // Also trigger once on load
+        const initialType = costTypeSelect.value;
+        const initialIsMeat = ['genisse', 'genisse-engrais', 'vache-reforme', 'veau'].includes(initialType);
+        costGmqGroup.style.display = initialIsMeat ? 'block' : 'none';
+      }
+
+      // === TABS ===
+      document.querySelectorAll('.rb-tabs').forEach(tabs => {
+        const section = tabs.closest('.rb-section-detail');
+        tabs.querySelectorAll('.rb-tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            tabs.querySelectorAll('.rb-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const tabId = tab.dataset.tab;
+            section.querySelectorAll('.rb-tab-content').forEach(content => {
+              content.classList.toggle('active', content.id === 'tab-' + tabId);
+            });
+          });
+        });
+      });
+
       // Load data
       alimentsDb = parseAlimentsCsv(window.RB_ALIMENTS_CSV || '');
+      
+      // Modal functionality for bilan details
+      const bilanModal = document.getElementById('bilan-detail-modal');
+      const modalTitle = document.getElementById('modal-detail-title');
+      const modalBody = document.getElementById('modal-detail-body');
+      
+      document.querySelector('.rb-modal-close')?.addEventListener('click', () => {
+        bilanModal?.classList.add('hidden');
+      });
+      
+      bilanModal?.addEventListener('click', (e) => {
+        if (e.target === bilanModal) bilanModal.classList.add('hidden');
+      });
+      
+      window.showBilanDetail = function(type, current, average, rUFL, pdiParUfl, totalMS) {
+        let title = '';
+        let html = '';
+        
+        if (type === 'fibre') {
+          title = '🌿 Fibre (NDF/ADF)';
+          html = `
+            <div style="margin-bottom:20px;">
+              <p><strong>Votre valeur actuelle:</strong> <span style="color:var(--primary);font-size:1.2em;">${current}% MS</span></p>
+              <p><strong>Valeur moyenne recommandée:</strong> 15-18% MS</p>
+            </div>
+            <div style="background:var(--bg);padding:16px;border-radius:8px;margin-bottom:20px;">
+              <h4 style="margin-top:0;">💡 Conseils</h4>
+              <ul style="margin:0;padding-left:20px;">
+                <li><strong>Si trop faible (</strong>${current < 15 ? '✓ Votre ration' : 'Augmenter'}):</strong> Risque d'acidose, rumen fragile. Ajoutez du foin, de la paille ou des fourrages grossiers.</li>
+                <li><strong>Si trop élevé:</strong> Réduction de l'ingestion et de la production laitière. Réduisez les fourrages riches en fibres.</li>
+                <li><strong>Objectif:</strong> Maintenir 15-18% NDF pour une bonne santé du rumen.</li>
+              </ul>
+            </div>
+            <div style="font-size:0.9rem;color:var(--text-light);">
+              <p>La fibre (NDF) est essentielle pour la rumination et la production de saliva qui tamponne l'acidité du rumen.</p>
+            </div>
+          `;
+        } else if (type === 'mineraux') {
+          title = '🦴 Minéraux';
+          html = `
+            <div style="margin-bottom:20px;">
+              <p><strong>Votre valeur actuelle:</strong> <span style="color:var(--primary);font-size:1.2em;">~${current}% MS</span> (estimé)</p>
+              <p><strong>Valeur recommandée:</strong> 3-5% MS</p>
+            </div>
+            <div style="background:var(--bg);padding:16px;border-radius:8px;margin-bottom:20px;">
+              <h4 style="margin-top:0;">💡 Conseils</h4>
+              <ul style="margin:0;padding-left:20px;">
+                <li>Les minéraux sont essentiels pour le métabolisme, la lactation et la reproduction.</li>
+                <li>Utilisez un mélange minéral adapté à votre troupeau (vaches laitières, tarisses, génisses).</li>
+                <li>Vérifiez le rapport Ca:P (ideal 1.5:1 à 2:1).</li>
+                <li>En période de transition (tarissement-vêlage), attention au calcium et magnesium.</li>
+              </ul>
+            </div>
+          `;
+        } else if (type === 'matieres-grasses') {
+          title = '💧 Matières grasses';
+          html = `
+            <div style="margin-bottom:20px;">
+              <p><strong>Votre valeur estimée:</strong> <span style="color:var(--primary);font-size:1.2em;">~${current}% MS</span></p>
+              <p><strong>Plage optimale:</strong> 3-5% MS</p>
+              <p><strong>Maximum:</strong> 6-7% MS (au-delà, risques de rumenite)</p>
+            </div>
+            <div style="background:var(--bg);padding:16px;border-radius:8px;margin-bottom:20px;">
+              <h4 style="margin-top:0;">💡 Conseils</h4>
+              <ul style="margin:0;padding-left:20px;">
+                <li><strong>Si trop faible:</strong> Pas de problème majeur, mais peut limiter l'énergie.</li>
+                <li><strong>Si trop élevé:</strong> Réduisez les graines oléagineuses (tournesol, lin) ou les matières grasses protégées.</li>
+                <li>Les matières grasses sont une source concentrée d'énergie (2.5x plus que les glucides).</li>
+              </ul>
+            </div>
+          `;
+        } else if (type === 'energie') {
+          title = '⚡ Énergie (UFL)';
+          const status = rUFL >= 0.9 && rUFL <= 1.1;
+          const statusText = status ? 'OK' : (rUFL < 0.9 ? 'Manque énergie' : 'Excès énergie');
+          html = `
+            <div style="margin-bottom:20px;">
+              <p><strong>Votre apport:</strong> <span style="color:var(--primary);font-size:1.2em;">${current.toFixed(1)} UFL/jour</span></p>
+              <p><strong>Vos besoins:</strong> ${average.toFixed(1)} UFL/jour</p>
+              <p><strong>Ratio:</strong> <span class="rb-badge ${status ? 'rb-badge-green' : 'rb-badge-orange'}">${(rUFL * 100).toFixed(0)}% ${statusText}</span></p>
+            </div>
+            <div style="background:var(--bg);padding:16px;border-radius:8px;margin-bottom:20px;">
+              <h4 style="margin-top:0;">💡 Conseils</h4>
+              <ul style="margin:0;padding-left:20px;">
+                ${rUFL < 0.9 ? `
+                <li><strong>Manque d'énergie:</strong> Perte de poids, baisse de production, problèmes reproductifs.</li>
+                <li>→ Ajoutez des concentrés énergétiques (céréales, maïs).</li>
+                <li>→ Vérifiez la qualité du fourrage.</li>
+                ` : rUFL > 1.1 ? `
+                <li><strong>Excès d'énergie:</strong> Risque d'acidose, animaux gras.</li>
+                <li>→ Réduisez les concentrés.</li>
+                <li>→ Remplacez une partie des céréales par des fibres.</li>
+                ` : `
+                <li>✓ Apport énergétique optimal !</li>
+                `}
+                <li>Le ratio idéal est de 90-110% des besoins.</li>
+              </ul>
+            </div>
+          `;
+        } else if (type === 'acides-ames') {
+          title = '🧬 Acides aminés';
+          html = `
+            <div style="margin-bottom:20px;">
+              <p><strong>Limitant identifié:</strong> Méthionine</p>
+              <p><strong>Statut:</strong> <span class="rb-badge rb-badge-orange">À optimiser</span></p>
+            </div>
+            <div style="background:var(--bg);padding:16px;border-radius:8px;margin-bottom:20px;">
+              <h4 style="margin-top:0;">💡 Conseils</h4>
+              <ul style="margin:0;padding-left:20px;">
+                <li>La Methionine est souvent le premier acide aminé limitant chez les hautes productrices.</li>
+                <li>Elle améliore la production laitière, le TB et la fertilité.</li>
+                <li><strong>Solutions:</strong></li>
+                <li>→ Utiliser un concentré protéique riche (tourteau de soja).</li>
+                <li>→ Ajouter un boute Protected Methionine (Metabolisse).</li>
+                <li>→ Vérifier l'équilibre global PDI/UFL (95-105 g/UFL).</li>
+              </ul>
+            </div>
+          `;
+        } else if (type === 'acidose') {
+          title = '⚠️ Risque Acidose';
+          const isHigh = current === 'ÉLEVÉ';
+          const isModerate = current === 'MODÉRÉ';
+          const isWatch = current === 'À SURVEILLER';
+          html = `
+            <div style="margin-bottom:20px;">
+              <p><strong>Niveau de risque:</strong> <span style="color:${isHigh ? '#ef4444' : (isModerate ? '#f59e0b' : '#10b981')};font-size:1.2em;">${current}</span></p>
+              <p><strong>Recommandation:</strong> <span style="color:var(--text-light);">FAIBLE</span></p>
+            </div>
+            <div style="background:${isHigh ? '#fef2f2' : (isModerate ? '#fffbeb' : '#ecfdf5')};padding:16px;border-radius:8px;margin-bottom:20px;border:2px solid ${isHigh ? '#ef4444' : (isModerate ? '#f59e0b' : '#10b981')};" class="acidose-section">
+              <h3 style="margin:0 0 5px 0;">${isHigh ? '⚠️ RISQUE ÉLEVÉ' : (isModerate ? '⚠️ RISQUE MODÉRÉ' : (isWatch ? '⚡ À SURVEILLER' : '✅ RISQUE FAIBLE'))}</h3>
+              <p style="margin:0;font-size:12px;">${isHigh ? 'Combinaison élevée d\'énergie + faible PDI - attention au rumen!' : 
+                 isModerate ? 'Surveiller l\'équilibre énergie/PDI et l\'ingestion.' : 
+                 isWatch ? 'Un paramètre hors norme - à surveiller.' : 
+                 'Conditions favorables pour la santé du rumen.'}</p>
+            </div>
+            <div style="background:var(--bg);padding:16px;border-radius:8px;margin-bottom:20px;">
+              <h4 style="margin-top:0;">💡 Conseils</h4>
+              <ul style="margin:0;padding-left:20px;">
+                <li><strong>Si risque élevé:</strong> Réduisez les concentrés, augmentez les fourrages.</li>
+                <li><strong>Ajustez la transition:</strong> Changes alimentaires progressives sur 2-3 semaines.</li>
+                <li><strong>Surveillez:</strong> Consommation, fientes, lait.</li>
+                <li><strong>Solutions:</strong> Paille before concentrés, son, buffers ( bicarbonate).</li>
+              </ul>
+            </div>
+            <div style="font-size:0.9rem;color:var(--text-light);">
+              <p>L'acidose ruminale est un trouble métabolique caused par une Production excessive d'acide dans le rumen.</p>
+            </div>
+          `;
+        }
+        
+        modalTitle.textContent = title;
+        modalBody.innerHTML = html;
+        bilanModal?.classList.remove('hidden');
+      };
       const custom = loadJson(LS.custom, []);
       if (Array.isArray(custom) && custom.length) {
         custom.forEach(it => {
           if (!it || !it.nom) return;
-          const item = { nom: String(it.nom).trim(), key: normalizeName(it.nom), msPct: Number(it.msPct), uflPerKgMS: Number(it.uflPerKgMS), pdiPerKgMS: Number(it.pdiPerKgMS) };
+          const item = {
+            nom: String(it.nom).trim(),
+            key: normalizeName(it.nom),
+            msPct: Number(it.msPct),
+            uflPerKgMS: Number(it.uflPerKgMS),
+            pdiPerKgMS: Number(it.pdiPerKgMS),
+            na_gkgms: Number(it.na_gkgms),
+            k_gkgms: Number(it.k_gkgms),
+            ca_gkgms: Number(it.ca_gkgms),
+            mg_gkgms: Number(it.mg_gkgms),
+            cl_gkgms: Number(it.cl_gkgms),
+            s_gkgms: Number(it.s_gkgms)
+          };
+          // Normaliser : si valeur absente -> undefined
+          if (!Number.isFinite(item.na_gkgms)) item.na_gkgms = undefined;
+          if (!Number.isFinite(item.k_gkgms)) item.k_gkgms = undefined;
+          if (!Number.isFinite(item.ca_gkgms)) item.ca_gkgms = undefined;
+          if (!Number.isFinite(item.mg_gkgms)) item.mg_gkgms = undefined;
+          if (!Number.isFinite(item.cl_gkgms)) item.cl_gkgms = undefined;
+          if (!Number.isFinite(item.s_gkgms)) item.s_gkgms = undefined;
           if (!Number.isFinite(item.msPct)) return;
           alimentsDb = alimentsDb.filter(a => a.key !== item.key);
           alimentsDb.unshift(item);
@@ -711,21 +1073,100 @@ Ensilage herbe,35.0,0.65,12.0,70.0
       costsByFeed = loadJson(LS.costs, {});
       hydrate();
 
-      document.getElementById('csv-status').innerHTML = alimentsDb.length ? `Base: <strong>${alimentsDb.length}</strong> aliments` : 'Base non chargée';
+      const customAliments = loadJson(LS.custom, []);
+      document.getElementById('csv-status').innerHTML = alimentsDb.length ? `Base: <strong>${alimentsDb.length}</strong> aliments` + (customAliments.length ? ` (+${customAliments.length} personnalisés)` : '') : 'Base non chargée';
 
       // Modal
       const modal = document.getElementById('custom-modal');
       document.getElementById('btn-open-custom-modal')?.addEventListener('click', () => modal.classList.remove('hidden'));
       document.getElementById('btn-open-custom-modal-ration')?.addEventListener('click', () => modal.classList.remove('hidden'));
       modal?.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.add('hidden')));
+      
+      // Real-time BACA calculation in custom modal
+      const mineralFields = ['custom-na', 'custom-k', 'custom-ca', 'custom-mg', 'custom-cl', 'custom-s'];
+      const calculateBaca = () => {
+        const na = Number(document.getElementById('custom-na')?.value) || 0;
+        const k = Number(document.getElementById('custom-k')?.value) || 0;
+        const ca = Number(document.getElementById('custom-ca')?.value) || 0;
+        const mg = Number(document.getElementById('custom-mg')?.value) || 0;
+        const cl = Number(document.getElementById('custom-cl')?.value) || 0;
+        const s = Number(document.getElementById('custom-s')?.value) || 0;
+        // BACA = (Na + K + Ca + Mg) - (Cl + S) in mEq/kg MS
+        const baca = (na * 43.5 + k * 25.6 + ca * 49.9 + mg * 82.2) - (cl * 28.2 + s * 62.4);
+        const bacaEl = document.getElementById('custom-baca-value');
+        if (bacaEl) {
+          if (na || k || ca || mg || cl || s) {
+            bacaEl.textContent = baca.toFixed(1);
+            bacaEl.style.color = baca < -100 ? 'var(--error)' : (baca > 100 ? 'var(--warning)' : 'var(--primary)');
+          } else {
+            bacaEl.textContent = '-';
+            bacaEl.style.color = 'var(--primary)';
+          }
+        }
+      };
+      mineralFields.forEach(id => {
+        document.getElementById(id)?.addEventListener('input', calculateBaca);
+      });
+      
+      // View custom foods - global function
+      window.showCustomFoods = function() {
+        const custom = loadJson(LS.custom, []);
+        let html = '<div style="max-height:60vh;overflow-y:auto;">';
+        if (!custom.length) {
+          html += '<p>Aucun aliment personnalisé.</p><p>Cliquez sur "+ Ajouter aliment" dans la section Ration pour en ajouter.</p>';
+        } else {
+          html += '<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">';
+          html += '<thead><tr style="background:var(--bg);"><th style="text-align:left;padding:8px;border-bottom:2px solid var(--border);">Nom</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);">MS%</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);">UFL</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--border);">PDI</th><th style="padding:8px;border-bottom:2px solid var(--border);"></th></tr></thead><tbody>';
+          custom.forEach((a, i) => {
+            html += '<tr>';
+            html += '<td style="padding:8px;border-bottom:1px solid var(--border);">' + a.nom + '</td>';
+            html += '<td style="text-align:right;padding:8px;border-bottom:1px solid var(--border);">' + a.msPct + '</td>';
+            html += '<td style="text-align:right;padding:8px;border-bottom:1px solid var(--border);">' + a.uflPerKgMS + '</td>';
+            html += '<td style="text-align:right;padding:8px;border-bottom:1px solid var(--border);">' + a.pdiPerKgMS + '</td>';
+            html += '<td style="text-align:center;padding:8px;border-bottom:1px solid var(--border);"><button onclick="if(confirm(\'Supprimer cet aliment ?\')){var c=JSON.parse(localStorage.getItem(\'rb_custom_v1\')||' + '[]);c.splice(' + i + ',1);localStorage.setItem(\'rb_custom_v1\',JSON.stringify(c));location.reload();}" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">🗑️</button></td>';
+            html += '</tr>';
+          });
+          html += '</tbody></table>';
+        }
+        html += '</div>';
+        html += '<div style="margin-top:16px;text-align:center;"><button onclick="document.getElementById(\'custom-modal\')?.classList.remove(\'hidden\');document.getElementById(\'view-custom-modal\')?.classList.add(\'hidden\');" class="rb-btn rb-btn-primary">➕ Ajouter un aliment</button></div>';
+        document.getElementById('view-custom-content').innerHTML = html;
+        document.getElementById('view-custom-modal')?.classList.remove('hidden');
+      };
+      
+      // Close handlers for view-custom-modal
+      document.getElementById('view-custom-modal')?.querySelector('.rb-modal-close')?.addEventListener('click', () => {
+        document.getElementById('view-custom-modal')?.classList.add('hidden');
+      });
+      
+
 
       document.getElementById('btn-add-custom')?.addEventListener('click', () => {
         const nom = document.getElementById('custom-nom').value.trim();
         const ms = Number(document.getElementById('custom-ms').value) || 0;
         const ufl = Number(document.getElementById('custom-ufl').value) || 0;
         const pdi = Number(document.getElementById('custom-pdi').value) || 0;
+        const na = Number(document.getElementById('custom-na')?.value) || 0;
+        const k = Number(document.getElementById('custom-k')?.value) || 0;
+        const ca = Number(document.getElementById('custom-ca')?.value) || 0;
+        const mg = Number(document.getElementById('custom-mg')?.value) || 0;
+        const cl = Number(document.getElementById('custom-cl')?.value) || 0;
+        const s = Number(document.getElementById('custom-s')?.value) || 0;
+
         if (!nom || !ms || !ufl || !pdi) { alert('Nom, MS, UFL, PDI requis'); return; }
-        const item = { nom, key: normalizeName(nom), msPct: ms, uflPerKgMS: ufl, pdiPerKgMS: pdi };
+        const item = {
+          nom,
+          key: normalizeName(nom),
+          msPct: ms,
+          uflPerKgMS: ufl,
+          pdiPerKgMS: pdi,
+          na_gkgms: na || undefined,
+          k_gkgms: k || undefined,
+          ca_gkgms: ca || undefined,
+          mg_gkgms: mg || undefined,
+          cl_gkgms: cl || undefined,
+          s_gkgms: s || undefined
+        };
         alimentsDb = alimentsDb.filter(a => a.key !== item.key);
         alimentsDb.unshift(item);
         hydrate();
@@ -737,7 +1178,12 @@ Ensilage herbe,35.0,0.65,12.0,70.0
         document.getElementById('custom-ufl').value = '';
         document.getElementById('custom-pdi').value = '';
         document.getElementById('custom-alias').value = '';
-        document.getElementById('custom-mat').value = '';
+        document.getElementById('custom-na').value = '';
+        document.getElementById('custom-k').value = '';
+        document.getElementById('custom-ca').value = '';
+        document.getElementById('custom-mg').value = '';
+        document.getElementById('custom-cl').value = '';
+        document.getElementById('custom-s').value = '';
         modal.classList.add('hidden');
         alert('✅ Aliment "' + nom + '" ajouté à la base!');
       });
@@ -905,7 +1351,21 @@ Ensilage herbe,35.0,0.65,12.0,70.0
           const qty = Number(row.querySelector('.rb-ration-qty')?.value) || 0;
           if (!nom || !qty) return;
           const a = findAlimentByText(nom);
-          if (a) items.push({ nom: a.nom, qty, ufl: a.uflPerKgMS * qty, pdi: a.pdiPerKgMS * qty, key: a.key });
+          if (a) {
+            items.push({
+              nom: a.nom,
+              qty,
+              ufl: a.uflPerKgMS * qty,
+              pdi: a.pdiPerKgMS * qty,
+              key: a.key,
+              na_gkgms: a.na_gkgms,
+              k_gkgms: a.k_gkgms,
+              ca_gkgms: a.ca_gkgms,
+              mg_gkgms: a.mg_gkgms,
+              cl_gkgms: a.cl_gkgms,
+              s_gkgms: a.s_gkgms
+            });
+          }
         });
         if (!items.length && descId) {
           document.getElementById(descId)?.value.split('\n').forEach(line => {
@@ -914,7 +1374,19 @@ Ensilage herbe,35.0,0.65,12.0,70.0
               const qty = Number(String(m[1]).replace(',', '.'));
               const nom = String(m[2] || '').trim();
               const a = findAlimentByText(nom);
-              if (a && qty) items.push({ nom: a.nom, qty, ufl: a.uflPerKgMS * qty, pdi: a.pdiPerKgMS * qty, key: a.key });
+              if (a && qty) items.push({
+                nom: a.nom,
+                qty,
+                ufl: a.uflPerKgMS * qty,
+                pdi: a.pdiPerKgMS * qty,
+                key: a.key,
+                na_gkgms: a.na_gkgms,
+                k_gkgms: a.k_gkgms,
+                ca_gkgms: a.ca_gkgms,
+                mg_gkgms: a.mg_gkgms,
+                cl_gkgms: a.cl_gkgms,
+                s_gkgms: a.s_gkgms
+              });
             }
           });
         }
@@ -1093,6 +1565,7 @@ Ensilage herbe,35.0,0.65,12.0,70.0
       });
 
       // Apports
+      console.log('Registering btn-calc-apports');
       document.getElementById('btn-calc-apports')?.addEventListener('click', () => {
         const a = parseRation('ration-lines', 'description-ration');
         document.getElementById('resultat-apports').innerHTML = `<h3>Apports</h3><p><strong>MS:</strong> ${a.totalMS.toFixed(1)} kg</p><p><strong>UFL:</strong> ${a.totalUFL.toFixed(1)}</p><p><strong>PDI:</strong> ${a.totalPDI.toFixed(0)} g</p>`;
@@ -1104,42 +1577,114 @@ Ensilage herbe,35.0,0.65,12.0,70.0
         if (!lastB) { alert('Calcule d\'abord les besoins'); return; }
         const pv = Number(document.getElementById('poids-vif').value) || 650;
         const a = parseRation('ration-lines', 'description-ration');
-        const rUFL = a.totalMS > 0 ? a.totalUFL / lastB.bUFL : 0;
+        const typeCode = document.getElementById('type-animal')?.value || '';
+        const isMeat = ['genisse', 'genisse-engrais', 'vache-reforme', 'veau'].includes(typeCode);
+        const UFV_FACTOR = 1.008; // approx : conversion globale UFV/UFL (INRA 2018) depuis Prog/aliment.csv
+        const energyFactor = isMeat ? UFV_FACTOR : 1; // UFL pour lait, UFV (approx) pour viande
+        const apportEnergy = a.totalUFL * energyFactor;
+        const besoinEnergy = lastB.bUFL * energyFactor;
+        const rUFL = besoinEnergy > 0 ? (apportEnergy / besoinEnergy) : 0;
         const rPDI = a.totalMS > 0 ? a.totalPDI / lastB.bPDI : 0;
-        const pdiParUfl = a.totalUFL > 0 ? a.totalPDI / a.totalUFL : 0;
+        const pdiParUfl = apportEnergy > 0 ? a.totalPDI / apportEnergy : 0;
+        const energyUnit = isMeat ? 'UFV' : 'UFL';
+        const prodLait = Number(document.getElementById('production-lait')?.value) || 0;
+        const gmqObj = Number(document.getElementById('gmq')?.value) || 0;
+        const act = document.getElementById('activite')?.value || 'stabulation';
         
-        // BACA Calculation: (Na + K + Ca + Mg) - (Cl + S) in mEq/kg MS
-        // Conversion: Na (g) * 43.5, K * 25.6, Ca * 49.9, Mg * 82.2, Cl * 28.2, S * 62.4
-        const na = Number(document.getElementById('mineraux-na').value) || 0;
-        const k = Number(document.getElementById('mineraux-k').value) || 0;
-        const ca = Number(document.getElementById('mineraux-ca').value) || 0;
-        const mg = Number(document.getElementById('mineraux-mg').value) || 0;
-        const cl = Number(document.getElementById('mineraux-cl').value) || 0;
-        const s = Number(document.getElementById('mineraux-s').value) || 0;
-        
-        const baca = (na * 43.5 + k * 25.6 + ca * 49.9 + mg * 82.2) - (cl * 28.2 + s * 62.4);
+        // BACA = (Na + K + Ca + Mg) - (Cl + S) en mEq/kg MS
+        // Conversion (g/kg MS -> mEq/kg MS) : Na*43.5, K*25.6, Ca*49.9, Mg*82.2, Cl*28.2, S*62.4
+        const manualNa = Number(document.getElementById('mineraux-na').value) || 0;
+        const manualK = Number(document.getElementById('mineraux-k').value) || 0;
+        const manualCa = Number(document.getElementById('mineraux-ca').value) || 0;
+        const manualMg = Number(document.getElementById('mineraux-mg').value) || 0;
+        const manualCl = Number(document.getElementById('mineraux-cl').value) || 0;
+        const manualS = Number(document.getElementById('mineraux-s').value) || 0;
+        const manualHas = manualNa > 0 || manualK > 0 || manualCa > 0 || manualMg > 0 || manualCl > 0 || manualS > 0;
+
+        function bacaFromRation(items) {
+          const requiredKeys = ['na_gkgms', 'k_gkgms', 'ca_gkgms', 'mg_gkgms', 'cl_gkgms', 's_gkgms'];
+          let totalMS = 0;
+          let sumWeighted = 0;
+          const missingFeeds = new Set();
+
+          for (const it of items) {
+            const qty = Number(it.qty) || 0;
+            if (!qty) continue;
+            totalMS += qty;
+
+            let missing = false;
+            for (const k of requiredKeys) {
+              const v = it[k];
+              if (!Number.isFinite(v)) { missing = true; break; }
+            }
+            if (missing) {
+              missingFeeds.add(it.nom);
+              continue;
+            }
+
+            const na = it.na_gkgms;
+            const kcat = it.k_gkgms;
+            const ca = it.ca_gkgms;
+            const mgcat = it.mg_gkgms;
+            const cl = it.cl_gkgms;
+            const s = it.s_gkgms;
+
+            const mEqKg = (na * 43.5 + kcat * 25.6 + ca * 49.9 + mgcat * 82.2) - (cl * 28.2 + s * 62.4);
+            sumWeighted += mEqKg * qty;
+          }
+
+          if (!totalMS) return { baca: null, missingFeeds: Array.from(missingFeeds) };
+          if (missingFeeds.size) return { baca: null, missingFeeds: Array.from(missingFeeds) };
+          return { baca: sumWeighted / totalMS, missingFeeds: Array.from(missingFeeds) };
+        }
+
+        const autoBaca = bacaFromRation(a.items || []);
+        const bacaValue = autoBaca.baca !== null ? autoBaca.baca : (manualHas ? (
+          (manualNa * 43.5 + manualK * 25.6 + manualCa * 49.9 + manualMg * 82.2) - (manualCl * 28.2 + manualS * 62.4)
+        ) : null);
+
+        const bacaMissingFeeds = autoBaca.missingFeeds || [];
+
         let bacaStatus = { label: 'À surveiller', cls: 'rb-badge-orange' };
-        if (Math.abs(baca) < 50) { bacaStatus = { label: 'Optimal', cls: 'rb-badge-green' }; }
-        else if (baca > 100) { bacaStatus = { label: 'Excès cations', cls: 'rb-badge-orange' }; }
-        else if (baca < -100) { bacaStatus = { label: 'Excès anions', cls: 'rb-badge-red' }; }
-        const hasMineraux = na > 0 || k > 0 || ca > 0 || mg > 0 || cl > 0 || s > 0;
+        if (bacaValue !== null) {
+          if (Math.abs(bacaValue) < 50) bacaStatus = { label: 'Optimal', cls: 'rb-badge-green' };
+          else if (bacaValue > 100) bacaStatus = { label: 'Excès cations', cls: 'rb-badge-orange' };
+          else if (bacaValue < -100) bacaStatus = { label: 'Excès anions', cls: 'rb-badge-red' };
+        }
+
+        const bacaSource = autoBaca.baca !== null ? 'Auto (base d\'aliments)' : (manualHas ? 'Manuel' : 'Incomplet');
+        const hasMineraux = bacaValue !== null;
+        const showBacaMissingPanel = !manualHas && bacaMissingFeeds.length > 0;
         
-        // Calculate MS intake vs recommended based on animal type
-        // Vache tarie 0-4 sem: 1.5-2% du poids
-        // Prépa vêlage 4-8 sem: 1.8-2.2% du poids
-        // Vache laitière: 17-19 kg MS default
+        // MS ingérée recommandée (proxy) - dépend du type et des objectifs
         let msRecoMin, msRecoMax;
-        const typeAnimal = lastB?.typeLabel || '';
-        if (typeAnimal.includes('tarie') && !typeAnimal.includes('prépa')) {
-          // Vache tarie 0-4 sem
-          msRecoMin = pv * 0.015;
-          msRecoMax = pv * 0.02;
-        } else if (typeAnimal.includes('prépa') || typeAnimal.includes('vêlage')) {
-          // Prépa vêlage 4-8 sem
-          msRecoMin = pv * 0.018;
-          msRecoMax = pv * 0.022;
+        const actCoef = act === 'paturage' ? 1.05 : 1;
+        if (typeCode === 'vache-laitiere') {
+          // La production augmente l'ingestion
+          msRecoMin = (0.025 * pv + 0.1 * prodLait) * actCoef;
+          msRecoMax = msRecoMin * 1.12;
+        } else if (typeCode === 'vache-tarie') {
+          msRecoMin = pv * 0.015 * actCoef;
+          msRecoMax = pv * 0.02 * actCoef;
+        } else if (typeCode === 'vache-prepa-velage') {
+          msRecoMin = pv * 0.018 * actCoef;
+          msRecoMax = pv * 0.022 * actCoef;
+        } else if (typeCode === 'genisse') {
+          msRecoMin = pv * 0.016 * actCoef;
+          msRecoMax = pv * 0.02 * actCoef;
+        } else if (typeCode === 'genisse-engrais') {
+          // Plus le GMQ objectif est haut, plus l'ingestion peut augmenter légèrement
+          const gmqCoef = gmqObj > 0 ? (1 + Math.min(0.12, gmqObj * 0.03)) : 1;
+          msRecoMin = pv * 0.018 * gmqCoef * actCoef;
+          msRecoMax = pv * 0.022 * gmqCoef * actCoef;
+        } else if (typeCode === 'vache-reforme') {
+          const gmqCoef = gmqObj > 0 ? (1 + Math.min(0.12, gmqObj * 0.03)) : 1;
+          msRecoMin = pv * 0.018 * gmqCoef * actCoef;
+          msRecoMax = pv * 0.022 * gmqCoef * actCoef;
+        } else if (typeCode === 'veau') {
+          msRecoMin = pv * 0.02 * actCoef;
+          msRecoMax = pv * 0.024 * actCoef;
         } else {
-          // Default for dairy cows
           msRecoMin = 17;
           msRecoMax = 19;
         }
@@ -1149,21 +1694,67 @@ Ensilage herbe,35.0,0.65,12.0,70.0
         const fiberEst = 15; // Estimated fiber % MS
         const fibRecco = 15; // Recommended fiber % MS
         
-        // Azote estimation
-        const azoteEst = a.totalMS > 0 ? (a.totalPDI / a.totalMS / 10) : 0;
-        const azoteRecco = 15; // Recommended MAT % MS
-        
         // Mineral estimation (rough)
         const mgEst = 3;
         const mgRecco = 5;
         
-        // Acidose risk: high energy, low fiber, low PDI/UFL ratio
-        const acidoseRisk = (rUFL > 1.1 || pdiParUfl > 110 || pdiParUfl < 80);
-        const acidoseLevel = acidoseRisk ? (rUFL > 1.2 ? 'ÉLEVÉ' : (rUFL > 1.1 ? 'MODÉRÉ' : 'FAIBLE')) : 'FAIBLE';
+        // Acidose risk: simplified calculation with more visible thresholds
+        // Based on: high energy density + low PDI + high intake
+        const energyDensity = a.totalMS > 0 ? (apportEnergy / a.totalMS) : 0; // ${energyUnit}/kg MS
         
+        // Simplified acidose risk - more visible changes
+        // Risk increases with: high energy density, low PDI/UFL ratio, high intake
+        let acidoseRisk = false;
+        let acidoseLevel = 'FAIBLE';
+        let acidoseReason = 'Conditions favorables';
+        
+        // Check each condition separately for better visibility
+        const highEnergy = rUFL > 1.15 || energyDensity > 0.95;
+        const lowPDI = pdiParUfl < 90;
+        const highIntake = msRatio > 1.1;
+        
+        if (highEnergy && lowPDI) {
+          acidoseRisk = true;
+          acidoseLevel = 'ÉLEVÉ';
+          acidoseReason = `Énergie élevée (${rUFL.toFixed(2)}) + PDI/${energyUnit} bas (${pdiParUfl.toFixed(0)} g/${energyUnit})`;
+        } else if ((highEnergy && highIntake) || (lowPDI && highIntake)) {
+          acidoseRisk = true;
+          acidoseLevel = 'MODÉRÉ';
+          acidoseReason = `Ingestion élevée + énergie ou PDI non optimal`;
+        } else if (highEnergy || lowPDI) {
+          acidoseRisk = false;
+          acidoseLevel = 'À SURVEILLER';
+          acidoseReason = highEnergy ? `Énergie élevée (${rUFL.toFixed(2)})` : `PDI/${energyUnit} bas (${pdiParUfl.toFixed(0)} g/${energyUnit})`;
+        }
+        
+        // Déséquilibre PDI (plus cohérent avec les ratios UFL/PDI)
         let status = { label: 'OK', cls: 'rb-badge-green' };
-        if (pdiParUfl < 90) { status = { label: 'Manque PDI', cls: 'rb-badge-red' }; }
-        else if (pdiParUfl > 105) { status = { label: 'Excès PDI', cls: 'rb-badge-orange' }; }
+        if (pdiParUfl < 88 || rPDI < 0.9) { status = { label: 'Manque PDI', cls: 'rb-badge-red' }; }
+        else if (pdiParUfl > 108 || rPDI > 1.1) { status = { label: 'Excès PDI', cls: 'rb-badge-orange' }; }
+
+        // Production/GMQ possibles à partir de l'énergie apportée (proxy)
+        const pv075 = Math.pow(pv, 0.75);
+        const tb = Number(document.getElementById('tb')?.value) || 40;
+        const tp = Number(document.getElementById('tp')?.value) || 32;
+        let productionPossibleKgLait = null;
+        let gmqObjective = (typeCode === 'genisse-engrais' || typeCode === 'vache-reforme') ? (gmqObj || 0) : null;
+        let gmqPossible = null;
+
+        if (typeCode === 'vache-laitiere') {
+          const coefActUfl = act === 'paturage' ? 1.08 : 1;
+          const uflEntretien = 0.054 * pv075 * coefActUfl;
+          const uflParKgLait = Math.max(0.35, 0.44 + (tb - 40) * 0.0012 + (tp - 32) * 0.0008);
+          const uflPossibleLait = (a.totalUFL - uflEntretien) / (uflParKgLait || 1);
+          productionPossibleKgLait = Math.max(0, uflPossibleLait);
+        }
+
+        if (typeCode === 'genisse-engrais' || typeCode === 'vache-reforme') {
+          const coefActUfl = act === 'paturage' ? 1.05 : 1;
+          const uflEntretien = 0.054 * pv075 * coefActUfl;
+          const gainCoeff = (typeCode === 'genisse-engrais') ? 1.6 : 1.8; // UFL/kg gain (proxy utilisé dans computeBesoins)
+          const uflPossibleGain = (a.totalUFL - uflEntretien) / (gainCoeff || 1);
+          gmqPossible = Math.max(0, uflPossibleGain);
+        }
 
         // MS status
         let msStatus = { label: 'OK', cls: 'rb-badge-green' };
@@ -1174,14 +1765,31 @@ Ensilage herbe,35.0,0.65,12.0,70.0
           <h3>Bilan complet de la ration</h3>
           
           <!-- BACA Display -->
-          ${hasMineraux ? `
+          ${(hasMineraux || showBacaMissingPanel) ? `
           <div class="rb-panel" style="border-color:var(--primary);margin-bottom:16px;">
             <h4>⚖️ BACA (Balance Anion-Cation Alimentaire)</h4>
             <div style="display:flex;align-items:center;gap:20px;">
               <div style="font-size:2rem;">⚖️</div>
               <div>
-                <p style="font-size:1.5rem;font-weight:bold;color:var(--primary);">${baca.toFixed(1)} mEq/kg MS</p>
-                <p style="font-size:0.9rem;">Statut: <span class="rb-badge ${bacaStatus.cls}">${bacaStatus.label}</span></p>
+                ${hasMineraux ? `
+                  <p style="font-size:1.5rem;font-weight:bold;color:var(--primary);">${bacaValue.toFixed(1)} mEq/kg MS</p>
+                  <p style="font-size:0.9rem;">Statut: <span class="rb-badge ${bacaStatus.cls}">${bacaStatus.label}</span></p>
+                  <p style="font-size:0.85rem;color:var(--text-light);">Source: <strong>${bacaSource}</strong></p>
+                  ${manualHas && bacaMissingFeeds.length ? `
+                    <p style="font-size:0.85rem;color:var(--text-light);margin-top:6px;">
+                      Auto incomplet (minéraux manquants pour : ${bacaMissingFeeds.slice(0,8).join(', ')}${bacaMissingFeeds.length > 8 ? '...' : ''}).<br>
+                      Résultat = saisie manuelle.
+                    </p>
+                  ` : ''}
+                ` : ''}
+
+                ${showBacaMissingPanel ? `
+                  <p style="font-size:0.85rem;color:var(--text-light);margin-top:6px;">
+                    Données minérales manquantes pour : ${bacaMissingFeeds.slice(0,8).join(', ')}${bacaMissingFeeds.length > 8 ? '...' : ''}<br>
+                    Ajoute Na/K/Ca/Mg/Cl/S dans tes aliments (bouton “Ajouter un aliment”) pour un calcul BACA automatique.
+                  </p>
+                ` : ''}
+
                 <p style="font-size:0.85rem;color:var(--text-light);">cible: -50 à +50 mEq/kg MS pour vache tarie</p>
               </div>
             </div>
@@ -1195,72 +1803,93 @@ Ensilage herbe,35.0,0.65,12.0,70.0
               <div style="font-size:2rem;">${acidoseRisk ? '⚠️' : '✅'}</div>
               <div>
                 <p style="font-size:1.3rem;font-weight:bold;color:${acidoseRisk ? 'var(--danger)' : 'var(--primary)'};">${acidoseLevel}</p>
-                <p style="font-size:0.9rem;color:var(--text-light);">${acidoseRisk ? 'Surveiller la ration' : 'Risque faible'}</p>
+                <p style="font-size:0.9rem;color:var(--text-light);">${acidoseRisk ? acidoseReason : 'Risque faible'}</p>
               </div>
             </div>
           </div>
+          
+          <!-- Production possible / GMQ possible -->
+          ${productionPossibleKgLait !== null ? `
+            <div class="rb-panel" style="margin-top:16px;">
+              <h4>✅ Production possible</h4>
+              <div class="rb-form-grid">
+                <div><p><strong>Production (ration):</strong></p><p style="font-size:1.3rem;color:var(--primary);">${productionPossibleKgLait.toFixed(1)} kg/j</p></div>
+                <div><p><strong>Production saisie:</strong></p><p style="font-size:1.3rem;">${prodLait.toFixed(1)} kg/j</p></div>
+              </div>
+            </div>
+          ` : ''}
+
+          ${gmqPossible !== null ? `
+            <div class="rb-panel" style="margin-top:16px;">
+              <h4>✅ GMQ possible</h4>
+              <div class="rb-form-grid">
+                <div><p><strong>GMQ objectif:</strong></p><p style="font-size:1.3rem;">${gmqObjective.toFixed(2)} kg/j</p></div>
+                <div><p><strong>GMQ possible (ration):</strong></p><p style="font-size:1.3rem;color:var(--primary);">${gmqPossible.toFixed(2)} kg/j</p></div>
+              </div>
+            </div>
+          ` : ''}
           
           <!-- Équilibre de la ration -->
           <div class="rb-panel" style="margin-top:16px;">
             <h4>⚖️ Équilibre de la ration</h4>
             <div class="rb-form-grid">
               <div><p><strong>Matière sèche ingérée totale:</strong></p><p style="font-size:1.3rem;color:var(--primary);">${a.totalMS.toFixed(1)} kg MS/j</p></div>
-              <div><p><strong>Niveau d'ingestion:</strong></p><p style="font-size:1.3rem;">${a.totalMS.toFixed(1)} / ${msRecoMin}-${msRecoMax} kg</p><span class="rb-badge ${msStatus.cls}">${msStatus.label}</span></div>
-              <div><p><strong>Efficacité PDI:</strong></p><p style="font-size:1.3rem;">${pdiParUfl.toFixed(0)} g/UFL</p><span class="rb-badge ${status.cls}">${status.label}</span></div>
+              <div><p><strong>Niveau d'ingestion:</strong></p><p style="font-size:1.3rem;">${a.totalMS.toFixed(1)} / ${Number(msRecoMin).toFixed(1)}-${Number(msRecoMax).toFixed(1)} kg</p><span class="rb-badge ${msStatus.cls}">${msStatus.label}</span></div>
+              <div><p><strong>Efficacité PDI:</strong></p><p style="font-size:1.3rem;">${pdiParUfl.toFixed(0)} g/${energyUnit}</p><span class="rb-badge ${status.cls}">${status.label}</span></div>
               <div><p><strong>Besoins PDI Totaux:</strong></p><p style="font-size:1.3rem;">${lastB.bPDI.toFixed(0)} g/j</p></div>
-              <div><p><strong>PDI/UFL:</strong></p><p style="font-size:1.3rem;color:var(--primary);">${pdiParUfl.toFixed(0)} g/UFL</p></div>
+              <div><p><strong>PDI/${energyUnit}:</strong></p><p style="font-size:1.3rem;color:var(--primary);">${pdiParUfl.toFixed(0)} g/${energyUnit}</p></div>
             </div>
           </div>
           
-          <!-- Jauges -->
+          <!-- Repères nutritionnels -->
           <div class="rb-panel" style="margin-top:16px;">
-            <h4>📊 Jauges nutritionnelles</h4>
-            <div class="rb-cow-grid">
-              ${cowGauge('UFL (Énergie)', 'UFL/j', a.totalUFL, lastB.bUFL, rUFL)}
-              ${cowGauge('PDI (Azote)', 'g/j', a.totalPDI, lastB.bPDI, rPDI)}
-              ${cowGauge('Matière Sèche', 'kg/j', a.totalMS, msRecoMin, a.totalMS/msRecoMin)}
+            <h4>📊 Repères nutritionnels</h4>
+            <div class="rb-metric-grid">
+              ${metricBar(`${energyUnit} (Énergie)`, `${energyUnit}/j`, apportEnergy, besoinEnergy, rUFL)}
+              ${metricBar('PDI (Azote)', 'g/j', a.totalPDI, lastB.bPDI, rPDI)}
+              ${metricBar('Matière Sèche', 'kg/j', a.totalMS, msRecoMin, a.totalMS/msRecoMin)}
             </div>
           </div>
           
           <!-- Équilibre détaillé -->
           <div class="rb-panel" style="margin-top:16px;">
-            <h4>🔬 Équilibre détaillé</h4>
+            <h4>🔬 Équilibre détaillé <span style="font-weight:normal;font-size:0.85rem;color:var(--text-light);">- Cliquer pour plus de détails</span></h4>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
               
-              <div class="rb-cow-card">
+              <div class="rb-cow-card" onclick="showBilanDetail('fibre', '${fiberEst}', '${fibRecco}', ${rUFL}, ${pdiParUfl}, ${a.totalMS})">
                 <div class="rb-cow-title">🌿 Fibre</div>
                 <div class="rb-cow-sub">~${fiberEst}% MS <span class="rb-badge rb-badge-green">OK</span></div>
                 <p style="font-size:0.85rem;color:var(--text-light);">Recommandé: >${fibRecco}% MS</p>
               </div>
               
-              <div class="rb-cow-card">
-                <div class="rb-cow-title">🧪 Azote (MAT)</div>
-                <div class="rb-cow-sub">~${azoteEst}% MS <span class="rb-badge rb-badge-green">OK</span></div>
-                <p style="font-size:0.85rem;color:var(--text-light);">Recommandé: ~${azoteRecco}% MS</p>
-              </div>
-              
-              <div class="rb-cow-card">
+              <div class="rb-cow-card" onclick="showBilanDetail('mineraux', '${mgEst}', '${mgRecco}', ${rUFL}, ${pdiParUfl}, ${a.totalMS})">
                 <div class="rb-cow-title">🦴 Minéraux</div>
                 <div class="rb-cow-sub">~${mgEst}% MS <span class="rb-badge rb-badge-orange">À voir</span></div>
                 <p style="font-size:0.85rem;color:var(--text-light);">Recommandé: ~${mgRecco}% MS</p>
               </div>
               
-              <div class="rb-cow-card">
+              <div class="rb-cow-card" onclick="showBilanDetail('matieres-grasses', '3.5', '5', ${rUFL}, ${pdiParUfl}, ${a.totalMS})">
                 <div class="rb-cow-title">💧 Matières grasses</div>
                 <div class="rb-cow-sub">~3-4% MS <span class="rb-badge rb-badge-green">OK</span></div>
                 <p style="font-size:0.85rem;color:var(--text-light);">Max: 6-7% MS</p>
               </div>
               
-              <div class="rb-cow-card">
+              <div class="rb-cow-card" onclick="showBilanDetail('energie', ${apportEnergy}, ${besoinEnergy}, ${rUFL}, ${pdiParUfl}, ${a.totalMS})">
                 <div class="rb-cow-title">⚡ Énergie</div>
-                <div class="rb-cow-sub">${a.totalUFL.toFixed(1)} UFL <span class="rb-badge ${rUFL >= 0.9 && rUFL <= 1.1 ? 'rb-badge-green' : 'rb-badge-orange'}">${rUFL >= 0.9 && rUFL <= 1.1 ? 'OK' : (rUFL * 100).toFixed(0) + '%'}</span></div>
-                <p style="font-size:0.85rem;color:var(--text-light);">Cible: ${lastB.bUFL.toFixed(1)} UFL</p>
+                <div class="rb-cow-sub">${apportEnergy.toFixed(1)} ${energyUnit} <span class="rb-badge ${rUFL >= 0.9 && rUFL <= 1.1 ? 'rb-badge-green' : 'rb-badge-orange'}">${rUFL >= 0.9 && rUFL <= 1.1 ? 'OK' : (rUFL * 100).toFixed(0) + '%'}</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Cible: ${besoinEnergy.toFixed(1)} ${energyUnit}</p>
               </div>
               
-              <div class="rb-cow-card">
+              <div class="rb-cow-card" onclick="showBilanDetail('acides-ames', '0', '0', ${rUFL}, ${pdiParUfl}, ${a.totalMS})">
                 <div class="rb-cow-title">🧬 Acides aminés</div>
                 <div class="rb-cow-sub">Limitant: Méthionine <span class="rb-badge rb-badge-orange">À optimiser</span></div>
                 <p style="font-size:0.85rem;color:var(--text-light);">Dépend du régime</p>
+              </div>
+              
+              <div class="rb-cow-card" onclick="showBilanDetail('acidose', '${acidoseLevel}', 'FAIBLE', ${rUFL}, ${pdiParUfl}, ${a.totalMS})">
+                <div class="rb-cow-title">⚠️ Acidose</div>
+                <div class="rb-cow-sub">${acidoseLevel} <span class="rb-badge ${acidoseRisk ? 'rb-badge-red' : 'rb-badge-green'}">${acidoseRisk ? 'ATTENTION' : 'OK'}</span></div>
+                <p style="font-size:0.85rem;color:var(--text-light);">Cliquez pour détails</p>
               </div>
               
             </div>
@@ -1270,10 +1899,10 @@ Ensilage herbe,35.0,0.65,12.0,70.0
           <div class="rb-panel" style="margin-top:16px;">
             <h4>🌾 Détail de la ration</h4>
             <table style="width:100%;border-collapse:collapse;">
-              <thead><tr style="border-bottom:2px solid var(--border);"><th style="text-align:left;padding:8px;">Aliment</th><th style="text-align:right;padding:8px;">kg MS</th><th style="text-align:right;padding:8px;">UFL</th><th style="text-align:right;padding:8px;">PDI</th></tr></thead>
+              <thead><tr style="border-bottom:2px solid var(--border);"><th style="text-align:left;padding:8px;">Aliment</th><th style="text-align:right;padding:8px;">kg MS</th><th style="text-align:right;padding:8px;">${energyUnit}</th><th style="text-align:right;padding:8px;">PDI</th></tr></thead>
               <tbody>
-                ${a.items.map(i => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">${i.nom}</td><td style="text-align:right;padding:8px;">${i.qty.toFixed(1)}</td><td style="text-align:right;padding:8px;">${i.ufl.toFixed(1)}</td><td style="text-align:right;padding:8px;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
-                <tr style="font-weight:bold;border-top:2px solid var(--border);"><td style="padding:8px;">TOTAL</td><td style="text-align:right;padding:8px;">${a.totalMS.toFixed(1)}</td><td style="text-align:right;padding:8px;">${a.totalUFL.toFixed(1)}</td><td style="text-align:right;padding:8px;">${a.totalPDI.toFixed(0)}</td></tr>
+                ${a.items.map(i => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">${i.nom}</td><td style="text-align:right;padding:8px;">${i.qty.toFixed(1)}</td><td style="text-align:right;padding:8px;">${(i.ufl * energyFactor).toFixed(1)}</td><td style="text-align:right;padding:8px;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
+                <tr style="font-weight:bold;border-top:2px solid var(--border);"><td style="padding:8px;">TOTAL</td><td style="text-align:right;padding:8px;">${a.totalMS.toFixed(1)}</td><td style="text-align:right;padding:8px;">${apportEnergy.toFixed(1)}</td><td style="text-align:right;padding:8px;">${a.totalPDI.toFixed(0)}</td></tr>
               </tbody>
             </table>
           </div>
@@ -1281,52 +1910,209 @@ Ensilage herbe,35.0,0.65,12.0,70.0
         document.getElementById('resultat-bilan').classList.remove('hidden');
       });
 
-      // Export PDF
+      // Export PDF - Generate a proper formatted PDF report
+      console.log('Registering btn-export-pdf');
       document.getElementById('btn-export-pdf')?.addEventListener('click', () => {
-        if (!lastB) { alert('Calcule dabord les besoins et le bilan'); return; }
+        const bilanSection = document.getElementById('resultat-bilan');
+        if (!bilanSection || bilanSection.classList.contains('hidden')) {
+          alert('Calcule d\'abord le bilan complet');
+          return;
+        }
+        
+        // Get data for the report
+        const pv = Number(document.getElementById('poids-vif').value) || 650;
+        const prodLait = Number(document.getElementById('production-lait').value) || 0;
+        const typeCode = document.getElementById('type-animal')?.value || '';
+        const typeLabel = typeCode === 'vache-laitiere' ? 'Vache laitière' : 
+                          typeCode === 'genisse' ? 'Génisse' :
+                          typeCode === 'vache-tarie' ? 'Vache tarie' : 'Animal';
+        
         const a = parseRation('ration-lines', 'description-ration');
-        if (!a.items.length) { alert('Saisis dabord une ration'); return; }
+        const isMeat = ['genisse', 'genisse-engrais', 'vache-reforme', 'veau'].includes(typeCode);
+        const energyFactor = isMeat ? 1.008 : 1;
+        const energyUnit = isMeat ? 'UFV' : 'UFL';
+        const apportEnergy = a.totalUFL * energyFactor;
+        const besoinEnergy = lastB.bUFL * energyFactor;
+        const rUFL = besoinEnergy > 0 ? (apportEnergy / besoinEnergy) : 0;
+        const rPDI = a.totalMS > 0 ? a.totalPDI / lastB.bPDI : 0;
+        const pdiParUfl = apportEnergy > 0 ? a.totalPDI / apportEnergy : 0;
         
-        const rUFL = a.totalUFL / lastB.bUFL;
-        const rPDI = a.totalPDI / lastB.bPDI;
-        const pdiParUfl = a.totalUFL > 0 ? a.totalPDI / a.totalUFL : 0;
+        // Acidose status
+        const energyDensity = a.totalMS > 0 ? (apportEnergy / a.totalMS) : 0;
+        const highEnergy = rUFL > 1.15 || energyDensity > 0.95;
+        const lowPDI = pdiParUfl < 90;
+        const highIntake = (a.totalMS / 18) > 1.1;
         
-        const isUFLOK = rUFL >= 0.95 && rUFL <= 1.05;
-        const isPDIOOK = rPDI >= 0.95 && rPDI <= 1.05;
-        const isPDIPerUFLOK = pdiParUfl >= 90 && pdiParUfl <= 105;
-        const isBalanced = isUFLOK && isPDIOOK && isPDIPerUFLOK;
+        let acidoseStatus = 'FAIBLE';
+        if (highEnergy && lowPDI) acidoseStatus = 'ÉLEVÉ';
+        else if ((highEnergy && highIntake) || (lowPDI && highIntake)) acidoseStatus = 'MODÉRÉ';
+        else if (highEnergy || lowPDI) acidoseStatus = 'À SURVEILLER';
         
-        const content = 
-'===========================================\nRATION BOVINE - BILAN\n===========================================\nDate: ' + new Date().toLocaleDateString('fr-FR') + '\n\n' +
-'DONNEES DE L ANIMAL:\n' +
-'- Poids vif: ' + (document.getElementById('poids-vif').value || '-') + ' kg\n' +
-'- Production: ' + (document.getElementById('production-lait').value || '-') + ' kg/j\n' +
-'- TB: ' + (document.getElementById('tb').value || '-') + ' g/L\n' +
-'- TP: ' + (document.getElementById('tp').value || '-') + ' g/L\n' +
-'- Activite: ' + (document.getElementById('activite').value === 'paturage' ? 'Paturage' : 'Stabulation') + '\n\n' +
-'BESOINS NUTRITIONNELS:\n' +
-'- Energie (UFL): ' + lastB.bUFL.toFixed(2) + ' UFL/jour\n' +
-'- PDI: ' + lastB.bPDI.toFixed(0) + ' g/jour\n\n' +
-'DETAIL DE LA RATION:\n' +
-a.items.map(i => '- ' + i.nom + ': ' + i.qty.toFixed(1) + ' kg MS (UFL: ' + i.ufl.toFixed(1) + ', PDI: ' + i.pdi.toFixed(0) + ' g)').join('\n') + '\n\n' +
-'TOTAL:\n' +
-'- MS: ' + a.totalMS.toFixed(1) + ' kg\n' +
-'- UFL: ' + a.totalUFL.toFixed(1) + ' (' + (rUFL*100).toFixed(0) + '% des besoins) ' + (isUFLOK ? 'OK' : 'PROBLEME') + '\n' +
-'- PDI: ' + a.totalPDI.toFixed(0) + ' g (' + (rPDI*100).toFixed(0) + '% des besoins) ' + (isPDIOOK ? 'OK' : 'PROBLEME') + '\n' +
-'- Ratio PDI/UFL: ' + pdiParUfl.toFixed(0) + ' g/UFL ' + (isPDIPerUFLOK ? 'OK' : 'PROBLEME') + '\n\n' +
-'===========================================\nSTATUT: ' + (isBalanced ? 'RATION EQUILIBREE' : 'DESEQUILIBRE DETECTE') + '\n===========================================\n';
+        // MS recommendation
+        let msRecoMin = 17, msRecoMax = 19;
+        if (typeCode === 'vache-laitiere') {
+          msRecoMin = (0.025 * pv + 0.1 * prodLait);
+          msRecoMax = msRecoMin * 1.12;
+        } else if (typeCode === 'vache-tarie') {
+          msRecoMin = pv * 0.015;
+          msRecoMax = pv * 0.02;
+        }
         
-        // Download as text file
-        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        // Create the PDF HTML
+        const today = new Date().toLocaleDateString('fr-FR');
+        const pdfHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rapport de ration - ${today}</title>
+  <style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; max-width: 210mm; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; border-bottom: 3px solid #059669; padding-bottom: 15px; margin-bottom: 25px; }
+    .header h1 { color: #059669; margin: 0 0 5px 0; font-size: 24px; }
+    .header p { color: #6b7280; margin: 0; font-size: 12px; }
+    .section { margin-bottom: 20px; }
+    .section-title { background: #059669; color: white; padding: 8px 15px; font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+    .info-card { background: #f3f4f6; padding: 10px; border-radius: 6px; }
+    .info-card label { display: block; font-size: 10px; color: #6b7280; text-transform: uppercase; }
+    .info-card .value { font-size: 14px; font-weight: bold; color: #1f2937; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 15px; }
+    th { background: #f3f4f6; padding: 8px; text-align: left; border-bottom: 2px solid #d1d5db; }
+    td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; }
+    .total-row { background: #f3f4f6; font-weight: bold; }
+    .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .metric-card { border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+    .metric-card.green { border-color: #10b981; background: #ecfdf5; }
+    .metric-card.orange { border-color: #f59e0b; background: #fffbeb; }
+    .metric-card.red { border-color: #ef4444; background: #fef2f2; }
+    .metric-card .label { font-size: 10px; color: #6b7280; text-transform: uppercase; }
+    .metric-card .value { font-size: 18px; font-weight: bold; margin: 5px 0; }
+    .metric-card .value.green { color: #10b981; }
+    .metric-card .value.orange { color: #f59e0b; }
+    .metric-card .value.red { color: #ef4444; }
+    .metric-card .status { font-size: 11px; color: #6b7280; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+    .badge.green { background: #10b981; color: white; }
+    .badge.orange { background: #f59e0b; color: white; }
+    .badge.red { background: #ef4444; color: white; }
+    .acidose-section { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .acidose-section.low { background: #ecfdf5; border: 2px solid #10b981; }
+    .acidose-section.moderate { background: #fffbeb; border: 2px solid #f59e0b; }
+    .acidose-section.high { background: #fef2f2; border: 2px solid #ef4444; }
+    .acidose-section h3 { margin: 0 0 5px 0; }
+    .acidose-section p { margin: 0; font-size: 12px; }
+    .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><img src="./Logo Bovicalc.png" alt="" style="height:50px;vertical-align:middle;margin-right:10px;"> Rapport de Ration</h1>
+    <p>Généré le ${today} par BoviCalc</p>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Animal</div>
+    <div class="info-grid">
+      <div class="info-card">
+        <label>Type</label>
+        <div class="value">${typeLabel}</div>
+      </div>
+      <div class="info-card">
+        <label>Poids vif</label>
+        <div class="value">${pv} kg</div>
+      </div>
+      ${prodLait > 0 ? `
+      <div class="info-card">
+        <label>Production laitière</label>
+        <div class="value">${prodLait} kg/j</div>
+      </div>` : ''}
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Ration</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Aliment</th>
+          <th style="text-align:right;">kg MS</th>
+          <th style="text-align:right;">${energyUnit}</th>
+          <th style="text-align:right;">PDI (g)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${a.items.map(i => `<tr>
+          <td>${i.nom}</td>
+          <td style="text-align:right;">${i.qty.toFixed(1)}</td>
+          <td style="text-align:right;">${(i.ufl * energyFactor).toFixed(1)}</td>
+          <td style="text-align:right;">${i.pdi.toFixed(0)}</td>
+        </tr>`).join('')}
+        <tr class="total-row">
+          <td><strong>TOTAL</strong></td>
+          <td style="text-align:right;"><strong>${a.totalMS.toFixed(1)}</strong></td>
+          <td style="text-align:right;"><strong>${apportEnergy.toFixed(1)}</strong></td>
+          <td style="text-align:right;"><strong>${a.totalPDI.toFixed(0)}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Analyse</div>
+    <div class="metrics-grid">
+      <div class="metric-card ${rUFL >= 0.9 && rUFL <= 1.1 ? 'green' : (rUFL < 0.9 ? 'red' : 'orange')}">
+        <div class="label">Énergie ${energyUnit}</div>
+        <div class="value ${rUFL >= 0.9 && rUFL <= 1.1 ? 'green' : (rUFL < 0.9 ? 'red' : 'orange')}">${apportEnergy.toFixed(1)} / ${besoinEnergy.toFixed(1)}</div>
+        <div class="status">${(rUFL * 100).toFixed(0)}% des besoins <span class="badge ${rUFL >= 0.9 && rUFL <= 1.1 ? 'green' : (rUFL < 0.9 ? 'red' : 'orange')}">${rUFL >= 0.9 && rUFL <= 1.1 ? 'OK' : (rUFL < 0.9 ? 'FAIBLE' : 'ÉLEVÉ')}</span></div>
+      </div>
+      <div class="metric-card ${rPDI >= 0.9 && rPDI <= 1.1 ? 'green' : (rPDI < 0.9 ? 'red' : 'orange')}">
+        <div class="label">PDI</div>
+        <div class="value ${rPDI >= 0.9 && rPDI <= 1.1 ? 'green' : (rPDI < 0.9 ? 'red' : 'orange')}">${a.totalPDI.toFixed(0)} / ${lastB.bPDI.toFixed(0)}</div>
+        <div class="status">${(rPDI * 100).toFixed(0)}% des besoins <span class="badge ${rPDI >= 0.9 && rPDI <= 1.1 ? 'green' : (rPDI < 0.9 ? 'red' : 'orange')}">${rPDI >= 0.9 && rPDI <= 1.1 ? 'OK' : (rPDI < 0.9 ? 'FAIBLE' : 'ÉLEVÉ')}</span></div>
+      </div>
+      <div class="metric-card ${pdiParUfl >= 90 && pdiParUfl <= 105 ? 'green' : 'orange'}">
+        <div class="label">Ratio PDI/${energyUnit}</div>
+        <div class="value ${pdiParUfl >= 90 && pdiParUfl <= 105 ? 'green' : 'orange'}">${pdiParUfl.toFixed(0)} g/${energyUnit}</div>
+        <div class="status">Cible: 90-105 <span class="badge ${pdiParUfl >= 90 && pdiParUfl <= 105 ? 'green' : 'orange'}">${pdiParUfl >= 90 && pdiParUfl <= 105 ? 'OK' : 'À AJUSTER'}</span></div>
+      </div>
+      <div class="metric-card ${a.totalMS >= msRecoMin && a.totalMS <= msRecoMax ? 'green' : 'orange'}">
+        <div class="label">MS Totale</div>
+        <div class="value ${a.totalMS >= msRecoMin && a.totalMS <= msRecoMax ? 'green' : 'orange'}">${a.totalMS.toFixed(1)} kg</div>
+        <div class="status">Cible: ${msRecoMin.toFixed(1)}-${msRecoMax.toFixed(1)} kg</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Risque Acidose</div>
+    <div class="acidose-section ${acidoseStatus === 'ÉLEVÉ' ? 'high' : (acidoseStatus === 'MODÉRÉ' ? 'moderate' : 'low')}">
+      <h3>${acidoseStatus === 'ÉLEVÉ' ? '⚠️ RISQUE ÉLEVÉ' : (acidoseStatus === 'MODÉRÉ' ? '⚠️ RISQUE MODÉRÉ' : (acidoseStatus === 'À SURVEILLER' ? '⚡ À SURVEILLER' : '✅ RISQUE FAIBLE'))}</h3>
+      <p>${acidoseStatus === 'ÉLEVÉ' ? 'Combinaison élevée d\'énergie + faible PDI - attention au rumen!' : 
+         acidoseStatus === 'MODÉRÉ' ? 'Surveiller l\'équilibre énergie/PDI et l\'ingestion.' : 
+         acidoseStatus === 'À SURVEILLER' ? 'Un paramètre hors norme - à surveiller.' : 
+         'Conditions favorables pour la santé du rumen.'}</p>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>BoviCalc - Outil pour les élevages | ${today}</p>
+  </div>
+</body>
+</html>`;
+        
+        // Download as HTML file (can be printed to PDF)
+        const blob = new Blob([pdfHtml], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'bilan-ration-' + new Date().toISOString().slice(0,10) + '.txt';
+        link.download = 'rapport-ration-' + new Date().toISOString().slice(0,10) + '.html';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       });
+      // End of PDF export
 
       // IA
       document.getElementById('btn-ia-ration')?.addEventListener('click', () => {
@@ -1359,41 +2145,269 @@ a.items.map(i => '- ' + i.nom + ': ' + i.qty.toFixed(1) + ' kg MS (UFL: ' + i.uf
       });
 
       // Coûts
-      document.getElementById('btn-save-cout-prix')?.addEventListener('click', () => {
-        const select = document.getElementById('cout-aliment-select');
-        const prix = Number(document.getElementById('cout-prix-tms').value) || 0;
-        const key = select?.value;
-        if (!key || !prix) { alert('Sélectionne un aliment et un prix'); return; }
-        costsByFeed[key] = prix / 1000;
-        saveJson(LS.costs, costsByFeed);
-        const found = alimentsDb.find(a => a.key === key);
-        document.getElementById('cout-prix-liste').innerHTML = `<p>✅ Prix enregistré: <strong>${prix} €/t MS</strong> pour ${found?.nom || key}</p>`;
-        document.getElementById('cout-prix-liste').classList.remove('hidden');
+      let lastCostRation = null; // { totalMS, itemsMerged: [{key, nom, qty}] }
+
+      function mergeRationItems(items) {
+        const map = new Map();
+        for (const it of items) {
+          const key = it.key || it.nom;
+          const prev = map.get(key);
+          if (prev) {
+            prev.qty += it.qty;
+          } else {
+            map.set(key, { key, nom: it.nom, qty: it.qty });
+          }
+        }
+        return Array.from(map.values());
+      }
+
+      function renderCostPriceLines(itemsMerged) {
+        const host = document.getElementById('cout-price-lines');
+        if (!host) return;
+        host.innerHTML = '';
+
+        itemsMerged.forEach(it => {
+          const prixPrefillTms = costsByFeed[it.key] ? (costsByFeed[it.key] * 1000) : '';
+          const row = document.createElement('div');
+          row.className = 'rb-ration-row';
+          row.style.gridTemplateColumns = '1fr 140px 220px';
+          row.innerHTML = `
+            <div>${it.nom}</div>
+            <div style="text-align:right;font-weight:600;color:var(--text);">${it.qty.toFixed(1)}</div>
+            <div>
+              <input
+                class="rb-cout-prix-tms"
+                data-key="${it.key}"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Ex: 280"
+                value="${prixPrefillTms || ''}"
+              />
+            </div>
+          `;
+          host.appendChild(row);
+        });
+      }
+
+      document.getElementById('btn-cout-charger-ration')?.addEventListener('click', () => {
+        const a = parseRation('ration-lines', 'description-ration');
+        if (!a.items.length) { alert("Saisis d'abord une ration dans \"Ration\""); return; }
+
+        const itemsMerged = mergeRationItems(a.items);
+        lastCostRation = { totalMS: a.totalMS, itemsMerged };
+
+        renderCostPriceLines(itemsMerged);
+        document.getElementById('cout-prix-ration')?.classList.remove('hidden');
+        document.getElementById('cout-resultats')?.classList.add('hidden');
+        document.getElementById('cout-detail')?.classList.add('hidden');
+      });
+
+      // Export PDF for cost calculation
+      console.log('Registering btn-export-cout-pdf');
+      document.getElementById('btn-export-cout-pdf')?.addEventListener('click', () => {
+        if (!lastCostRation) {
+          alert("Clique d'abord sur \"Charger ma ration\"");
+          return;
+        }
+
+        const typeCode = document.getElementById('type-animal')?.value || '';
+        const isMeat = ['genisse', 'genisse-engrais', 'vache-reforme', 'veau'].includes(typeCode);
+        
+        const nbVL = Number(document.getElementById('cout-nb-vl').value) || 1;
+        const duree = Number(document.getElementById('cout-duree').value) || 0;
+        const gmq = Number(document.getElementById('cout-gmq')?.value) || 1.0;
+        
+        // Get values from display
+        const coutVL = Number(document.getElementById('cout-vl-jour').textContent) || 0;
+        const cout1000L = Number(document.getElementById('cout-1000l').textContent) || 0;
+        const coutPerKgMs = Number(document.getElementById('cout-kg-ms').textContent) || 0;
+        const totalMS = Number(document.getElementById('cout-ms-vl').textContent) || 0;
+        
+        const typeAnimal = document.getElementById('type-animal')?.options?.[document.getElementById('type-animal')?.selectedIndex]?.text || typeCode;
+        const date = new Date().toLocaleDateString('fr-FR');
+        
+        const pdfHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Coût de Ration</title><style>
+          body { font-family: Arial, sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; }
+          h1 { color: #059669; text-align: center; border-bottom: 3px solid #059669; padding-bottom: 15px; }
+          h1::before { content: ""; display: inline-block; width: 50px; height: 50px; background: url('./Logo Bovicalc.png') center/contain no-repeat; margin-right: 10px; vertical-align: middle; }
+          .section { margin: 20px 0; }
+          .box { border: 2px solid #059669; padding: 15px; }
+          .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+          .total { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 20px; }
+          .label { font-weight: bold; }
+          .value { color: #059669; }
+        </style></head><body>
+          <h1>💰 Coût de Ration</h1>
+          <div class="section">
+            <p><strong>Type d'animal:</strong> ${typeAnimal}</p>
+            <p><strong>Nombre d'animaux:</strong> ${nbVL}</p>
+            <p><strong>Durée:</strong> ${duree} jours</p>
+            <p><strong>Date:</strong> ${date}</p>
+          </div>
+          <div class="box">
+            <div class="row"><span class="label">Coût / animal / jour</span><span class="value">${coutVL.toFixed(2)} €</span></div>
+            <div class="row"><span class="label">${isMeat ? 'Coût / kg gain' : 'Coût pour 1000L'}</span><span class="value">${cout1000L.toFixed(2)} €</span></div>
+            <div class="row"><span class="label">Coût / kg MS</span><span class="value">${coutPerKgMs.toFixed(3)} €</span></div>
+            <div class="row"><span class="label">MS / animal / jour</span><span class="value">${totalMS.toFixed(1)} kg</span></div>
+          </div>
+          <div class="total">
+            <div class="row"><span class="label">Coût total période</span><span class="value">${(coutVL * nbVL * duree).toFixed(2)} €</span></div>
+          </div>
+        </body></html>`;
+        
+        const blob = new Blob([pdfHtml], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cout-ration-${date.replace(/\//g, '-')}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
       });
 
       document.getElementById('btn-calc-cout')?.addEventListener('click', () => {
-        const a = parseRation('ration-lines', 'description-ration');
+        if (!lastCostRation) {
+          alert("Clique d'abord sur \"Charger ma ration\"");
+          return;
+        }
+
+        const typeCode = document.getElementById('type-animal')?.value || '';
+        const isMeat = ['genisse', 'genisse-engrais', 'vache-reforme', 'veau'].includes(typeCode);
+        
+        // Update the title dynamically based on animal type
+        const cout1000LTitre = document.querySelector('#metric-cout-1000l .rb-metric-title');
+        if (cout1000LTitre) {
+          cout1000LTitre.textContent = isMeat ? 'Coût / kg gain' : 'Coût pour 1000L';
+        }
+
         const nbVL = Number(document.getElementById('cout-nb-vl').value) || 1;
-        const refLait = Number(document.getElementById('cout-ref-lait').value) || 9000;
+        const refLait = Number(document.getElementById('cout-ref-lait').value) || 0; // kg/an ou L/an par vache (on suppose ~1 kg = 1 L)
+        const duree = Number(document.getElementById('cout-duree').value) || 0;
+        if (!duree || duree <= 0) { alert('Renseigne une durée de ration en jours'); return; }
 
-        if (!a.items.length) { alert('Saisis d\'abord une ration'); return; }
+        const inputs = document.querySelectorAll('#cout-price-lines .rb-cout-prix-tms');
+        const prixByKey = {};
+        inputs.forEach(inp => {
+          const key = inp.dataset.key;
+          const v = Number(inp.value);
+          prixByKey[key] = Number.isFinite(v) ? v : 0;
+        });
 
-        const coutVL = a.cost;
-        const laitVL = refLait / 365;
-        const cout1000L = laitVL > 0 ? (coutVL / laitVL) * 1000 : 0;
+        const missing = lastCostRation.itemsMerged
+          .filter(it => !(prixByKey[it.key] > 0))
+          .map(it => it.nom);
 
-        document.getElementById('cout-vl-jour').textContent = coutVL.toFixed(2) + ' €';
-        document.getElementById('cout-1000l').textContent = cout1000L.toFixed(2) + ' €';
-        document.getElementById('cout-kg-ms').textContent = a.costPerKg.toFixed(3) + ' €';
-        document.getElementById('cout-ms-vl').textContent = a.totalMS.toFixed(1);
+        if (missing.length) {
+          alert('Prix manquants (€/t MS) pour : ' + missing.slice(0, 6).join(', ') + (missing.length > 6 ? '...' : ''));
+          return;
+        }
+
+        // Mémo locale des prix saisis (préremplit à l'avenir, sans UI supplémentaire)
+        for (const it of lastCostRation.itemsMerged) {
+          const prixTms = prixByKey[it.key];
+          if (prixTms > 0) costsByFeed[it.key] = prixTms / 1000; // €/kg MS
+        }
+        saveJson(LS.costs, costsByFeed);
+
+        let coutVL = 0; // €/vache/jour (coût de la ration "par vache et par jour")
+        const detail = lastCostRation.itemsMerged.map(it => {
+          const prixTms = prixByKey[it.key];
+          const cout = it.qty * (prixTms / 1000); // € = kg MS * (€/kg MS)
+          coutVL += cout;
+          return { ...it, prixTms, cout };
+        });
+
+        // Calculate cost metrics
+        const coutTotalPeriode = coutVL * nbVL * duree;
+        
+        let cout1000L = 0;
+        let coutParUnite = 0; // €/kg gain for meat, €/1000L for dairy
+        
+        if (isMeat) {
+          // For meat: calculate cost per kg of gain
+          const gmqInput = document.getElementById('cout-gmq')?.value || 1.0;
+          const gmq = Number(gmqInput) || 1.0;
+          const totalGain = gmq * nbVL * duree; // kg gain for the period
+          coutParUnite = totalGain > 0 ? coutTotalPeriode / totalGain : 0;
+          cout1000L = coutParUnite; // Use same value for display
+        } else {
+          // For dairy: calculate cost per 1000L
+          const laitTotalPeriode1000L = refLait > 0
+            ? (((refLait / 365) * nbVL * duree) / 1000)
+            : 0;
+          coutParUnite = laitTotalPeriode1000L > 0 ? (coutTotalPeriode / laitTotalPeriode1000L) : 0;
+          cout1000L = coutParUnite;
+        }
+
+        const totalMS = lastCostRation.itemsMerged.reduce((s, it) => s + it.qty, 0) || 0;
+        const coutPerKgMs = totalMS > 0 ? coutVL / totalMS : 0;
+
+        // Update values with proper units
+        document.getElementById('cout-vl-jour').textContent = coutVL.toFixed(2);
+        document.getElementById('cout-vl-jour-sub').textContent = isMeat 
+          ? coutVL.toFixed(2) + ' €/animal/jour' 
+          : coutVL.toFixed(2) + ' €/vache/jour';
+        document.getElementById('cout-1000l').textContent = cout1000L > 0 ? cout1000L.toFixed(2) : '—';
+        document.getElementById('cout-1000l-sub').textContent = isMeat
+          ? (cout1000L > 0 ? cout1000L.toFixed(2) + ' €/kg gain' : '— €/kg gain')
+          : (cout1000L > 0 ? cout1000L.toFixed(2) + ' €/1000 litres' : '— €/1000 litres');
+        document.getElementById('cout-kg-ms').textContent = coutPerKgMs.toFixed(3);
+        document.getElementById('cout-kg-ms-sub').textContent = coutPerKgMs.toFixed(3) + ' €/kg MS';
+        document.getElementById('cout-ms-vl').textContent = totalMS.toFixed(1);
+        document.getElementById('cout-ms-vl-sub').textContent = totalMS.toFixed(1) + ' kg MS/jour';
+        
+        // Update progress bars with visual indicators
+        // For cost per VL: Different thresholds for meat (higher) vs dairy
+        const coutVLThresholds = isMeat 
+          ? { ok: 8, high: 12 }    // meat: green ≤8, orange ≤12, red >12
+          : { ok: 5, high: 8 };    // dairy: green ≤5, orange ≤8, red >8
+        const coutVLPct = Math.min(100, (coutVL / coutVLThresholds.high) * 100);
+        const coutVLGauge = document.getElementById('cout-vl-progress');
+        if (coutVLGauge) {
+          coutVLGauge.className = 'rb-progress ' + (coutVL <= coutVLThresholds.ok ? 'ok' : (coutVL <= coutVLThresholds.high ? 'high' : 'low'));
+          coutVLGauge.querySelector('span').style.width = coutVLPct + '%';
+        }
+        
+        // For cost per 1000L: Only applicable for dairy (meat uses different metrics)
+        // For meat: display €/kg gain instead
+        // No progress bar for this metric
+        const cout1000LValue = document.getElementById('cout-1000l');
+        
+        // For cost per kg MS: reasonable is 0-0.5€/kg
+        const coutMsPct = Math.min(100, (coutPerKgMs / 0.5) * 100);
+        const coutMsGauge = document.getElementById('cout-ms-progress');
+        if (coutMsGauge) {
+          coutMsGauge.className = 'rb-progress ' + (coutPerKgMs <= 0.3 ? 'ok' : (coutPerKgMs <= 0.45 ? 'high' : 'low'));
+          coutMsGauge.querySelector('span').style.width = coutMsPct + '%';
+        }
+        
+        // For MS per VL: 15-20kg is good
+        const msVLPct = Math.min(100, (totalMS / 20) * 100);
+        const msVLGauge = document.getElementById('cout-ms-vl-progress');
+        if (msVLGauge) {
+          msVLGauge.className = 'rb-progress ' + (totalMS >= 15 && totalMS <= 20 ? 'ok' : (totalMS >= 12 && totalMS <= 22 ? 'high' : 'low'));
+          msVLGauge.querySelector('span').style.width = msVLPct + '%';
+        }
+        
         document.getElementById('cout-resultats').classList.remove('hidden');
 
-        // Detail table
+        // Détail
         const tbody = document.querySelector('#cout-table tbody');
-        tbody.innerHTML = a.items.map(i => {
-          const prix = i.key && costsByFeed[i.key] ? costsByFeed[i.key] * 1000 : 0;
-          return `<tr><td>${i.nom}</td><td>${i.qty.toFixed(1)}</td><td>${prix > 0 ? prix.toFixed(0) : '—'}</td><td>${(i.qty * (prix/1000)).toFixed(2)} €</td></tr>`;
-        }).join('') + `<tr><td><strong>Total</strong></td><td><strong>${a.totalMS.toFixed(1)}</strong></td><td></td><td><strong>${a.cost.toFixed(2)} €</strong></td></tr>`;
+        tbody.innerHTML = detail.map(d => {
+          return `<tr>
+            <td>${d.nom}</td>
+            <td style="text-align:right;">${d.qty.toFixed(1)}</td>
+            <td style="text-align:right;">${d.prixTms.toFixed(0)}</td>
+            <td style="text-align:right;">${d.cout.toFixed(2)} €</td>
+          </tr>`;
+        }).join('') + `
+          <tr>
+            <td><strong>Total</strong></td>
+            <td style="text-align:right;"><strong>${totalMS.toFixed(1)}</strong></td>
+            <td></td>
+            <td style="text-align:right;"><strong>${coutVL.toFixed(2)} €</strong></td>
+          </tr>
+        `;
         document.getElementById('cout-detail').classList.remove('hidden');
       });
 
@@ -1492,6 +2506,7 @@ a.items.map(i => '- ' + i.nom + ': ' + i.qty.toFixed(1) + ' kg MS (UFL: ' + i.uf
       });
 
       // Export PDF for bilan fourrager
+      console.log('Registering btn-export-bf-pdf');
       document.getElementById('btn-export-bf-pdf')?.addEventListener('click', () => {
         const nb = Number(document.getElementById('bf-nb-vaches').value) || 0;
         const jours = Number(document.getElementById('bf-duree').value) || 0;
@@ -1679,10 +2694,112 @@ a.items.map(i => '- ' + i.nom + ': ' + i.qty.toFixed(1) + ' kg MS (UFL: ' + i.uf
       updateBesGmqField();
 
       // Ration seule
+      console.log('Registering btn-calc-ration-only');
       document.getElementById('btn-calc-ration-only')?.addEventListener('click', () => {
         const a = parseRation('ration-only-lines', null);
         document.getElementById('resultat-ration-only').innerHTML = `<h3>Résultat</h3><p><strong>MS:</strong> ${a.totalMS.toFixed(1)} kg</p><p><strong>UFL:</strong> ${a.totalUFL.toFixed(1)}</p><p><strong>PDI:</strong> ${a.totalPDI.toFixed(0)} g</p>`;
         document.getElementById('resultat-ration-only').classList.remove('hidden');
+      });
+      
+      // Export PDF - Besoins seuls
+      console.log('Registering btn-export-besoins-pdf');
+      document.getElementById('btn-export-besoins-pdf')?.addEventListener('click', () => {
+          const res = document.getElementById('resultat-besoins-seuls');
+          if (!res || res.classList.contains('hidden')) { alert('Calculez d\'abord les besoins'); return; }
+        const pv = Number(document.getElementById('bes-poids-vif').value) || 0;
+        const prod = Number(document.getElementById('bes-production-lait').value) || 0;
+        const typeAnimal = document.getElementById('bes-type-animal')?.value || '';
+        const typeLabel = typeAnimal === 'vache-laitiere' ? 'Vache laitière' : 
+                          typeAnimal === 'genisse' ? 'Génisse' :
+                          typeAnimal === 'vache-tarie' ? 'Vache tarie' : 'Animal';
+        const act = document.getElementById('bes-activite')?.value || 'stabulation';
+        const tb = Number(document.getElementById('bes-tb')?.value) || 40;
+        const tp = Number(document.getElementById('bes-tp')?.value) || 32;
+        const gmq = Number(document.getElementById('bes-gmq')?.value) || 0;
+        const ageMois = Number(document.getElementById('bes-age-mois')?.value) || 0;
+        
+        const b = computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq, ageMois);
+        const today = new Date().toLocaleDateString('fr-FR');
+        
+        let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Besoins - ' + today + '</title>' +
+        '<style>@page{size:A4;margin:15mm}body{font-family:"Segoe UI",Arial,sans-serif;color:#1f2937;max-width:210mm;margin:0 auto;padding:20px}' +
+        '.header{text-align:center;border-bottom:3px solid #059669;padding-bottom:15px;margin-bottom:25px}.header h1{color:#059669;margin:0}.header p{color:#6b7280;margin:5px 0 0}' +
+        '.section{margin-bottom:20px}.section-title{background:#059669;color:white;padding:8px 15px;font-size:14px;font-weight:bold;margin-bottom:10px}' +
+        '.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px}.info-card{background:#f3f4f6;padding:10px;border-radius:6px}' +
+        '.info-card label{display:block;font-size:10px;color:#6b7280;text-transform:uppercase}.info-card .value{font-size:14px;font-weight:bold}' +
+        '.metric{background:#f3f4f6;border-radius:8px;padding:15px;margin:10px 0}.metric .label{font-size:12px;color:#6b7280}.metric .value{font-size:24px;font-weight:bold;color:#059669;margin:5px 0}' +
+        '.footer{text-align:center;margin-top:30px;color:#9ca3af;font-size:10px;border-top:1px solid #e5e7eb;padding-top:15px}</style></head>' +
+        '<body><div class="header"><h1><img src="./Logo Bovicalc.png" alt="" style="height:40px;vertical-align:middle;margin-right:10px;"> Calcul des Besoins</h1><p>Généré le ' + today + ' par BoviCalc</p></div>' +
+        '<div class="section"><div class="section-title">Animal</div><div class="info-grid">' +
+          '<div class="info-card"><label>Type</label><div class="value">' + typeLabel + '</div></div>' +
+          '<div class="info-card"><label>Poids vif</label><div class="value">' + pv + ' kg</div></div>' +
+          '<div class="info-card"><label>Activité</label><div class="value">' + (act === 'paturage' ? 'Pâturage' : 'Stabulation') + '</div></div>';
+        if (prod > 0) {
+          html += '<div class="info-card"><label>Production</label><div class="value">' + prod + ' kg/j</div></div>' +
+          '<div class="info-card"><label>TB</label><div class="value">' + tb + ' g/L</div></div>' +
+          '<div class="info-card"><label>TP</label><div class="value">' + tp + ' g/L</div></div>';
+        }
+        html += '</div></div>' +
+        '<div class="section"><div class="section-title">Résultats</div>' +
+          '<div class="metric"><div class="label">Besoins Énergie (UFL)</div><div class="value">' + b.bUFL.toFixed(1) + ' UFL/jour</div></div>' +
+          '<div class="metric"><div class="label">Besoins PDI</div><div class="value">' + b.bPDI.toFixed(0) + ' g PDI/jour</div></div>' +
+        '</div>' +
+        '<div class="footer"><p>Ration Bovine - ' + today + '</p></div></body></html>';
+        
+        const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'besoins-' + new Date().toISOString().slice(0,10) + '.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+      
+      // Export PDF - Ration seule
+      console.log('Registering btn-export-ration-seule-pdf');
+      document.getElementById('btn-export-ration-seule-pdf')?.addEventListener('click', () => {
+        const res = document.getElementById('resultat-ration-only');
+        if (!res || res.classList.contains('hidden')) { alert('Calculez d\'abord la ration'); return; }
+        const a = parseRation('ration-only-lines', null);
+        const today = new Date().toLocaleDateString('fr-FR');
+        
+        let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ration - ' + today + '</title>' +
+        '<style>@page{size:A4;margin:15mm}body{font-family:"Segoe UI",Arial,sans-serif;color:#1f2937;max-width:210mm;margin:0 auto;padding:20px}' +
+        '.header{text-align:center;border-bottom:3px solid #059669;padding-bottom:15px;margin-bottom:25px}.header h1{color:#059669;margin:0}.header p{color:#6b7280;margin:5px 0 0}' +
+        '.section{margin-bottom:20px}.section-title{background:#059669;color:white;padding:8px 15px;font-size:14px;font-weight:bold;margin-bottom:10px}' +
+        'table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f3f4f6;padding:8px;text-align:left;border-bottom:2px solid #d1d5db}' +
+        'td{padding:6px 8px;border-bottom:1px solid #e5e7eb}.total-row{background:#f3f4f6;font-weight:bold}' +
+        '.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:20px 0}.metric{background:#f3f4f6;border-radius:8px;padding:15px}' +
+        '.metric .label{font-size:10px;color:#6b7280;text-transform:uppercase}.metric .value{font-size:20px;font-weight:bold;color:#059669}' +
+        '.footer{text-align:center;margin-top:30px;color:#9ca3af;font-size:10px;border-top:1px solid #e5e7eb;padding-top:15px}</style></head>' +
+        '<body><div class="header"><h1><img src="./Logo Bovicalc.png" alt="" style="height:40px;vertical-align:middle;margin-right:10px;"> Ma Ration</h1><p>Généré le ' + today + ' par BoviCalc</p></div>' +
+        '<div class="section"><div class="section-title">Détail</div>' +
+        '<table><thead><tr><th>Aliment</th><th style="text-align:right">kg MS</th><th style="text-align:right">UFL</th><th style="text-align:right">PDI</th></tr></thead>' +
+        '<tbody>';
+        
+        a.items.forEach(function(i) {
+          html += '<tr><td>' + i.nom + '</td><td style="text-align:right">' + i.qty.toFixed(1) + '</td><td style="text-align:right">' + i.ufl.toFixed(1) + '</td><td style="text-align:right">' + i.pdi.toFixed(0) + '</td></tr>';
+        });
+        
+        html += '<tr class="total-row"><td><strong>TOTAL</strong></td><td style="text-align:right"><strong>' + a.totalMS.toFixed(1) + '</strong></td><td style="text-align:right"><strong>' + a.totalUFL.toFixed(1) + '</strong></td><td style="text-align:right"><strong>' + a.totalPDI.toFixed(0) + '</strong></td></tr>' +
+        '</tbody></table>' +
+        '<div class="metrics"><div class="metric"><div class="label">Matière Sèche</div><div class="value">' + a.totalMS.toFixed(1) + ' kg</div></div>' +
+        '<div class="metric"><div class="label">Énergie</div><div class="value">' + a.totalUFL.toFixed(1) + ' UFL</div></div>' +
+        '<div class="metric"><div class="label">PDI</div><div class="value">' + a.totalPDI.toFixed(0) + ' g</div></div></div>' +
+        '</div>' +
+        '<div class="footer"><p>Ration Bovine - ' + today + '</p></div></body></html>';
+        
+        const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'ration-' + new Date().toISOString().slice(0,10) + '.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       });
     });
   </script>

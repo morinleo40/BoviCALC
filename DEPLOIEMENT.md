@@ -1,44 +1,30 @@
-# Déploiement de Ration Bovine
+# Déploiement de BoviCalc
 
-## Option gratuite: GitHub Pages
+## Option recommandée: Vercel
 
-### Étape 1: Créer un compte GitHub
-- Va sur [github.com](https://github.com)
-- Crée un compte gratuit
+### Étape 1: Créer un compte Vercel
+- Va sur [vercel.com](https://vercel.com)
+- Crée un compte avec ton email
 
-### Étape 2: Créer un nouveau dépôt
-1. Clique sur "New repository"
-2. Nom: `ration-bovine`
-3. Choisis "Public"
-4. Clique "Create repository"
+### Étape 2: Déployer le projet
+1. Va sur [vercel.com/new](https://vercel.com/new)
+2. Clique "Import Project"
+3. Choisis "Link GitHub Repository" si ton code est sur GitHub, ou uploade directement les fichiers
+4. Importe les fichiers `index.html` et `style.css`
+5. Clique "Deploy"
 
-### Étape 3: Uploader les fichiers
-1. Dans le dépôt, clique "uploading an existing file"
-2. Glisse les fichiers `index.html` et `style.css`
-3. Clique "Commit changes"
-
-### Étape 4: Activer GitHub Pages
-1. Va dans "Settings" du dépôt
-2. Menu à gauche: "Pages"
-3. Sous "Branch", sélectionne `main` (ou `master`)
-4. Clique "Save"
-5. Attend 1-2 minutes
-
-### Étape 5: Accède à ton site
-- URL: `https://tonpseudo.github.io/ration-bovine`
+### Étape 3: Configurer le domaine (optionnel)
+- Dans Vercel, va dans "Settings" > "Domains"
+- Ajoute ton nom de domaine personnalisé
 
 ---
 
-## Option alternative: Netlify (encore plus simple)
+## Option alternative: Hébergement classique
 
-1. Va sur [app.netlify.com](https://app.netlify.com)
-2. Connecte avec GitHub
-3. Glisse le dossier contenant `index.html` et `style.css`
-4. Ton site est en ligne immédiatement!
+Tu peux aussi héberger l'outil sur n'importe quel serveur web (OVH, SiteGround, etc.) en uploadant les fichiers `index.html` et `style.css`.
 
 ---
 
-## Pour mettre à jour
-1. Modifie tes fichiers localement
-2. Re-upload sur GitHub/Netlify
-3. Le site se met à jour automatiquement
+## Support
+
+Pour toute question sur le déploiement, contacte le support.

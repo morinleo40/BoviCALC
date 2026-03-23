@@ -8,15 +8,17 @@
   --primary-lighter: #34d399;
   --accent: #f59e0b;
   --danger: #ef4444;
-  --bg-main: #e5e7eb;
-  --bg-card: #f3f4f6;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
   --bg-dark: #1e293b;
   --text: #1f2937;
   --text-light: #4b5563;
   --text-muted: #6b7280;
   --border: #d1d5db;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.15);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.06);
   --radius: 12px;
   --radius-sm: 8px;
 }
@@ -36,8 +38,7 @@ body {
 
 /* Header */
 .rb-header {
-  background: linear-gradient(135deg, rgba(34, 87, 34, 0.92) 0%, rgba(28, 70, 28, 0.95) 100%), 
-              url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800&q=80') center/cover;
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
   border-bottom: 1px solid var(--border);
   padding: 20px 24px;
   position: sticky;
@@ -85,8 +86,7 @@ body {
 }
 
 .rb-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,250,245,0.92) 100%), 
-              url('https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=400&q=60') center/cover;
+  background: var(--bg-card);
   border-radius: var(--radius);
   border: 1px solid var(--border);
   padding: 24px;
@@ -172,8 +172,7 @@ body {
 
 /* Section detail */
 .rb-section-detail {
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,250,245,0.92) 100%), 
-              url('https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=400&q=60') center/cover;
+  background: var(--bg-card);
   border-radius: var(--radius);
   border: 1px solid var(--border);
   padding: 32px;
@@ -288,7 +287,7 @@ body {
 
 /* Panels */
 .rb-panel {
-  background: #e5e7eb;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
@@ -336,7 +335,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
-  background: #e5e7eb;
+  background: var(--bg-card);
 }
 
 .rb-ration-lines-head,
@@ -358,6 +357,16 @@ body {
 
 .rb-ration-row {
   margin-bottom: 12px;
+}
+
+.rb-ration-row input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #e5e7eb;
+  color: var(--text);
+  font-size: 0.95rem;
 }
 
 /* Badges */
@@ -396,6 +405,67 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
   margin-top: 16px;
+}
+
+/* Simples jauges (remplacent les gauges "vache") */
+.rb-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.rb-metric {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.rb-metric-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  align-items: flex-start;
+}
+
+.rb-metric-title {
+  font-weight: 800;
+  color: var(--text);
+}
+
+.rb-metric-sub {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rb-progress {
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.rb-progress > span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+  transition: width 0.35s ease;
+}
+
+.rb-progress.ok > span {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+.rb-progress.low > span {
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+}
+.rb-progress.high > span {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
 }
 
 .rb-cow-card {
@@ -603,6 +673,32 @@ body {
   color: var(--primary);
 }
 
+.rb-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--text-light);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.rb-modal-close:hover {
+  color: var(--text);
+}
+
+/* Clickable bilan cards */
+.rb-cow-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.rb-cow-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
 /* Footer */
 .rb-footer {
   text-align: center;
@@ -641,11 +737,12 @@ body {
 }
 
 .cost-card {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: #fff;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
   text-align: center;
-  color: #fff;
+  color: var(--text);
 }
 
 .cost-card-label {
