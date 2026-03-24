@@ -54,7 +54,6 @@
       </div>
 
       <div id="csv-status" class="rb-help" style="margin-top:0;display:inline-block;"></div>
-      <button type="button" class="rb-btn" style="margin-left:8px;" onclick="var c=JSON.parse(localStorage.getItem('rb_custom_v1')||'[]');if(c.length==0){alert('Aucun aliment. Allez dans Ration puis + Ajouter aliment.');}else{var m='Vos aliments: ';c.forEach((a,i)=>{m+=(i+1)+'. '+a.nom+' ';});alert(m);}">🍂 Mes aliments</button>
 
       <!-- 4 onglets -->
       <div class="rb-tabs">
@@ -142,7 +141,7 @@
               <input type="number" id="tp" min="20" step="0.5" placeholder="Ex: 32">
             </div>
           </div>
-          <div class="rb-form-actions">
+          <div class="rb-form-actions" style="justify-content:flex-end;">
             <button type="button" id="btn-calc-besoins" class="rb-btn rb-btn-primary">Calculer les besoins</button>
           </div>
         </form>
@@ -162,11 +161,16 @@
             <div></div>
           </div>
           <div id="ration-lines"></div>
-          <div class="rb-form-actions" style="margin-top:12px;">
-            <button type="button" id="btn-add-line" class="rb-btn">+ Ligne</button>
-            <button type="button" id="btn-open-custom-modal-ration" class="rb-btn">+ Ajouter aliment</button>
+          <div class="rb-form-actions" style="margin-top:12px;justify-content:space-between;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button type="button" id="btn-add-line" class="rb-btn">+ Ligne</button>
+              <button type="button" id="btn-open-custom-modal-ration" class="rb-btn">+ Ajouter aliment</button>
+              <select id="select-custom-aliment" class="rb-select" style="max-width:200px;"><option value="">Sélectionner...</option></select>
+              <button type="button" id="btn-edit-custom-aliment" class="rb-btn" style="margin-left:4px;">✏️</button>
+              <button type="button" id="btn-delete-custom-aliment" class="rb-btn" style="margin-left:4px;background:var(--error);color:white;">🗑️</button>
+              <button type="button" id="btn-export-ration-pdf" class="rb-btn">📄 Exporter PDF</button>
+            </div>
             <button type="button" id="btn-calc-apports" class="rb-btn rb-btn-primary">Calculer les apports</button>
-            <button type="button" id="btn-export-ration-pdf" class="rb-btn">📄 Exporter PDF</button>
           </div>
           <datalist id="aliments-list"></datalist>
         </div>
@@ -341,16 +345,6 @@
             <div class="rb-form-group"><label>MS (%)</label><input id="custom-ms" type="number" min="0" max="100" step="0.1"></div>
             <div class="rb-form-group"><label>UFL/kg MS</label><input id="custom-ufl" type="number" min="0" step="0.01"></div>
             <div class="rb-form-group"><label>PDI (g/kg MS)</label><input id="custom-pdi" type="number" min="0" step="1"></div>
-            <div class="rb-form-group"><label>Na (g/kg MS)</label><input id="custom-na" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
-            <div class="rb-form-group"><label>K (g/kg MS)</label><input id="custom-k" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
-            <div class="rb-form-group"><label>Ca (g/kg MS)</label><input id="custom-ca" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
-            <div class="rb-form-group"><label>Mg (g/kg MS)</label><input id="custom-mg" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
-            <div class="rb-form-group"><label>Cl (g/kg MS)</label><input id="custom-cl" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
-            <div class="rb-form-group"><label>S (g/kg MS)</label><input id="custom-s" type="number" min="0" step="0.1" placeholder="Optionnel"></div>
-          </div>
-          <div id="custom-baca-display" style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;text-align:center;">
-            <strong>BACA calculée:</strong> <span id="custom-baca-value" style="color:var(--primary);font-size:1.1em;">-</span> mEq/kg MS
-            <p style="margin:4px 0 0;font-size:0.8rem;color:var(--text-light);">BACA = (Na + K + Ca + Mg) - (Cl + S)</p>
           </div>
           <div class="rb-form-actions">
             <button type="button" id="btn-add-custom" class="rb-btn rb-btn-primary">Ajouter</button>
@@ -1079,7 +1073,98 @@ Uree 46,98,0,1443`;
       // Modal
       const modal = document.getElementById('custom-modal');
       document.getElementById('btn-open-custom-modal')?.addEventListener('click', () => modal.classList.remove('hidden'));
-      document.getElementById('btn-open-custom-modal-ration')?.addEventListener('click', () => modal.classList.remove('hidden'));
+      document.getElementById('btn-open-custom-modal-ration')?.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        // Reset form for new aliment
+        document.getElementById('custom-nom').value = '';
+        document.getElementById('custom-ms').value = '';
+        document.getElementById('custom-ufl').value = '';
+        document.getElementById('custom-pdi').value = '';
+        document.getElementById('custom-na').value = '';
+        document.getElementById('custom-k').value = '';
+        document.getElementById('custom-ca').value = '';
+        document.getElementById('custom-mg').value = '';
+        document.getElementById('custom-cl').value = '';
+        document.getElementById('custom-s').value = '';
+        document.querySelector('#custom-modal h3').textContent = '➕ Ajouter un aliment';
+        document.getElementById('btn-add-custom').textContent = 'Ajouter';
+        editingIndex = -1;
+      });
+      
+      // Show custom foods list with edit/delete buttons
+      document.getElementById('btn-view-custom-aliments')?.addEventListener('click', function() {
+        window.showCustomFoods();
+      });
+      
+      // Populate select dropdown with custom foods
+      function refreshCustomSelect() {
+        const select = document.getElementById('select-custom-aliment');
+        if (!select) return;
+        const custom = loadJson(LS.custom, []);
+        let html = '<option value="">Sélectionner...</option>';
+        custom.forEach((a, i) => {
+          html += '<option value="' + i + '">' + a.nom + '</option>';
+        });
+        select.innerHTML = html;
+      }
+      refreshCustomSelect();
+
+      // Edit custom aliment - open form for selected aliment
+      document.getElementById('btn-edit-custom-aliment')?.addEventListener('click', function() {
+        const select = document.getElementById('select-custom-aliment');
+        const idx = select ? select.value : '';
+        if (idx === '' || idx === null) {
+          alert('Sélectionnez d\'abord un aliment à modifier dans la liste.');
+          return;
+        }
+        const custom = loadJson(LS.custom, []);
+        const a = custom[parseInt(idx)];
+        if (!a) {
+          alert('Aliment non trouvé.');
+          return;
+        }
+        document.getElementById('custom-nom').value = a.nom || '';
+        document.getElementById('custom-ms').value = a.msPct || '';
+        document.getElementById('custom-ufl').value = a.uflPerKgMS || '';
+        document.getElementById('custom-pdi').value = a.pdiPerKgMS || '';
+        document.getElementById('custom-na').value = a.na_gkgms || '';
+        document.getElementById('custom-k').value = a.k_gkgms || '';
+        document.getElementById('custom-ca').value = a.ca_gkgms || '';
+        document.getElementById('custom-mg').value = a.mg_gkgms || '';
+        document.getElementById('custom-cl').value = a.cl_gkgms || '';
+        document.getElementById('custom-s').value = a.s_gkgms || '';
+        document.querySelector('#custom-modal h3').textContent = '✏️ Modifier un aliment';
+        document.getElementById('btn-add-custom').textContent = 'Enregistrer';
+        editingIndex = parseInt(idx);
+        const editModal = document.getElementById('custom-modal');
+        editModal.classList.remove('hidden');
+        editModal.style.display = 'flex';
+        editModal.style.position = 'fixed';
+        editModal.style.top = '0';
+        editModal.style.left = '0';
+        editModal.style.width = '100%';
+        editModal.style.height = '100%';
+        editModal.style.zIndex = '10000';
+      });
+
+      // Delete custom aliment
+      document.getElementById('btn-delete-custom-aliment')?.addEventListener('click', function() {
+        const select = document.getElementById('select-custom-aliment');
+        const idx = select ? select.value : '';
+        if (idx === '' || idx === null) {
+          alert('Sélectionnez d\'abord un aliment à supprimer dans la liste.');
+          return;
+        }
+        const custom = loadJson(LS.custom, []);
+        const a = custom[parseInt(idx)];
+        if (a && confirm('Voulez-vous vraiment supprimer "' + a.nom + '" ?')) {
+          custom.splice(parseInt(idx), 1);
+          saveJson(LS.custom, custom);
+          refreshCustomSelect();
+          alert('Aliment supprimé!');
+        }
+      });
+      
       modal?.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.add('hidden')));
       
       // Real-time BACA calculation in custom modal
@@ -1110,6 +1195,8 @@ Uree 46,98,0,1443`;
       
       // View custom foods - global function
       window.showCustomFoods = function() {
+        try {
+        // alert('showCustomFoods called!-custom=' + localStorage.getItem('rb_custom_v1'));
         const custom = loadJson(LS.custom, []);
         let html = '<div style="max-height:60vh;overflow-y:auto;">';
         if (!custom.length) {
@@ -1123,7 +1210,10 @@ Uree 46,98,0,1443`;
             html += '<td style="text-align:right;padding:8px;border-bottom:1px solid var(--border);">' + a.msPct + '</td>';
             html += '<td style="text-align:right;padding:8px;border-bottom:1px solid var(--border);">' + a.uflPerKgMS + '</td>';
             html += '<td style="text-align:right;padding:8px;border-bottom:1px solid var(--border);">' + a.pdiPerKgMS + '</td>';
-            html += '<td style="text-align:center;padding:8px;border-bottom:1px solid var(--border);"><button onclick="if(confirm(\'Supprimer cet aliment ?\')){var c=JSON.parse(localStorage.getItem(\'rb_custom_v1\')||' + '[]);c.splice(' + i + ',1);localStorage.setItem(\'rb_custom_v1\',JSON.stringify(c));location.reload();}" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">🗑️</button></td>';
+            html += '<td style="text-align:center;padding:8px;border-bottom:1px solid var(--border);">';
+            html += '<button onclick="editCustomAliment(' + i + ')" style="background:none;border:none;cursor:pointer;font-size:1.2rem;margin-right:8px;" title="Modifier">✏️</button>';
+            html += '<button onclick="if(confirm(\'Supprimer cet aliment ?\')){var c=JSON.parse(localStorage.getItem(\'rb_custom_v1\')||' + '[]);c.splice(' + i + ',1);localStorage.setItem(\'rb_custom_v1\',JSON.stringify(c));location.reload();}" style="background:none;border:none;cursor:pointer;font-size:1.2rem;" title="Supprimer">🗑️</button>';
+            html += '</td>';
             html += '</tr>';
           });
           html += '</tbody></table>';
@@ -1131,7 +1221,20 @@ Uree 46,98,0,1443`;
         html += '</div>';
         html += '<div style="margin-top:16px;text-align:center;"><button onclick="document.getElementById(\'custom-modal\')?.classList.remove(\'hidden\');document.getElementById(\'view-custom-modal\')?.classList.add(\'hidden\');" class="rb-btn rb-btn-primary">➕ Ajouter un aliment</button></div>';
         document.getElementById('view-custom-content').innerHTML = html;
-        document.getElementById('view-custom-modal')?.classList.remove('hidden');
+        // Show modal with list
+        const modal = document.getElementById('view-custom-modal');
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.style.display = 'flex';
+          modal.style.position = 'fixed';
+          modal.style.top = '0';
+          modal.style.left = '0';
+          modal.style.width = '100%';
+          modal.style.height = '100%';
+          modal.style.zIndex = '9999';
+          modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        }
+        } catch(e) { console.error('Error in showCustomFoods:', e); alert('Erreur: ' + e.message); }
       };
       
       // Close handlers for view-custom-modal
@@ -1140,6 +1243,43 @@ Uree 46,98,0,1443`;
       });
       
 
+
+      // Variable to track edit mode
+      let editingIndex = -1;
+
+      // Function to open modal for editing
+      window.editCustomAliment = function(index) {
+        const custom = loadJson(LS.custom, []);
+        const a = custom[index];
+        if (!a) return;
+        editingIndex = index;
+        document.getElementById('custom-nom').value = a.nom || '';
+        document.getElementById('custom-ms').value = a.msPct || '';
+        document.getElementById('custom-ufl').value = a.uflPerKgMS || '';
+        document.getElementById('custom-pdi').value = a.pdiPerKgMS || '';
+        document.getElementById('custom-na').value = a.na_gkgms || '';
+        document.getElementById('custom-k').value = a.k_gkgms || '';
+        document.getElementById('custom-ca').value = a.ca_gkgms || '';
+        document.getElementById('custom-mg').value = a.mg_gkgms || '';
+        document.getElementById('custom-cl').value = a.cl_gkgms || '';
+        document.getElementById('custom-s').value = a.s_gkgms || '';
+        // Update modal for edit mode
+        document.querySelector('#custom-modal h3').textContent = '✏️ Modifier un aliment';
+        document.getElementById('btn-add-custom').textContent = 'Enregistrer';
+        const editModal = document.getElementById('custom-modal');
+        if (editModal) {
+          editModal.classList.remove('hidden');
+          editModal.style.display = 'flex';
+          editModal.style.position = 'fixed';
+          editModal.style.top = '0';
+          editModal.style.left = '0';
+          editModal.style.width = '100%';
+          editModal.style.height = '100%';
+          editModal.style.zIndex = '10000';
+          // Hide view modal
+          document.getElementById('view-custom-modal').classList.add('hidden');
+        }
+      };
 
       document.getElementById('btn-add-custom')?.addEventListener('click', () => {
         const nom = document.getElementById('custom-nom').value.trim();
@@ -1171,10 +1311,16 @@ Uree 46,98,0,1443`;
         alimentsDb.unshift(item);
         hydrate();
         const customNow = loadJson(LS.custom, []);
+        // Update or add (replace by name to handle duplicates)
         saveJson(LS.custom, [item, ...customNow.filter(x => x.nom !== nom)]);
-        // Clear form
+        refreshCustomSelect();
+        // Clear form and reset modal
         document.getElementById('custom-nom').value = '';
         document.getElementById('custom-ms').value = '';
+        document.querySelector('#custom-modal h3').textContent = '➕ Ajouter un aliment';
+        document.getElementById('btn-add-custom').textContent = 'Ajouter';
+        editingIndex = -1;
+        location.reload();
         document.getElementById('custom-ufl').value = '';
         document.getElementById('custom-pdi').value = '';
         document.getElementById('custom-alias').value = '';
@@ -1218,28 +1364,48 @@ Uree 46,98,0,1443`;
       }
       document.getElementById('btn-add-stock')?.addEventListener('click', () => addStock());
 
-      // === CALCULS INRA 2018 ===
-      // Références: INRA 2018 - Alimentation des ruminants
+      // === CALCULS BESOINS RUMINANTS ===
+      // Formules utilisateur: UFL entretien = 1.4 + (0.006 x PV), UFL prod = L x 0.44
+      // PDI entretien = 95 + (0.5 x PV), PDI prod = L x 50 (base)
+      // Lait Standard = (TB x Prod) / 40
       function computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq = 0, ageMois = 0) {
         const pv075 = Math.pow(pv, 0.75);
-        let bUFL, bPDI, uflParKg, buLait, pdiLait, typeLabel;
+        let bUFL, bPDI, uflParKg, buLait, pdiLait, typeLabel, laitStandard;
+        let calcioProd = 0, phosphoreProd = 0, ingestionCapacite = 0;
         
         // Calculate based on animal type
         if (typeAnimal === 'vache-laitiere' || !typeAnimal) {
-          // Dairy cow - INRA 2018
+          // Dairy cow - Formules utilisateur
           typeLabel = 'Vache laitière';
-          const coefAct = act === 'paturage' ? 1.08 : 1;
-          const buEntret = 0.054 * pv075 * coefAct; // UFL entretien INRA
           
-          // UFL/kg lait = 0.44 + 0.0012*(TB-40) + 0.0008*(TP-32) selon INRA 2018
-          uflParKg = Math.max(0.35, 0.44 + (tb - 40) * 0.0012 + (tp - 32) * 0.0008);
-          buLait = prod * uflParKg;
+          // UFL Entretien = 1.4 + (0.006 x Poids Vif)
+          const buEntret = 1.4 + (0.006 * pv);
+          
+          // Lait Standard = (TB Réel x Production réelle) / 40
+          // Total MG = TB réel x Production réelle (en g)
+          const totalMG = (tb || 40) * prod; // g de MG par jour
+          laitStandard = totalMG / 40; // Lait standard à TB 40 g/L
+          
+          // UFL Production = Lait Standard × 0.44 UFL/kg lait
+          uflParKg = 0.44;
+          buLait = laitStandard * uflParKg;
           bUFL = buEntret + buLait;
           
-          // PDI: 3.25 g/kg PV^0.75 entretien + 45-55 g/kg lait selon composition
-          // Plus le TB est élevé, plus il faut de PDI
-          const pdiParKgLait = 45 + (tb - 35) * 0.3; // 45g à 35g TB, +0.3g par g de TB en plus
-          bPDI = 3.25 * pv075 + prod * pdiParKgLait;
+          // PDI Entretien = 95 + (0.5 x Poids Vif)
+          const pdiEntret = 95 + (0.5 * pv);
+          
+          // PDI Production = Lait Standard × 90 g PDI/jour
+          pdiLait = laitStandard * 90; // 90 g PDI par litre de lait standard
+          bPDI = pdiEntret + pdiLait;
+          
+          // Calcium et Phosphore pour la production laitière
+          // 0.9 g phosphore / kg lait produit
+          // 1.25 g calcium / kg lait produit
+          calcioProd = prod * 1.25; // g calcium par jour pour la production
+          phosphoreProd = prod * 0.9; // g phosphore par jour pour la production
+          
+          // Capacité d'ingération = 3% du poids vif
+          const ingestionCapacite = pv * 0.03; // kg MS par jour
         } else if (typeAnimal === 'genisse') {
           // Growing heifer - INRA 2018 (besoins dépendent de l'âge et du GMQ)
           typeLabel = 'Génisse';
@@ -1341,7 +1507,7 @@ Uree 46,98,0,1443`;
           bPDI = 3.25 * pv075 + prod * 45;
         }
         
-        return { bUFL, bPDI, typeLabel, pv075 };
+        return { bUFL, bPDI, typeLabel, pv075, laitStandard, calcioProd, phosphoreProd, ingestionCapacite };
       }
 
       function parseRation(containerId, descId) {
@@ -1460,17 +1626,22 @@ Uree 46,98,0,1443`;
         // UFL calculation
         html += '<div class="rb-panel"><h4>⚡ Calcul UFL</h4>';
         if (typeAnimal === 'vache-laitiere') {
-          const coefAct = act === 'paturage' ? 1.08 : 1;
-          const buEntret = 0.054 * result.pv075 * coefAct;
-          const uflParKg = Math.max(0.35, 0.44 + (tb - 40) * 0.0012 + (tp - 32) * 0.0008);
+          // UFL Entretien = 1.4 + (0.006 x PV)
+          const buEntret = 1.4 + (0.006 * pv);
+          // UFL Production = Volume lait x 0.44 UFL/kg lait
+          const uflParKg = 0.44;
           const buLait = prod * uflParKg;
           html += '<p><strong>Besoins d\'entretien:</strong></p>';
-          html += '<p style="margin-left:16px;color:var(--text-light);">PV<sup>0.75</sup> = ' + pv + '<sup>0.75</sup> = ' + result.pv075.toFixed(2) + ' kg</p>';
-          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 0.054 × ' + result.pv075.toFixed(2) + ' × ' + coefAct + ' = <strong>' + buEntret.toFixed(2) + ' UFL</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Formule: 1.4 + (0.006 × ' + pv + ') = <strong>' + buEntret.toFixed(2) + ' UFL</strong></p>';
           html += '<p><strong>Besoins pour la production:</strong></p>';
-          html += '<p style="margin-left:16px;color:var(--text-light);">UFL/kg lait = ' + uflParKg.toFixed(3) + '</p>';
-          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + prod + ' × ' + uflParKg.toFixed(3) + ' = <strong>' + buLait.toFixed(2) + ' UFL</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Formule: ' + prod + ' L × 0.44 UFL/kg = <strong>' + buLait.toFixed(2) + ' UFL</strong></p>';
           html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total UFL = ' + buEntret.toFixed(2) + ' + ' + buLait.toFixed(2) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bUFL.toFixed(2) + ' UFL/jour</span></strong></p>';
+          
+          // Lait Standard calculation
+          if (result.laitStandard) {
+            html += '<p style="margin-top:16px;color:var(--text-light);"><strong>Lait Standard (TB 40 g/L):</strong> ' + result.laitStandard.toFixed(1) + ' L/jour</p>';
+            html += '<p style="margin-left:16px;font-size:0.9em;">Calcul: (TB ' + (tb || 40) + ' g/L × ' + prod + ' L) / 40 = ' + ((tb || 40) * prod / 40).toFixed(1) + ' L</p>';
+          }
         } else if (typeAnimal === 'genisse' || typeAnimal === 'genisse-engrais') {
           const gain = typeAnimal === 'genisse-engrais' ? 1.0 : 0.6;
           const coefAct = act === 'paturage' ? 1.1 : 1;
@@ -1524,13 +1695,16 @@ Uree 46,98,0,1443`;
         
         // PDI calculation
         html += '<div class="rb-panel"><h4>🥩 Calcul PDI</h4>';
-        const pdiEntret = 3.25 * result.pv075;
+        // PDI Entretien = 95 + (0.5 x PV)
+        const pdiEntret = 95 + (0.5 * pv);
         if (typeAnimal === 'vache-laitiere') {
-          const pdiLait = prod * 45;
+          // PDI Production = Lait Standard × 90 g PDI/jour
+          const pdiLait = result.laitStandard * 90;
           html += '<p><strong>Besoins d\'entretien:</strong></p>';
-          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = 3.25 × ' + result.pv075.toFixed(2) + ' = <strong>' + pdiEntret.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Formule: 95 + (0.5 × ' + pv + ') = <strong>' + pdiEntret.toFixed(0) + ' g PDI</strong></p>';
           html += '<p><strong>Besoins pour la production:</strong></p>';
-          html += '<p style="margin-left:16px;color:var(--text-light);">BESOIN = ' + prod + ' × 45 = <strong>' + pdiLait.toFixed(0) + ' g PDI</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Lait Standard: ' + result.laitStandard.toFixed(1) + ' L</p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Formule: ' + result.laitStandard.toFixed(1) + ' L × 90 g PDI = <strong>' + pdiLait.toFixed(0) + ' g PDI</strong></p>';
           html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total PDI = ' + pdiEntret.toFixed(0) + ' + ' + pdiLait.toFixed(0) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bPDI.toFixed(0) + ' g PDI/jour</span></strong></p>';
         } else if (typeAnimal === 'vache-tarie') {
           // Dry cow PDI
@@ -1559,6 +1733,24 @@ Uree 46,98,0,1443`;
           html += '<p style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"><strong>Total PDI = ' + pdiEntret.toFixed(0) + ' + ' + pdiGrowth.toFixed(0) + ' = <span style="color:var(--primary);font-size:1.2em;">' + result.bPDI.toFixed(0) + ' g PDI/jour</span></strong></p>';
         }
         html += '</div>';
+        
+        // Calcium et Phosphore pour production laitière
+        if (result.calcioProd > 0 || result.phosphoreProd > 0) {
+          html += '<div class="rb-panel"><h4>🦴 Calcium et Phosphore</h4>';
+          html += '<p><strong>Calcium (Ca) - Production:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Formule: ' + prod + ' L × 1.25 g = <strong>' + result.calcioProd.toFixed(0) + ' g Ca/jour</strong></p>';
+          html += '<p><strong>Phosphore (P) - Production:</strong></p>';
+          html += '<p style="margin-left:16px;color:var(--text-light);">Formule: ' + prod + ' L × 0.9 g = <strong>' + result.phosphoreProd.toFixed(0) + ' g P/jour</strong></p>';
+          html += '</div>';
+        }
+        
+        // Capacité d'ingération
+        if (result.ingestionCapacite > 0) {
+          html += '<div class="rb-panel"><h4>🌿 Capacité d\'ingération</h4>';
+          html += '<p style="font-size:1.2rem;color:var(--primary);"><strong>' + result.ingestionCapacite.toFixed(1) + ' kg MS/jour</strong></p>';
+          html += '<p style="color:var(--text-light);font-size:0.9em;">Formule: ' + pv + ' kg × 3% = ' + result.ingestionCapacite.toFixed(1) + ' kg MS</p>';
+          html += '</div>';
+        }
         
         document.getElementById('resultat-besoins').innerHTML = html;
         document.getElementById('resultat-besoins').classList.remove('hidden');
@@ -2634,7 +2826,7 @@ Uree 46,98,0,1443`;
           const msMax = (pv * 0.022).toFixed(1);
           msReco = `<p><strong>Ingestion MS recommandée:</strong> ${msMin}-${msMax} kg MS/jour (1.8-2.2% du poids vif)</p>`;
         } else if (typeAnimal === 'vache-laitiere') {
-          msReco = `<p><strong>Ingestion MS recommandée:</strong> 17-19 kg MS/jour</p>`;
+          msReco = `<p><strong>Ingestion MS recommandée:</strong> 19-23 kg MS/jour</p>`;
         }
         
         const typeLabel = b.typeLabel;
@@ -2657,6 +2849,24 @@ Uree 46,98,0,1443`;
         html += `<div class="rb-panel"><h4>🥩 Besoins PDI</h4>`;
         html += `<p style="font-size:1.5rem;color:var(--primary);"><strong>${b.bPDI.toFixed(0)} g PDI/jour</strong></p>`;
         html += `</div>`;
+        
+        // Calcium et Phosphore pour production laitière
+        if (b.calcioProd > 0 || b.phosphoreProd > 0) {
+          html += `<div class="rb-panel"><h4>🦴 Calcium et Phosphore</h4>`;
+          html += `<p><strong>Calcium (Ca):</strong> ${b.calcioProd.toFixed(0)} g/jour</p>`;
+          html += `<p style="color:var(--text-light);font-size:0.9em;">Formule: ${prod} L × 1.25 g = ${b.calcioProd.toFixed(0)} g</p>`;
+          html += `<p><strong>Phosphore (P):</strong> ${b.phosphoreProd.toFixed(0)} g/jour</p>`;
+          html += `<p style="color:var(--text-light);font-size:0.9em;">Formule: ${prod} L × 0.9 g = ${b.phosphoreProd.toFixed(0)} g</p>`;
+          html += `</div>`;
+        }
+        
+        // Capacité d'ingération
+        if (b.ingestionCapacite > 0) {
+          html += `<div class="rb-panel"><h4>🌿 Capacité d'ingération</h4>`;
+          html += `<p style="font-size:1.2rem;color:var(--primary);"><strong>${b.ingestionCapacite.toFixed(1)} kg MS/jour</strong></p>`;
+          html += `<p style="color:var(--text-light);font-size:0.9em;">Formule: ${pv} kg × 3% = ${b.ingestionCapacite.toFixed(1)} kg MS</p>`;
+          html += `</div>`;
+        }
         
         if (msReco) {
           html += `<div class="rb-panel"><h4>🌿 Ingestion</h4>${msReco}</div>`;
