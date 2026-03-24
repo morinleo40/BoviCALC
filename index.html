@@ -7,15 +7,158 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="icon" type="image/png" href="./Logo Bovicalc.png">
 </head>
+
 <body>
-  <header class="rb-header">
-    <div class="rb-header-inner">
-      <img src="Logo Bovicalc.png" alt="BoviCalc Logo" style="height:120px;vertical-align:middle;margin-right:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-      <div style="display:inline-block;vertical-align:middle;">
-        <h1 style="margin:0;font-size:2.5rem;">BoviCalc</h1>
-        <p style="margin:0;font-size:0.9rem;">Optimisation des rations pour bovins</p>
-      </div>
+
+
+<div id="landing-page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Bovicalc</h1>
+      <p class="hero-sub">
+        Le rationnement bovin simple, rapide et pensé pour le terrain
+      </p>
+      <button onclick="enterApp()">Accéder au rationneur</button>
     </div>
+  </section>
+
+  <!-- SECTION 1 -->
+  <section class="split">
+    <div class="text">
+      <h2>Un outil conçu pour le terrain</h2>
+      <p>
+        Bovicalc a été conçu pour s’adapter aux conditions d’utilisation sur le terrain.
+        Il prend en compte le besoin d’avoir un outil réactif,
+        permettant d’analyser rapidement une ration et d’en comprendre les principaux équilibres.
+
+        L’objectif est de proposer une lecture claire et accessible,
+        sans alourdir le processus d’analyse.
+      </p>
+    </div>
+    <div class="image">
+      <img src="https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=800&q=80">
+    </div>
+  </section>
+
+  <!-- IMAGE LARGE -->
+  <section class="full-image">
+    <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?w=1600&q=80">
+  </section>
+
+  <!-- SECTION 2 -->
+  <section class="split reverse">
+    <div class="image">
+      <img src="https://images.unsplash.com/photo-1596733430284-f7437764b1a9?w=800&q=80">
+    </div>
+    <div class="text">
+      <h2>Gagner du temps et améliorer les performances</h2>
+      <p>
+        L’alimentation est aujourd’hui un levier stratégique en élevage.
+        Elle conditionne directement la performance économique, la production et la santé des animaux.
+
+        Chaque déséquilibre alimentaire peut entraîner des pertes significatives,
+        tandis qu’une ration optimisée permet d’améliorer les résultats tout en maîtrisant les coûts.
+
+        Sur le terrain, les conseillers doivent être capables d’analyser rapidement une situation
+        et de proposer des solutions fiables.
+
+        C’est pourquoi un outil rapide, clair et utilisable en conditions réelles est indispensable.
+        Bovicalc permet de gagner du temps, de simplifier l’analyse
+        et d’améliorer la pertinence des décisions prises.
+      </p>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+
+  <h2>Les fonctionnalités</h2>
+
+  <div class="feature-block">
+
+    <h3>🐄 Je calcule ma ration de A à Z</h3>
+    <p>
+      Bovicalc permet de construire une ration complète en partant de zéro,
+      directement sur le terrain. L’utilisateur peut sélectionner les aliments,
+      ajuster les quantités et visualiser immédiatement les impacts.
+    </p>
+    <p>
+      L’objectif est de simplifier un processus souvent long et complexe,
+      en proposant une approche fluide, rapide et compréhensible.
+    </p>
+
+  </div>
+
+  <div class="feature-block">
+
+    <h3>📊 Je calcule mes besoins</h3>
+    <p>
+      L’outil permet d’estimer précisément les besoins nutritionnels en fonction
+      du type d’animal, de la production et des objectifs.
+    </p>
+    <p>
+      Cette étape permet de poser une base solide avant toute construction de ration,
+      en garantissant une cohérence entre les besoins et les apports.
+    </p>
+
+  </div>
+
+  <div class="feature-block">
+
+    <h3>⚖️ Je calcule ma ration</h3>
+    <p>
+      Bovicalc analyse automatiquement les apports de la ration et les compare
+      aux besoins de l’animal.
+    </p>
+    <p>
+      L’utilisateur obtient une lecture claire des excès et des manques,
+      facilitant les ajustements et la prise de décision.
+    </p>
+
+  </div>
+
+  <div class="feature-block">
+
+    <h3>🌾 Bilan fourrager</h3>
+    <p>
+      L’outil permet d’évaluer la cohérence globale de l’alimentation,
+      en intégrant les ressources disponibles sur l’exploitation.
+    </p>
+    <p>
+      Cela permet d’optimiser l’utilisation des fourrages,
+      de réduire les coûts et d’améliorer l’autonomie alimentaire.
+    </p>
+
+  </div>
+
+</section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <h2>Essayer Bovicalc</h2>
+    <button onclick="enterApp()">Lancer le rationneur</button>
+  </section>
+
+</div>
+
+
+<header class="rb-header">
+  <div class="rb-header-inner">
+
+    <div class="logo-box">
+      <img src="Logo Bovicalc.png" alt="BoviCalc Logo" class="logo">
+    </div>
+
+    <div class="title-box">
+      <h1>BoviCalc</h1>
+      <p>Optimisation des rations pour bovins</p>
+    </div>
+
+  </div>
+</header>
+
   </header>
 
   <main class="rb-main">
@@ -3013,5 +3156,29 @@ Uree 46,98,0,1443`;
       });
     });
   </script>
+</div>
+<script>
+window.onload = function() {
+  document.getElementById("app").style.display = "none";
+};
+
+{
+  landing.classList.add("fade-out");
+
+  setTimeout(() => {
+    landing.style.display = "none";
+    app.style.display = "block";
+    app.classList.add("fade-in");
+  }, 400);
+}
+
+function enterApp() {
+  document.getElementById("landing-page").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+</script>
+
+</script>
+
 </body>
 </html>
