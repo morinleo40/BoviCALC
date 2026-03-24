@@ -277,7 +277,7 @@
             </div>
             <div id="tb-group" class="rb-form-group">
               <label>TB (g/L)</label>
-              <input type="number" id="tb" min="20" step="0.5" placeholder="Ex: 40">
+              <input type="number" id="tb" min="20" step="0.5" placeholder="Ex: 38">
             </div>
             <div id="tp-group" class="rb-form-group">
               <label>TP (g/L)</label>
@@ -1510,7 +1510,7 @@ Uree 46,98,0,1443`;
       // === CALCULS BESOINS RUMINANTS ===
       // Formules utilisateur: UFL entretien = 1.4 + (0.006 x PV), UFL prod = L x 0.44
       // PDI entretien = 95 + (0.5 x PV), PDI prod = L x 50 (base)
-      // Lait Standard = (TB x Prod) / 40
+      // Lait Standard = (TB x Prod) / 38
       function computeBesoins(pv, prod, act, tb, tp, typeAnimal, gmq = 0, ageMois = 0) {
         const pv075 = Math.pow(pv, 0.75);
         let bUFL, bPDI, uflParKg, buLait, pdiLait, typeLabel, laitStandard;
@@ -1524,10 +1524,10 @@ Uree 46,98,0,1443`;
           // UFL Entretien = 1.4 + (0.006 x Poids Vif)
           const buEntret = 1.4 + (0.006 * pv);
           
-          // Lait Standard = (TB Réel x Production réelle) / 40
+          // Lait Standard = (TB Réel x Production réelle) / 38
           // Total MG = TB réel x Production réelle (en g)
-          const totalMG = (tb || 40) * prod; // g de MG par jour
-          laitStandard = totalMG / 40; // Lait standard à TB 40 g/L
+          const totalMG = (tb || 38) * prod; // g de MG par jour
+          laitStandard = totalMG / 38; // Lait standard à TB 40 g/L
           
           // UFL Production = Lait Standard × 0.44 UFL/kg lait
           uflParKg = 0.44;
