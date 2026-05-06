@@ -196,18 +196,29 @@ function requirePro(feature) {
   alert('⭐ Fonctionnalité Pro\n\n"' + feature + '" est disponible avec l\'abonnement Pro.\n\nContactez-nous pour souscrire.');
   return false;
 }
+async function loadUserPlan() {
+  var supa = getSupa(); if (!supa || !currentUser) { userPlan = 'free'; return; }
+  try {
+    var res = await supa.from('user_plans').select('plan').eq('user_id', currentUser.id).single();
+    userPlan = (res.data && res.data.plan) ? res.data.plan : 'free';
+  } catch(e) { userPlan = 'free'; }
+  updateAuthUI();
+}
+
 async function initAuth() {
   showAuthWall();
   var supa = getSupa(); if (!supa) return;
   try {
     var sd = await supa.auth.getSession();
     if (sd.data && sd.data.session && sd.data.session.user) {
-      currentUser = sd.data.session.user; updateAuthUI(); hideAuthWall();
+      currentUser = sd.data.session.user;
+      await loadUserPlan();
+      hideAuthWall();
     }
-    supa.auth.onAuthStateChange(function(_evt, session) {
+    supa.auth.onAuthStateChange(async function(_evt, session) {
       currentUser = session ? session.user : null;
-      updateAuthUI();
-      if (currentUser) hideAuthWall(); else showAuthWall();
+      if (currentUser) { await loadUserPlan(); hideAuthWall(); }
+      else { userPlan = 'free'; updateAuthUI(); showAuthWall(); }
     });
   } catch(e) { console.warn('Auth init failed:', e); }
 }
