@@ -389,7 +389,7 @@ window.addEventListener('scroll', () => {
 
 /* Build pricing cards */
 (function buildPricing() {
-  const cfg = window.PRICING_CONFIG;
+  const cfg = PRICING_CONFIG;
   document.getElementById('pricing-subtitle').textContent = cfg.pricingSubtitle;
   const emailA = document.getElementById('pricing-email');
   if (emailA) { emailA.textContent = cfg.contactEmail; emailA.href = 'mailto:' + cfg.contactEmail; }
