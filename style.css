@@ -1603,3 +1603,42 @@ a:hover { color: var(--primary-dark); }
   box-shadow: 0 2px 6px rgba(217,119,6,.35);
 }
 
+/* ── Auth Wall ── */
+#auth-wall {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 40%, #a5d6a7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.auth-wall-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  padding: 40px 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.auth-wall-logo {
+  text-align: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.auth-wall-form { flex: 1; }
+.auth-wall-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 480px) {
+  .auth-wall-card { padding: 28px 20px 24px; }
+}
+

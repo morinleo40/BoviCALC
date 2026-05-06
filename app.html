@@ -14,6 +14,51 @@
 </head>
 
 <body>
+<!-- ========== AUTH WALL ========== -->
+<div id="auth-wall">
+  <div class="auth-wall-card">
+    <div class="auth-wall-logo">
+      <img src="Logo Bovicalc.png" alt="BoviCalc" style="height:64px;width:auto;">
+      <h1 style="margin:12px 0 4px;font-size:2rem;color:var(--green-900);">BoviCalc</h1>
+      <p style="margin:0;color:var(--text-muted);font-size:.95rem;">Optimisation des rations pour bovins</p>
+    </div>
+
+    <div class="auth-wall-form">
+      <div class="auth-tabs" style="margin-bottom:20px;">
+        <button class="auth-tab active" id="wall-tab-login" onclick="switchWallTab('login')">Se connecter</button>
+        <button class="auth-tab" id="wall-tab-register" onclick="switchWallTab('register')">Créer un compte</button>
+      </div>
+
+      <div class="rb-form-group">
+        <label>Email</label>
+        <input type="email" id="wall-email" class="rb-input" placeholder="votre@email.com"
+               autocomplete="email" onkeydown="if(event.key==='Enter')submitWall()">
+      </div>
+      <div class="rb-form-group" style="margin-top:12px;">
+        <label>Mot de passe</label>
+        <input type="password" id="wall-pass" class="rb-input" placeholder="••••••••"
+               autocomplete="current-password" onkeydown="if(event.key==='Enter')submitWall()">
+      </div>
+      <div id="wall-confirm-group" class="rb-form-group hidden" style="margin-top:12px;">
+        <label>Confirmer le mot de passe</label>
+        <input type="password" id="wall-pass-confirm" class="rb-input" placeholder="••••••••">
+      </div>
+
+      <div id="wall-error" style="display:none;color:var(--danger);font-size:.85rem;margin-top:10px;padding:8px 12px;background:#fee2e2;border-radius:6px;"></div>
+
+      <button id="btn-wall-submit" class="rb-btn rb-btn-primary" style="width:100%;margin-top:18px;font-size:1rem;padding:12px;" onclick="submitWall()">Se connecter</button>
+
+      <div id="wall-forgot" style="text-align:center;margin-top:12px;">
+        <a href="#" onclick="resetWallPassword();return false;" style="font-size:.8rem;color:var(--text-muted);text-decoration:underline;">Mot de passe oublié ?</a>
+      </div>
+    </div>
+
+    <div class="auth-wall-footer">
+      <p style="margin:0;font-size:.75rem;color:var(--text-muted);">En vous connectant, vous acceptez nos conditions d'utilisation.</p>
+    </div>
+  </div>
+</div>
+
 <header class="rb-header">
   <div class="rb-header-inner">
     <div class="logo-box" onclick="backToHome()" style="cursor:pointer;">
@@ -1121,17 +1166,74 @@ Uree 46,98,0,1443`;
     currentUser = null; userPlan = 'free';
     updateAuthUI();
     closeAccountModal();
-    alert('\U0001f44b Déconnecté avec succès.');
+    showAuthWall();
+  }
+
+  function showAuthWall() {
+    const w = $('auth-wall'); if (w) w.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function hideAuthWall() {
+    const w = $('auth-wall'); if (w) w.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  let _wallMode = 'login';
+  function switchWallTab(tab) {
+    _wallMode = tab;
+    $('wall-tab-login')?.classList.toggle('active', tab === 'login');
+    $('wall-tab-register')?.classList.toggle('active', tab === 'register');
+    $('btn-wall-submit') && ($('btn-wall-submit').textContent = tab === 'login' ? 'Se connecter' : 'Cr\u00e9er mon compte');
+    $('wall-confirm-group')?.classList.toggle('hidden', tab !== 'register');
+    $('wall-forgot')?.classList.toggle('hidden', tab === 'register');
+    const err = $('wall-error'); if (err) err.style.display = 'none';
+  }
+  function showWallError(msg) {
+    const el = $('wall-error'); if (el) { el.textContent = msg; el.style.display = 'block'; }
+  }
+  async function submitWall() {
+    const email = $('wall-email')?.value?.trim();
+    const pass  = $('wall-pass')?.value;
+    const btn   = $('btn-wall-submit');
+    if (!email || !pass) { showWallError('Email et mot de passe requis.'); return; }
+    const supa = getSupa();
+    if (!supa) { showWallError('Service indisponible. V\u00e9rifiez votre connexion internet.'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+    try {
+      if (_wallMode === 'register') {
+        const confirm = $('wall-pass-confirm')?.value;
+        if (pass !== confirm) { showWallError('Les mots de passe ne correspondent pas.'); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} return; }
+        if (pass.length < 6) { showWallError('Mot de passe : 6 caract\u00e8res minimum.'); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} return; }
+        const { error } = await supa.auth.signUp({ email, password: pass });
+        if (error) { showWallError(error.message); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} }
+        else { alert('\u2705 Compte cr\u00e9\u00e9 ! V\u00e9rifiez votre email pour confirmer votre inscription.'); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} }
+      } else {
+        const { error } = await supa.auth.signInWithPassword({ email, password: pass });
+        if (error) { showWallError(error.message); if(btn){btn.disabled=false;btn.textContent='Se connecter';} }
+        else { hideAuthWall(); }
+      }
+    } catch(e) { showWallError('Erreur r\u00e9seau.'); if(btn) btn.disabled=false; }
+  }
+  async function resetWallPassword() {
+    const email = $('wall-email')?.value?.trim();
+    if (!email) { showWallError('Entrez votre email pour r\u00e9initialiser votre mot de passe.'); return; }
+    const supa = getSupa(); if (!supa) return;
+    const { error } = await supa.auth.resetPasswordForEmail(email);
+    if (!error) alert('\U0001f4e7 Email envoy\u00e9 \u00e0 ' + email);
+    else showWallError(error.message);
   }
 
   async function initAuth() {
+    showAuthWall();
     const supa = getSupa(); if (!supa) return;
     try {
       const { data: { session } } = await supa.auth.getSession();
-      if (session?.user) { currentUser = session.user; updateAuthUI(); }
+      if (session?.user) { currentUser = session.user; updateAuthUI(); hideAuthWall(); }
       supa.auth.onAuthStateChange((_evt, session) => {
         currentUser = session?.user || null;
         updateAuthUI();
+        if (currentUser) hideAuthWall();
+        else showAuthWall();
       });
     } catch (e) { console.warn('Auth init failed:', e); }
   }
