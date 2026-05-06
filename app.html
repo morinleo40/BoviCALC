@@ -215,9 +215,12 @@ async function initAuth() {
       await loadUserPlan();
       hideAuthWall();
     }
-    supa.auth.onAuthStateChange(async function(_evt, session) {
+    supa.auth.onAuthStateChange(async function(evt, session) {
       currentUser = session ? session.user : null;
-      if (currentUser) { await loadUserPlan(); hideAuthWall(); }
+      if (currentUser) {
+        await loadUserPlan(); hideAuthWall();
+        if (evt === 'SIGNED_IN') { setTimeout(restoreAutoSave, 500); setTimeout(maybeShowTutorial, 800); }
+      }
       else { userPlan = 'free'; updateAuthUI(); showAuthWall(); }
     });
   } catch(e) { console.warn('Auth init failed:', e); }
@@ -283,6 +286,7 @@ async function initAuth() {
     <div class="header-actions">
       <button onclick="backToHome()" class="hdr-btn">☰ Menu</button>
       <a href="index.html" class="hdr-btn hdr-btn-outline">🏠 Accueil</a>
+      <button onclick="showTutorial()" class="hdr-btn hdr-btn-outline" title="Guide de démarrage">? Aide</button>
       <button id="btn-header-auth" class="hdr-btn hdr-btn-auth" onclick="onAuthBtnClick()">🔑 Connexion</button>
     </div>
   </div>
@@ -434,7 +438,7 @@ async function initAuth() {
           </div>
 
           <div class="rb-form-group">
-            <label>Poids vif (kg) <span class="required">*</span></label>
+            <label>Poids vif (kg) <span class="tt-q" data-tt="pv">?</span> <span class="required">*</span></label>
             <input type="number" id="poids-vif" min="100" step="10" required placeholder="Ex: 650">
             <small class="form-hint">Poids approximatif de l'animal</small>
           </div>
@@ -445,7 +449,7 @@ async function initAuth() {
           </div>
 
           <div id="gmq-group" class="rb-form-group" style="display:none;">
-            <label>Objectif GMQ (kg/j)</label>
+            <label>Objectif GMQ (kg/j) <span class="tt-q" data-tt="gmq">?</span></label>
             <input type="number" id="gmq" min="0" max="2" step="0.1" placeholder="Ex: 1.0">
           </div>
 
@@ -455,7 +459,7 @@ async function initAuth() {
           </div>
 
           <div class="rb-form-group">
-            <label>Activité</label>
+            <label>Activité <span class="tt-q" data-tt="paturage">?</span></label>
             <select id="activite">
               <option value="stabulation">Stabulation</option>
               <option value="paturage">Pâturage</option>
@@ -463,12 +467,12 @@ async function initAuth() {
           </div>
 
           <div id="tb-group" class="rb-form-group">
-            <label>TB (g/L)</label>
+            <label>TB (g/L) <span class="tt-q" data-tt="tb">?</span></label>
             <input type="number" id="tb" min="20" step="0.5" placeholder="Ex: 38">
           </div>
 
           <div id="tp-group" class="rb-form-group">
-            <label>TP (g/L)</label>
+            <label>TP (g/L) <span class="tt-q" data-tt="tp">?</span></label>
             <input type="number" id="tp" min="20" step="0.5" placeholder="Ex: 32">
           </div>
         </div>
@@ -623,8 +627,8 @@ async function initAuth() {
           <div style="padding:16px;">
             <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;">Cibles INRA : Méthionine ≥ 2.4 % PDI — Lysine ≥ 7.2 % PDI — Ratio Lys:Met ≈ 3:1.</p>
             <div class="rb-form-grid">
-              <div class="rb-form-group"><label>Méthionine apportée (g/j)</label><input type="number" id="aa-met" min="0" step="0.5" placeholder="Ex : 28"></div>
-              <div class="rb-form-group"><label>Lysine apportée (g/j)</label><input type="number" id="aa-lys" min="0" step="0.5" placeholder="Ex : 85"></div>
+              <div class="rb-form-group"><label>Méthionine apportée (g/j) <span class="tt-q" data-tt="met">?</span></label><input type="number" id="aa-met" min="0" step="0.5" placeholder="Ex : 28"></div>
+              <div class="rb-form-group"><label>Lysine apportée (g/j) <span class="tt-q" data-tt="lys">?</span></label><input type="number" id="aa-lys" min="0" step="0.5" placeholder="Ex : 85"></div>
             </div>
           </div>
         </details>
@@ -805,7 +809,7 @@ async function initAuth() {
       </div>
 
       <div class="rb-form-group">
-        <label>Poids vif (kg) <span class="required">*</span></label>
+        <label>Poids vif (kg) <span class="tt-q" data-tt="pv">?</span> <span class="required">*</span></label>
         <input type="number" id="ba-poids-vif" min="100" step="10" required placeholder="Ex: 650">
       </div>
 
@@ -815,12 +819,12 @@ async function initAuth() {
       </div>
 
       <div id="ba-gmq-group" class="rb-form-group" style="display:none;">
-        <label>Objectif GMQ (kg/j)</label>
+        <label>Objectif GMQ (kg/j) <span class="tt-q" data-tt="gmq">?</span></label>
         <input type="number" id="ba-gmq" min="0" max="2" step="0.1" placeholder="Ex: 1.0">
       </div>
 
       <div class="rb-form-group">
-        <label>Activité</label>
+        <label>Activité <span class="tt-q" data-tt="paturage">?</span></label>
         <select id="ba-activite">
           <option value="stabulation">Stabulation</option>
           <option value="paturage">Pâturage</option>
@@ -828,12 +832,12 @@ async function initAuth() {
       </div>
 
       <div id="ba-tb-group" class="rb-form-group">
-        <label>TB (g/L)</label>
+        <label>TB (g/L) <span class="tt-q" data-tt="tb">?</span></label>
         <input type="number" id="ba-tb" min="20" step="0.5" placeholder="Ex: 38">
       </div>
 
       <div id="ba-tp-group" class="rb-form-group">
-        <label>TP (g/L)</label>
+        <label>TP (g/L) <span class="tt-q" data-tt="tp">?</span></label>
         <input type="number" id="ba-tp" min="20" step="0.5" placeholder="Ex: 32">
       </div>
     </div>
@@ -1174,128 +1178,155 @@ async function initAuth() {
   </div>
 </div>
 
+<!-- ====== TOOLTIP ====== -->
+<div id="tt-popup"></div>
+
+<!-- ====== TOAST AUTOSAVE ====== -->
+<div id="autosave-toast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;background:#1e293b;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .3s;">
+  💾 Sauvegardé automatiquement
+</div>
+
+<!-- ====== MODAL TUTORIEL ====== -->
+<div id="tutorial-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:560px;">
+    <div class="rb-modal-header">
+      <h3>👋 Bienvenue sur BoviCalc</h3>
+      <span class="rb-modal-close" onclick="closeTutorial()">&times;</span>
+    </div>
+    <div id="tutorial-body"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;gap:6px;" id="tutorial-dots"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="rb-btn rb-btn-ghost" id="tutorial-prev" onclick="tutorialNav(-1)">← Précédent</button>
+        <button class="rb-btn rb-btn-primary" id="tutorial-next" onclick="tutorialNav(1)">Suivant →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer class="rb-footer">
   <p>© 2026 - BoviCalc | Outil pour les élevages</p>
 </footer>
 
 <script>
   // Base d'aliments embarquée (fonctionne en local file://)
-  window.RB_ALIMENTS_CSV = `Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys
-Avoine,87.6,0.87,88,1.1,3.3,0.2,1.4,4.5,1.7,3.7
-Avoine décortiquée,85.7,1.00,100,0.7,3.8,0.2,1.2,4.2,2.0,4.2
-Avoine floconnée,87.6,0.90,90,1.1,3.3,0.2,1.4,4.5,1.7,3.7
-Blé dur,87.8,1.06,105,0.5,3.8,0.2,1.2,4.0,1.8,3.0
-Blé tendre,86.9,1.04,90,0.5,3.4,0.1,1.3,4.2,1.7,2.8
-Blé aplati,87.0,1.06,95,0.5,3.5,0.1,1.3,4.2,1.7,2.9
-Maïs,86.3,1.11,82,0.4,2.9,0.1,1.1,3.5,2.0,2.7
-Maïs extrudé,86.3,1.15,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8
-Maïs floconné,86.3,1.13,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8
-Maïs humide,67.0,1.12,85,0.4,3.0,0.1,1.1,3.5,2.0,2.7
-Maïs aplati,86.3,1.11,85,0.4,2.9,0.1,1.1,3.5,2.0,2.7
-Mil,89.6,1.18,97,0.4,3.5,0.2,1.6,3.8,2.2,3.0
-Millet commun,90.6,1.10,90,0.4,3.2,0.2,1.6,4.0,2.0,2.8
-Orge,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5
-Orge aplatie,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5
-Riz cargo,88.0,1.06,71,0.3,3.5,0.2,1.2,2.5,2.5,3.8
-Riz paddy,88.0,0.76,59,0.4,2.8,0.2,1.1,2.8,1.8,3.2
-Seigle,87.0,1.04,88,0.8,3.4,0.2,1.2,5.0,1.7,3.0
-Sorgho grain,87.0,1.08,82,0.3,3.0,0.1,1.5,3.5,1.8,2.5
-Triticale,87.0,1.06,95,0.6,3.5,0.2,1.2,4.5,1.8,3.2
-Manioc,86.0,1.08,28,1.2,1.0,0.2,0.8,7.0,0.3,0.5
-Son de blé,87.0,0.78,115,1.4,11.0,0.3,4.8,13.0,1.8,4.5
-Remoulage de blé,87.0,0.90,110,1.5,9.0,0.3,4.0,10.0,1.8,4.0
-Issues de blé,87.0,0.83,105,1.4,9.5,0.3,4.5,12.0,1.8,4.2
-Farine de blé,87.0,1.10,90,0.2,2.8,0.1,0.5,1.5,1.8,3.0
-Son de maïs,88.0,0.90,80,0.3,3.5,0.2,2.0,5.0,1.8,3.0
-Farine de maïs,86.0,1.14,90,0.4,3.0,0.1,1.2,3.6,2.0,2.8
-Gluten de maïs,88.0,1.30,540,0.4,4.5,0.4,2.5,3.0,16.0,9.0
-DDGS maïs,89.0,1.03,240,0.5,4.8,0.7,2.5,4.5,5.5,7.5
-DDGS blé,88.0,1.00,230,1.5,8.0,0.8,3.5,10.0,5.0,7.0
-Drêches de maïs fraîches,35.0,1.00,215,0.8,3.5,0.4,2.0,4.0,5.0,6.5
-Drêches de brasserie fraîches,22.0,0.87,200,3.5,5.5,0.5,2.0,1.5,5.0,8.0
-Drêches de brasserie séchées,90.0,0.90,210,4.0,6.0,0.5,2.2,1.6,5.2,8.5
-Tourteau de colza,88.0,1.05,230,7.2,11.0,0.8,4.5,12.0,7.0,17.5
-Tourteau de colza décortiqué,88.0,1.12,260,8.0,11.5,0.8,4.5,12.5,7.5,19.0
-Tourteau de soja 44,88.0,1.17,285,3.3,6.5,0.5,3.0,20.0,6.1,27.2
-Tourteau de soja 48,89.0,1.23,315,3.3,7.0,0.5,3.0,22.0,6.5,29.0
-Tourteau de tournesol,90.0,0.82,215,3.5,10.0,0.5,4.0,11.0,6.0,12.0
-Tourteau de tournesol décortiqué,90.0,0.98,265,4.0,11.0,0.5,4.5,12.0,6.5,14.0
-Tourteau de lin,88.0,1.06,235,4.0,8.5,0.5,4.5,12.0,5.0,10.0
-Tourteau de palmiste,91.0,1.06,155,2.4,5.5,0.3,2.5,7.0,2.5,6.0
-Tourteau de coton,90.0,0.88,250,3.0,10.0,0.4,4.0,12.0,5.5,14.0
-Tourteau de coprah,91.0,1.06,150,1.5,5.0,0.3,2.5,6.0,2.0,5.5
-Pois protéagineux,86.0,1.17,160,1.2,4.0,0.1,1.5,10.0,2.2,14.0
-Féverole,86.0,1.17,175,1.2,4.5,0.1,1.5,11.0,1.8,14.5
-Lupin blanc,87.0,1.17,190,2.0,4.0,0.2,1.8,7.0,1.8,14.5
-Lupin jaune,87.0,1.08,210,1.5,4.5,0.2,2.0,7.5,1.8,14.0
-Luzerne déshydratée,90.0,0.75,120,17.0,2.8,0.5,3.5,22.0,3.5,11.0
-Pulpe de betterave,22.0,0.86,50,7.0,0.9,0.9,2.0,1.0,0.7,2.5
-Pulpe de betterave déshydratée,90.0,0.93,55,8.0,1.0,1.0,2.2,1.2,0.8,2.8
-Pulpe d'agrumes déshydratée,90.0,0.90,55,15.0,1.0,0.5,1.5,10.0,1.0,2.0
-Betterave fourragère,17.0,1.04,45,1.0,2.0,0.5,1.5,20.0,0.5,1.5
-Betterave sucrière,23.0,1.08,50,0.7,1.5,0.4,1.2,18.0,0.5,1.5
-Pomme de terre,22.0,1.08,65,0.7,2.0,0.2,1.0,15.0,1.5,3.5
-Pomme de terre déshydratée,87.0,1.14,70,0.8,2.2,0.2,1.2,18.0,1.5,3.5
-Mélasse de betterave,77.0,0.85,45,1.2,0.4,3.5,0.5,4.5,0.8,1.5
-Mélasse de canne,77.0,0.88,35,4.5,0.5,1.5,0.8,35.0,0.8,1.5
-Lactosérum,6.0,0.75,85,10.0,9.0,5.5,1.2,15.0,2.5,8.0
-Lactosérum en poudre,94.0,0.87,120,12.0,8.0,5.5,1.2,16.0,2.5,8.5
-Levure de brasserie,93.0,0.95,310,0.7,14.0,0.5,2.5,16.0,6.5,22.0
-Farine de sang,92.0,0.88,695,3.0,2.0,3.5,0.5,1.5,3.5,78.0
-Farine de poisson,92.0,1.10,590,45.0,28.0,8.5,2.0,10.0,16.0,38.0
-Urée 46,98.0,0.00,1443,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Foin de prairie,86.0,0.72,68,6.5,2.8,1.2,2.0,18.0,1.5,3.5
-Foin de prairie tardif,86.0,0.63,52,5.0,2.2,1.0,1.5,14.0,1.2,2.8
-Foin de prairie précoce,86.0,0.78,80,7.0,3.0,1.5,2.2,20.0,1.8,4.0
-Foin de luzerne,86.0,0.72,107,14.5,2.6,0.5,2.5,22.0,2.5,7.0
-Foin de luzerne 1ère coupe,87.0,0.74,112,15.0,2.7,0.5,2.6,23.0,2.6,7.5
-Foin de ray-grass,86.0,0.75,80,6.0,3.0,1.0,2.0,20.0,1.8,4.2
-Foin de trèfle,86.0,0.70,95,12.0,2.8,1.2,2.5,20.0,2.0,5.5
-Foin de dactyle,86.0,0.68,65,5.5,2.5,1.0,1.8,18.0,1.5,3.2
-Foin de fétuque,86.0,0.68,63,5.0,2.5,1.0,1.8,17.0,1.5,3.0
-Regain de prairie,86.0,0.68,70,7.0,2.8,1.2,2.0,19.0,1.5,3.5
-Ensilage maïs,33.0,0.87,62,2.0,2.2,0.2,1.8,12.0,1.8,2.5
-Ensilage maïs mûr,35.0,0.92,58,1.8,2.0,0.2,1.6,11.0,1.8,2.4
-Ensilage maïs plante entière,30.0,0.85,60,2.2,2.0,0.2,1.7,12.0,1.8,2.5
-Ensilage d'épi de maïs,55.0,1.05,80,1.2,2.8,0.2,1.5,8.0,2.0,2.8
-Ensilage herbe prairie,20.0,0.82,85,5.5,3.5,1.5,2.0,22.0,2.0,5.0
-Ensilage d'herbe précoce,18.0,0.88,95,6.0,3.8,1.5,2.2,25.0,2.2,5.5
-Ensilage d'herbe tardif,22.0,0.74,72,5.0,3.2,1.2,1.8,20.0,1.8,4.5
-Ensilage ray-grass,18.0,0.88,92,6.5,3.8,1.5,2.2,25.0,2.2,5.5
-Ensilage trèfle violet,20.0,0.82,100,12.0,3.0,1.0,2.5,22.0,2.0,6.0
-Ensilage luzerne,25.0,0.72,108,16.0,2.8,0.5,2.8,25.0,2.5,7.0
-Ensilage sorgho,25.0,0.78,55,2.5,2.0,0.2,1.8,12.0,1.5,2.0
-Ensilage seigle,22.0,0.85,80,4.5,3.2,1.2,2.0,22.0,2.0,4.5
-Herbe pâturée,18.0,0.95,100,6.0,3.5,1.5,2.0,28.0,2.2,6.0
-Herbe pâturée précoce,16.0,1.00,110,7.0,4.0,1.8,2.5,30.0,2.5,6.5
-Herbe pâturée mi-saison,18.0,0.90,95,6.0,3.5,1.5,2.0,27.0,2.0,5.8
-Luzerne fraîche,22.0,0.75,112,17.0,2.8,0.5,2.8,25.0,2.5,7.5
-Trèfle blanc pâturé,18.0,0.95,120,12.5,3.5,1.2,2.5,22.0,2.2,6.5
-Ray-grass anglais pâturé,18.0,0.92,105,6.5,3.8,1.5,2.2,28.0,2.2,6.0
-Paille de blé,87.0,0.37,27,3.8,0.7,0.7,0.8,10.0,0.8,1.5
-Paille d'orge,87.0,0.40,27,3.8,0.9,0.8,0.9,12.0,0.8,1.5
-Paille de maïs,86.0,0.42,18,3.0,0.6,0.5,0.8,8.0,0.5,1.0
-Paille de triticale,87.0,0.38,27,3.5,0.7,0.7,0.8,10.0,0.8,1.5
-Paille de seigle,87.0,0.35,22,3.0,0.6,0.5,0.7,9.0,0.6,1.2
-Paille de sorgho,86.0,0.38,20,3.5,0.7,0.5,0.8,9.0,0.5,1.0
-Huile de soja,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Huile de colza,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Graisse de palme,99.0,3.20,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Acides gras saturés protégés,97.0,3.00,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Carbonate de calcium,100.0,0.00,0,395.0,0.0,0.0,0.0,0.0,0.0,0.0
-Phosphate bicalcique,100.0,0.00,0,240.0,185.0,0.0,0.0,0.0,0.0,0.0
-Phosphate monocalcique,100.0,0.00,0,155.0,245.0,0.0,0.0,0.0,0.0,0.0
-Chlorure de sodium,100.0,0.00,0,0.0,0.0,390.0,0.0,0.0,0.0,0.0
-Bicarbonate de sodium,100.0,0.00,0,0.0,0.0,270.0,0.0,0.0,0.0,0.0
-Oxyde de magnésium,100.0,0.00,0,0.0,0.0,0.0,580.0,0.0,0.0,0.0
-Marc de raisin déshydraté,90.0,0.75,85,7.0,2.5,0.5,1.5,8.0,1.8,3.5
-Marc de pomme,25.0,0.72,45,2.5,1.2,0.3,0.8,5.0,1.0,2.0
-Pulpe de tomate déshydratée,92.0,0.78,120,4.5,3.5,0.3,2.5,28.0,1.5,3.5
-Tourteau de tournesol partiellement décortiqué,90.0,0.90,240,4.0,11.0,0.5,4.2,11.5,6.2,13.0
-Corn gluten feed,90.0,0.95,165,1.0,8.5,0.5,3.5,10.0,3.5,5.5
-Mélange céréalier,87.0,1.05,88,0.6,3.4,0.2,1.4,5.0,1.8,3.2
-Foin de sorgho,86.0,0.60,45,4.0,1.8,0.5,1.5,12.0,1.2,2.5
-Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
+  // AL=amidon lent (g/kgMS), AR=amidon rapide (g/kgMS), SS=sucres solubles (g/kgMS)
+  window.RB_ALIMENTS_CSV = `Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS
+Avoine,87.6,0.87,88,1.1,3.3,0.2,1.4,4.5,1.7,3.7,220,170,15
+Avoine décortiquée,85.7,1.00,100,0.7,3.8,0.2,1.2,4.2,2.0,4.2,240,180,15
+Avoine floconnée,87.6,0.90,90,1.1,3.3,0.2,1.4,4.5,1.7,3.7,180,220,15
+Blé dur,87.8,1.06,105,0.5,3.8,0.2,1.2,4.0,1.8,3.0,30,610,25
+Blé tendre,86.9,1.04,90,0.5,3.4,0.1,1.3,4.2,1.7,2.8,30,580,25
+Blé aplati,87.0,1.06,95,0.5,3.5,0.1,1.3,4.2,1.7,2.9,20,600,25
+Maïs,86.3,1.11,82,0.4,2.9,0.1,1.1,3.5,2.0,2.7,650,0,15
+Maïs extrudé,86.3,1.15,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,350,300,15
+Maïs floconné,86.3,1.13,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,300,350,15
+Maïs humide,67.0,1.12,85,0.4,3.0,0.1,1.1,3.5,2.0,2.7,650,0,20
+Maïs aplati,86.3,1.11,85,0.4,2.9,0.1,1.1,3.5,2.0,2.7,550,100,15
+Mil,89.6,1.18,97,0.4,3.5,0.2,1.6,3.8,2.2,3.0,200,350,10
+Millet commun,90.6,1.10,90,0.4,3.2,0.2,1.6,4.0,2.0,2.8,180,330,10
+Orge,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,30,530,20
+Orge aplatie,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,20,540,20
+Riz cargo,88.0,1.06,71,0.3,3.5,0.2,1.2,2.5,2.5,3.8,600,20,5
+Riz paddy,88.0,0.76,59,0.4,2.8,0.2,1.1,2.8,1.8,3.2,550,10,5
+Seigle,87.0,1.04,88,0.8,3.4,0.2,1.2,5.0,1.7,3.0,20,570,40
+Sorgho grain,87.0,1.08,82,0.3,3.0,0.1,1.5,3.5,1.8,2.5,320,300,10
+Triticale,87.0,1.06,95,0.6,3.5,0.2,1.2,4.5,1.8,3.2,30,550,20
+Manioc,86.0,1.08,28,1.2,1.0,0.2,0.8,7.0,0.3,0.5,670,0,35
+Son de blé,87.0,0.78,115,1.4,11.0,0.3,4.8,13.0,1.8,4.5,20,130,50
+Remoulage de blé,87.0,0.90,110,1.5,9.0,0.3,4.0,10.0,1.8,4.0,30,200,45
+Issues de blé,87.0,0.83,105,1.4,9.5,0.3,4.5,12.0,1.8,4.2,25,165,48
+Farine de blé,87.0,1.10,90,0.2,2.8,0.1,0.5,1.5,1.8,3.0,10,650,20
+Son de maïs,88.0,0.90,80,0.3,3.5,0.2,2.0,5.0,1.8,3.0,50,10,25
+Farine de maïs,86.0,1.14,90,0.4,3.0,0.1,1.2,3.6,2.0,2.8,600,10,15
+Gluten de maïs,88.0,1.30,540,0.4,4.5,0.4,2.5,3.0,16.0,9.0,5,0,10
+DDGS maïs,89.0,1.03,240,0.5,4.8,0.7,2.5,4.5,5.5,7.5,15,0,25
+DDGS blé,88.0,1.00,230,1.5,8.0,0.8,3.5,10.0,5.0,7.0,10,20,30
+Drêches de maïs fraîches,35.0,1.00,215,0.8,3.5,0.4,2.0,4.0,5.0,6.5,10,0,20
+Drêches de brasserie fraîches,22.0,0.87,200,3.5,5.5,0.5,2.0,1.5,5.0,8.0,5,0,25
+Drêches de brasserie séchées,90.0,0.90,210,4.0,6.0,0.5,2.2,1.6,5.2,8.5,5,0,25
+Tourteau de colza,88.0,1.05,230,7.2,11.0,0.8,4.5,12.0,7.0,17.5,0,5,55
+Tourteau de colza décortiqué,88.0,1.12,260,8.0,11.5,0.8,4.5,12.5,7.5,19.0,0,5,55
+Tourteau de soja 44,88.0,1.17,285,3.3,6.5,0.5,3.0,20.0,6.1,27.2,0,25,75
+Tourteau de soja 48,89.0,1.23,315,3.3,7.0,0.5,3.0,22.0,6.5,29.0,0,25,80
+Tourteau de tournesol,90.0,0.82,215,3.5,10.0,0.5,4.0,11.0,6.0,12.0,0,5,40
+Tourteau de tournesol décortiqué,90.0,0.98,265,4.0,11.0,0.5,4.5,12.0,6.5,14.0,0,5,40
+Tourteau de lin,88.0,1.06,235,4.0,8.5,0.5,4.5,12.0,5.0,10.0,0,5,45
+Tourteau de palmiste,91.0,1.06,155,2.4,5.5,0.3,2.5,7.0,2.5,6.0,0,5,40
+Tourteau de coton,90.0,0.88,250,3.0,10.0,0.4,4.0,12.0,5.5,14.0,0,5,35
+Tourteau de coprah,91.0,1.06,150,1.5,5.0,0.3,2.5,6.0,2.0,5.5,0,5,40
+Pois protéagineux,86.0,1.17,160,1.2,4.0,0.1,1.5,10.0,2.2,14.0,150,200,45
+Féverole,86.0,1.17,175,1.2,4.5,0.1,1.5,11.0,1.8,14.5,160,190,40
+Lupin blanc,87.0,1.17,190,2.0,4.0,0.2,1.8,7.0,1.8,14.5,0,0,55
+Lupin jaune,87.0,1.08,210,1.5,4.5,0.2,2.0,7.5,1.8,14.0,0,0,50
+Luzerne déshydratée,90.0,0.75,120,17.0,2.8,0.5,3.5,22.0,3.5,11.0,0,0,30
+Pulpe de betterave,22.0,0.86,50,7.0,0.9,0.9,2.0,1.0,0.7,2.5,0,0,170
+Pulpe de betterave déshydratée,90.0,0.93,55,8.0,1.0,1.0,2.2,1.2,0.8,2.8,0,0,175
+Pulpe d'agrumes déshydratée,90.0,0.90,55,15.0,1.0,0.5,1.5,10.0,1.0,2.0,0,0,130
+Betterave fourragère,17.0,1.04,45,1.0,2.0,0.5,1.5,20.0,0.5,1.5,0,0,125
+Betterave sucrière,23.0,1.08,50,0.7,1.5,0.4,1.2,18.0,0.5,1.5,0,0,180
+Pomme de terre,22.0,1.08,65,0.7,2.0,0.2,1.0,15.0,1.5,3.5,650,0,35
+Pomme de terre déshydratée,87.0,1.14,70,0.8,2.2,0.2,1.2,18.0,1.5,3.5,680,0,40
+Mélasse de betterave,77.0,0.85,45,1.2,0.4,3.5,0.5,4.5,0.8,1.5,0,0,600
+Mélasse de canne,77.0,0.88,35,4.5,0.5,1.5,0.8,35.0,0.8,1.5,0,0,650
+Lactosérum,6.0,0.75,85,10.0,9.0,5.5,1.2,15.0,2.5,8.0,0,0,550
+Lactosérum en poudre,94.0,0.87,120,12.0,8.0,5.5,1.2,16.0,2.5,8.5,0,0,600
+Levure de brasserie,93.0,0.95,310,0.7,14.0,0.5,2.5,16.0,6.5,22.0,0,0,30
+Farine de sang,92.0,0.88,695,3.0,2.0,3.5,0.5,1.5,3.5,78.0,0,0,0
+Farine de poisson,92.0,1.10,590,45.0,28.0,8.5,2.0,10.0,16.0,38.0,0,0,0
+Urée 46,98.0,0.00,1443,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Foin de prairie,86.0,0.72,68,6.5,2.8,1.2,2.0,18.0,1.5,3.5,0,0,50
+Foin de prairie tardif,86.0,0.63,52,5.0,2.2,1.0,1.5,14.0,1.2,2.8,0,0,35
+Foin de prairie précoce,86.0,0.78,80,7.0,3.0,1.5,2.2,20.0,1.8,4.0,0,0,65
+Foin de luzerne,86.0,0.72,107,14.5,2.6,0.5,2.5,22.0,2.5,7.0,0,0,25
+Foin de luzerne 1ère coupe,87.0,0.74,112,15.0,2.7,0.5,2.6,23.0,2.6,7.5,0,0,25
+Foin de ray-grass,86.0,0.75,80,6.0,3.0,1.0,2.0,20.0,1.8,4.2,0,0,60
+Foin de trèfle,86.0,0.70,95,12.0,2.8,1.2,2.5,20.0,2.0,5.5,0,0,55
+Foin de dactyle,86.0,0.68,65,5.5,2.5,1.0,1.8,18.0,1.5,3.2,0,0,45
+Foin de fétuque,86.0,0.68,63,5.0,2.5,1.0,1.8,17.0,1.5,3.0,0,0,45
+Regain de prairie,86.0,0.68,70,7.0,2.8,1.2,2.0,19.0,1.5,3.5,0,0,40
+Ensilage maïs,33.0,0.87,62,2.0,2.2,0.2,1.8,12.0,1.8,2.5,290,0,25
+Ensilage maïs mûr,35.0,0.92,58,1.8,2.0,0.2,1.6,11.0,1.8,2.4,320,0,20
+Ensilage maïs plante entière,30.0,0.85,60,2.2,2.0,0.2,1.7,12.0,1.8,2.5,270,0,25
+Ensilage d'épi de maïs,55.0,1.05,80,1.2,2.8,0.2,1.5,8.0,2.0,2.8,500,0,20
+Ensilage herbe prairie,20.0,0.82,85,5.5,3.5,1.5,2.0,22.0,2.0,5.0,0,0,70
+Ensilage d'herbe précoce,18.0,0.88,95,6.0,3.8,1.5,2.2,25.0,2.2,5.5,0,0,90
+Ensilage d'herbe tardif,22.0,0.74,72,5.0,3.2,1.2,1.8,20.0,1.8,4.5,0,0,50
+Ensilage ray-grass,18.0,0.88,92,6.5,3.8,1.5,2.2,25.0,2.2,5.5,0,0,85
+Ensilage trèfle violet,20.0,0.82,100,12.0,3.0,1.0,2.5,22.0,2.0,6.0,0,0,65
+Ensilage luzerne,25.0,0.72,108,16.0,2.8,0.5,2.8,25.0,2.5,7.0,0,0,30
+Ensilage sorgho,25.0,0.78,55,2.5,2.0,0.2,1.8,12.0,1.5,2.0,100,30,35
+Ensilage seigle,22.0,0.85,80,4.5,3.2,1.2,2.0,22.0,2.0,4.5,0,80,55
+Herbe pâturée,18.0,0.95,100,6.0,3.5,1.5,2.0,28.0,2.2,6.0,0,0,120
+Herbe pâturée précoce,16.0,1.00,110,7.0,4.0,1.8,2.5,30.0,2.5,6.5,0,0,150
+Herbe pâturée mi-saison,18.0,0.90,95,6.0,3.5,1.5,2.0,27.0,2.0,5.8,0,0,110
+Luzerne fraîche,22.0,0.75,112,17.0,2.8,0.5,2.8,25.0,2.5,7.5,0,0,35
+Trèfle blanc pâturé,18.0,0.95,120,12.5,3.5,1.2,2.5,22.0,2.2,6.5,0,0,130
+Ray-grass anglais pâturé,18.0,0.92,105,6.5,3.8,1.5,2.2,28.0,2.2,6.0,0,0,140
+Paille de blé,87.0,0.37,27,3.8,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10
+Paille d'orge,87.0,0.40,27,3.8,0.9,0.8,0.9,12.0,0.8,1.5,0,0,12
+Paille de maïs,86.0,0.42,18,3.0,0.6,0.5,0.8,8.0,0.5,1.0,0,0,8
+Paille de triticale,87.0,0.38,27,3.5,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10
+Paille de seigle,87.0,0.35,22,3.0,0.6,0.5,0.7,9.0,0.6,1.2,0,0,8
+Paille de sorgho,86.0,0.38,20,3.5,0.7,0.5,0.8,9.0,0.5,1.0,0,0,8
+Huile de soja,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Huile de colza,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Graisse de palme,99.0,3.20,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Acides gras saturés protégés,97.0,3.00,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Carbonate de calcium,100.0,0.00,0,395.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Phosphate bicalcique,100.0,0.00,0,240.0,185.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Phosphate monocalcique,100.0,0.00,0,155.0,245.0,0.0,0.0,0.0,0.0,0.0,0,0,0
+Chlorure de sodium,100.0,0.00,0,0.0,0.0,390.0,0.0,0.0,0.0,0.0,0,0,0
+Bicarbonate de sodium,100.0,0.00,0,0.0,0.0,270.0,0.0,0.0,0.0,0.0,0,0,0
+Oxyde de magnésium,100.0,0.00,0,0.0,0.0,0.0,580.0,0.0,0.0,0.0,0,0,0
+Marc de raisin déshydraté,90.0,0.75,85,7.0,2.5,0.5,1.5,8.0,1.8,3.5,0,0,30
+Marc de pomme,25.0,0.72,45,2.5,1.2,0.3,0.8,5.0,1.0,2.0,0,0,50
+Pulpe de tomate déshydratée,92.0,0.78,120,4.5,3.5,0.3,2.5,28.0,1.5,3.5,0,0,35
+Tourteau de tournesol partiellement décortiqué,90.0,0.90,240,4.0,11.0,0.5,4.2,11.5,6.2,13.0,0,5,40
+Corn gluten feed,90.0,0.95,165,1.0,8.5,0.5,3.5,10.0,3.5,5.5,90,10,30
+Mélange céréalier,87.0,1.05,88,0.6,3.4,0.2,1.4,5.0,1.8,3.2,250,300,18
+Foin de sorgho,86.0,0.60,45,4.0,1.8,0.5,1.5,12.0,1.2,2.5,0,0,30
+Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`;
 </script>
 <script>
   // =====================================================
@@ -1342,7 +1373,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
       const nom = c[0]?.replace(/"/g,'').trim();
       const ms  = parseFloat(c[1]) || 0;
       if (!nom || !ms) continue;
-      // Colonnes: Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys (toutes par kg MS)
+      // Colonnes: Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS (toutes par kg MS)
       result.push({
         nom, ms,
         uflPerKgMS:  parseFloat(c[2]) || 0,
@@ -1354,6 +1385,9 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
         k_gkgms:     parseFloat(c[8]) || 0,
         met_gkgms:   parseFloat(c[9]) || 0,
         lys_gkgms:   parseFloat(c[10]) || 0,
+        al_gkgms:    parseFloat(c[11]) || 0,
+        ar_gkgms:    parseFloat(c[12]) || 0,
+        ss_gkgms:    parseFloat(c[13]) || 0,
       });
     }
     return result;
@@ -1456,15 +1490,16 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
 
     switch(type) {
       case 'vache-laitiere': {
-        const uEnt = 1.4 + 0.006*pv, uProd = prod*0.44;
-        lait = prod*((tb||40)/40);
+        // Lait corrigé : LC = (prod × TB g/kg) / 40
+        lait = (prod * (tb||40)) / 40;
+        const uEnt = 1.4 + 0.006*pv, uProd = 0.44*lait;
         const pEnt = 95 + 0.5*pv, pProd = lait*48;
         bUFL = (uEnt+uProd)*coef; bPDI = (pEnt+pProd)*coef;
         cap  = (0.025*pv + 0.1*prod)*coef;
         dUFL = [{l:'Entretien', f:`1.4 + 0.006 × ${pv} kg`, v:uEnt},
-                {l:'Production', f:`${prod} kg lait × 0.44`, v:uProd}];
+                {l:'Production', f:`0.44 × ${lait.toFixed(1)} kg LC`, v:uProd}];
         dPDI = [{l:'Entretien', f:`95 + 0.5 × ${pv} kg`, v:pEnt},
-                {l:'Lait corrigé TB', f:`${lait.toFixed(1)} kg × 48`, v:pProd}];
+                {l:'Lait corrigé', f:`${lait.toFixed(1)} kg × 48 g/L`, v:pProd}];
         break;
       }
       case 'vache-tarie': {
@@ -1634,13 +1669,23 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
       const qty = parseFloat(inp[1]?.value);
       if (!nom || !qty || qty <= 0) return;
       const f = findFood(nom);
-      if (f) items.push({ nom:f.nom, qty, ufl:f.uflPerKgMS*qty, pdi:f.pdiPerKgMS*qty });
+      if (f) items.push({
+        nom: f.nom, qty,
+        ufl: f.uflPerKgMS*qty,
+        pdi: f.pdiPerKgMS*qty,
+        al:  (f.al_gkgms||0)*qty,
+        ar:  (f.ar_gkgms||0)*qty,
+        ss:  (f.ss_gkgms||0)*qty,
+      });
     });
     return {
       items,
       totalMS:  items.reduce((s,i)=>s+i.qty,0),
       totalUFL: items.reduce((s,i)=>s+i.ufl,0),
-      totalPDI: items.reduce((s,i)=>s+i.pdi,0)
+      totalPDI: items.reduce((s,i)=>s+i.pdi,0),
+      totalAL:  items.reduce((s,i)=>s+i.al,0),
+      totalAR:  items.reduce((s,i)=>s+i.ar,0),
+      totalSS:  items.reduce((s,i)=>s+i.ss,0),
     };
   }
 
@@ -1673,6 +1718,65 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
   }
   $('btn-calc-apports')?.addEventListener('click', calcApports);
 
+  // -- Bloc glucides fermentescibles
+  function renderGlucides(a) {
+    const al = a.totalAL || 0, ar = a.totalAR || 0, ss = a.totalSS || 0;
+    const total = al + ar + ss;
+    if (total < 1) return '';
+    const ms = a.totalMS || 1;
+    // g/kg MS de la ration
+    const alKg = al/ms, arKg = ar/ms, ssKg = ss/ms;
+    const totKg = alKg + arKg + ssKg;
+    const alPct = totKg > 0 ? (alKg/totKg*100).toFixed(0) : 0;
+    const arPct = totKg > 0 ? (arKg/totKg*100).toFixed(0) : 0;
+    const ssPct = totKg > 0 ? (ssKg/totKg*100).toFixed(0) : 0;
+    // Seuil risque acidose : amidon rapide > 150 g/kg MS ration ou (AR+SS) > 200 g/kg MS
+    const ferment = arKg + ssKg;
+    const riskAcidose = arKg > 150 || ferment > 220;
+    const warnAcidose = !riskAcidose && (arKg > 100 || ferment > 160);
+    const riskColor = riskAcidose ? '#dc2626' : warnAcidose ? '#d97706' : '#16a34a';
+    const riskLabel = riskAcidose ? '⚠️ Risque acidose élevé' : warnAcidose ? '⚡ Surveiller la fermentation' : '✅ Équilibre glucidique correct';
+    const seg = (pct, color, label) => pct > 0
+      ? `<div title="${label}: ${pct}%" style="width:${pct}%;background:${color};height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600;overflow:hidden;white-space:nowrap;">${pct>8?label:''}</div>`
+      : '';
+    return `
+      <div class="rb-panel" style="margin-top:16px;">
+        <h4>🌾 Glucides fermentescibles</h4>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+          <div style="flex:1;min-width:160px;background:#f0fdf4;border-radius:8px;padding:10px 14px;border-left:4px solid #16a34a;">
+            <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Amidon lent <span class="tt-q" data-tt="al">?</span></div>
+            <div style="font-size:22px;font-weight:700;color:#15803d;">${alKg.toFixed(0)}<span style="font-size:13px;font-weight:400"> g/kg MS</span></div>
+            <div style="font-size:11px;color:#6b7280;">Maïs, manioc… fermentation lente</div>
+          </div>
+          <div style="flex:1;min-width:160px;background:#fff7ed;border-radius:8px;padding:10px 14px;border-left:4px solid #ea580c;">
+            <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Amidon rapide <span class="tt-q" data-tt="ar">?</span></div>
+            <div style="font-size:22px;font-weight:700;color:#c2410c;">${arKg.toFixed(0)}<span style="font-size:13px;font-weight:400"> g/kg MS</span></div>
+            <div style="font-size:11px;color:#6b7280;">Blé, orge… fermentation rapide</div>
+          </div>
+          <div style="flex:1;min-width:160px;background:#eff6ff;border-radius:8px;padding:10px 14px;border-left:4px solid #2563eb;">
+            <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Sucres solubles <span class="tt-q" data-tt="ss">?</span></div>
+            <div style="font-size:22px;font-weight:700;color:#1d4ed8;">${ssKg.toFixed(0)}<span style="font-size:13px;font-weight:400"> g/kg MS</span></div>
+            <div style="font-size:11px;color:#6b7280;">Betterave, herbe… sucres rapides</div>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">Répartition des glucides fermentescibles</div>
+          <div style="display:flex;height:28px;border-radius:6px;overflow:hidden;background:#e5e7eb;">
+            ${seg(alPct,'#16a34a','Lent')}${seg(arPct,'#ea580c','Rapide')}${seg(ssPct,'#2563eb','Solubles')}
+          </div>
+          <div style="display:flex;gap:16px;margin-top:6px;font-size:12px;">
+            <span style="color:#16a34a;">● Lent ${alPct}%</span>
+            <span style="color:#ea580c;">● Rapide ${arPct}%</span>
+            <span style="color:#2563eb;">● Solubles ${ssPct}%</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:8px 12px;border-radius:6px;background:${riskAcidose?'#fef2f2':warnAcidose?'#fffbeb':'#f0fdf4'};border:1px solid ${riskColor};font-size:13px;font-weight:600;color:${riskColor};">
+          ${riskLabel}
+          ${riskAcidose||warnAcidose ? `<span style="font-weight:400;font-size:12px;margin-left:8px;">Amidon rapide + solubles = ${ferment.toFixed(0)} g/kg MS (seuil : 200 g/kg MS)</span>` : ''}
+        </div>
+      </div>`;
+  }
+
   // -- Calcul bilan
   function calcBilan() {
     if (!lastB) { alert('Calculez d\'abord les besoins (étape 1).'); return; }
@@ -1692,7 +1796,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
       <div class="rb-metric-grid">
         <div class="rb-metric">
           <div class="rb-metric-head">
-            <div class="rb-metric-title">Énergie (${eu}/j)</div>
+            <div class="rb-metric-title">Énergie (${eu}/j) <span class="tt-q" data-tt="${eu==='UFL'?'ufl':'ufv'}">?</span></div>
             <span class="rb-badge ${badgeCls(rUFL)}">${badgeLbl(rUFL)}</span>
           </div>
           <div class="rb-progress ${barCls(rUFL)}"><span style="width:${Math.min(100,rUFL*100)}%"></span></div>
@@ -1707,7 +1811,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
         </div>
         <div class="rb-metric">
           <div class="rb-metric-head">
-            <div class="rb-metric-title">PDI (g/j)</div>
+            <div class="rb-metric-title">PDI (g/j) <span class="tt-q" data-tt="pdi">?</span></div>
             <span class="rb-badge ${badgeCls(rPDI)}">${badgeLbl(rPDI)}</span>
           </div>
           <div class="rb-progress ${barCls(rPDI)}"><span style="width:${Math.min(100,rPDI*100)}%"></span></div>
@@ -1722,16 +1826,16 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
         </div>
         <div class="rb-metric">
           <div class="rb-metric-head">
-            <div class="rb-metric-title">PDI / ${eu}</div>
+            <div class="rb-metric-title">PDI / ${eu} <span class="tt-q" data-tt="pdi_ufl">?</span></div>
             <span class="rb-badge ${ppu>=90&&ppu<=105?'rb-badge-green':'rb-badge-orange'}">${ppu>=90&&ppu<=105?'Idéal':'À ajuster'}</span>
           </div>
           <div class="result-value" style="margin-top:8px;">${ppu.toFixed(0)}<span class="result-unit">g/${eu}</span></div>
           <div class="result-sub">Cible : 90–105 g/${eu}</div>
         </div>
         <div class="rb-metric">
-          <div class="rb-metric-head"><div class="rb-metric-title">MS totale</div></div>
+          <div class="rb-metric-head"><div class="rb-metric-title">MS totale <span class="tt-q" data-tt="ms">?</span></div></div>
           <div class="result-value" style="margin-top:8px;">${a.totalMS.toFixed(1)}<span class="result-unit">kg MS/j</span></div>
-          ${b.ingestionCapacite>0?`<div class="result-sub">Capacité max : ${b.ingestionCapacite.toFixed(1)} kg MS</div>`:''}
+          ${b.ingestionCapacite>0?`<div class="result-sub">Capacité max : ${b.ingestionCapacite.toFixed(1)} kg MS <span class="tt-q" data-tt="cap">?</span></div>`:''}
         </div>
       </div>
       <div class="rb-panel" style="margin-top:16px;">
@@ -1743,7 +1847,8 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
             <tr style="font-weight:700;background:var(--green-50);"><td>TOTAL</td><td>${a.totalMS.toFixed(1)}</td><td>${a.totalUFL.toFixed(2)}</td><td>${a.totalPDI.toFixed(0)}</td></tr>
           </tbody>
         </table>
-      </div>`;
+      </div>
+      ${renderGlucides(a)}`;
     $('resultat-bilan')?.classList.remove('hidden');
     $('btn-optimize')?.classList.remove('hidden');
     renderQualityScore(a, b);
@@ -3287,6 +3392,209 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0`;
   addLine('ration-lines','aliments-list');
   addLine('ration-only-lines','aliments-list-ration-only');
   refreshDashboard();
+
+  // =====================================================
+  // TOOLTIPS
+  // =====================================================
+  const TT_DEFS = {
+    ufl:   '<strong>UFL</strong> — Unité Fourragère Lait. Mesure l\'énergie apportée par un aliment pour la production de lait. 1 UFL = énergie d\'1 kg d\'orge de référence.',
+    ufv:   '<strong>UFV</strong> — Unité Fourragère Viande. Même principe que l\'UFL mais pour la production de viande et la croissance.',
+    pdi:   '<strong>PDI</strong> — Protéines Digestibles dans l\'Intestin. Quantité de protéines réellement absorbées par l\'intestin grêle après fermentation ruminale.',
+    ms:    '<strong>MS</strong> — Matière Sèche. Masse de l\'aliment après élimination de toute l\'eau. Toutes les valeurs nutritives sont exprimées par kg MS.',
+    tb:    '<strong>TB</strong> — Taux Butyreux. Teneur en matières grasses du lait, en g par litre. Référence courante : 38–42 g/L.',
+    tp:    '<strong>TP</strong> — Taux Protéique. Teneur en protéines du lait, en g par litre. Référence courante : 30–34 g/L.',
+    gmq:   '<strong>GMQ</strong> — Gain Moyen Quotidien. Croissance journalière de l\'animal en kg par jour. Varie selon l\'âge, le sexe et la race.',
+    pv:    '<strong>Poids vif</strong> — Masse totale de l\'animal à la pesée. Influence directement les besoins d\'entretien.',
+    baca:  '<strong>BACA</strong> — Bilan Acido-Basique de la Ration. Indicateur d\'équilibre minéral. Optimum : −100 à +100 mEq/kg MS. Un BACA trop négatif augmente le risque d\'acidose ; trop positif, risque de tétanie.',
+    met:   '<strong>Méthionine (Met)</strong> — Acide aminé essentiel, 1er limitant pour la production laitière. Cible INRA : ≥ 2,4 % des PDI.',
+    lys:   '<strong>Lysine (Lys)</strong> — Acide aminé essentiel, 2ème limitant. Cible INRA : ≥ 7,2 % des PDI. Ratio Lys:Met optimal ≈ 3:1.',
+    cap:   '<strong>Capacité d\'ingestion</strong> — Quantité maximale de matière sèche que l\'animal peut ingérer par jour (kg MS). Dépend du poids vif et de la production.',
+    lc:    '<strong>Lait corrigé</strong> — Lait ramené à 40 g/L de TB. Formule : lait corrigé = (lait × TB) / 40. Permet de comparer des laits de compositions différentes.',
+    al:    '<strong>Amidon lent</strong> — Amidon à fermentation lente dans le rumen (maïs, manioc). Risque acidose faible même en quantité élevée.',
+    ar:    '<strong>Amidon rapide</strong> — Amidon à fermentation rapide (blé, orge, triticale). Risque d\'acidose ruminale si > 150 g/kg MS de ration.',
+    ss:    '<strong>Sucres solubles</strong> — Sucres directement fermentescibles (betterave, herbe jeune, mélasses). À surveiller combinés avec l\'amidon rapide.',
+    paturage: '<strong>Pâturage</strong> — Ajoute +10 % aux besoins énergétiques (déplacements, thermorégulation). Stabulation = pas de majoration.',
+    pdi_ufl: '<strong>PDI / UFL</strong> — Ratio protéines / énergie de la ration. Optimum : 90–105 g PDI par UFL. En dessous = déficit protéique ; au-dessus = gaspillage d\'azote.',
+  };
+
+  (function() {
+    const popup = document.getElementById('tt-popup');
+    if (!popup) return;
+    let hideTimer;
+    document.addEventListener('mouseover', e => {
+      const el = e.target.closest('.tt-q');
+      if (!el) return;
+      clearTimeout(hideTimer);
+      const key = el.dataset.tt;
+      if (!TT_DEFS[key]) return;
+      popup.innerHTML = TT_DEFS[key];
+      popup.classList.add('visible');
+      const r = el.getBoundingClientRect();
+      let top = r.top - popup.offsetHeight - 8;
+      let left = r.left + r.width/2 - 130;
+      if (top < 8) top = r.bottom + 8;
+      if (left < 8) left = 8;
+      if (left + 260 > window.innerWidth - 8) left = window.innerWidth - 268;
+      popup.style.top = top + 'px';
+      popup.style.left = left + 'px';
+    });
+    document.addEventListener('mouseout', e => {
+      if (!e.target.closest('.tt-q')) return;
+      hideTimer = setTimeout(() => popup.classList.remove('visible'), 150);
+    });
+  })();
+
+  // =====================================================
+  // AUTOSAVE
+  // =====================================================
+  const AS_KEY = 'bovicalc-autosave';
+
+  function autoSaveState() {
+    if (!currentUser) return;
+    const lines = [];
+    document.querySelectorAll('#ration-lines .rb-ration-row').forEach(row => {
+      const inp = row.querySelectorAll('input');
+      if (inp[0]?.value) lines.push({ nom: inp[0].value, qty: inp[1]?.value || '' });
+    });
+    const state = {
+      ts: Date.now(),
+      step1: {
+        type:      $('type-animal')?.value,
+        pv:        $('pv')?.value,
+        prod:      $('prod')?.value,
+        tb:        $('tb')?.value,
+        tp:        $('tp')?.value,
+        gmq:       $('gmq')?.value,
+        activite:  $('activite')?.value,
+      },
+      rationLines: lines,
+    };
+    try { localStorage.setItem(AS_KEY, JSON.stringify(state)); } catch(e) {}
+    const toast = $('autosave-toast');
+    if (toast) {
+      toast.style.display = 'block'; toast.style.opacity = '1';
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 300); }, 2000);
+    }
+  }
+
+  function restoreAutoSave() {
+    try {
+      const raw = localStorage.getItem(AS_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      const ageMin = (Date.now() - state.ts) / 60000;
+      if (ageMin > 120) return; // ignore si > 2h
+      if (!confirm(`Une saisie non terminée a été trouvée (il y a ${Math.round(ageMin)} min). Voulez-vous la restaurer ?`)) return;
+      // Restaurer step 1
+      const s1 = state.step1 || {};
+      if (s1.type && $('type-animal')) {
+        $('type-animal').value = s1.type;
+        $('type-animal').dispatchEvent(new Event('change'));
+      }
+      if (s1.pv   && $('pv'))   $('pv').value   = s1.pv;
+      if (s1.prod && $('prod')) $('prod').value  = s1.prod;
+      if (s1.tb   && $('tb'))   $('tb').value    = s1.tb;
+      if (s1.tp   && $('tp'))   $('tp').value    = s1.tp;
+      if (s1.gmq  && $('gmq')) $('gmq').value    = s1.gmq;
+      if (s1.activite && $('activite')) $('activite').value = s1.activite;
+      // Restaurer ration
+      if (state.rationLines?.length) {
+        const container = $('ration-lines');
+        if (container) {
+          container.innerHTML = '';
+          state.rationLines.forEach(() => addLine('ration-lines','aliments-list'));
+          const rows = container.querySelectorAll('.rb-ration-row');
+          state.rationLines.forEach((l, i) => {
+            if (rows[i]) {
+              const inp = rows[i].querySelectorAll('input');
+              if (inp[0]) inp[0].value = l.nom;
+              if (inp[1]) inp[1].value = l.qty;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  }
+
+  setInterval(autoSaveState, 30000);
+
+  // =====================================================
+  // TUTORIEL DÉBUTANT
+  // =====================================================
+  const TUTORIAL_KEY = 'bovicalc-onboarded';
+  let tutorialStep = 0;
+
+  const TUTORIAL_STEPS = [
+    {
+      icon: '🐄',
+      title: 'Décrivez votre animal',
+      text: 'Commencez par l\'<strong>étape 1</strong> : sélectionnez le type d\'animal (vache laitière, génisse…), entrez son poids vif, sa production et son taux butyreux.<br><br>BoviCalc calcule automatiquement ses <strong>besoins en UFL et PDI</strong>.',
+      tip: 'UFL = Unité Fourragère Lait (énergie) · PDI = Protéines Digestibles dans l\'Intestin',
+    },
+    {
+      icon: '🌾',
+      title: 'Composez la ration',
+      text: 'À l\'<strong>étape 2</strong>, ajoutez vos aliments ligne par ligne : tapez le nom (ex: "Ensilage maïs") et la quantité en kg de matière sèche par jour.<br><br>Utilisez le bouton <strong>🤖 Auto</strong> pour laisser BoviCalc composer une ration de base automatiquement.',
+      tip: 'Les aliments sont issus des tables INRA. Vous pouvez aussi créer vos propres aliments avec vos analyses fourragères.',
+    },
+    {
+      icon: '📊',
+      title: 'Analysez le bilan',
+      text: 'À l\'<strong>étape 3</strong>, cliquez sur "Calculer le bilan". Vous verrez :<br><ul style="margin:8px 0 0 16px;line-height:1.8;"><li>Couverture UFL et PDI vs besoins</li><li>Score global de qualité de la ration</li><li>Bilan minéral et acides aminés</li><li>Répartition des glucides (acidose)</li></ul>',
+      tip: 'Un badge vert = objectif atteint · orange = à ajuster · rouge = déficit ou excès important',
+    },
+    {
+      icon: '💾',
+      title: 'Sauvegardez vos rations',
+      text: 'Cliquez sur <strong>💾 Sauvegarder</strong> dans le menu pour enregistrer la ration. Vous pourrez la recharger plus tard ou comparer deux rations avec <strong>⚖️ Comparer</strong>.<br><br>BoviCalc sauvegarde aussi automatiquement votre saisie en cours toutes les 30 secondes.',
+      tip: 'Accès complet (Ration de A à Z, Bilan fourrager…) avec le plan Pro à 15 €/mois.',
+    },
+  ];
+
+  function renderTutorialStep() {
+    const s = TUTORIAL_STEPS[tutorialStep];
+    const body = $('tutorial-body');
+    if (!body) return;
+    body.innerHTML = `
+      <div style="text-align:center;font-size:52px;margin-bottom:12px;">${s.icon}</div>
+      <h4 style="font-size:1.15rem;margin-bottom:12px;">${s.title}</h4>
+      <p style="line-height:1.7;color:var(--text);">${s.text}</p>
+      <div style="margin-top:14px;background:#f0fdf4;border-left:3px solid #16a34a;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;color:#15803d;">
+        💡 ${s.tip}
+      </div>`;
+    // Dots
+    const dots = $('tutorial-dots');
+    if (dots) dots.innerHTML = TUTORIAL_STEPS.map((_,i) =>
+      `<div style="width:8px;height:8px;border-radius:50%;background:${i===tutorialStep?'var(--green-600)':'#d1d5db'};transition:background .2s;"></div>`
+    ).join('');
+    // Boutons
+    const prev = $('tutorial-prev'), next = $('tutorial-next');
+    if (prev) prev.style.display = tutorialStep === 0 ? 'none' : '';
+    if (next) next.textContent = tutorialStep === TUTORIAL_STEPS.length-1 ? '✅ Commencer' : 'Suivant →';
+  }
+
+  function tutorialNav(dir) {
+    tutorialStep += dir;
+    if (tutorialStep >= TUTORIAL_STEPS.length) { closeTutorial(); return; }
+    if (tutorialStep < 0) tutorialStep = 0;
+    renderTutorialStep();
+  }
+
+  function showTutorial() {
+    tutorialStep = 0;
+    renderTutorialStep();
+    $('tutorial-modal')?.classList.remove('hidden');
+  }
+
+  function closeTutorial() {
+    $('tutorial-modal')?.classList.add('hidden');
+    try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch(e) {}
+  }
+
+  function maybeShowTutorial() {
+    try { if (!localStorage.getItem(TUTORIAL_KEY)) showTutorial(); } catch(e) {}
+  }
+
   initAuth();
 </script>
 
