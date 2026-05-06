@@ -9,6 +9,8 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -24,6 +26,7 @@
     <div class="header-actions">
       <button onclick="backToHome()" class="hdr-btn">☰ Menu</button>
       <a href="index.html" class="hdr-btn hdr-btn-outline">🏠 Accueil</a>
+      <button id="btn-header-auth" class="hdr-btn hdr-btn-auth" onclick="onAuthBtnClick()">🔑 Connexion</button>
     </div>
   </div>
 </header>
@@ -56,6 +59,15 @@
     </article>
   </section>
 
+  <!-- Dashboard dernières sessions -->
+  <div id="home-dashboard" style="margin-top:32px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;font-size:1rem;color:var(--green-900);">🕐 Dernières sessions</h3>
+      <button class="rb-btn rb-btn-ghost" style="font-size:.8rem;padding:6px 12px;" onclick="openSessionsModal()">Voir tout →</button>
+    </div>
+    <div id="home-sessions-list" class="home-sessions-grid"></div>
+  </div>
+
   <!-- Ration A à Z - WIZARD ÉTAPES -->
   <section id="section-ration-a-z" class="rb-section-detail hidden">
 
@@ -85,7 +97,12 @@
           </div>
         </div>
       </div>
-      <button class="rb-btn rb-btn-ghost" data-close>← Retour menu</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="rb-btn rb-btn-ghost" onclick="saveCurrentSession()" title="Sauvegarder la session courante">💾 Sauvegarder</button>
+        <button class="rb-btn rb-btn-ghost" onclick="openSessionsModal()" title="Voir toutes les sessions">📁 Mes sessions</button>
+        <button class="rb-btn rb-btn-ghost" onclick="openCompareModal()" title="Comparer deux sessions">⚖️ Comparer</button>
+        <button class="rb-btn rb-btn-ghost" data-close>← Menu</button>
+      </div>
     </div>
 
     <!-- Étape 1 : Configuration Animal -->
@@ -94,6 +111,17 @@
       <div class="step-intro">
         <h3>Configuration de l'animal</h3>
         <p>Définissez les caractéristiques de l'animal pour calculer ses besoins nutritionnels.</p>
+      </div>
+
+      <!-- Profils animaux -->
+      <div class="rb-panel panel-profiles" style="margin-bottom:20px;">
+        <h4 style="margin-top:0;">🐄 Profils animaux sauvegardés</h4>
+        <div class="rb-form-actions" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:0;">
+          <select id="animal-profiles" class="rb-select" style="min-width:220px;"><option value="">-- Sélectionner un profil --</option></select>
+          <button type="button" id="btn-save-animal-profile" class="rb-btn">💾 Sauvegarder</button>
+          <button type="button" id="btn-load-animal-profile" class="rb-btn">📂 Charger</button>
+          <button type="button" id="btn-delete-animal-profile" class="rb-btn" style="background:var(--danger);color:#fff;">🗑️</button>
+        </div>
       </div>
 
       <form id="form-besoins-tab">
@@ -322,8 +350,9 @@
       <div class="wizard-actions">
         <button type="button" class="rb-btn rb-btn-ghost" onclick="goToStep(2)">← Étape 2 : Ration</button>
         <button type="button" id="btn-calc-bilan" class="rb-btn rb-btn-primary">📊 Calculer le bilan</button>
+        <button type="button" id="btn-optimize" class="rb-btn hidden">🔧 Optimiser</button>
         <button type="button" id="btn-ia-ration" class="rb-btn">🤖 Analyse IA</button>
-        <button type="button" id="btn-export-pdf" class="rb-btn">📄 PDF</button>
+        <button type="button" id="btn-export-pdf" class="rb-btn" onclick="exportPDF()">📄 Imprimer / PDF</button>
         <button type="button" id="btn-goto-costs" class="rb-btn rb-btn-secondary">💰 Coûts →</button>
       </div>
 
@@ -332,7 +361,9 @@
         <div id="resultat-bilan-content"></div>
       </div>
 
+      <div id="bilan-score" class="hidden" style="margin-top:24px;"></div>
       <div id="bilan-indicateurs" class="hidden" style="margin-top:24px;"></div>
+      <div id="bilan-optimizer" class="hidden" style="margin-top:16px;"></div>
 
       <div id="resultat-ia" class="rb-panel hidden result-panel">
         <h3>🤖 Analyse IA</h3>
@@ -407,7 +438,7 @@
       <div class="wizard-actions">
         <button type="button" class="rb-btn rb-btn-ghost" onclick="goToStep(3)">← Étape 3 : Bilan</button>
         <button type="button" id="btn-calc-cout" class="rb-btn rb-btn-primary">💰 Calculer le coût</button>
-        <button type="button" id="btn-export-cout-pdf" class="rb-btn">📄 Exporter PDF</button>
+        <button type="button" id="btn-export-cout-pdf" class="rb-btn" onclick="exportPDF('couts')">📄 Imprimer / PDF</button>
       </div>
 
       <!-- Résultats des coûts -->
@@ -442,7 +473,7 @@
 
       <!-- Export coût -->
       <div id="cout-export-section" class="hidden" style="margin-top:24px;text-align:center;">
-        <button id="btn-export-cout-pdf-2" class="rb-btn">📄 Exporter le coût en PDF</button>
+        <button id="btn-export-cout-pdf-2" class="rb-btn" onclick="exportPDF('couts')">📄 Imprimer / PDF</button>
       </div>
 
     </div>
@@ -459,6 +490,16 @@
     <div class="step-intro">
       <h3>Configuration de l'animal</h3>
       <p>Calculez les besoins nutritionnels journaliers de votre animal sans créer de ration.</p>
+    </div>
+
+    <div class="rb-panel panel-profiles" style="margin-bottom:20px;">
+      <h4 style="margin-top:0;">🐄 Profils animaux sauvegardés</h4>
+      <div class="rb-form-actions" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:0;">
+        <select id="ba-animal-profiles" class="rb-select" style="min-width:220px;"><option value="">-- Sélectionner un profil --</option></select>
+        <button type="button" id="btn-save-ba-animal-profile" class="rb-btn">💾 Sauvegarder</button>
+        <button type="button" id="btn-load-ba-animal-profile" class="rb-btn">📂 Charger</button>
+        <button type="button" id="btn-delete-ba-animal-profile" class="rb-btn" style="background:var(--danger);color:#fff;">🗑️</button>
+      </div>
     </div>
 
     <div class="rb-form-grid">
@@ -539,7 +580,7 @@
       <div class="rb-form-actions" style="margin-top:12px;">
         <button type="button" id="btn-add-line-ration-only" class="rb-btn">+ Ligne</button>
         <button type="button" id="btn-calc-ration-only" class="rb-btn rb-btn-primary">Calculer</button>
-        <button type="button" id="btn-export-ration-seule-pdf" class="rb-btn">📄 Exporter PDF</button>
+        <button type="button" id="btn-export-ration-seule-pdf" class="rb-btn" onclick="exportPDF('ration-seule')">📄 Exporter PDF</button>
       </div>
       <datalist id="aliments-list-ration-only"></datalist>
     </div>
@@ -616,7 +657,7 @@
     <div id="tab-bf-resultat" class="rb-tab-content">
       <div class="rb-form-actions">
         <button type="button" id="btn-calc-bilan-fourrager" class="rb-btn rb-btn-primary">📊 Calculer le bilan</button>
-        <button type="button" id="btn-export-bf-pdf" class="rb-btn">📄 Exporter PDF</button>
+        <button type="button" id="btn-export-bf-pdf" class="rb-btn" onclick="exportPDF('bilan-fourrager')">📄 Exporter PDF</button>
       </div>
 
       <!-- Résultat visuel -->
@@ -798,8 +839,56 @@
   </div>
 </div>
 
+<!-- Tooltip nutritionnel flottant -->
+<div id="feed-tooltip" class="feed-tooltip hidden">
+  <div class="ft-name" id="ft-name"></div>
+  <div class="ft-row"><span class="ft-label">MS</span><span class="ft-val" id="ft-ms"></span></div>
+  <div class="ft-row"><span class="ft-label">UFL/kg MS</span><span class="ft-val" id="ft-ufl"></span></div>
+  <div class="ft-row"><span class="ft-label">PDI g/kg MS</span><span class="ft-val" id="ft-pdi"></span></div>
+</div>
+
+<!-- Rapport imprimable (caché à l'écran, visible uniquement à l'impression) -->
+<div id="print-rapport"></div>
+
 <!-- Datalist partagé pour l'autocomplétion des aliments -->
 <datalist id="aliments-list"></datalist>
+
+<!-- ====== MODAL SESSIONS ====== -->
+<div id="sessions-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:720px;">
+    <div class="rb-modal-header">
+      <h3>📁 Mes sessions enregistrées</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('sessions-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <div id="sessions-list" style="max-height:60vh;overflow-y:auto;"></div>
+    <div class="rb-form-actions" style="margin-top:16px;justify-content:flex-end;">
+      <button class="rb-btn rb-btn-ghost" onclick="document.getElementById('sessions-modal').classList.add('hidden')">Fermer</button>
+      <button class="rb-btn rb-btn-primary" onclick="saveCurrentSession()">💾 Sauvegarder la session actuelle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL COMPARAISON ====== -->
+<div id="compare-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:900px;width:95vw;">
+    <div class="rb-modal-header">
+      <h3>⚖️ Comparaison de sessions</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('compare-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div>
+        <label style="font-weight:700;font-size:.85rem;">Session A</label>
+        <select id="compare-a" class="rb-select" style="margin-top:6px;"><option value="">-- Choisir --</option></select>
+      </div>
+      <div>
+        <label style="font-weight:700;font-size:.85rem;">Session B</label>
+        <select id="compare-b" class="rb-select" style="margin-top:6px;"><option value="">-- Choisir --</option></select>
+      </div>
+    </div>
+    <button class="rb-btn rb-btn-primary" onclick="runComparison()" style="margin-bottom:20px;">⚖️ Comparer</button>
+    <div id="compare-result"></div>
+  </div>
+</div>
 
 <footer class="rb-footer">
   <p>© 2026 - BoviCalc | Outil pour les élevages</p>
@@ -882,6 +971,171 @@ Uree 46,98,0,1443`;
   let visitedSteps = new Set([1]);
   let costsByFeed = {};
   let editingFoodIndex = -1;
+
+  // =====================================================
+  // AUTH SUPABASE
+  // =====================================================
+  const SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
+  const SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
+
+  let _supa = null;
+  let currentUser = null;
+  let userPlan = 'free'; // 'free' | 'pro'
+  let _authMode = 'login';
+
+  function getSupa() {
+    if (!_supa && window.supabase) {
+      _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    }
+    return _supa;
+  }
+
+  function requireAuth(feature) {
+    if (currentUser) return true;
+    const msg = feature
+      ? 'Connectez-vous pour utiliser "' + feature + '".'
+      : 'Connectez-vous pour continuer.';
+    if (confirm(msg + '\n\nOuvrir la page de connexion ?')) openAuthModal();
+    return false;
+  }
+
+  function requirePro(feature) {
+    if (!currentUser) return requireAuth(feature);
+    if (userPlan === 'pro') return true;
+    alert('\u2b50 Fonctionnalité Pro\n\n"' + feature + '" est disponible avec l'abonnement Pro.\n\nContactez-nous pour souscrire.');
+    return false;
+  }
+
+  function updateAuthUI() {
+    const btn = $('btn-header-auth');
+    if (!btn) return;
+    if (currentUser) {
+      const name = currentUser.email?.split('@')[0] || 'Mon compte';
+      btn.textContent = '\u{1F464} ' + name;
+      btn.classList.add('hdr-btn-connected');
+    } else {
+      btn.textContent = '\u{1F511} Connexion';
+      btn.classList.remove('hdr-btn-connected');
+    }
+  }
+
+  function onAuthBtnClick() {
+    if (currentUser) openAccountModal();
+    else openAuthModal();
+  }
+
+  function openAuthModal() {
+    $('auth-modal')?.classList.remove('hidden');
+    const err = $('auth-error'); if (err) err.style.display = 'none';
+    switchAuthTab('login');
+  }
+  function closeAuthModal() { $('auth-modal')?.classList.add('hidden'); }
+
+  function openAccountModal() {
+    const modal = $('account-modal'); if (!modal) return;
+    const email = $('acct-email');
+    if (email) email.textContent = currentUser?.email || '';
+    const badge = $('acct-plan-badge');
+    if (badge) badge.innerHTML = userPlan === 'pro'
+      ? '<span class="plan-badge-pro">\u2b50 Pro</span>'
+      : '<span class="plan-badge-free">Gratuit</span>';
+    const details = $('acct-plan-details');
+    if (details) details.innerHTML = userPlan === 'pro'
+      ? '<p style="margin:0;font-size:.85rem;color:var(--green-900);">\u2705 Accès complet — Export PDF, Optimiseur, Comparaison, sessions illimitées.</p>'
+      : '<p style="margin:0;font-size:.85rem;color:var(--text-muted);">Plan gratuit — calculs disponibles. Passez Pro pour débloquer l'export PDF, l'optimiseur et la comparaison.</p>';
+    modal.classList.remove('hidden');
+  }
+  function closeAccountModal() { $('account-modal')?.classList.add('hidden'); }
+
+  function switchAuthTab(tab) {
+    _authMode = tab;
+    $('tab-login')?.classList.toggle('active', tab === 'login');
+    $('tab-register')?.classList.toggle('active', tab === 'register');
+    const title = $('auth-modal-title');
+    if (title) title.textContent = tab === 'login' ? 'Connexion' : 'Créer un compte';
+    const submitBtn = $('btn-auth-submit');
+    if (submitBtn) submitBtn.textContent = tab === 'login' ? 'Se connecter' : 'Créer mon compte';
+    $('auth-confirm-group')?.classList.toggle('hidden', tab !== 'register');
+    $('auth-forgot')?.classList.toggle('hidden', tab === 'register');
+    const err = $('auth-error'); if (err) err.style.display = 'none';
+  }
+
+  function showAuthError(msg) {
+    const el = $('auth-error');
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+  }
+
+  async function submitAuth() {
+    const email = $('auth-email')?.value?.trim();
+    const pass  = $('auth-pass')?.value;
+    const btn   = $('btn-auth-submit');
+    if (!email || !pass) { showAuthError('Email et mot de passe requis.'); return; }
+    const supa = getSupa();
+    if (!supa) { showAuthError('Service indisponible — vérifiez votre connexion.'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+    try {
+      if (_authMode === 'register') {
+        const confirm = $('auth-pass-confirm')?.value;
+        if (pass !== confirm) {
+          showAuthError('Les mots de passe ne correspondent pas.');
+          if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
+        }
+        if (pass.length < 6) {
+          showAuthError('Mot de passe : 6 caractères minimum.');
+          if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
+        }
+        const { error } = await supa.auth.signUp({ email, password: pass });
+        if (error) {
+          showAuthError(error.message);
+          if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
+        } else {
+          alert('\u2705 Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
+          closeAuthModal();
+        }
+      } else {
+        const { error } = await supa.auth.signInWithPassword({ email, password: pass });
+        if (error) {
+          showAuthError(error.message);
+          if (btn) { btn.disabled = false; btn.textContent = 'Se connecter'; }
+        } else {
+          closeAuthModal();
+        }
+      }
+    } catch (e) {
+      showAuthError('Erreur réseau. Vérifiez votre connexion.');
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  async function resetPassword() {
+    const email = $('auth-email')?.value?.trim();
+    if (!email) { showAuthError('Entrez votre email pour réinitialiser votre mot de passe.'); return; }
+    const supa = getSupa(); if (!supa) return;
+    const { error } = await supa.auth.resetPasswordForEmail(email);
+    if (!error) alert('\u{1F4E7} Email de réinitialisation envoyé à ' + email);
+    else showAuthError(error.message);
+  }
+
+  async function logoutUser() {
+    await getSupa()?.auth.signOut();
+    currentUser = null; userPlan = 'free';
+    updateAuthUI();
+    closeAccountModal();
+    alert('\U0001f44b Déconnecté avec succès.');
+  }
+
+  async function initAuth() {
+    const supa = getSupa(); if (!supa) return;
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (session?.user) { currentUser = session.user; updateAuthUI(); }
+      supa.auth.onAuthStateChange((_evt, session) => {
+        currentUser = session?.user || null;
+        updateAuthUI();
+      });
+    } catch (e) { console.warn('Auth init failed:', e); }
+  }
+
 
   const LS = {
     costs:          'bovicalc-costs',
@@ -1304,6 +1558,8 @@ Uree 46,98,0,1443`;
         </table>
       </div>`;
     $('resultat-bilan')?.classList.remove('hidden');
+    $('btn-optimize')?.classList.remove('hidden');
+    renderQualityScore(a, b);
     renderIndicateurs(a, b);
   }
   $('btn-calc-bilan')?.addEventListener('click', calcBilan);
@@ -1585,6 +1841,495 @@ Uree 46,98,0,1443`;
         ${card('aa',        '💊', 'Acides Aminés',            aaCls, aaBadge, aaBadgeCls, aaResume, aaDetail)}
       </div>`;
     container.classList.remove('hidden');
+  }
+
+  // =====================================================
+  // SESSIONS — Sauvegarde / Chargement
+  // =====================================================
+  const SESS_KEY = 'bovicalc-sessions';
+  const ANIMAL_LABELS = {
+    'vache-laitiere':'Vache laitière','vache-tarie':'Vache tarie',
+    'vache-prepa-velage':'Prépa vêlage','genisse':'Génisse',
+    'genisse-engrais':'Génisse engrais','vache-reforme':'Vache réforme','veau':'Veau'
+  };
+
+  function saveCurrentSession() {
+    if (!requireAuth('Sauvegarder une session')) return;
+    if (!lastB || !lastA?.items?.length) {
+      alert('Calculez d\'abord un bilan complet (étapes 1, 2, 3) avant de sauvegarder.'); return;
+    }
+    const name = prompt('Nom de la session :', `Ration du ${new Date().toLocaleDateString('fr-FR')}`);
+    if (!name?.trim()) return;
+    const rationLines = [];
+    document.querySelectorAll('#ration-lines .rb-ration-row').forEach(row => {
+      const inp = row.querySelectorAll('input');
+      if (inp[0]?.value) rationLines.push({ nom: inp[0].value, qty: inp[1]?.value || '' });
+    });
+    const sessions = loadLS(SESS_KEY, []);
+    sessions.unshift({
+      id: Date.now(), name: name.trim(),
+      date: new Date().toLocaleDateString('fr-FR'),
+      animalLabel: ANIMAL_LABELS[$('type-animal')?.value] || 'Animal',
+      rationCount: rationLines.length,
+      animal: {
+        type:$('type-animal')?.value, race:$('race-animal')?.value,
+        poids:$('poids-vif')?.value, prod:$('production-lait')?.value,
+        gmq:$('gmq')?.value, activite:$('activite')?.value,
+        tb:$('tb')?.value, tp:$('tp')?.value
+      },
+      mineraux: {
+        na:$('mineraux-na')?.value, k:$('mineraux-k')?.value,
+        ca:$('mineraux-ca')?.value, mg:$('mineraux-mg')?.value,
+        cl:$('mineraux-cl')?.value, s:$('mineraux-s')?.value
+      },
+      aa: { met:$('aa-met')?.value, lys:$('aa-lys')?.value },
+      rationLines, lastB, lastA
+    });
+    if (sessions.length > 30) sessions.pop();
+    saveLS(SESS_KEY, sessions);
+    alert(`✅ Session "${name.trim()}" sauvegardée avec succès !`);
+    refreshCompareSelects();
+    refreshDashboard();
+  }
+
+  function openSessionsModal() {
+    refreshSessionsList();
+    refreshCompareSelects();
+    document.getElementById('sessions-modal')?.classList.remove('hidden');
+  }
+
+  function refreshSessionsList() {
+    const sessions = loadLS(SESS_KEY, []);
+    const list = $('sessions-list');
+    if (!list) return;
+    if (!sessions.length) {
+      list.innerHTML = '<p style="padding:24px;text-align:center;color:var(--text-muted);">Aucune session enregistrée.<br>Calculez un bilan complet puis cliquez sur 💾 Sauvegarder.</p>';
+      return;
+    }
+    list.innerHTML = sessions.map(s => `
+      <div class="sess-item">
+        <div class="sess-info">
+          <div class="sess-name">${s.name}</div>
+          <div class="sess-meta">${s.date} · ${s.animalLabel} · ${s.rationCount} aliment${s.rationCount>1?'s':''}</div>
+          ${s.lastB ? `<div class="sess-values">
+            Énergie : ${s.lastA?.totalUFL?.toFixed(2)||'?'} / ${s.lastB?.bUFL?.toFixed(2)||'?'} UFL ·
+            PDI : ${s.lastA?.totalPDI?.toFixed(0)||'?'} / ${s.lastB?.bPDI?.toFixed(0)||'?'} g
+          </div>` : ''}
+        </div>
+        <div class="sess-actions">
+          <button class="rb-btn" onclick="loadSessionById(${s.id})">📂 Charger</button>
+          <button class="rb-btn" style="background:var(--danger);color:#fff;" onclick="deleteSessionById(${s.id})">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function loadSessionById(id) {
+    const s = loadLS(SESS_KEY, []).find(x => x.id === id);
+    if (!s) return;
+    const set = (id, v) => { if ($(id)) $(id).value = v || ''; };
+    set('type-animal', s.animal.type); set('race-animal', s.animal.race);
+    set('poids-vif', s.animal.poids); set('production-lait', s.animal.prod);
+    set('gmq', s.animal.gmq); set('activite', s.animal.activite);
+    set('tb', s.animal.tb); set('tp', s.animal.tp);
+    $('type-animal')?.dispatchEvent(new Event('change'));
+    if (s.mineraux) {
+      set('mineraux-na',s.mineraux.na); set('mineraux-k',s.mineraux.k);
+      set('mineraux-ca',s.mineraux.ca); set('mineraux-mg',s.mineraux.mg);
+      set('mineraux-cl',s.mineraux.cl); set('mineraux-s',s.mineraux.s);
+    }
+    if (s.aa) { set('aa-met',s.aa.met); set('aa-lys',s.aa.lys); }
+    $('ration-lines').innerHTML = '';
+    s.rationLines.forEach(l => {
+      addLine('ration-lines','aliments-list');
+      const rows = document.querySelectorAll('#ration-lines .rb-ration-row');
+      const last = rows[rows.length-1];
+      if (last) { last.querySelectorAll('input')[0].value=l.nom; last.querySelectorAll('input')[1].value=l.qty; }
+    });
+    lastB = s.lastB; lastA = s.lastA;
+    document.getElementById('sessions-modal')?.classList.add('hidden');
+    showSection('ration-a-z');
+    goToStep(1);
+    if (lastB) { renderBesoinsResult(lastB,'resultat-besoins-content'); $('resultat-besoins')?.classList.remove('hidden'); }
+    alert(`✅ Session "${s.name}" chargée !`);
+  }
+
+  function deleteSessionById(id) {
+    if (!confirm('Supprimer cette session définitivement ?')) return;
+    const sessions = loadLS(SESS_KEY, []).filter(x => x.id !== id);
+    saveLS(SESS_KEY, sessions);
+    refreshSessionsList(); refreshCompareSelects();
+  }
+
+  // =====================================================
+  // OPTIMISEUR DE RATION
+  // =====================================================
+  $('btn-optimize')?.addEventListener('click', runOptimizer);
+
+  function runOptimizer() {
+    if (!requirePro('Optimiseur de ration')) return;
+    if (!lastB || !lastA?.items?.length) return;
+    const a=lastA, b=lastB;
+    const rUFL = b.bUFL > 0 ? a.totalUFL/b.bUFL : 0;
+    const rPDI = b.bPDI > 0 ? a.totalPDI/b.bPDI : 0;
+    const ppu  = a.totalUFL > 0 ? a.totalPDI/a.totalUFL : 0;
+    const suggs = [];
+
+    function bestFeed(byFn) { return [...a.items].sort((x,y)=>byFn(y)-byFn(x))[0]; }
+
+    if (rUFL < 0.92) {
+      const need = b.bUFL - a.totalUFL;
+      const f = bestFeed(x=>x.ufl/x.qty);
+      if (f) {
+        const dq = need/(f.ufl/f.qty);
+        suggs.push({icon:'⚡',verb:'Augmenter',feed:f.nom,sign:'+',qty:dq,
+          effect:`→ énergie ${((a.totalUFL+need)/b.bUFL*100).toFixed(0)}%`,reason:'Déficit énergétique'});
+      }
+    }
+    if (rUFL > 1.13) {
+      const excess = a.totalUFL - b.bUFL;
+      const f = bestFeed(x=>x.ufl/x.qty);
+      if (f) {
+        const dq = Math.min(f.qty*0.35, excess/(f.ufl/f.qty));
+        suggs.push({icon:'✂️',verb:'Réduire',feed:f.nom,sign:'-',qty:dq,
+          effect:`→ énergie ${((a.totalUFL-dq*f.ufl/f.qty)/b.bUFL*100).toFixed(0)}%`,reason:'Excès énergétique'});
+      }
+    }
+    if (rPDI < 0.9) {
+      const need = b.bPDI - a.totalPDI;
+      const f = bestFeed(x=>x.pdi/x.qty);
+      if (f) {
+        const dq = need/(f.pdi/f.qty);
+        suggs.push({icon:'🧬',verb:'Augmenter',feed:f.nom,sign:'+',qty:dq,
+          effect:`→ PDI ${((a.totalPDI+need)/b.bPDI*100).toFixed(0)}%`,reason:'Déficit protéique'});
+      }
+    }
+    if (rPDI > 1.15) {
+      const excess = a.totalPDI - b.bPDI;
+      const f = bestFeed(x=>x.pdi/x.qty);
+      if (f) {
+        const dq = Math.min(f.qty*0.35, excess/(f.pdi/f.qty));
+        suggs.push({icon:'✂️',verb:'Réduire',feed:f.nom,sign:'-',qty:dq,
+          effect:`→ PDI ${((a.totalPDI-dq*f.pdi/f.qty)/b.bPDI*100).toFixed(0)}%`,reason:'Excès protéique'});
+      }
+    }
+    if (ppu < 85 && rUFL >= 0.88 && rPDI < 0.95) {
+      suggs.push({icon:'⚖️',verb:'Ajouter',feed:'Tourteau de colza',sign:'+',qty:0.5,
+        effect:'Améliore rapport PDI/UFL',reason:'Déséquilibre énergie/protéines'});
+    }
+
+    const cont = $('bilan-optimizer');
+    if (!cont) return;
+    if (!suggs.length) {
+      cont.innerHTML = `<div class="opti-panel opti-ok"><div class="opti-header">🎯 Ration équilibrée</div>
+        <p style="padding:14px 16px;margin:0;font-size:.9rem;color:var(--text-light);">Énergie et protéines sont dans les cibles. Aucun ajustement nécessaire.</p></div>`;
+    } else {
+      cont.innerHTML = `<div class="opti-panel"><div class="opti-header">🔧 ${suggs.length} ajustement${suggs.length>1?'s':''} suggéré${suggs.length>1?'s':''}</div>
+        <div class="opti-body">
+          ${suggs.map((s,i)=>`
+            <div class="opti-row" id="opti-row-${i}">
+              <span class="opti-icon">${s.icon}</span>
+              <div class="opti-text">
+                <strong>${s.verb} «${s.feed}»</strong> de <strong>${s.sign}${s.qty.toFixed(1)} kg MS</strong>
+                <span class="opti-effect">${s.effect}</span>
+                <span class="opti-reason">${s.reason}</span>
+              </div>
+              <button class="rb-btn rb-btn-primary opti-apply-btn" onclick="applyOpt(${i},'${s.feed}','${s.sign}','${s.qty.toFixed(1)}')">Appliquer</button>
+            </div>`).join('')}
+          <p style="font-size:.75rem;color:var(--text-muted);margin:12px 0 0;">Après application, allez à l'étape 2 et recalculez le bilan.</p>
+        </div></div>`;
+    }
+    cont.classList.remove('hidden');
+    cont.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function applyOpt(i, feed, sign, qtyStr) {
+    const qty = parseFloat(qtyStr);
+    const rows = document.querySelectorAll('#ration-lines .rb-ration-row');
+    let applied = false;
+    for (const row of rows) {
+      const inp = row.querySelectorAll('input');
+      if (inp[0]?.value?.toLowerCase().includes(feed.toLowerCase())) {
+        const cur = parseFloat(inp[1]?.value)||0;
+        inp[1].value = Math.max(0, sign==='+' ? cur+qty : cur-qty).toFixed(1);
+        applied = true; break;
+      }
+    }
+    if (!applied && sign==='+') {
+      addLine('ration-lines','aliments-list');
+      const rows2 = document.querySelectorAll('#ration-lines .rb-ration-row');
+      const last = rows2[rows2.length-1];
+      if (last) { last.querySelectorAll('input')[0].value=feed; last.querySelectorAll('input')[1].value=qty.toFixed(1); }
+      applied = true;
+    }
+    if (applied) {
+      const row = document.getElementById('opti-row-'+i);
+      if (row) { row.style.opacity='.5'; row.querySelector('.opti-apply-btn').textContent='✅ Appliqué'; row.querySelector('.opti-apply-btn').disabled=true; }
+    }
+  }
+
+  // =====================================================
+  // COMPARAISON DE SESSIONS
+  // =====================================================
+  function refreshCompareSelects() {
+    const sessions = loadLS(SESS_KEY, []);
+    ['compare-a','compare-b'].forEach(id => {
+      const sel = $(id); if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">-- Choisir une session --</option>';
+      sessions.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.name} (${s.date})</option>`);
+      sel.value = cur;
+    });
+  }
+
+  function openCompareModal() {
+    if (!requirePro('Comparaison de sessions')) return;
+    refreshCompareSelects();
+    document.getElementById('compare-modal')?.classList.remove('hidden');
+  }
+
+  function runComparison() {
+    const idA = parseInt($('compare-a')?.value);
+    const idB = parseInt($('compare-b')?.value);
+    if (!idA || !idB || idA===idB) { alert('Sélectionnez deux sessions différentes.'); return; }
+    const sessions = loadLS(SESS_KEY, []);
+    const sA = sessions.find(s=>s.id===idA);
+    const sB = sessions.find(s=>s.id===idB);
+    if (!sA||!sB) return;
+    const cont = $('compare-result'); if (!cont) return;
+
+    const eu = s => ['genisse','genisse-engrais','vache-reforme','veau'].includes(s.lastB?.typeLabel) ? 'UFV':'UFL';
+    const pct = (a,b) => b>0?(a/b*100).toFixed(0)+'%':'—';
+    const diff = (a,b,dec=2) => {
+      const d = (parseFloat(a)||0)-(parseFloat(b)||0);
+      return `<span style="color:${d>0?'var(--green-700)':d<0?'var(--red-500)':'var(--text-muted)'}">${d>0?'+':''}${d.toFixed(dec)}</span>`;
+    };
+
+    cont.innerHTML = `
+      <div class="cmp-grid">
+        <div class="cmp-label"></div>
+        <div class="cmp-head cmp-a">${sA.name}</div>
+        <div class="cmp-head cmp-b">${sB.name}</div>
+        <div class="cmp-head">Différence</div>
+
+        <div class="cmp-section" style="grid-column:1/-1;">Animal</div>
+        <div class="cmp-label">Type</div>
+        <div class="cmp-cell">${ANIMAL_LABELS[sA.animal?.type]||'—'}</div>
+        <div class="cmp-cell">${ANIMAL_LABELS[sB.animal?.type]||'—'}</div>
+        <div class="cmp-cell">—</div>
+        <div class="cmp-label">Poids (kg)</div>
+        <div class="cmp-cell">${sA.animal?.poids||'—'}</div>
+        <div class="cmp-cell">${sB.animal?.poids||'—'}</div>
+        <div class="cmp-cell">${diff(sA.animal?.poids,sB.animal?.poids,0)}</div>
+
+        <div class="cmp-section" style="grid-column:1/-1;">Ration</div>
+        <div class="cmp-label">Aliments</div>
+        <div class="cmp-cell">${sA.rationCount}</div>
+        <div class="cmp-cell">${sB.rationCount}</div>
+        <div class="cmp-cell">${diff(sA.rationCount,sB.rationCount,0)}</div>
+        <div class="cmp-label">MS totale (kg/j)</div>
+        <div class="cmp-cell">${sA.lastA?.totalMS?.toFixed(1)||'—'}</div>
+        <div class="cmp-cell">${sB.lastA?.totalMS?.toFixed(1)||'—'}</div>
+        <div class="cmp-cell">${diff(sA.lastA?.totalMS,sB.lastA?.totalMS,1)}</div>
+
+        <div class="cmp-section" style="grid-column:1/-1;">Énergie</div>
+        <div class="cmp-label">Apport (UFL/j)</div>
+        <div class="cmp-cell">${sA.lastA?.totalUFL?.toFixed(2)||'—'}</div>
+        <div class="cmp-cell">${sB.lastA?.totalUFL?.toFixed(2)||'—'}</div>
+        <div class="cmp-cell">${diff(sA.lastA?.totalUFL,sB.lastA?.totalUFL)}</div>
+        <div class="cmp-label">Besoin (UFL/j)</div>
+        <div class="cmp-cell">${sA.lastB?.bUFL?.toFixed(2)||'—'}</div>
+        <div class="cmp-cell">${sB.lastB?.bUFL?.toFixed(2)||'—'}</div>
+        <div class="cmp-cell">${diff(sA.lastB?.bUFL,sB.lastB?.bUFL)}</div>
+        <div class="cmp-label">Couverture</div>
+        <div class="cmp-cell cmp-pct">${pct(sA.lastA?.totalUFL,sA.lastB?.bUFL)}</div>
+        <div class="cmp-cell cmp-pct">${pct(sB.lastA?.totalUFL,sB.lastB?.bUFL)}</div>
+        <div class="cmp-cell">—</div>
+
+        <div class="cmp-section" style="grid-column:1/-1;">Protéines</div>
+        <div class="cmp-label">Apport PDI (g/j)</div>
+        <div class="cmp-cell">${sA.lastA?.totalPDI?.toFixed(0)||'—'}</div>
+        <div class="cmp-cell">${sB.lastA?.totalPDI?.toFixed(0)||'—'}</div>
+        <div class="cmp-cell">${diff(sA.lastA?.totalPDI,sB.lastA?.totalPDI,0)}</div>
+        <div class="cmp-label">Besoin PDI (g/j)</div>
+        <div class="cmp-cell">${sA.lastB?.bPDI?.toFixed(0)||'—'}</div>
+        <div class="cmp-cell">${sB.lastB?.bPDI?.toFixed(0)||'—'}</div>
+        <div class="cmp-cell">${diff(sA.lastB?.bPDI,sB.lastB?.bPDI,0)}</div>
+        <div class="cmp-label">Couverture</div>
+        <div class="cmp-cell cmp-pct">${pct(sA.lastA?.totalPDI,sA.lastB?.bPDI)}</div>
+        <div class="cmp-cell cmp-pct">${pct(sB.lastA?.totalPDI,sB.lastB?.bPDI)}</div>
+        <div class="cmp-cell">—</div>
+      </div>`;
+  }
+
+  // =====================================================
+  // EXPORT PDF — Rapport complet
+  // =====================================================
+  function scoreColor(g){return{A:'#15803d',B:'#0369a1',C:'#b45309',D:'#b91c1c'}[g]||'#64748b';}
+  function rpStatus(r){return r>=0.9&&r<=1.1?'ok':r<0.9?'bad':'warn';}
+  function rpIcon(r){return r>=0.9&&r<=1.1?'✓':r<0.9?'↓ D\xe9ficit':'↑ Exc\xe8s';}
+  function rpBadge(cls,txt){return '<span class="rp-ind-badge badge-'+cls+'">'+txt+'</span>';}
+
+  function buildRapportRationAZ(){
+    if(!lastB||!lastA?.items?.length){alert('Calculez d\'abord le bilan complet (\xe9tapes 1 → 3).');return false;}
+    const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(lastB.typeLabel)?'UFV':'UFL';
+    const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
+    const rUFL=lastB.bUFL>0?lastA.totalUFL/lastB.bUFL:0;
+    const rPDI=lastB.bPDI>0?lastA.totalPDI/lastB.bPDI:0;
+    const ppu=lastA.totalUFL>0?lastA.totalPDI/lastA.totalUFL:0;
+    const q=computeQualityScore(lastA,lastB);
+    const gc=scoreColor(q.grade);
+    const animalLabel=ANIMAL_LABELS[$('type-animal')?.value]||'Animal';
+    const race=$('race-animal')?.value||'',poids=$('poids-vif')?.value||'';
+    const prod=$('production-lait')?.value||'',gmq=$('gmq')?.value||'';
+    const tb=$('tb')?.value||'',tp=$('tp')?.value||'';
+    const acti=$('activite')?.value==='paturage'?'P\xe2turage':'Stabulation';
+    const na=getNum('mineraux-na'),kk=getNum('mineraux-k'),ca=getNum('mineraux-ca');
+    const mg=getNum('mineraux-mg'),cl=getNum('mineraux-cl'),ss=getNum('mineraux-s');
+    const hasBaca=na||kk||ca||mg||cl||ss;
+    const baca=hasBaca?(na*43.5+kk*25.6+ca*49.9+mg*82.2)-(cl*28.2+ss*62.4):null;
+    let fg=0; lastA.items.forEach(i=>{if(getFeedCategory(i.nom)==='fourrage')fg+=i.qty;});
+    const pctConc3=lastA.totalMS>0?(1-fg/lastA.totalMS)*100:0;
+    const acidoseLvl=pctConc3<35?{c:'ok',t:'Risque faible'}:pctConc3<50?{c:'warn',t:'Risque mod\xe9r\xe9'}:{c:'bad',t:'Risque \xe9lev\xe9'};
+    const metA=getNum('aa-met'),lysA=getNum('aa-lys');
+    const metP=lastA.totalPDI>0&&metA>0?metA/lastA.totalPDI*100:0;
+    const lysP=lastA.totalPDI>0&&lysA>0?lysA/lastA.totalPDI*100:0;
+
+    const kv=(l,v)=>'<div class="rp-kv"><span class="rp-kv-label">'+l+'</span><span class="rp-kv-val">'+v+'</span></div>';
+    const ir=(ico,lbl,val,cls,badge)=>'<div class="rp-indicator-row"><span class="rp-ind-icon">'+ico+'</span><span class="rp-ind-label">'+lbl+'</span><span class="rp-ind-val">'+val+'</span>'+rpBadge(cls,badge)+'</div>';
+
+    let h='<div class="rp-header"><div class="rp-logo">BoviCalc</div>'
+     +'<div class="rp-title-block"><div class="rp-title">Rapport de ration complet</div>'
+     +'<div class="rp-subtitle">'+animalLabel+(race?' \xb7 '+race:'')+' — '+date+'</div></div>'
+     +'<div class="rp-grade-badge" style="color:'+gc+';">'+q.grade+'<span class="rp-grade-sub">'+q.total+'/100</span></div></div>'
+     +'<div class="rp-body">';
+
+    // 1 Animal
+    h+='<div class="rp-section"><div class="rp-section-title">1 — Animal</div><div class="rp-two-col">'
+     +'<div class="rp-box"><div class="rp-box-title">Identification</div>'+kv('Type',animalLabel)+(race?kv('Race',race):'')+kv('Activit\xe9',acti)+'</div>'
+     +'<div class="rp-box"><div class="rp-box-title">Param\xe8tres</div>'+kv('Poids vif',poids+' kg')+(prod?kv('Production',prod+' kg lait/j'):'')+((tb||tp)?kv('TB/TP',(tb||'—')+' / '+(tp||'—')+' g/L'):'')+(gmq?kv('GMQ',gmq+' kg/j'):'')+'</div>'
+     +'</div></div>';
+
+    // 2 Besoins
+    if(lastB){
+      h+='<div class="rp-section"><div class="rp-section-title">2 — Besoins calcul\xe9s</div><div class="rp-two-col">'
+       +'<div class="rp-box"><div class="rp-box-title">\xc9nergie ('+eu+'/j)</div>'
+       +'<div style="font-size:1.6rem;font-weight:900;color:#15803d;">'+lastB.bUFL.toFixed(2)+' '+eu+'</div>'
+       +(lastB.dUFL?.length?lastB.dUFL.map(d=>kv(d.l,d.v.toFixed(2)+' '+eu)).join(''):'')
+       +'</div><div class="rp-box"><div class="rp-box-title">PDI (g/j)</div>'
+       +'<div style="font-size:1.6rem;font-weight:900;color:#15803d;">'+lastB.bPDI.toFixed(0)+' g</div>'
+       +(lastB.dPDI?.length?lastB.dPDI.map(d=>kv(d.l,d.v.toFixed(0)+' g')).join(''):'')
+       +(lastB.ingestionCapacite>0?'<div style="margin-top:8px;border-top:1px solid #e2e8f0;padding-top:8px;">'+kv('Ingestion max',lastB.ingestionCapacite.toFixed(1)+' kg MS/j')+'</div>':'')
+       +'</div></div></div>';
+    }
+
+    // 3 Ration
+    h+='<div class="rp-section"><div class="rp-section-title">3 — Composition de la ration</div>'
+     +'<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j</th><th class="rp-num">% MS</th><th class="rp-num">'+eu+'</th><th class="rp-num">PDI g</th></tr></thead><tbody>'
+     +lastA.items.map(i=>'<tr><td>'+i.nom+'</td><td class="rp-num">'+i.qty.toFixed(1)+'</td>'
+       +'<td class="rp-num">'+(lastA.totalMS>0?(i.qty/lastA.totalMS*100).toFixed(0)+'%':'')+'</td>'
+       +'<td class="rp-num">'+i.ufl.toFixed(2)+'</td><td class="rp-num">'+i.pdi.toFixed(0)+'</td></tr>').join('')
+     +'<tr class="rp-total"><td>TOTAL</td><td class="rp-num">'+lastA.totalMS.toFixed(1)+'</td><td class="rp-num">100%</td>'
+     +'<td class="rp-num">'+lastA.totalUFL.toFixed(2)+'</td><td class="rp-num">'+lastA.totalPDI.toFixed(0)+'</td></tr>'
+     +'</tbody></table></div>';
+
+    // 4 Bilan
+    h+='<div class="rp-section"><div class="rp-section-title">4 — Bilan nutritionnel</div>'
+     +'<table class="rp-table"><thead><tr><th>Indicateur</th><th>Apport</th><th>Besoin</th><th>Couverture</th><th>Statut</th></tr></thead><tbody>'
+     +'<tr><td>\xc9nergie ('+eu+'/j)</td><td class="rp-num">'+lastA.totalUFL.toFixed(2)+'</td><td class="rp-num">'+lastB.bUFL.toFixed(2)+'</td>'
+     +'<td class="rp-num"><strong>'+(rUFL*100).toFixed(0)+'%</strong></td><td class="rp-status-'+rpStatus(rUFL)+'">'+rpIcon(rUFL)+'</td></tr>'
+     +'<tr><td>Prot\xe9ines PDI</td><td class="rp-num">'+lastA.totalPDI.toFixed(0)+'</td><td class="rp-num">'+lastB.bPDI.toFixed(0)+'</td>'
+     +'<td class="rp-num"><strong>'+(rPDI*100).toFixed(0)+'%</strong></td><td class="rp-status-'+rpStatus(rPDI)+'">'+rpIcon(rPDI)+'</td></tr>'
+     +'<tr><td>PDI/'+eu+'</td><td class="rp-num">'+ppu.toFixed(0)+' g/'+eu+'</td><td class="rp-num">90–105</td>'
+     +'<td></td><td class="rp-status-'+(ppu>=90&&ppu<=105?'ok':ppu>=82&&ppu<=115?'warn':'bad')+'">'
+     +(ppu>=90&&ppu<=105?'✓ Optimal':ppu>=82&&ppu<=115?'\xc0 ajuster':'⚠ D\xe9s\xe9quilibre')+'</td></tr>'
+     +'</tbody></table>'
+     +'<div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border-radius:8px;border-left:5px solid '+gc+';display:flex;align-items:center;gap:14px;">'
+     +'<div style="font-size:1.8rem;font-weight:900;color:'+gc+';font-family:serif;">'+q.grade+'</div>'
+     +'<div><div style="font-weight:700;color:#14532d;">Score : '+q.total+'/100</div>'
+     +'<div style="font-size:.78rem;color:#475569;">\xc9nergie '+q.eS+'/30 \xb7 PDI '+q.pS+'/30 \xb7 \xc9quilibre '+q.bS+'/20 \xb7 Acidose '+q.aS+'/10 \xb7 Ingestion '+q.cS+'/10</div>'
+     +'<div style="margin-top:6px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">'
+     +'<div style="width:'+q.total+'%;height:100%;background:'+gc+';border-radius:3px;"></div></div></div></div>'
+     +'</div>';
+
+    // 5 Indicateurs
+    h+='<div class="rp-section"><div class="rp-section-title">5 — Analyse par indicateur</div>'
+     +ir('⚡','\xc9nergie',lastA.totalUFL.toFixed(2)+'/'+lastB.bUFL.toFixed(2)+' '+eu+' ('+(rUFL*100).toFixed(0)+'%)',rpStatus(rUFL),rpStatus(rUFL)==='ok'?'Optimal':rpStatus(rUFL)==='bad'?'D\xe9ficit':'Exc\xe8s')
+     +ir('\U0001f9ec','Prot\xe9ines',lastA.totalPDI.toFixed(0)+'/'+lastB.bPDI.toFixed(0)+' g ('+(rPDI*100).toFixed(0)+'%)',rpStatus(rPDI),rpStatus(rPDI)==='ok'?'Optimal':rpStatus(rPDI)==='bad'?'D\xe9ficit':'Exc\xe8s')
+     +ir('⚖️','Equilibre PDI/'+eu,ppu.toFixed(0)+' g/'+eu,ppu>=90&&ppu<=105?'ok':ppu>=82&&ppu<=115?'warn':'bad',ppu>=90&&ppu<=105?'Optimal':ppu>=82&&ppu<=115?'\xc0 ajuster':'D\xe9s\xe9quilibre')
+     +ir('\U0001f525','Acidose',pctConc3.toFixed(0)+'% conc. / '+(100-pctConc3).toFixed(0)+'% fourr.',acidoseLvl.c,acidoseLvl.t)
+     +(hasBaca?ir('⚗️','BACA',(baca?.toFixed(0)||'?')+' mEq/kg MS',Math.abs(baca||0)<=100?'ok':'warn',Math.abs(baca||0)<=100?'Optimal':baca<0?'Anionique':'Alcalin'):'')
+     +(metA>0?ir('\U0001f48a','M\xe9thionine',metA.toFixed(0)+' g/j = '+metP.toFixed(1)+'% PDI',metP>=2.4?'ok':metP>=2.0?'warn':'bad',metP>=2.4?'Optimal':metP>=2.0?'Correct':'D\xe9ficit'):'')
+     +(lysA>0?ir('\U0001f48a','Lysine',lysA.toFixed(0)+' g/j = '+lysP.toFixed(1)+'% PDI',lysP>=7.2?'ok':lysP>=6.5?'warn':'bad',lysP>=7.2?'Optimal':lysP>=6.5?'Correct':'D\xe9ficit'):'')
+     +'</div>';
+
+    // 6 Couts
+    const cv=document.getElementById('cout-vl-jour')?.textContent;
+    if(cv&&cv!=='—'){
+      h+='<div class="rp-section"><div class="rp-section-title">6 — Co\xfbts</div><div class="rp-two-col">'
+       +'<div class="rp-box"><div class="rp-box-title">Co\xfbt/VL/j</div><div style="font-size:1.4rem;font-weight:800;color:#14532d;">'+cv+'</div></div>'
+       +'<div class="rp-box"><div class="rp-box-title">Co\xfbt/1000 L</div><div style="font-size:1.4rem;font-weight:800;color:#0369a1;">'+(document.getElementById('cout-1000l')?.textContent||'—')+'</div></div>'
+       +'<div class="rp-box"><div class="rp-box-title">Co\xfbt/kg MS</div><div style="font-size:1.1rem;font-weight:700;">'+(document.getElementById('cout-kg-ms')?.textContent||'—')+'</div></div>'
+       +'<div class="rp-box"><div class="rp-box-title">MS/VL/j</div><div style="font-size:1.1rem;font-weight:700;">'+(document.getElementById('cout-ms-vl')?.textContent||'—')+'</div></div>'
+       +'</div></div>';
+    }
+    h+='</div><div class="rp-footer"><span>BoviCalc — Outil de rationnement bovin</span><span>'+date+'</span></div>';
+    return h;
+  }
+
+  function buildRapportRationSeule(){
+    const a=lastA;
+    if(!a?.items?.length){alert('Calculez d\'abord les apports.');return false;}
+    const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
+    const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
+    const rows=a.items.map(i=>'<tr><td>'+i.nom+'</td><td class="rp-num">'+i.qty.toFixed(1)+'</td><td class="rp-num">'+(a.totalMS>0?(i.qty/a.totalMS*100).toFixed(0)+'%':'')+'</td><td class="rp-num">'+i.ufl.toFixed(2)+'</td><td class="rp-num">'+i.pdi.toFixed(0)+'</td></tr>').join('');
+    return '<div class="rp-header"><div class="rp-logo">BoviCalc</div><div class="rp-title-block"><div class="rp-title">Analyse de ration — apports seuls</div><div class="rp-subtitle">'+date+'</div></div></div>'
+     +'<div class="rp-body"><div class="rp-section"><div class="rp-section-title">Composition</div>'
+     +'<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j</th><th class="rp-num">% MS</th><th class="rp-num">UFL</th><th class="rp-num">PDI g</th></tr></thead>'
+     +'<tbody>'+rows+'<tr class="rp-total"><td>TOTAL</td><td class="rp-num">'+a.totalMS.toFixed(1)+'</td><td class="rp-num">100%</td><td class="rp-num">'+a.totalUFL.toFixed(2)+'</td><td class="rp-num">'+a.totalPDI.toFixed(0)+'</td></tr></tbody></table></div>'
+     +'<div class="rp-section"><div class="rp-section-title">Apports</div><div class="rp-two-col">'
+     +'<div class="rp-box"><div class="rp-box-title">MS</div><div style="font-size:1.4rem;font-weight:800;color:#15803d;">'+a.totalMS.toFixed(1)+' kg/j</div></div>'
+     +'<div class="rp-box"><div class="rp-box-title">\xc9nergie</div><div style="font-size:1.4rem;font-weight:800;color:#15803d;">'+a.totalUFL.toFixed(2)+' UFL/j</div></div>'
+     +'<div class="rp-box"><div class="rp-box-title">PDI</div><div style="font-size:1.4rem;font-weight:800;color:#15803d;">'+a.totalPDI.toFixed(0)+' g/j</div></div>'
+     +'<div class="rp-box"><div class="rp-box-title">PDI/UFL</div><div style="font-size:1.4rem;font-weight:800;color:'+(ppu>=90&&ppu<=105?'#15803d':'#b45309')+';">'+ppu.toFixed(0)+' g/UFL</div><div style="font-size:.75rem;color:#64748b;">Cible 90–105</div></div>'
+     +'</div></div></div>'
+     +'<div class="rp-footer"><span>BoviCalc</span><span>'+date+'</span></div>';
+  }
+
+  function buildRapportBilanFourrager(){
+    const st=document.getElementById('bf-stock-total')?.textContent;
+    const bs=document.getElementById('bf-besoin-total')?.textContent;
+    const bv=document.getElementById('bf-bilan-value')?.textContent;
+    if(!st||st==='—'){alert('Calculez d\'abord le bilan fourrager.');return false;}
+    const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
+    const solde=parseFloat(bv)||0;
+    return '<div class="rp-header"><div class="rp-logo">BoviCalc</div><div class="rp-title-block"><div class="rp-title">Bilan fourrager</div><div class="rp-subtitle">'+date+'</div></div></div>'
+     +'<div class="rp-body"><div class="rp-section"><div class="rp-section-title">R\xe9sultat</div><div class="rp-two-col">'
+     +'<div class="rp-box"><div class="rp-box-title">Stock total (t MS)</div><div style="font-size:1.8rem;font-weight:800;color:#0369a1;">'+st+'</div></div>'
+     +'<div class="rp-box"><div class="rp-box-title">Besoin total (t MS)</div><div style="font-size:1.8rem;font-weight:800;color:#b45309;">'+bs+'</div></div>'
+     +'<div class="rp-box" style="grid-column:1/-1;border-left:5px solid '+(solde>=0?'#15803d':'#b91c1c')+';">'
+     +'<div class="rp-box-title">Solde (t MS)</div>'
+     +'<div style="font-size:2rem;font-weight:900;color:'+(solde>=0?'#15803d':'#b91c1c')+';">'+bv+' t MS</div>'
+     +'<div style="font-size:.9rem;color:#475569;margin-top:4px;">'+(solde>=0?'✓ Stocks suffisants':'⚠ D\xe9ficit fourrager')+'</div>'
+     +'</div></div></div></div>'
+     +'<div class="rp-footer"><span>BoviCalc</span><span>'+date+'</span></div>';
+  }
+
+  function exportPDF(mode){
+    if (!requirePro('Export PDF')) return;
+    const rp=document.getElementById('print-rapport');
+    if(!rp) return;
+    let html='';
+    if(!mode||mode==='ration-az'||mode==='couts'){
+      html=buildRapportRationAZ();
+    } else if(mode==='ration-seule'){
+      const a2=parseRation('ration-only-lines'); lastA=a2;
+      html=buildRapportRationSeule();
+    } else if(mode==='bilan-fourrager'){
+      html=buildRapportBilanFourrager();
+    }
+    if(!html) return;
+    rp.innerHTML=html;
+    window.print();
   }
 
   // -- Couts
@@ -1887,7 +2632,194 @@ Uree 46,98,0,1443`;
       el.classList.remove('hidden');}
   });
 
-  // -- INITIALISATION
+  // =====================================================
+  // PROFILS ANIMAUX
+  // =====================================================
+  const AP_KEY = 'bovicalc-animal-profiles';
+
+  function getAnimalFields(prefix='') {
+    const g = id => $(prefix+id)?.value || '';
+    return {
+      type:g('type-animal'), race:g('race-animal'), poids:g('poids-vif'),
+      prod:g('production-lait'), gmq:g('gmq'), activite:g('activite'),
+      tb:g('tb'), tp:g('tp')
+    };
+  }
+  function setAnimalFields(data, prefix='') {
+    const s = (id, v) => { if ($(prefix+id)) $(prefix+id).value = v||''; };
+    s('type-animal',data.type); s('race-animal',data.race); s('poids-vif',data.poids);
+    s('production-lait',data.prod); s('gmq',data.gmq); s('activite',data.activite);
+    s('tb',data.tb); s('tp',data.tp);
+    $(prefix+'type-animal')?.dispatchEvent(new Event('change'));
+  }
+
+  function updateAnimalProfileSelects() {
+    const profiles = loadLS(AP_KEY, {});
+    ['animal-profiles','ba-animal-profiles'].forEach(id => {
+      const sel = $(id); if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">-- Sélectionner un profil --</option>';
+      Object.keys(profiles).forEach(n => sel.innerHTML += `<option value="${n}">${n}</option>`);
+      sel.value = cur;
+    });
+  }
+
+  function saveAnimalProfile(prefix='') {
+    const name = prompt('Nom du profil animal :'); if (!name?.trim()) return;
+    const profiles = loadLS(AP_KEY, {});
+    profiles[name.trim()] = getAnimalFields(prefix);
+    saveLS(AP_KEY, profiles);
+    updateAnimalProfileSelects();
+    const selId = prefix ? 'ba-animal-profiles' : 'animal-profiles';
+    if ($(selId)) $(selId).value = name.trim();
+    alert(`✅ Profil animal "${name.trim()}" sauvegardé !`);
+  }
+  function loadAnimalProfile(selId, prefix='') {
+    const name = $(selId)?.value; if (!name) return;
+    const data = loadLS(AP_KEY, {})[name]; if (!data) return;
+    setAnimalFields(data, prefix);
+  }
+  function deleteAnimalProfile(selId) {
+    const name = $(selId)?.value; if (!name || !confirm(`Supprimer le profil "${name}" ?`)) return;
+    const profiles = loadLS(AP_KEY, {}); delete profiles[name];
+    saveLS(AP_KEY, profiles); updateAnimalProfileSelects();
+  }
+
+  $('btn-save-animal-profile')?.addEventListener('click', () => saveAnimalProfile(''));
+  $('btn-load-animal-profile')?.addEventListener('click', () => loadAnimalProfile('animal-profiles',''));
+  $('btn-delete-animal-profile')?.addEventListener('click', () => deleteAnimalProfile('animal-profiles'));
+  $('btn-save-ba-animal-profile')?.addEventListener('click', () => saveAnimalProfile('ba-'));
+  $('btn-load-ba-animal-profile')?.addEventListener('click', () => loadAnimalProfile('ba-animal-profiles','ba-'));
+  $('btn-delete-ba-animal-profile')?.addEventListener('click', () => deleteAnimalProfile('ba-animal-profiles'));
+
+  // =====================================================
+  // SCORE QUALITÉ DE RATION (A / B / C / D)
+  // =====================================================
+  function computeQualityScore(a, b) {
+    const rUFL = b.bUFL > 0 ? a.totalUFL/b.bUFL : 0;
+    const rPDI = b.bPDI > 0 ? a.totalPDI/b.bPDI : 0;
+    const ppu  = a.totalUFL > 0 ? a.totalPDI/a.totalUFL : 0;
+
+    // Énergie — 30 pts
+    const eS = rUFL>=0.93&&rUFL<=1.08 ? 30 : rUFL>=0.88&&rUFL<=1.13 ? 20 : rUFL>=0.80&&rUFL<=1.20 ? 10 : 0;
+    // PDI — 30 pts
+    const pS = rPDI>=0.92&&rPDI<=1.10 ? 30 : rPDI>=0.85&&rPDI<=1.18 ? 20 : rPDI>=0.75&&rPDI<=1.25 ? 10 : 0;
+    // Équilibre E/P — 20 pts
+    const bS = ppu>=90&&ppu<=105 ? 20 : ppu>=82&&ppu<=115 ? 12 : ppu>=75&&ppu<=125 ? 5 : 0;
+    // Acidose — 10 pts
+    let foragekgMS2=0;
+    a.items.forEach(i=>{ if(getFeedCategory(i.nom)==='fourrage') foragekgMS2+=i.qty; });
+    const pctC2 = a.totalMS>0 ? (1-foragekgMS2/a.totalMS)*100 : 0;
+    const aS = pctC2<40 ? 10 : pctC2<50 ? 6 : pctC2<60 ? 3 : 0;
+    // Ingestion — 10 pts
+    const cS = b.ingestionCapacite>0 ? (a.totalMS/b.ingestionCapacite<=1.03 ? 10 : a.totalMS/b.ingestionCapacite<=1.10 ? 6 : 2) : 10;
+
+    const total = eS+pS+bS+aS+cS;
+    const grade = total>=85?'A':total>=68?'B':total>=48?'C':'D';
+    return { total, grade, eS, pS, bS, aS, cS };
+  }
+
+  function renderQualityScore(a, b) {
+    const q = computeQualityScore(a, b);
+    const colors = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#b91c1c' };
+    const bg     = { A:'#dcfce7', B:'#dbeafe', C:'#fef3c7', D:'#fee2e2' };
+    const msgs   = {
+      A:'Ration excellente — tous les indicateurs sont dans les cibles optimales.',
+      B:'Bonne ration — quelques ajustements mineurs amélioreraient encore l\'équilibre.',
+      C:'Ration acceptable — des déséquilibres notables nécessitent des corrections.',
+      D:'Ration à revoir — des déficits ou excès importants peuvent nuire aux performances.'
+    };
+    const cont = $('bilan-score'); if (!cont) return;
+    const bar = (score, max, color) => `<div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:3px;">
+      <div style="width:${(score/max*100).toFixed(0)}%;height:100%;background:${color};border-radius:3px;transition:width .5s;"></div></div>`;
+    cont.innerHTML = `
+      <div class="quality-card" style="border-left:6px solid ${colors[q.grade]};background:${bg[q.grade]};">
+        <div class="quality-main">
+          <div class="quality-grade" style="color:${colors[q.grade]};">${q.grade}</div>
+          <div class="quality-info">
+            <div class="quality-title">Score global : <strong>${q.total}/100</strong></div>
+            <div class="quality-msg">${msgs[q.grade]}</div>
+            <div class="quality-progress" style="margin-top:10px;">
+              <div style="height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;">
+                <div style="width:${q.total}%;height:100%;background:${colors[q.grade]};border-radius:5px;transition:width .7s cubic-bezier(.4,0,.2,1);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="quality-breakdown">
+          <div class="qb-item"><span>⚡ Énergie</span><span>${q.eS}/30</span>${bar(q.eS,30,colors[q.grade])}</div>
+          <div class="qb-item"><span>🧬 Protéines</span><span>${q.pS}/30</span>${bar(q.pS,30,colors[q.grade])}</div>
+          <div class="qb-item"><span>⚖️ Équilibre E/P</span><span>${q.bS}/20</span>${bar(q.bS,20,colors[q.grade])}</div>
+          <div class="qb-item"><span>🔥 Acidose</span><span>${q.aS}/10</span>${bar(q.aS,10,colors[q.grade])}</div>
+          <div class="qb-item"><span>🐄 Ingestion</span><span>${q.cS}/10</span>${bar(q.cS,10,colors[q.grade])}</div>
+        </div>
+      </div>`;
+    cont.classList.remove('hidden');
+  }
+
+  // =====================================================
+  // TOOLTIP NUTRITIONNEL EN TEMPS RÉEL
+  // =====================================================
+  const tooltip = document.getElementById('feed-tooltip');
+
+  document.addEventListener('input', e => {
+    if (!e.target.matches('input[list="aliments-list"], input[list="aliments-list-ration-only"]')) return;
+    const val = e.target.value.trim();
+    if (val.length < 2) { tooltip?.classList.add('hidden'); return; }
+    const f = findFood(val);
+    if (f && tooltip) {
+      const r = e.target.getBoundingClientRect();
+      tooltip.style.top  = (r.bottom + window.scrollY + 6) + 'px';
+      tooltip.style.left = Math.min(r.left + window.scrollX, window.innerWidth - 220) + 'px';
+      document.getElementById('ft-name').textContent = f.nom;
+      document.getElementById('ft-ms').textContent   = f.ms.toFixed(1) + ' %';
+      document.getElementById('ft-ufl').textContent  = f.uflPerKgMS.toFixed(3);
+      document.getElementById('ft-pdi').textContent  = f.pdiPerKgMS.toFixed(1) + ' g';
+      tooltip.classList.remove('hidden');
+    } else {
+      tooltip?.classList.add('hidden');
+    }
+  });
+  document.addEventListener('focusout', e => {
+    if (e.target.matches('input[list]')) setTimeout(() => tooltip?.classList.add('hidden'), 200);
+  });
+
+  // =====================================================
+  // DASHBOARD ACCUEIL
+  // =====================================================
+  function refreshDashboard() {
+    const sessions = loadLS(SESS_KEY, []);
+    const dash = document.getElementById('home-dashboard');
+    const list = document.getElementById('home-sessions-list');
+    if (!dash || !list) return;
+    if (!sessions.length) { dash.style.display = 'none'; return; }
+    dash.style.display = 'block';
+    const last3 = sessions.slice(0, 3);
+    list.innerHTML = last3.map(s => {
+      const rUFL = s.lastB?.bUFL > 0 ? (s.lastA?.totalUFL||0) / s.lastB.bUFL * 100 : 0;
+      const rPDI = s.lastB?.bPDI > 0 ? (s.lastA?.totalPDI||0) / s.lastB.bPDI * 100 : 0;
+      const grade = s.lastA && s.lastB ? computeQualityScore(s.lastA, s.lastB).grade : '—';
+      const gc = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#b91c1c', '—':'#94a3b8' };
+      return `<div class="home-sess-card" onclick="loadSessionById(${s.id})">
+        <div class="hsc-grade" style="color:${gc[grade]};">${grade}</div>
+        <div class="hsc-info">
+          <div class="hsc-name">${s.name}</div>
+          <div class="hsc-meta">${s.date} · ${ANIMAL_LABELS[s.animal?.type]||'—'}</div>
+          ${s.lastA ? `<div class="hsc-vals">⚡${rUFL.toFixed(0)}% · 🧬${rPDI.toFixed(0)}%</div>` : ''}
+        </div>
+        <span style="color:var(--text-muted);font-size:.8rem;">Charger →</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Mise à jour score + dashboard après chaque bilan
+  const _origRenderIndicateurs = renderIndicateurs;
+  // Hook: score + dashboard après calcul bilan
+  // (appelé directement depuis calcBilan ci-dessus)
+
+  // =====================================================
+  // INITIALISATION
+  // =====================================================
   alimentsDb    = parseAlimentsCsv(window.RB_ALIMENTS_CSV||'');
   customFoodsDb = loadLS(LS.customFoods,[]);
   costsByFeed   = loadLS(LS.costs,{});
@@ -1895,9 +2827,71 @@ Uree 46,98,0,1443`;
   goToStep(1);
   updateRationProfiles();
   updateHerdProfiles();
+  updateAnimalProfileSelects();
   addLine('ration-lines','aliments-list');
   addLine('ration-only-lines','aliments-list-ration-only');
+  refreshDashboard();
+  initAuth();
 </script>
+
+
+<!-- ========== AUTH MODAL ========== -->
+<div id="auth-modal" class="modal-backdrop hidden" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 id="auth-modal-title">Connexion</h3>
+      <button onclick="closeAuthModal()" class="modal-close" aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Se connecter</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Créer un compte</button>
+      </div>
+      <div style="margin-top:18px;">
+        <div class="rb-form-group">
+          <label>Email</label>
+          <input type="email" id="auth-email" class="rb-input" placeholder="votre@email.com" autocomplete="email"
+                 onkeydown="if(event.key==='Enter')submitAuth()">
+        </div>
+        <div class="rb-form-group" style="margin-top:12px;">
+          <label>Mot de passe</label>
+          <input type="password" id="auth-pass" class="rb-input" placeholder="••••••••" autocomplete="current-password"
+                 onkeydown="if(event.key==='Enter')submitAuth()">
+        </div>
+        <div id="auth-confirm-group" class="rb-form-group hidden" style="margin-top:12px;">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="auth-pass-confirm" class="rb-input" placeholder="••••••••">
+        </div>
+        <div id="auth-error" style="display:none;color:var(--danger);font-size:.85rem;margin-top:10px;padding:8px 12px;background:#fee2e2;border-radius:6px;"></div>
+        <button id="btn-auth-submit" class="rb-btn rb-btn-primary" style="width:100%;margin-top:18px;" onclick="submitAuth()">Se connecter</button>
+        <div id="auth-forgot" style="text-align:center;margin-top:12px;">
+          <a href="#" onclick="resetPassword();return false;" style="font-size:.8rem;color:var(--text-muted);text-decoration:underline;">Mot de passe oublié ?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ACCOUNT MODAL ========== -->
+<div id="account-modal" class="modal-backdrop hidden" onclick="if(event.target===this)closeAccountModal()">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-header">
+      <h3>Mon compte</h3>
+      <button onclick="closeAccountModal()" class="modal-close" aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-size:3rem;">👤</div>
+        <div id="acct-email" style="font-weight:700;color:var(--green-900);margin-top:8px;word-break:break-all;"></div>
+        <div id="acct-plan-badge" style="margin-top:10px;"></div>
+      </div>
+      <div style="background:var(--green-50);border-radius:var(--r-md);padding:14px 16px;margin-bottom:16px;">
+        <div id="acct-plan-details"></div>
+      </div>
+      <button class="rb-btn rb-btn-ghost" style="width:100%;margin-top:4px;color:var(--danger);border-color:var(--danger);" onclick="logoutUser()">🚪 Se déconnecter</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
