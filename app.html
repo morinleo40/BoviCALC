@@ -118,7 +118,7 @@ function openAccountModal() {
   var dt = _$$('acct-plan-details');
   if (dt) dt.innerHTML = userPlan === 'pro'
     ? '<p style="margin:0;font-size:.85rem;color:var(--green-900);">✅ Accès complet.</p>'
-    : '<p style="margin:0;font-size:.85rem;color:var(--text-muted);">Plan gratuit. Passez Pro pour débloquer l'export PDF, l'optimiseur et la comparaison.</p>';
+    : '<p style="margin:0;font-size:.85rem;color:var(--text-muted);">Plan gratuit. Passez Pro pour débloquer l\'export PDF, l\'optimiseur et la comparaison.</p>';
   m.classList.remove('hidden');
 }
 function closeAccountModal() { var m = _$$('account-modal'); if (m) m.classList.add('hidden'); }
@@ -193,7 +193,7 @@ function requireAuth(feature) {
 function requirePro(feature) {
   if (!currentUser) return requireAuth(feature);
   if (userPlan === 'pro') return true;
-  alert('⭐ Fonctionnalité Pro\n\n"' + feature + '" est disponible avec l'abonnement Pro.\n\nContactez-nous pour souscrire.');
+  alert('⭐ Fonctionnalité Pro\n\n"' + feature + '" est disponible avec l\'abonnement Pro.\n\nContactez-nous pour souscrire.');
   return false;
 }
 async function initAuth() {
