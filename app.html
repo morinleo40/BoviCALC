@@ -313,11 +313,6 @@ async function initAuth() {
       <button class="rb-btn">Ouvrir</button>
     </article>
 
-    <article class="rb-card" data-section="auto-ration" data-requires-pro="true">
-      <h2>🤖 Ration automatique</h2>
-      <p>L’app calcule la ration optimale selon vos besoins et vos aliments disponibles</p>
-      <button class="rb-btn rb-btn-primary">Optimiser</button>
-    </article>
 
     <article class="rb-card" data-section="bilan-fourrager" data-requires-pro="true">
       <h2>📦 Bilan fourrager</h2>
@@ -637,8 +632,7 @@ async function initAuth() {
       <div class="wizard-actions">
         <button type="button" class="rb-btn rb-btn-ghost" onclick="goToStep(2)">← Étape 2 : Ration</button>
         <button type="button" id="btn-calc-bilan" class="rb-btn rb-btn-primary">📊 Calculer le bilan</button>
-        <button type="button" id="btn-optimize" class="rb-btn hidden">🔧 Optimiser</button>
-        <button type="button" id="btn-ia-ration" class="rb-btn">🤖 Analyse IA</button>
+        <button type="button" id="btn-optimize" class="rb-btn hidden">🔧 Suggestions d'ajustements</button>
         <button type="button" id="btn-export-pdf" class="rb-btn" onclick="exportPDF()">📄 Imprimer / PDF</button>
         <button type="button" id="btn-goto-costs" class="rb-btn rb-btn-secondary">💰 Coûts →</button>
       </div>
@@ -652,10 +646,6 @@ async function initAuth() {
       <div id="bilan-indicateurs" class="hidden" style="margin-top:24px;"></div>
       <div id="bilan-optimizer" class="hidden" style="margin-top:16px;"></div>
 
-      <div id="resultat-ia" class="rb-panel hidden result-panel">
-        <h3>🤖 Analyse IA</h3>
-        <div id="resultat-ia-contenu" style="white-space:pre-wrap;"></div>
-      </div>
     </div>
 
     <!-- Étape 4 : Coûts -->
@@ -2261,73 +2251,198 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if (!requirePro('Optimiseur de ration')) return;
     if (!lastB || !lastA?.items?.length) return;
     const a=lastA, b=lastB;
-    const rUFL = b.bUFL > 0 ? a.totalUFL/b.bUFL : 0;
-    const rPDI = b.bPDI > 0 ? a.totalPDI/b.bPDI : 0;
+    const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+    const rUFL = b.bUFL > 0 ? a.totalUFL/b.bUFL : 1;
+    const rPDI = b.bPDI > 0 ? a.totalPDI/b.bPDI : 1;
     const ppu  = a.totalUFL > 0 ? a.totalPDI/a.totalUFL : 0;
     const suggs = [];
 
-    function bestFeed(byFn) { return [...a.items].sort((x,y)=>byFn(y)-byFn(x))[0]; }
+    // Trouver le meilleur aliment existant par critère, ou suggérer un aliment de la DB
+    function bestExisting(byFn) { return [...a.items].sort((x,y)=>byFn(y)-byFn(x))[0]; }
+    function bestFromDB(filterFn, byFn) {
+      const db = [...alimentsDb, ...customFoodsDb];
+      return db.filter(filterFn).sort((x,y)=>byFn(y)-byFn(x))[0];
+    }
 
-    if (rUFL < 0.92) {
-      const need = b.bUFL - a.totalUFL;
-      const f = bestFeed(x=>x.ufl/x.qty);
-      if (f) {
-        const dq = need/(f.ufl/f.qty);
-        suggs.push({icon:'⚡',verb:'Augmenter',feed:f.nom,sign:'+',qty:dq,
-          effect:`→ énergie ${((a.totalUFL+need)/b.bUFL*100).toFixed(0)}%`,reason:'Déficit énergétique'});
+    // ── 1. Déficit énergétique ─────────────────────────────
+    if (rUFL < 0.90) {
+      const deficit = b.bUFL - a.totalUFL;
+      const f = bestExisting(x=>x.ufl/x.qty);
+      const alt = bestFromDB(x=>x.uflPerKgMS>1.0&&x.uflPerKgMS<3, x=>x.uflPerKgMS);
+      const feed = f || alt;
+      if (feed) {
+        const uflPer = f ? f.ufl/f.qty : alt.uflPerKgMS;
+        const dq = Math.min(deficit/uflPer, 3);
+        suggs.push({icon:'⚡', tag:'Énergie', severity:'bad',
+          title:`Augmenter "${feed.nom || alt?.nom}"`,
+          qty: `+${dq.toFixed(1)} kg MS/j`,
+          effect:`Énergie : ${((a.totalUFL+dq*uflPer)/b.bUFL*100).toFixed(0)}% des besoins`,
+          consequence:'Un déficit énergétique entraîne une perte de poids, une chute de production et une mobilisation des réserves corporelles.',
+          feed: feed.nom || alt?.nom, sign:'+'
+        });
       }
     }
-    if (rUFL > 1.13) {
+
+    // ── 2. Excès énergétique ───────────────────────────────
+    if (rUFL > 1.15) {
       const excess = a.totalUFL - b.bUFL;
-      const f = bestFeed(x=>x.ufl/x.qty);
+      const f = bestExisting(x=>x.ufl/x.qty);
       if (f) {
-        const dq = Math.min(f.qty*0.35, excess/(f.ufl/f.qty));
-        suggs.push({icon:'✂️',verb:'Réduire',feed:f.nom,sign:'-',qty:dq,
-          effect:`→ énergie ${((a.totalUFL-dq*f.ufl/f.qty)/b.bUFL*100).toFixed(0)}%`,reason:'Excès énergétique'});
+        const dq = Math.min(f.qty*0.4, excess/(f.ufl/f.qty));
+        suggs.push({icon:'✂️', tag:'Énergie', severity:'warn',
+          title:`Réduire "${f.nom}"`,
+          qty: `-${dq.toFixed(1)} kg MS/j`,
+          effect:`Énergie : ${((a.totalUFL-dq*(f.ufl/f.qty))/b.bUFL*100).toFixed(0)}% des besoins`,
+          consequence:'Un excès énergétique important favorise l\'engraissement, le risque de cétose et augmente le coût de la ration.',
+          feed: f.nom, sign:'-'
+        });
       }
     }
-    if (rPDI < 0.9) {
-      const need = b.bPDI - a.totalPDI;
-      const f = bestFeed(x=>x.pdi/x.qty);
-      if (f) {
-        const dq = need/(f.pdi/f.qty);
-        suggs.push({icon:'🧬',verb:'Augmenter',feed:f.nom,sign:'+',qty:dq,
-          effect:`→ PDI ${((a.totalPDI+need)/b.bPDI*100).toFixed(0)}%`,reason:'Déficit protéique'});
+
+    // ── 3. Déficit protéique (PDI) ─────────────────────────
+    if (rPDI < 0.90) {
+      const deficit = b.bPDI - a.totalPDI;
+      const f = bestExisting(x=>x.pdi/x.qty);
+      const alt = bestFromDB(x=>x.pdiPerKgMS>200, x=>x.pdiPerKgMS);
+      const feed = f || alt;
+      if (feed) {
+        const pdiPer = f ? f.pdi/f.qty : alt?.pdiPerKgMS;
+        const dq = Math.min(deficit/pdiPer, 2);
+        suggs.push({icon:'🧬', tag:'Protéines', severity:'bad',
+          title:`Augmenter "${feed.nom || alt?.nom}"`,
+          qty: `+${dq.toFixed(1)} kg MS/j`,
+          effect:`PDI : ${((a.totalPDI+dq*pdiPer)/b.bPDI*100).toFixed(0)}% des besoins`,
+          consequence:'Un déficit en PDI réduit la production laitière, dégrade la fertilité et affaiblit l\'immunité.',
+          feed: feed.nom || alt?.nom, sign:'+'
+        });
       }
     }
-    if (rPDI > 1.15) {
-      const excess = a.totalPDI - b.bPDI;
-      const f = bestFeed(x=>x.pdi/x.qty);
+
+    // ── 4. Excès protéique ─────────────────────────────────
+    if (rPDI > 1.20) {
+      const f = bestExisting(x=>x.pdi/x.qty);
       if (f) {
-        const dq = Math.min(f.qty*0.35, excess/(f.pdi/f.qty));
-        suggs.push({icon:'✂️',verb:'Réduire',feed:f.nom,sign:'-',qty:dq,
-          effect:`→ PDI ${((a.totalPDI-dq*f.pdi/f.qty)/b.bPDI*100).toFixed(0)}%`,reason:'Excès protéique'});
+        const dq = Math.min(f.qty*0.3, (a.totalPDI-b.bPDI)/(f.pdi/f.qty));
+        suggs.push({icon:'✂️', tag:'Protéines', severity:'warn',
+          title:`Réduire "${f.nom}"`,
+          qty: `-${dq.toFixed(1)} kg MS/j`,
+          effect:`PDI : ${((a.totalPDI-dq*(f.pdi/f.qty))/b.bPDI*100).toFixed(0)}% des besoins`,
+          consequence:'Un excès protéique est coûteux et génère un surplus d\'azote (hausse urée lait, charge hépatique).',
+          feed: f.nom, sign:'-'
+        });
       }
     }
-    if (ppu < 85 && rUFL >= 0.88 && rPDI < 0.95) {
-      suggs.push({icon:'⚖️',verb:'Ajouter',feed:'Tourteau de colza',sign:'+',qty:0.5,
-        effect:'Améliore rapport PDI/UFL',reason:'Déséquilibre énergie/protéines'});
+
+    // ── 5. Déséquilibre PDI/UFL ───────────────────────────
+    if (ppu < 82 && rUFL >= 0.88) {
+      suggs.push({icon:'⚖️', tag:'Équilibre', severity:'warn',
+        title:'Ajouter un tourteau protéique',
+        qty:'+0.5 kg MS/j',
+        effect:`Ratio PDI/${eu} : ${((a.totalPDI+0.5*230)/a.totalUFL).toFixed(0)} g/${eu} (cible 90–105)`,
+        consequence:'Un ratio PDI/UFL trop bas limite la synthèse microbienne et réduit l\'efficacité de la ration.',
+        feed:'Tourteau de colza', sign:'+'
+      });
+    }
+    if (ppu > 115 && rPDI >= 0.95) {
+      suggs.push({icon:'⚖️', tag:'Équilibre', severity:'warn',
+        title:'Ajouter un aliment énergétique',
+        qty:'+0.5 kg MS/j',
+        effect:`Ratio PDI/${eu} amélioré vers 90–105 g/${eu}`,
+        consequence:'Un ratio PDI/UFL trop élevé signale un excès protéique relatif ou un déficit énergétique.',
+        feed:'Maïs', sign:'+'
+      });
+    }
+
+    // ── 6. Surcharge d'ingestion ───────────────────────────
+    if (b.ingestionCapacite > 0 && a.totalMS > b.ingestionCapacite * 1.08) {
+      const overload = a.totalMS - b.ingestionCapacite;
+      const f = bestExisting(x=>x.qty);
+      if (f) {
+        suggs.push({icon:'🫁', tag:'Ingestion', severity:'bad',
+          title:`Réduire "${f.nom}" (aliment le plus volumineux)`,
+          qty:`-${Math.min(overload, f.qty*0.4).toFixed(1)} kg MS/j`,
+          effect:`MS totale : ${(a.totalMS-Math.min(overload,f.qty*0.4)).toFixed(1)} kg MS (capacité : ${b.ingestionCapacite.toFixed(1)} kg MS)`,
+          consequence:'Une ration au-dessus de la capacité d\'ingestion entraîne des refus, une baisse de consommation effective et un risque d\'acidose.',
+          feed: f.nom, sign:'-'
+        });
+      }
+    }
+
+    // ── 7. Risque acidose glucides ─────────────────────────
+    if ((a.totalAR||0) > 0 || (a.totalSS||0) > 0) {
+      const ms = a.totalMS || 1;
+      const arKg = (a.totalAR||0)/ms, ssKg = (a.totalSS||0)/ms;
+      const ferment = arKg + ssKg;
+      if (ferment > 200) {
+        const fastFeed = a.items.filter(i=>{const f=findFood(i.nom);return f&&(f.ar_gkgms||0)>100;})
+          .sort((x,y)=>y.qty-x.qty)[0];
+        if (fastFeed) {
+          suggs.push({icon:'🔥', tag:'Acidose', severity:'bad',
+            title:`Réduire "${fastFeed.nom}" (amidon rapide élevé)`,
+            qty:`-${(fastFeed.qty*0.25).toFixed(1)} kg MS/j`,
+            effect:`Amidon rapide + solubles estimé < 200 g/kg MS`,
+            consequence:'Un excès de glucides fermentescibles rapides acidifie le rumen, réduit la rumination et peut provoquer une acidose subclinique (chute TB, fourbures, baisse production).',
+            feed: fastFeed.nom, sign:'-'
+          });
+        }
+      } else if (ferment > 160) {
+        suggs.push({icon:'⚡', tag:'Acidose', severity:'warn',
+          title:'Ajouter un tampon ruminal',
+          qty:'+100–150 g/j de bicarbonate de sodium',
+          effect:'Tampon le pH ruminal, protège contre l\'acidose subclinique',
+          consequence:'Recommandé quand l\'amidon rapide + solubles dépasse 160 g/kg MS de ration.',
+          feed: null, sign: null
+        });
+      }
+    }
+
+    // ── 8. Rapport Ca/P ────────────────────────────────────
+    const ca=getNum('mineraux-ca'), pp=getNum('mineraux-p');
+    if (ca > 0 && pp > 0) {
+      const rCaP = ca/pp;
+      if (rCaP < 1.2) {
+        suggs.push({icon:'🦴', tag:'Minéraux', severity:'warn',
+          title:'Corriger le rapport Ca/P',
+          qty:'Ajouter Carbonate de calcium (+80 g/j)',
+          effect:`Rapport Ca/P actuel : ${rCaP.toFixed(2)} (cible ≥ 1.5)`,
+          consequence:'Un rapport Ca/P trop bas augmente le risque de fièvre vitulaire et de troubles osseux en début de lactation.',
+          feed: null, sign: null
+        });
+      }
     }
 
     const cont = $('bilan-optimizer');
     if (!cont) return;
+
+    const sevColor = s => s==='bad'?'#dc2626':s==='warn'?'#d97706':'#16a34a';
+    const sevBg    = s => s==='bad'?'#fef2f2':s==='warn'?'#fffbeb':'#f0fdf4';
+
     if (!suggs.length) {
-      cont.innerHTML = `<div class="opti-panel opti-ok"><div class="opti-header">🎯 Ration équilibrée</div>
-        <p style="padding:14px 16px;margin:0;font-size:.9rem;color:var(--text-light);">Énergie et protéines sont dans les cibles. Aucun ajustement nécessaire.</p></div>`;
+      cont.innerHTML = `<div class="opti-panel opti-ok">
+        <div class="opti-header" style="color:#16a34a;">✅ Ration bien équilibrée</div>
+        <p style="padding:14px 16px;margin:0;font-size:.9rem;color:var(--text-light);">
+          Énergie, protéines, ingestion et glucides sont dans les cibles. Aucun ajustement nécessaire.
+        </p></div>`;
     } else {
-      cont.innerHTML = `<div class="opti-panel"><div class="opti-header">🔧 ${suggs.length} ajustement${suggs.length>1?'s':''} suggéré${suggs.length>1?'s':''}</div>
+      cont.innerHTML = `<div class="opti-panel">
+        <div class="opti-header">🔧 ${suggs.length} suggestion${suggs.length>1?'s':''} d'ajustement</div>
         <div class="opti-body">
           ${suggs.map((s,i)=>`
-            <div class="opti-row" id="opti-row-${i}">
-              <span class="opti-icon">${s.icon}</span>
-              <div class="opti-text">
-                <strong>${s.verb} «${s.feed}»</strong> de <strong>${s.sign}${s.qty.toFixed(1)} kg MS</strong>
-                <span class="opti-effect">${s.effect}</span>
-                <span class="opti-reason">${s.reason}</span>
+            <div class="opti-row" id="opti-row-${i}" style="border-left:4px solid ${sevColor(s.severity)};background:${sevBg(s.severity)};">
+              <div style="display:flex;align-items:flex-start;gap:12px;flex:1;">
+                <span style="font-size:1.4rem;line-height:1;">${s.icon}</span>
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${sevColor(s.severity)};background:${sevBg(s.severity)};border:1px solid ${sevColor(s.severity)};padding:1px 7px;border-radius:20px;">${s.tag}</span>
+                  </div>
+                  <div style="font-weight:700;font-size:.95rem;margin-bottom:2px;">${s.title} <span style="font-weight:400;color:#0369a1;">${s.qty}</span></div>
+                  <div style="font-size:.82rem;color:#16a34a;font-weight:600;margin-bottom:4px;">→ ${s.effect}</div>
+                  <div style="font-size:.78rem;color:#64748b;line-height:1.5;">${s.consequence}</div>
+                </div>
               </div>
-              <button class="rb-btn rb-btn-primary opti-apply-btn" onclick="applyOpt(${i},'${s.feed}','${s.sign}','${s.qty.toFixed(1)}')">Appliquer</button>
+              ${s.feed && s.sign ? `<button class="rb-btn rb-btn-primary opti-apply-btn" style="flex-shrink:0;" onclick="applyOpt(${i},'${s.feed.replace(/'/g,'')}','${s.sign}','${(parseFloat(s.qty)||0.5).toFixed(1)}')">Appliquer</button>` : ''}
             </div>`).join('')}
-          <p style="font-size:.75rem;color:var(--text-muted);margin:12px 0 0;">Après application, allez à l'étape 2 et recalculez le bilan.</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:12px 0 0;">Après application, recalculez le bilan pour vérifier les résultats.</p>
         </div></div>`;
     }
     cont.classList.remove('hidden');
@@ -2543,16 +2658,46 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
      +'<div style="width:'+q.total+'%;height:100%;background:'+gc+';border-radius:3px;"></div></div></div></div>'
      +'</div>';
 
-    // 5 Indicateurs
+    // 5 Indicateurs nutritionnels
     h+='<div class="rp-section"><div class="rp-section-title">5 — Analyse par indicateur</div>'
      +ir('⚡','\xc9nergie',lastA.totalUFL.toFixed(2)+'/'+lastB.bUFL.toFixed(2)+' '+eu+' ('+(rUFL*100).toFixed(0)+'%)',rpStatus(rUFL),rpStatus(rUFL)==='ok'?'Optimal':rpStatus(rUFL)==='bad'?'D\xe9ficit':'Exc\xe8s')
-     +ir('\U0001f9ec','Prot\xe9ines',lastA.totalPDI.toFixed(0)+'/'+lastB.bPDI.toFixed(0)+' g ('+(rPDI*100).toFixed(0)+'%)',rpStatus(rPDI),rpStatus(rPDI)==='ok'?'Optimal':rpStatus(rPDI)==='bad'?'D\xe9ficit':'Exc\xe8s')
-     +ir('⚖️','Equilibre PDI/'+eu,ppu.toFixed(0)+' g/'+eu,ppu>=90&&ppu<=105?'ok':ppu>=82&&ppu<=115?'warn':'bad',ppu>=90&&ppu<=105?'Optimal':ppu>=82&&ppu<=115?'\xc0 ajuster':'D\xe9s\xe9quilibre')
-     +ir('\U0001f525','Acidose',pctConc3.toFixed(0)+'% conc. / '+(100-pctConc3).toFixed(0)+'% fourr.',acidoseLvl.c,acidoseLvl.t)
-     +(hasBaca?ir('⚗️','BACA',(baca?.toFixed(0)||'?')+' mEq/kg MS',Math.abs(baca||0)<=100?'ok':'warn',Math.abs(baca||0)<=100?'Optimal':baca<0?'Anionique':'Alcalin'):'')
-     +(metA>0?ir('\U0001f48a','M\xe9thionine',metA.toFixed(0)+' g/j = '+metP.toFixed(1)+'% PDI',metP>=2.4?'ok':metP>=2.0?'warn':'bad',metP>=2.4?'Optimal':metP>=2.0?'Correct':'D\xe9ficit'):'')
-     +(lysA>0?ir('\U0001f48a','Lysine',lysA.toFixed(0)+' g/j = '+lysP.toFixed(1)+'% PDI',lysP>=7.2?'ok':lysP>=6.5?'warn':'bad',lysP>=7.2?'Optimal':lysP>=6.5?'Correct':'D\xe9ficit'):'')
+     +ir('🧬','Prot\xe9ines PDI',lastA.totalPDI.toFixed(0)+'/'+lastB.bPDI.toFixed(0)+' g ('+(rPDI*100).toFixed(0)+'%)',rpStatus(rPDI),rpStatus(rPDI)==='ok'?'Optimal':rpStatus(rPDI)==='bad'?'D\xe9ficit':'Exc\xe8s')
+     +ir('⚖️','Equilibre PDI/'+eu,ppu.toFixed(0)+' g/'+eu+' (cible 90–105)',ppu>=90&&ppu<=105?'ok':ppu>=82&&ppu<=115?'warn':'bad',ppu>=90&&ppu<=105?'Optimal':ppu>=82&&ppu<=115?'\xc0 ajuster':'D\xe9s\xe9quilibre')
+     +ir('🫁','Ingestion MS',lastA.totalMS.toFixed(1)+' kg MS/j'+(lastB.ingestionCapacite>0?' / max '+lastB.ingestionCapacite.toFixed(1)+' kg':''),lastB.ingestionCapacite>0&&lastA.totalMS>lastB.ingestionCapacite*1.08?'bad':lastB.ingestionCapacite>0&&lastA.totalMS>lastB.ingestionCapacite*1.0?'warn':'ok',lastB.ingestionCapacite>0&&lastA.totalMS>lastB.ingestionCapacite*1.08?'Surcharge':lastB.ingestionCapacite>0&&lastA.totalMS>lastB.ingestionCapacite?'Limite':'OK')
+     +(hasBaca?ir('⚗️','BACA',(baca?.toFixed(0)||'?')+' mEq/kg MS (cible -100 à +100)',Math.abs(baca||0)<=100?'ok':'warn',Math.abs(baca||0)<=100?'Optimal':baca<0?'Anionique':'Alcalin'):'')
+     +(metA>0?ir('💊','M\xe9thionine',metA.toFixed(0)+' g/j = '+metP.toFixed(1)+'% PDI (cible ≥ 2.4%)',metP>=2.4?'ok':metP>=2.0?'warn':'bad',metP>=2.4?'Optimal':metP>=2.0?'Correct':'D\xe9ficit'):'')
+     +(lysA>0?ir('💊','Lysine',lysA.toFixed(0)+' g/j = '+lysP.toFixed(1)+'% PDI (cible ≥ 7.2%)',lysP>=7.2?'ok':lysP>=6.5?'warn':'bad',lysP>=7.2?'Optimal':lysP>=6.5?'Correct':'D\xe9ficit'):'')
      +'</div>';
+
+    // 5b Glucides fermentescibles
+    const alKg=(lastA.totalAL||0)/lastA.totalMS, arKg=(lastA.totalAR||0)/lastA.totalMS, ssKg=(lastA.totalSS||0)/lastA.totalMS;
+    const ferment=arKg+ssKg;
+    if(lastA.totalMS>0&&(alKg+arKg+ssKg)>1){
+      const glucRisk=ferment>200?{c:'bad',t:'Risque acidose \xe9lev\xe9'}:ferment>160?{c:'warn',t:'Surveiller'}:{c:'ok',t:'Correct'};
+      h+='<div class="rp-section"><div class="rp-section-title">5b — Glucides fermentescibles (g/kg MS ration)</div>'
+       +'<table class="rp-table"><thead><tr><th>Type</th><th class="rp-num">g/kg MS</th><th class="rp-num">g/j</th><th>Description</th><th>Statut</th></tr></thead><tbody>'
+       +(alKg>0?'<tr><td>Amidon lent</td><td class="rp-num">'+alKg.toFixed(0)+'</td><td class="rp-num">'+lastA.totalAL.toFixed(0)+'</td><td>Ma\xefs, manioc…</td><td class="rp-status-ok">✓ Fermentation lente</td></tr>':'')
+       +(arKg>0?'<tr><td>Amidon rapide</td><td class="rp-num">'+arKg.toFixed(0)+'</td><td class="rp-num">'+lastA.totalAR.toFixed(0)+'</td><td>Bl\xe9, orge…</td><td class="rp-status-'+(arKg>150?'bad':arKg>100?'warn':'ok')+'">'+(arKg>150?'⚠ \xc9lev\xe9':arKg>100?'~ Surveiller':'✓ Correct')+'</td></tr>':'')
+       +(ssKg>0?'<tr><td>Sucres solubles</td><td class="rp-num">'+ssKg.toFixed(0)+'</td><td class="rp-num">'+lastA.totalSS.toFixed(0)+'</td><td>Betterave, herbe, m\xe9lasse…</td><td class="rp-status-'+(ssKg>120?'warn':'ok')+'">'+(ssKg>120?'~ Surveiller':'✓ Correct')+'</td></tr>':'')
+       +'<tr class="rp-total"><td>Total fermentescible (rapide + solubles)</td><td class="rp-num">'+ferment.toFixed(0)+'</td><td class="rp-num">'+(ferment*lastA.totalMS).toFixed(0)+'</td><td>Seuil risque : 200 g/kg MS</td><td class="rp-status-'+glucRisk.c+'">'+glucRisk.t+'</td></tr>'
+       +'</tbody></table></div>';
+    }
+
+    // 5c Bilan minéral détaillé
+    const nap=getNum('mineraux-na'),kp=getNum('mineraux-k'),cap2=getNum('mineraux-ca');
+    const mgp=getNum('mineraux-mg'),clp=getNum('mineraux-cl'),sp=getNum('mineraux-s');
+    if(nap||kp||cap2||mgp||clp||sp){
+      const rCaP2=cap2>0&&pp>0?cap2/pp:0;
+      h+='<div class="rp-section"><div class="rp-section-title">5c — Bilan min\xe9ral</div>'
+       +'<table class="rp-table"><thead><tr><th>Min\xe9ral</th><th class="rp-num">Apport (g/kg MS)</th><th>Statut</th></tr></thead><tbody>'
+       +(cap2?'<tr><td>Calcium (Ca)</td><td class="rp-num">'+cap2.toFixed(1)+'</td><td class="rp-status-ok">Renseign\xe9</td></tr>':'')
+       +(pp?'<tr><td>Phosphore (P)</td><td class="rp-num">'+pp.toFixed(1)+'</td><td class="rp-status-'+(rCaP2>0?rCaP2>=1.5?'ok':'warn':'ok')+'">'+( rCaP2>0?'Ca/P = '+rCaP2.toFixed(2)+(rCaP2>=1.5?' ✓':' ⚠ Corriger'):'Renseign\xe9')+'</td></tr>':'')
+       +(mgp?'<tr><td>Magn\xe9sium (Mg)</td><td class="rp-num">'+mgp.toFixed(1)+'</td><td class="rp-status-ok">Renseign\xe9</td></tr>':'')
+       +(nap?'<tr><td>Sodium (Na)</td><td class="rp-num">'+nap.toFixed(1)+'</td><td class="rp-status-ok">Renseign\xe9</td></tr>':'')
+       +(kp?'<tr><td>Potassium (K)</td><td class="rp-num">'+kp.toFixed(1)+'</td><td class="rp-status-'+(kp>30?'warn':'ok')+'">'+(kp>30?'⚠ Risque t\xe9tanie':'✓ Correct')+'</td></tr>':'')
+       +(hasBaca?'<tr class="rp-total"><td>BACA</td><td class="rp-num">'+baca.toFixed(0)+' mÉq/kg MS</td><td class="rp-status-'+(Math.abs(baca)<=100?'ok':'warn')+'">'+(Math.abs(baca)<=100?'✓ Optimal':baca<0?'Anionique → risque acidose':'Alcalin → v\xe9rifier')+'</td></tr>':'')
+       +'</tbody></table></div>';
+    }
 
     // 6 Couts
     const cv=document.getElementById('cout-vl-jour')?.textContent;
