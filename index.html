@@ -266,10 +266,10 @@ const PRICING_CONFIG = {
     <span>BoviCalc</span>
   </a>
   <div class="lp-nav-links">
-    <button class="lp-nav-link" onclick="scrollTo('about')">À propos</button>
-    <button class="lp-nav-link" onclick="scrollTo('features')">Fonctionnalités</button>
-    <button class="lp-nav-link" onclick="scrollTo('pricing')">Tarifs</button>
-    <button class="lp-nav-link" onclick="scrollTo('audience')">Public</button>
+    <button class="lp-nav-link" onclick="scrollToSection('about')">À propos</button>
+    <button class="lp-nav-link" onclick="scrollToSection('features')">Fonctionnalités</button>
+    <button class="lp-nav-link" onclick="scrollToSection('pricing')">Tarifs</button>
+    <button class="lp-nav-link" onclick="scrollToSection('audience')">Public</button>
   </div>
   <a href="app.html" class="lp-nav-cta">Accéder à l'app →</a>
 </nav>
@@ -281,7 +281,7 @@ const PRICING_CONFIG = {
   <p>L'outil de rationnement bovin <strong>simple, rapide et précis</strong> conçu pour les éleveurs et conseillers sur le terrain.</p>
   <div class="lp-hero-buttons">
     <a href="app.html" class="btn-hero-primary">Commencer gratuitement</a>
-    <button class="btn-hero-secondary" onclick="scrollTo('pricing')">Voir les tarifs</button>
+    <button class="btn-hero-secondary" onclick="scrollToSection('pricing')">Voir les tarifs</button>
   </div>
   <div class="lp-hero-stats">
     <div class="lp-stat"><span class="lp-stat-val">500+</span><span class="lp-stat-lbl">éleveurs</span></div>
@@ -369,7 +369,7 @@ const PRICING_CONFIG = {
 
 <script>
 /* Rendu dynamique à partir de PRICING_CONFIG */
-function scrollTo(id) {
+function scrollToSection(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 }
 
