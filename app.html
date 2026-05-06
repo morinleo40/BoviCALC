@@ -11,6 +11,207 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* BoviCalc Auth - chargé avant tout HTML */
+var SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
+var SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
+var _supa    = null;
+var currentUser = null;
+var userPlan    = 'free';
+var _authMode   = 'login';
+var _wallMode   = 'login';
+
+function _$$(id) { return document.getElementById(id); }
+
+function getSupa() {
+  if (!_supa && window.supabase)
+    _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  return _supa;
+}
+function showAuthWall() {
+  var w = _$$('auth-wall');
+  if (w) w.style.display = 'flex';
+  if (document.body) document.body.style.overflow = 'hidden';
+}
+function hideAuthWall() {
+  var w = _$$('auth-wall');
+  if (w) w.style.display = 'none';
+  if (document.body) document.body.style.overflow = '';
+}
+function switchWallTab(tab) {
+  _wallMode = tab;
+  var tl = _$$('wall-tab-login'), tr = _$$('wall-tab-register');
+  if (tl) tl.classList.toggle('active', tab === 'login');
+  if (tr) tr.classList.toggle('active', tab === 'register');
+  var btn = _$$('btn-wall-submit');
+  if (btn) btn.textContent = tab === 'login' ? 'Se connecter' : 'Créer mon compte';
+  var cg = _$$('wall-confirm-group');
+  if (cg) cg.classList.toggle('hidden', tab !== 'register');
+  var fg = _$$('wall-forgot');
+  if (fg) fg.classList.toggle('hidden', tab === 'register');
+  var err = _$$('wall-error'); if (err) err.style.display = 'none';
+}
+function showWallError(msg) {
+  var el = _$$('wall-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+async function submitWall() {
+  var email = (_$$('wall-email') || {}).value || '';
+  var pass  = (_$$('wall-pass')  || {}).value || '';
+  email = email.trim();
+  var btn = _$$('btn-wall-submit');
+  if (!email || !pass) { showWallError('Email et mot de passe requis.'); return; }
+  var supa = getSupa();
+  if (!supa) { showWallError('Service indisponible. Vérifiez votre connexion.'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    if (_wallMode === 'register') {
+      var conf = (_$$('wall-pass-confirm') || {}).value || '';
+      if (pass !== conf) {
+        showWallError('Les mots de passe ne correspondent pas.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
+      }
+      if (pass.length < 6) {
+        showWallError('Mot de passe : 6 caractères minimum.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
+      }
+      var r1 = await supa.auth.signUp({ email: email, password: pass });
+      if (r1.error) {
+        showWallError(r1.error.message);
+        if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
+      } else {
+        alert('✅ Compte créé ! Vérifiez votre email pour confirmer.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
+      }
+    } else {
+      var r2 = await supa.auth.signInWithPassword({ email: email, password: pass });
+      if (r2.error) {
+        showWallError(r2.error.message);
+        if (btn) { btn.disabled = false; btn.textContent = 'Se connecter'; }
+      } else {
+        hideAuthWall();
+      }
+    }
+  } catch(e) {
+    showWallError('Erreur réseau. Vérifiez votre connexion.');
+    if (btn) btn.disabled = false;
+  }
+}
+async function resetWallPassword() {
+  var el = _$$('wall-email');
+  var email = el ? el.value.trim() : '';
+  if (!email) { showWallError('Entrez votre email pour réinitialiser votre mot de passe.'); return; }
+  var supa = getSupa(); if (!supa) return;
+  var res = await supa.auth.resetPasswordForEmail(email);
+  if (!res.error) alert('📧 Email envoyé à ' + email);
+  else showWallError(res.error.message);
+}
+function openAuthModal()  { var m = _$$('auth-modal');  if (m) m.classList.remove('hidden'); var e = _$$('auth-error'); if (e) e.style.display='none'; }
+function closeAuthModal() { var m = _$$('auth-modal');  if (m) m.classList.add('hidden'); }
+function openAccountModal() {
+  var m = _$$('account-modal'); if (!m) return;
+  var em = _$$('acct-email'); if (em) em.textContent = currentUser ? currentUser.email || '' : '';
+  var bd = _$$('acct-plan-badge');
+  if (bd) bd.innerHTML = userPlan === 'pro'
+    ? '<span class="plan-badge-pro">⭐ Pro</span>'
+    : '<span class="plan-badge-free">Gratuit</span>';
+  var dt = _$$('acct-plan-details');
+  if (dt) dt.innerHTML = userPlan === 'pro'
+    ? '<p style="margin:0;font-size:.85rem;color:var(--green-900);">✅ Accès complet.</p>'
+    : '<p style="margin:0;font-size:.85rem;color:var(--text-muted);">Plan gratuit. Passez Pro pour débloquer l'export PDF, l'optimiseur et la comparaison.</p>';
+  m.classList.remove('hidden');
+}
+function closeAccountModal() { var m = _$$('account-modal'); if (m) m.classList.add('hidden'); }
+function onAuthBtnClick()  { if (currentUser) openAccountModal(); else openAuthModal(); }
+function switchAuthTab(tab) {
+  _authMode = tab;
+  var tl = _$$('tab-login'), tr = _$$('tab-register');
+  if (tl) tl.classList.toggle('active', tab === 'login');
+  if (tr) tr.classList.toggle('active', tab === 'register');
+  var ti = _$$('auth-modal-title');
+  if (ti) ti.textContent = tab === 'login' ? 'Connexion' : 'Créer un compte';
+  var sb = _$$('btn-auth-submit');
+  if (sb) sb.textContent = tab === 'login' ? 'Se connecter' : 'Créer mon compte';
+  var cg = _$$('auth-confirm-group'); if (cg) cg.classList.toggle('hidden', tab !== 'register');
+  var fg = _$$('auth-forgot');        if (fg) fg.classList.toggle('hidden', tab === 'register');
+  var er = _$$('auth-error');         if (er) er.style.display = 'none';
+}
+function showAuthError(msg) { var e = _$$('auth-error'); if (e) { e.textContent = msg; e.style.display = 'block'; } }
+async function submitAuth() {
+  var email = (_$$('auth-email') || {}).value || ''; email = email.trim();
+  var pass  = (_$$('auth-pass')  || {}).value || '';
+  var btn   = _$$('btn-auth-submit');
+  if (!email || !pass) { showAuthError('Email et mot de passe requis.'); return; }
+  var supa = getSupa(); if (!supa) { showAuthError('Service indisponible.'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    if (_authMode === 'register') {
+      var conf = (_$$('auth-pass-confirm') || {}).value || '';
+      if (pass !== conf) { showAuthError('Les mots de passe ne correspondent pas.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return; }
+      if (pass.length < 6) { showAuthError('Mot de passe : 6 caractères minimum.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return; }
+      var ra = await supa.auth.signUp({ email: email, password: pass });
+      if (ra.error) { showAuthError(ra.error.message); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} }
+      else { alert('✅ Compte créé ! Vérifiez votre email.'); closeAuthModal(); }
+    } else {
+      var rb = await supa.auth.signInWithPassword({ email: email, password: pass });
+      if (rb.error) { showAuthError(rb.error.message); if(btn){btn.disabled=false;btn.textContent='Se connecter';} }
+      else { closeAuthModal(); }
+    }
+  } catch(e) { showAuthError('Erreur réseau.'); if(btn) btn.disabled=false; }
+}
+async function resetPassword() {
+  var el = _$$('auth-email'); var email = el ? el.value.trim() : '';
+  if (!email) { showAuthError('Entrez votre email.'); return; }
+  var supa = getSupa(); if (!supa) return;
+  var res = await supa.auth.resetPasswordForEmail(email);
+  if (!res.error) alert('📧 Email envoyé à ' + email);
+  else showAuthError(res.error.message);
+}
+async function logoutUser() {
+  var supa = getSupa();
+  if (supa) await supa.auth.signOut();
+  currentUser = null; userPlan = 'free';
+  updateAuthUI(); closeAccountModal(); showAuthWall();
+}
+function updateAuthUI() {
+  var btn = _$$('btn-header-auth'); if (!btn) return;
+  if (currentUser) {
+    var name = currentUser.email ? currentUser.email.split('@')[0] : 'Mon compte';
+    btn.textContent = '👤 ' + name;
+    btn.classList.add('hdr-btn-connected');
+  } else {
+    btn.textContent = '🔑 Connexion';
+    btn.classList.remove('hdr-btn-connected');
+  }
+}
+function requireAuth(feature) {
+  if (currentUser) return true;
+  var msg = feature ? 'Connectez-vous pour utiliser "' + feature + '".' : 'Connectez-vous pour continuer.';
+  if (confirm(msg + '\n\nOuvrir la page de connexion ?')) openAuthModal();
+  return false;
+}
+function requirePro(feature) {
+  if (!currentUser) return requireAuth(feature);
+  if (userPlan === 'pro') return true;
+  alert('⭐ Fonctionnalité Pro\n\n"' + feature + '" est disponible avec l'abonnement Pro.\n\nContactez-nous pour souscrire.');
+  return false;
+}
+async function initAuth() {
+  showAuthWall();
+  var supa = getSupa(); if (!supa) return;
+  try {
+    var sd = await supa.auth.getSession();
+    if (sd.data && sd.data.session && sd.data.session.user) {
+      currentUser = sd.data.session.user; updateAuthUI(); hideAuthWall();
+    }
+    supa.auth.onAuthStateChange(function(_evt, session) {
+      currentUser = session ? session.user : null;
+      updateAuthUI();
+      if (currentUser) hideAuthWall(); else showAuthWall();
+    });
+  } catch(e) { console.warn('Auth init failed:', e); }
+}
+</script>
 </head>
 
 <body>
@@ -1016,227 +1217,6 @@ Uree 46,98,0,1443`;
   let visitedSteps = new Set([1]);
   let costsByFeed = {};
   let editingFoodIndex = -1;
-
-  // =====================================================
-  // AUTH SUPABASE
-  // =====================================================
-  const SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
-  const SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
-
-  let _supa = null;
-  let currentUser = null;
-  let userPlan = 'free'; // 'free' | 'pro'
-  let _authMode = 'login';
-
-  function getSupa() {
-    if (!_supa && window.supabase) {
-      _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-    }
-    return _supa;
-  }
-
-  function requireAuth(feature) {
-    if (currentUser) return true;
-    const msg = feature
-      ? 'Connectez-vous pour utiliser "' + feature + '".'
-      : 'Connectez-vous pour continuer.';
-    if (confirm(msg + '\n\nOuvrir la page de connexion ?')) openAuthModal();
-    return false;
-  }
-
-  function requirePro(feature) {
-    if (!currentUser) return requireAuth(feature);
-    if (userPlan === 'pro') return true;
-    alert('\u2b50 Fonctionnalité Pro\n\n"' + feature + '" est disponible avec l\'abonnement Pro.\n\nContactez-nous pour souscrire.');
-    return false;
-  }
-
-  function updateAuthUI() {
-    const btn = $('btn-header-auth');
-    if (!btn) return;
-    if (currentUser) {
-      const name = currentUser.email?.split('@')[0] || 'Mon compte';
-      btn.textContent = '\u{1F464} ' + name;
-      btn.classList.add('hdr-btn-connected');
-    } else {
-      btn.textContent = '\u{1F511} Connexion';
-      btn.classList.remove('hdr-btn-connected');
-    }
-  }
-
-  function onAuthBtnClick() {
-    if (currentUser) openAccountModal();
-    else openAuthModal();
-  }
-
-  function openAuthModal() {
-    $('auth-modal')?.classList.remove('hidden');
-    const err = $('auth-error'); if (err) err.style.display = 'none';
-    switchAuthTab('login');
-  }
-  function closeAuthModal() { $('auth-modal')?.classList.add('hidden'); }
-
-  function openAccountModal() {
-    const modal = $('account-modal'); if (!modal) return;
-    const email = $('acct-email');
-    if (email) email.textContent = currentUser?.email || '';
-    const badge = $('acct-plan-badge');
-    if (badge) badge.innerHTML = userPlan === 'pro'
-      ? '<span class="plan-badge-pro">\u2b50 Pro</span>'
-      : '<span class="plan-badge-free">Gratuit</span>';
-    const details = $('acct-plan-details');
-    if (details) details.innerHTML = userPlan === 'pro'
-      ? '<p style="margin:0;font-size:.85rem;color:var(--green-900);">\u2705 Accès complet — Export PDF, Optimiseur, Comparaison, sessions illimitées.</p>'
-      : '<p style="margin:0;font-size:.85rem;color:var(--text-muted);">Plan gratuit — calculs disponibles. Passez Pro pour débloquer l'export PDF, l'optimiseur et la comparaison.</p>';
-    modal.classList.remove('hidden');
-  }
-  function closeAccountModal() { $('account-modal')?.classList.add('hidden'); }
-
-  function switchAuthTab(tab) {
-    _authMode = tab;
-    $('tab-login')?.classList.toggle('active', tab === 'login');
-    $('tab-register')?.classList.toggle('active', tab === 'register');
-    const title = $('auth-modal-title');
-    if (title) title.textContent = tab === 'login' ? 'Connexion' : 'Créer un compte';
-    const submitBtn = $('btn-auth-submit');
-    if (submitBtn) submitBtn.textContent = tab === 'login' ? 'Se connecter' : 'Créer mon compte';
-    $('auth-confirm-group')?.classList.toggle('hidden', tab !== 'register');
-    $('auth-forgot')?.classList.toggle('hidden', tab === 'register');
-    const err = $('auth-error'); if (err) err.style.display = 'none';
-  }
-
-  function showAuthError(msg) {
-    const el = $('auth-error');
-    if (el) { el.textContent = msg; el.style.display = 'block'; }
-  }
-
-  async function submitAuth() {
-    const email = $('auth-email')?.value?.trim();
-    const pass  = $('auth-pass')?.value;
-    const btn   = $('btn-auth-submit');
-    if (!email || !pass) { showAuthError('Email et mot de passe requis.'); return; }
-    const supa = getSupa();
-    if (!supa) { showAuthError('Service indisponible — vérifiez votre connexion.'); return; }
-    if (btn) { btn.disabled = true; btn.textContent = '...'; }
-    try {
-      if (_authMode === 'register') {
-        const confirm = $('auth-pass-confirm')?.value;
-        if (pass !== confirm) {
-          showAuthError('Les mots de passe ne correspondent pas.');
-          if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
-        }
-        if (pass.length < 6) {
-          showAuthError('Mot de passe : 6 caractères minimum.');
-          if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
-        }
-        const { error } = await supa.auth.signUp({ email, password: pass });
-        if (error) {
-          showAuthError(error.message);
-          if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
-        } else {
-          alert('\u2705 Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
-          closeAuthModal();
-        }
-      } else {
-        const { error } = await supa.auth.signInWithPassword({ email, password: pass });
-        if (error) {
-          showAuthError(error.message);
-          if (btn) { btn.disabled = false; btn.textContent = 'Se connecter'; }
-        } else {
-          closeAuthModal();
-        }
-      }
-    } catch (e) {
-      showAuthError('Erreur réseau. Vérifiez votre connexion.');
-      if (btn) btn.disabled = false;
-    }
-  }
-
-  async function resetPassword() {
-    const email = $('auth-email')?.value?.trim();
-    if (!email) { showAuthError('Entrez votre email pour réinitialiser votre mot de passe.'); return; }
-    const supa = getSupa(); if (!supa) return;
-    const { error } = await supa.auth.resetPasswordForEmail(email);
-    if (!error) alert('\u{1F4E7} Email de réinitialisation envoyé à ' + email);
-    else showAuthError(error.message);
-  }
-
-  async function logoutUser() {
-    await getSupa()?.auth.signOut();
-    currentUser = null; userPlan = 'free';
-    updateAuthUI();
-    closeAccountModal();
-    showAuthWall();
-  }
-
-  function showAuthWall() {
-    const w = $('auth-wall'); if (w) w.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
-  function hideAuthWall() {
-    const w = $('auth-wall'); if (w) w.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-
-  let _wallMode = 'login';
-  function switchWallTab(tab) {
-    _wallMode = tab;
-    $('wall-tab-login')?.classList.toggle('active', tab === 'login');
-    $('wall-tab-register')?.classList.toggle('active', tab === 'register');
-    $('btn-wall-submit') && ($('btn-wall-submit').textContent = tab === 'login' ? 'Se connecter' : 'Cr\u00e9er mon compte');
-    $('wall-confirm-group')?.classList.toggle('hidden', tab !== 'register');
-    $('wall-forgot')?.classList.toggle('hidden', tab === 'register');
-    const err = $('wall-error'); if (err) err.style.display = 'none';
-  }
-  function showWallError(msg) {
-    const el = $('wall-error'); if (el) { el.textContent = msg; el.style.display = 'block'; }
-  }
-  async function submitWall() {
-    const email = $('wall-email')?.value?.trim();
-    const pass  = $('wall-pass')?.value;
-    const btn   = $('btn-wall-submit');
-    if (!email || !pass) { showWallError('Email et mot de passe requis.'); return; }
-    const supa = getSupa();
-    if (!supa) { showWallError('Service indisponible. V\u00e9rifiez votre connexion internet.'); return; }
-    if (btn) { btn.disabled = true; btn.textContent = '...'; }
-    try {
-      if (_wallMode === 'register') {
-        const confirm = $('wall-pass-confirm')?.value;
-        if (pass !== confirm) { showWallError('Les mots de passe ne correspondent pas.'); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} return; }
-        if (pass.length < 6) { showWallError('Mot de passe : 6 caract\u00e8res minimum.'); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} return; }
-        const { error } = await supa.auth.signUp({ email, password: pass });
-        if (error) { showWallError(error.message); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} }
-        else { alert('\u2705 Compte cr\u00e9\u00e9 ! V\u00e9rifiez votre email pour confirmer votre inscription.'); if(btn){btn.disabled=false;btn.textContent='Cr\u00e9er mon compte';} }
-      } else {
-        const { error } = await supa.auth.signInWithPassword({ email, password: pass });
-        if (error) { showWallError(error.message); if(btn){btn.disabled=false;btn.textContent='Se connecter';} }
-        else { hideAuthWall(); }
-      }
-    } catch(e) { showWallError('Erreur r\u00e9seau.'); if(btn) btn.disabled=false; }
-  }
-  async function resetWallPassword() {
-    const email = $('wall-email')?.value?.trim();
-    if (!email) { showWallError('Entrez votre email pour r\u00e9initialiser votre mot de passe.'); return; }
-    const supa = getSupa(); if (!supa) return;
-    const { error } = await supa.auth.resetPasswordForEmail(email);
-    if (!error) alert('\U0001f4e7 Email envoy\u00e9 \u00e0 ' + email);
-    else showWallError(error.message);
-  }
-
-  async function initAuth() {
-    showAuthWall();
-    const supa = getSupa(); if (!supa) return;
-    try {
-      const { data: { session } } = await supa.auth.getSession();
-      if (session?.user) { currentUser = session.user; updateAuthUI(); hideAuthWall(); }
-      supa.auth.onAuthStateChange((_evt, session) => {
-        currentUser = session?.user || null;
-        updateAuthUI();
-        if (currentUser) hideAuthWall();
-        else showAuthWall();
-      });
-    } catch (e) { console.warn('Auth init failed:', e); }
-  }
 
 
   const LS = {
