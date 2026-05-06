@@ -280,13 +280,13 @@ async function initAuth() {
 <main class="rb-main">
   <!-- Accueil -->
   <section class="rb-section-grid" id="home-grid">
-    <article class="rb-card" data-section="ration-a-z">
+    <article class="rb-card" data-section="ration-a-z" data-requires-pro="true">
       <h2>🐄 Créer ma ration</h2>
       <p>De A à Z : besoins, ration, analyse et coûts</p>
       <button class="rb-btn rb-btn-primary">Commencer</button>
     </article>
 
-    <article class="rb-card" data-section="besoins">
+    <article class="rb-card" data-section="besoins" data-requires-pro="true">
       <h2>📊 Calculer mes besoins</h2>
       <p>Sans faire de ration complète</p>
       <button class="rb-btn">Ouvrir</button>
@@ -298,7 +298,7 @@ async function initAuth() {
       <button class="rb-btn">Ouvrir</button>
     </article>
 
-    <article class="rb-card" data-section="bilan-fourrager">
+    <article class="rb-card" data-section="bilan-fourrager" data-requires-pro="true">
       <h2>📦 Bilan fourrager</h2>
       <p>Stocks vs besoins du troupeau</p>
       <button class="rb-btn">Ouvrir</button>
@@ -1290,7 +1290,10 @@ Uree 46,98,0,1443`;
     sectionIds.forEach(sid => $('section-'+sid)?.classList.add('hidden'));
   }
   document.querySelectorAll('[data-section]').forEach(card => {
-    card.addEventListener('click', () => showSection(card.dataset.section));
+    card.addEventListener('click', () => {
+      if (card.dataset.requiresPro === 'true' && !requirePro('Plan Pro')) return;
+      showSection(card.dataset.section);
+    });
   });
   document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', backToHome));
 
