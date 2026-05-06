@@ -309,6 +309,12 @@ async function initAuth() {
       <button class="rb-btn">Ouvrir</button>
     </article>
 
+    <article class="rb-card" data-section="auto-ration" data-requires-pro="true">
+      <h2>🤖 Ration automatique</h2>
+      <p>L’app calcule la ration optimale selon vos besoins et vos aliments disponibles</p>
+      <button class="rb-btn rb-btn-primary">Optimiser</button>
+    </article>
+
     <article class="rb-card" data-section="bilan-fourrager" data-requires-pro="true">
       <h2>📦 Bilan fourrager</h2>
       <p>Stocks vs besoins du troupeau</p>
@@ -2912,6 +2918,316 @@ Uree 46,98,0,1443`;
   const _origRenderIndicateurs = renderIndicateurs;
   // Hook: score + dashboard après calcul bilan
   // (appelé directement depuis calcBilan ci-dessus)
+
+
+  // =====================================================
+  // RATION AUTOMATIQUE
+  // =====================================================
+  var arBesoins = null;
+  var arOptResult = null;
+
+  // Bind animal type change
+  document.getElementById('ar-type-animal') && (function() {
+    var sel = document.getElementById('ar-type-animal');
+    sel.addEventListener('change', function() {
+      var v = sel.value;
+      var lait = ['vache-laitiere','vache-tarie','vache-prepa-velage'];
+      var via  = ['genisse','genisse-engrais','vache-reforme','veau'];
+      document.getElementById('ar-prod-group').style.display = lait.includes(v) ? '' : 'none';
+      document.getElementById('ar-tb-group').style.display   = lait.includes(v) ? '' : 'none';
+      document.getElementById('ar-tp-group').style.display   = lait.includes(v) ? '' : 'none';
+      document.getElementById('ar-gmq-group').style.display  = via.includes(v)  ? '' : 'none';
+    });
+  })();
+
+  function arCalcBesoins() {
+    var type = ($('ar-type-animal')||{}).value;
+    var pv   = parseFloat(($('ar-poids-vif')||{}).value);
+    if (!type || !pv) { alert('S\xe9lectionnez le type d\'animal et le poids vif.'); return; }
+    var b = computeBesoins(
+      pv,
+      parseFloat(($('ar-production-lait')||{}).value)||0,
+      ($('ar-activite')||{}).value||'stabulation',
+      parseFloat(($('ar-tb')||{}).value)||0,
+      parseFloat(($('ar-tp')||{}).value)||0,
+      type,
+      parseFloat(($('ar-gmq')||{}).value)||0
+    );
+    arBesoins = b;
+    var res = $('ar-besoins-result');
+    if (res) {
+      $('ar-b-ufl').textContent = b.bUFL.toFixed(2);
+      $('ar-b-pdi').textContent = b.bPDI.toFixed(0);
+      $('ar-b-ing').textContent = b.ingestionCapacite.toFixed(1);
+      res.style.display = 'block';
+    }
+    arBuildFeedList();
+    var s2 = $('ar-step2'); if (s2) s2.style.display = 'block';
+    s2 && s2.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function arBuildFeedList(filter) {
+    var list = $('ar-feeds-list'); if (!list) return;
+    var allFeeds = (alimentsDb||[]).concat(customFoodsDb||[]);
+    filter = (filter||'').toLowerCase().trim();
+
+    // Group by category
+    var groups = { 'Fourrages': [], 'Concentr\xe9s': [], 'Compl\xe9ments': [] };
+    allFeeds.forEach(function(f) {
+      if (filter && !f.nom.toLowerCase().includes(filter)) return;
+      var cat = getFeedCategory ? getFeedCategory(f.nom) : 'other';
+      if (cat === 'fourrage') groups['Fourrages'].push(f);
+      else if (cat === 'concentrate') groups['Concentr\xe9s'].push(f);
+      else groups['Compl\xe9ments'].push(f);
+    });
+
+    var html2 = '';
+    Object.keys(groups).forEach(function(grp) {
+      if (!groups[grp].length) return;
+      html2 += '<div class="ar-feed-group"><div class="ar-feed-group-title">' + grp + '</div>';
+      groups[grp].forEach(function(f) {
+        var id = 'ar-feed-' + f.nom.replace(/[^a-z0-9]/gi,'_');
+        html2 += '<div class="ar-feed-row">' +
+          '<input type="checkbox" id="' + id + '" data-nom="' + f.nom + '" checked class="ar-feed-check">' +
+          '<label for="' + id + '" class="ar-feed-name">' + f.nom + '</label>' +
+          '<span class="ar-feed-vals">' + (f.uflPerKgMS||f.ufl||0).toFixed(2) + ' UFL | ' + (f.pdiPerKgMS||f.pdi||0).toFixed(0) + 'g PDI</span>' +
+          '<input type="number" placeholder="min kg" min="0" max="50" step="0.5" class="ar-qty-input ar-min" data-nom="' + f.nom + '">' +
+          '<input type="number" placeholder="max kg" min="0" max="50" step="0.5" class="ar-qty-input ar-max" data-nom="' + f.nom + '">' +
+          '<input type="number" placeholder="€/t MS" min="0" max="1000" step="1" class="ar-qty-input ar-price" data-nom="' + f.nom + '">' +
+          '</div>';
+      });
+      html2 += '</div>';
+    });
+
+    if (!html2) html2 = '<p style="padding:20px;text-align:center;color:var(--text-muted);">Aucun aliment trouv\xe9.</p>';
+    list.innerHTML = html2;
+  }
+
+  function arFilterFeeds() {
+    var val = ($('ar-search')||{}).value || '';
+    arBuildFeedList(val);
+  }
+
+  function arCheckAll(checked) {
+    document.querySelectorAll('.ar-feed-check').forEach(function(cb) { cb.checked = checked; });
+  }
+
+  function arRunOptimize() {
+    if (!arBesoins) { alert('Calculez d\'abord les besoins (Étape 1).'); return; }
+
+    // Collect selected feeds
+    var selected = [];
+    document.querySelectorAll('.ar-feed-check:checked').forEach(function(cb) {
+      var nom = cb.dataset.nom;
+      var feed = findFood ? findFood(nom) : null;
+      if (!feed) return;
+      var row = cb.closest('.ar-feed-row');
+      var minEl  = row.querySelector('.ar-min');
+      var maxEl  = row.querySelector('.ar-max');
+      var priceEl = row.querySelector('.ar-price');
+      selected.push({
+        nom:    nom,
+        ufl:    feed.uflPerKgMS || feed.ufl || 0,
+        pdi:    feed.pdiPerKgMS || feed.pdi || 0,
+        ms:     feed.ms || feed.msPct || 86,
+        price:  parseFloat(priceEl && priceEl.value) || 0,
+        min:    parseFloat(minEl && minEl.value)  || 0,
+        max:    parseFloat(maxEl && maxEl.value)  || 20,
+        isForage: getFeedCategory ? getFeedCategory(nom) === 'fourrage' : false
+      });
+    });
+
+    if (selected.length < 2) { alert('S\xe9lectionnez au moins 2 aliments.'); return; }
+
+    var result = arOptimize(selected, arBesoins);
+    arOptResult = { feeds: selected, qty: result.qty, besoins: arBesoins };
+    arShowResult(result, selected);
+  }
+
+  // ── Algorithme d'optimisation greedy ──────────────────────────────────
+  function arOptimize(feeds, b) {
+    var n = feeds.length;
+    var qty = feeds.map(function(f) { return f.min || 0; });
+    var maxMS = b.ingestionCapacite || 18;
+    var forageMinRatio = 0.50; // 50% fourrage minimum
+
+    function totals() {
+      var ufl=0, pdi=0, ms=0, cost=0, forage=0;
+      qty.forEach(function(q,i) {
+        ufl   += q * feeds[i].ufl;
+        pdi   += q * feeds[i].pdi;
+        ms    += q;
+        cost  += q * (feeds[i].price||0) / 1000;
+        if (feeds[i].isForage) forage += q;
+      });
+      return { ufl:ufl, pdi:pdi, ms:ms, cost:cost, forage:forage };
+    }
+
+    // Phase 1 : remplir avec des fourrages jusqu'à 55% de la capacité
+    var forages = feeds.map(function(f,i){return {f:f,i:i};}).filter(function(x){return x.f.isForage;});
+    if (forages.length > 0) {
+      var targetForageMS = maxMS * 0.55;
+      var perForage = targetForageMS / forages.length;
+      forages.forEach(function(x) {
+        qty[x.i] = Math.min(x.f.max||20, Math.max(qty[x.i], perForage));
+      });
+    }
+
+    // Phase 2 : combler les déficits par itérations greedy
+    var STEP = 0.2;
+    for (var iter = 0; iter < 5000; iter++) {
+      var t = totals();
+      var uflDef = b.bUFL - t.ufl;
+      var pdiDef = b.bPDI - t.pdi;
+      var msRoom = maxMS - t.ms;
+
+      if (uflDef <= 0.02 && pdiDef <= 2) break;
+      if (msRoom < 0.05) break;
+
+      var bestIdx = -1, bestScore = -Infinity;
+      for (var i = 0; i < n; i++) {
+        var room = Math.min(STEP, (feeds[i].max||20) - qty[i], msRoom);
+        if (room < 0.05) continue;
+
+        // Contrainte fourrage minimum
+        if (!feeds[i].isForage && t.ms > 2) {
+          var newForageRatio = t.forage / (t.ms + room);
+          if (newForageRatio < forageMinRatio * 0.85) continue;
+        }
+
+        var price = feeds[i].price > 0 ? feeds[i].price : 150;
+        var uflContrib = feeds[i].ufl * room;
+        var pdiContrib = feeds[i].pdi * room;
+
+        // Score pondéré sur ce qui manque le plus
+        var uflW = uflDef > 0 ? (uflDef / b.bUFL) : 0;
+        var pdiW = pdiDef > 0 ? (pdiDef / b.bPDI) * 0.6 : 0;
+        var score = ((uflContrib * uflW) + (pdiContrib * pdiW / 100)) / (price / 100);
+
+        if (score > bestScore) { bestScore = score; bestIdx = i; }
+      }
+
+      if (bestIdx === -1) break;
+      var add = Math.min(STEP, (feeds[bestIdx].max||20) - qty[bestIdx], maxMS - totals().ms);
+      qty[bestIdx] += add;
+    }
+
+    // Phase 3 : optimisation du coût — réduire les aliments chers si surplus
+    for (var opt = 0; opt < 2000; opt++) {
+      var t2 = totals();
+      // Chercher l'aliment le plus cher avec surplus potentiel
+      var worstIdx = -1, worstCost = -1;
+      for (var i2 = 0; i2 < n; i2++) {
+        if (qty[i2] <= (feeds[i2].min||0) + 0.1) continue;
+        if (feeds[i2].price <= 0) continue;
+        if (feeds[i2].price > worstCost) { worstCost = feeds[i2].price; worstIdx = i2; }
+      }
+      if (worstIdx === -1) break;
+
+      // Simuler la réduction de 0.2 kg
+      var newQty = qty.slice();
+      newQty[worstIdx] = Math.max((feeds[worstIdx].min||0), newQty[worstIdx] - 0.2);
+
+      var simUFL=0, simPDI=0;
+      newQty.forEach(function(q,i) { simUFL+=q*feeds[i].ufl; simPDI+=q*feeds[i].pdi; });
+
+      if (simUFL >= b.bUFL * 0.97 && simPDI >= b.bPDI * 0.97) {
+        qty = newQty; // réduction possible
+      } else { break; }
+    }
+
+    return { qty: qty, summary: totals() };
+  }
+
+  function arShowResult(result, feeds) {
+    var cont = $('ar-result'); if (!cont) return;
+    var t = result.summary;
+    var rUFL = arBesoins.bUFL > 0 ? t.ufl / arBesoins.bUFL : 0;
+    var rPDI = arBesoins.bPDI > 0 ? t.pdi / arBesoins.bPDI : 0;
+    var ok = rUFL >= 0.95 && rPDI >= 0.95;
+
+    var rows = '';
+    feeds.forEach(function(f, i) {
+      if (result.qty[i] < 0.05) return;
+      var costLine = f.price > 0 ? (result.qty[i] * f.price / 1000).toFixed(2) + ' €' : '—';
+      rows += '<tr><td>' + f.nom + '</td>' +
+        '<td style="text-align:right;">' + result.qty[i].toFixed(1) + '</td>' +
+        '<td style="text-align:right;">' + (result.qty[i] * f.ufl).toFixed(2) + '</td>' +
+        '<td style="text-align:right;">' + (result.qty[i] * f.pdi).toFixed(0) + '</td>' +
+        '<td style="text-align:right;">' + costLine + '</td></tr>';
+    });
+
+    var bar = function(v) {
+      var pct = Math.min(100, v * 100);
+      var col = v >= 0.95 && v <= 1.08 ? '#15803d' : v < 0.95 ? '#dc2626' : '#d97706';
+      return '<div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:4px;">' +
+        '<div style="width:' + pct.toFixed(0) + '%;height:100%;background:' + col + ';border-radius:4px;transition:width .5s;"></div></div>';
+    };
+
+    var html2 = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:14px 16px;border-radius:10px;background:' +
+      (ok ? '#dcfce7' : '#fef3c7') + ';border-left:4px solid ' + (ok ? '#15803d' : '#d97706') + ';">' +
+      '<span style="font-size:1.8rem;">' + (ok ? '✅' : '⚠️') + '</span>' +
+      '<div><strong>' + (ok ? 'Ration optimis\xe9e trouv\xe9e !' : 'Ration partielle — besoins non couverts \xe0 100%') + '</strong>' +
+      '<div style="font-size:.85rem;color:#475569;margin-top:2px;">MS totale : ' + t.ms.toFixed(1) + ' kg | ' +
+      'Co\xfbt/j : ' + (t.cost > 0 ? t.cost.toFixed(2) + ' €' : 'non renseign\xe9') + '</div></div></div>' +
+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">' +
+      '<div style="padding:12px 16px;background:#f8fafc;border-radius:8px;">' +
+      '<div style="font-size:.85rem;font-weight:600;">Énergie (UFL)</div>' +
+      '<div style="font-size:1.3rem;font-weight:800;color:' + (rUFL>=0.95?'#15803d':'#dc2626') + ';">' + (rUFL*100).toFixed(0) + '%</div>' +
+      '<div style="font-size:.8rem;color:#64748b;">' + t.ufl.toFixed(2) + ' / ' + arBesoins.bUFL.toFixed(2) + ' UFL</div>' + bar(rUFL) + '</div>' +
+      '<div style="padding:12px 16px;background:#f8fafc;border-radius:8px;">' +
+      '<div style="font-size:.85rem;font-weight:600;">Prot\xe9ines (PDI)</div>' +
+      '<div style="font-size:1.3rem;font-weight:800;color:' + (rPDI>=0.95?'#15803d':'#dc2626') + ';">' + (rPDI*100).toFixed(0) + '%</div>' +
+      '<div style="font-size:.8rem;color:#64748b;">' + t.pdi.toFixed(0) + ' / ' + arBesoins.bPDI.toFixed(0) + ' g PDI</div>' + bar(rPDI) + '</div>' +
+      '</div>' +
+
+      '<table class="rb-table" style="margin-bottom:0;">' +
+      '<thead><tr><th>Aliment</th><th style="text-align:right;">kg MS/j</th><th style="text-align:right;">UFL</th><th style="text-align:right;">PDI (g)</th><th style="text-align:right;">Co\xfbt</th></tr></thead>' +
+      '<tbody>' + rows + '<tr style="font-weight:700;background:var(--green-50);">' +
+      '<td>TOTAL</td><td style="text-align:right;">' + t.ms.toFixed(1) + '</td>' +
+      '<td style="text-align:right;">' + t.ufl.toFixed(2) + '</td>' +
+      '<td style="text-align:right;">' + t.pdi.toFixed(0) + '</td>' +
+      '<td style="text-align:right;">' + (t.cost>0 ? t.cost.toFixed(2)+' €' : '—') + '</td></tr>' +
+      '</tbody></table>';
+
+    $('ar-result-content').innerHTML = html2;
+    cont.style.display = 'block';
+    cont.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function arLoadIntoWizard() {
+    if (!arOptResult) return;
+    // Aller sur le wizard
+    showSection('ration-a-z');
+    goToStep(2);
+    // Vider les lignes existantes
+    var rl = $('ration-lines'); if (!rl) return;
+    rl.innerHTML = '';
+    // Ajouter chaque aliment
+    arOptResult.feeds.forEach(function(f, i) {
+      var q = arOptResult.qty[i];
+      if (q < 0.05) return;
+      addLine('ration-lines', 'aliments-list');
+      var rows = document.querySelectorAll('#ration-lines .rb-ration-row');
+      var last = rows[rows.length - 1];
+      if (last) {
+        last.querySelectorAll('input')[0].value = f.nom;
+        last.querySelectorAll('input')[1].value = q.toFixed(1);
+      }
+    });
+    // Copier les données animal
+    if ($('ar-type-animal') && $('type-animal')) {
+      $('type-animal').value = $('ar-type-animal').value;
+      $('type-animal').dispatchEvent(new Event('change'));
+      if ($('poids-vif')) $('poids-vif').value = $('ar-poids-vif').value;
+      if ($('production-lait')) $('production-lait').value = $('ar-production-lait').value;
+      if ($('tb')) $('tb').value = $('ar-tb').value;
+      if ($('tp')) $('tp').value = $('ar-tp').value;
+      if ($('activite')) $('activite').value = $('ar-activite').value;
+    }
+    alert('✅ Ration charg\xe9e dans le wizard ! Allez \xe0 l’\xe9tape 3 pour calculer le bilan.');
+  }
 
   // =====================================================
   // INITIALISATION

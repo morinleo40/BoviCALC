@@ -1642,3 +1642,45 @@ a:hover { color: var(--primary-dark); }
   .auth-wall-card { padding: 28px 20px 24px; }
 }
 
+/* ── Ration automatique ── */
+.ar-feed-group-title {
+  padding: 8px 14px;
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--primary);
+  background: var(--green-50);
+  border-bottom: 1px solid var(--border);
+}
+.ar-feed-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 130px 80px 80px 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: .85rem;
+}
+.ar-feed-row:hover { background: #f8fafc; }
+.ar-feed-name { font-weight: 500; color: #1e293b; }
+.ar-feed-vals { font-size: .78rem; color: var(--text-muted); }
+.ar-qty-input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: .82rem;
+  text-align: right;
+  background: #fff;
+}
+.ar-qty-input:focus { outline: none; border-color: var(--primary); }
+@media (max-width: 640px) {
+  .ar-feed-row {
+    grid-template-columns: 24px 1fr 90px;
+    grid-template-rows: auto auto;
+  }
+  .ar-feed-vals { grid-column: 2 / -1; }
+  .ar-qty-input { display: none; }
+}
+
