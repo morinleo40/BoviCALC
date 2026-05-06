@@ -1684,3 +1684,32 @@ a:hover { color: var(--primary-dark); }
   .ar-qty-input { display: none; }
 }
 
+/* ── Ration toolbar ── */
+.ration-toolbar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.toolbar-btn {
+  padding: 7px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--text-light);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.toolbar-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--green-50); }
+.toolbar-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.rt-panel {
+  background: var(--green-50);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
