@@ -1,0 +1,1585 @@
+﻿<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BoviCalc Conseiller</title>
+  <link rel="stylesheet" href="./style_conseiller.css">
+  <link rel="icon" type="image/png" href="Logo Bovicalc.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ── AUTH BOOTSTRAP ── */
+var SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
+var SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
+var _supa = null, currentUser = null, _wallMode = 'login';
+
+function getSupa() {
+  if (!_supa && window.supabase) _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  return _supa;
+}
+function _$(id) { return document.getElementById(id); }
+function showAuthWall() { var w=_$('auth-wall'); if(w) w.style.display='flex'; if(document.body) document.body.style.overflow='hidden'; }
+function hideAuthWall() { var w=_$('auth-wall'); if(w) w.style.display='none'; if(document.body) document.body.style.overflow=''; }
+function togglePwd(id, btn) {
+  var inp=_$(id); if(!inp) return;
+  var show=inp.type==='password'; inp.type=show?'text':'password'; btn.textContent=show?'🙈':'👁';
+}
+function switchWallTab(t) {
+  _wallMode=t;
+  _$('wt-login')&&_$('wt-login').classList.toggle('active',t==='login');
+  _$('wt-reg')&&_$('wt-reg').classList.toggle('active',t==='register');
+  if(_$('btn-wall-sub')) _$('btn-wall-sub').textContent=t==='login'?'Se connecter':'Créer mon compte';
+  var cg=_$('wall-cg'); if(cg) cg.style.display=t==='register'?'':'none';
+  var pg=_$('wall-pg'); if(pg) pg.style.display=t==='register'?'':'none';
+  var fg=_$('wall-fg'); if(fg) fg.style.display=t==='register'?'none':'';
+  var er=_$('wall-err'); if(er) er.style.display='none';
+}
+function showWallErr(m) { var e=_$('wall-err'); if(e){e.textContent=m;e.style.display='block';} }
+async function submitWall() {
+  var email=(_$('wall-email')||{}).value||''; email=email.trim();
+  var pass=(_$('wall-pass')||{}).value||'';
+  var btn=_$('btn-wall-sub');
+  if(!email||!pass){showWallErr('Email et mot de passe requis.');return;}
+  var supa=getSupa(); if(!supa){showWallErr('Service indisponible.');return;}
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  try {
+    if(_wallMode==='register'){
+      var conf=(_$('wall-conf')||{}).value||'';
+      if(pass!==conf){showWallErr('Mots de passe différents.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return;}
+      if(pass.length<6){showWallErr('6 caractères minimum.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return;}
+      var prenom=(_$('wall-prenom')||{}).value||'';
+      var r1=await supa.auth.signUp({email,password:pass,options:{data:{prenom}}});
+      if(r1.error){showWallErr(r1.error.message);if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}}
+      else{alert('✅ Compte créé ! Vérifiez votre email.');if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}}
+    } else {
+      var r2=await supa.auth.signInWithPassword({email,password:pass});
+      if(r2.error){showWallErr(r2.error.message);if(btn){btn.disabled=false;btn.textContent='Se connecter';}}
+      else hideAuthWall();
+    }
+  } catch(e){showWallErr('Erreur réseau.');if(btn)btn.disabled=false;}
+}
+async function resetWallPwd() {
+  var em=_$('wall-email'); var email=em?em.value.trim():'';
+  if(!email){showWallErr('Entrez votre email.');return;}
+  var supa=getSupa(); if(!supa)return;
+  var res=await supa.auth.resetPasswordForEmail(email);
+  if(!res.error)alert('📧 Email envoyé à '+email); else showWallErr(res.error.message);
+}
+async function initAuth() {
+  showAuthWall();
+  var supa=getSupa(); if(!supa)return;
+  try {
+    var sd=await supa.auth.getSession();
+    if(sd.data&&sd.data.session&&sd.data.session.user){
+      currentUser=sd.data.session.user; hideAuthWall();
+    }
+    supa.auth.onAuthStateChange(async function(evt,session){
+      currentUser=session?session.user:null;
+      if(currentUser){ hideAuthWall(); if(evt==='SIGNED_IN') onSignIn(); }
+      else { showAuthWall(); }
+    });
+  } catch(e){ console.warn('Auth init failed:',e); }
+}
+/* Theme */
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('bc-c-theme',t);}catch(e){}
+  var lb=_$('th-light'),db=_$('th-dark');
+  if(lb)lb.style.fontWeight=t==='light'?'700':'400';
+  if(db)db.style.fontWeight=t==='dark'?'700':'400';
+}
+(function(){try{var t=localStorage.getItem('bc-c-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+</head>
+<body>
+<!-- ────────── AUTH WALL ────────── -->
+<div id="auth-wall" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2718 100%);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="Logo Bovicalc.png" alt="BoviCalc" onerror="this.style.display='none'">
+      <h1>BoviCalc <span style="color:#22c55e;">Conseiller</span></h1>
+      <p>Gestion multi-exploitations pour conseillers agricoles</p>
+    </div>
+    <div class="auth-tabs" style="margin-bottom:18px;">
+      <button class="auth-tab-btn active" id="wt-login" onclick="switchWallTab('login')">Se connecter</button>
+      <button class="auth-tab-btn" id="wt-reg" onclick="switchWallTab('register')">Créer un compte</button>
+    </div>
+    <input type="email" id="wall-email" class="auth-input" placeholder="votre@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')submitWall()">
+    <div style="position:relative;margin-bottom:12px;">
+      <input type="password" id="wall-pass" class="auth-input" placeholder="••••••••" style="margin-bottom:0;padding-right:44px;" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitWall()">
+      <button type="button" onclick="togglePwd('wall-pass',this)" tabindex="-1" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;font-size:1rem;">👁</button>
+    </div>
+    <div id="wall-pg" style="display:none;"><input type="text" id="wall-prenom" class="auth-input" placeholder="Votre prénom" autocomplete="given-name"></div>
+    <div id="wall-cg" style="display:none;"><input type="password" id="wall-conf" class="auth-input" placeholder="Confirmer le mot de passe"></div>
+    <div id="wall-err" class="auth-error" style="display:none;"></div>
+    <button id="btn-wall-sub" class="auth-btn" onclick="submitWall()">Se connecter</button>
+    <div id="wall-fg" style="text-align:center;margin-top:12px;">
+      <a href="#" onclick="resetWallPwd();return false;" style="font-size:.78rem;color:#475569;text-decoration:underline;">Mot de passe oublié ?</a>
+    </div>
+    <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #334155;">
+      <a href="index_conseiller.html" style="font-size:.78rem;color:#475569;text-decoration:none;">← Retour à l'accueil</a>
+      <span style="color:#334155;margin:0 8px;">|</span>
+      <a href="./app.html" style="font-size:.78rem;color:#475569;text-decoration:none;">BoviCalc Éleveur</a>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── APP LAYOUT ────────── -->
+<div class="app-layout" id="app-layout" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="Logo Bovicalc.png" alt="" onerror="this.style.display='none'">
+      <div class="sidebar-logo-text">
+        <div class="sidebar-logo-title">BoviCalc</div>
+        <div class="sidebar-logo-sub">Conseiller</div>
+      </div>
+      <button onclick="toggleSidebar()" style="background:none;border:none;cursor:pointer;color:#64748b;padding:4px;margin-left:auto;" title="Masquer">☰</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Navigation</div>
+      <button class="sidebar-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+        <span class="si-icon">📊</span> Tableau de bord
+      </button>
+      <button class="sidebar-item" id="nav-exploitations" onclick="showPage('exploitations')">
+        <span class="si-icon">🏠</span> Mes exploitations
+        <span class="si-badge" id="sb-exp-count">0</span>
+      </button>
+      <button class="sidebar-item" id="nav-rapports" onclick="showPage('rapports')">
+        <span class="si-icon">📄</span> Rapports
+      </button>
+      <button class="sidebar-item" id="nav-settings" onclick="showPage('settings')">
+        <span class="si-icon">⚙️</span> Paramètres
+      </button>
+      <a href="./app.html" class="sidebar-item" style="margin-top:4px;">
+        <span class="si-icon">🐄</span> Mode Éleveur
+      </a>
+    </div>
+
+    <div class="sidebar-section" style="flex:1;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px;margin-bottom:4px;">
+        <div class="sidebar-section-label" style="padding:0;">Exploitations</div>
+        <button onclick="openExpModal(null)" title="Nouvelle exploitation" style="background:#15803d;border:none;cursor:pointer;color:#fff;border-radius:6px;width:22px;height:22px;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+      </div>
+      <div id="sidebar-exp-list">
+        <div style="font-size:.75rem;color:#475569;padding:8px 10px;">Aucune exploitation</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="showPage('settings')">
+        <div class="sidebar-avatar" id="sb-avatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sb-name">—</div>
+          <div class="sidebar-user-plan" id="sb-email">—</div>
+        </div>
+        <button onclick="event.stopPropagation();logoutUser()" title="Déconnexion" style="background:none;border:none;cursor:pointer;color:#475569;font-size:.8rem;padding:4px;flex-shrink:0;">⏻</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="main-content">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <button onclick="toggleSidebar()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.1rem;padding:4px 8px;border-radius:6px;display:none;" id="sidebar-toggle-btn">☰</button>
+      <div class="top-bar-title" id="page-title">Tableau de bord</div>
+      <div class="top-bar-actions" id="top-bar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openExpModal(null)">+ Nouvelle exploitation</button>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: DASHBOARD ══ -->
+    <div class="page-content" id="page-dashboard">
+      <!-- Métriques globales -->
+      <div class="grid-4" style="margin-bottom:24px;" id="dash-metrics">
+        <div class="metric-card">
+          <div class="metric-lbl">Exploitations</div>
+          <div class="metric-val" id="m-total">—</div>
+          <div class="metric-sub">Enregistrées</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-lbl">Score A/B</div>
+          <div class="metric-val" id="m-good" style="color:#16a34a;">—</div>
+          <div class="metric-sub">Rations équilibrées</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-lbl">À surveiller</div>
+          <div class="metric-val" id="m-warn" style="color:#d97706;">—</div>
+          <div class="metric-sub">Score C/D ou pas de ration</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-lbl">Sessions ce mois</div>
+          <div class="metric-val" id="m-sessions">—</div>
+          <div class="metric-sub">Analyses réalisées</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <h2 style="font-size:1rem;font-weight:800;color:var(--text);">Toutes les exploitations</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="search" id="search-exp" class="form-input" placeholder="🔍 Rechercher..." style="width:200px;padding:6px 10px;" oninput="filterExpCards()">
+          <select class="form-select" id="filter-type" style="width:150px;padding:6px 10px;" onchange="filterExpCards()">
+            <option value="">Tous types</option>
+            <option value="lait">Lait</option>
+            <option value="viande">Viande</option>
+            <option value="mixte">Mixte</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" id="exp-cards-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-muted);">
+          <div style="font-size:2.5rem;margin-bottom:12px;">🐄</div>
+          <p>Aucune exploitation. <a href="#" onclick="openExpModal(null);return false;" style="color:#15803d;">Créer la première →</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: EXPLOITATIONS LIST ══ -->
+    <div class="page-content hidden" id="page-exploitations">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">Mes exploitations</h2>
+        <button class="btn btn-primary btn-sm" onclick="openExpModal(null)">+ Nouvelle exploitation</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="data-table" id="exp-table">
+          <thead>
+            <tr>
+              <th>Nom</th><th>Type</th><th>Contact</th><th>Dernier bilan</th><th>Score</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="exp-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: EXPLOITATION DETAIL ══ -->
+    <div class="page-content hidden" id="page-exp-detail">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="goBack()">← Retour</button>
+        <div>
+          <h2 style="font-size:1.2rem;font-weight:900;color:var(--text);margin-bottom:2px;" id="exp-detail-name">Exploitation</h2>
+          <div style="font-size:.8rem;color:var(--text-muted);" id="exp-detail-meta"></div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="editCurrentExp()">✏️ Modifier</button>
+          <button class="btn btn-primary btn-sm" onclick="saveSession()">💾 Sauvegarder ration</button>
+          <button class="btn btn-secondary btn-sm" onclick="printRapport()">📄 PDF / Imprimer</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-ration',this)">🌾 Ration & Bilan</button>
+        <button class="tab-btn" onclick="switchTab('tab-historique',this)">🕐 Historique</button>
+        <button class="tab-btn" onclick="switchTab('tab-rapport',this)">📄 Rapport</button>
+      </div>
+
+      <!-- TAB: RATION -->
+      <div class="tab-content active" id="tab-ration">
+        <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;" class="ration-layout">
+
+          <!-- Colonne gauche : animal -->
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div class="card-header"><div class="card-title">🐄 Animal</div></div>
+              <div class="form-group">
+                <label>Type d'animal</label>
+                <select class="form-select" id="r-type-animal" onchange="onAnimalTypeChange()">
+                  <option value="">Sélectionner…</option>
+                  <optgroup label="Lait">
+                    <option value="vache-laitiere">Vache laitière</option>
+                    <option value="vache-tarie">Vache tarie</option>
+                    <option value="vache-prepa-velage">Prépa vêlage</option>
+                  </optgroup>
+                  <optgroup label="Viande">
+                    <option value="genisse">Génisse (croissance)</option>
+                    <option value="genisse-engrais">Génisse à engraisser</option>
+                    <option value="vache-reforme">Vache réforme</option>
+                    <option value="veau">Veau</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Poids vif (kg)</label>
+                  <input type="number" class="form-input" id="r-pv" min="100" step="10" placeholder="650">
+                </div>
+                <div class="form-group">
+                  <label>Activité</label>
+                  <select class="form-select" id="r-activite">
+                    <option value="stabulation">Stabulation</option>
+                    <option value="paturage">Pâturage</option>
+                  </select>
+                </div>
+                <div class="form-group" id="rg-prod">
+                  <label>Production (kg/j)</label>
+                  <input type="number" class="form-input" id="r-prod" min="0" step="0.5" placeholder="30">
+                </div>
+                <div class="form-group" id="rg-tb">
+                  <label>TB (g/L)</label>
+                  <input type="number" class="form-input" id="r-tb" min="20" step="0.5" placeholder="38">
+                </div>
+                <div class="form-group" id="rg-gmq" style="display:none;">
+                  <label>GMQ (kg/j)</label>
+                  <input type="number" class="form-input" id="r-gmq" min="0" max="2" step="0.1" placeholder="1.0">
+                </div>
+              </div>
+              <button class="btn btn-primary" style="width:100%;" onclick="calcBesoins()">Calculer les besoins →</button>
+            </div>
+
+            <!-- Résultats besoins -->
+            <div class="card" id="card-besoins" style="display:none;margin-bottom:16px;">
+              <div class="card-header"><div class="card-title">📊 Besoins calculés</div></div>
+              <div id="besoins-result"></div>
+            </div>
+          </div>
+
+          <!-- Colonne droite : ration + bilan -->
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div class="card-header">
+                <div class="card-title">🌾 Composition de la ration</div>
+                <button class="btn btn-ghost btn-sm" onclick="addRationRow()">+ Aliment</button>
+              </div>
+              <div class="ration-head"><span>Aliment</span><span>kg MS/j</span><span></span></div>
+              <div id="ration-rows">
+                <!-- rows added dynamically -->
+              </div>
+              <div id="ration-datalist-container"></div>
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="calcBilan()">Calculer le bilan</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearRation()">🗑 Vider</button>
+              </div>
+            </div>
+
+            <!-- Bilan résultat -->
+            <div id="bilan-result-wrap" style="display:none;">
+              <div class="card" style="margin-bottom:16px;">
+                <div class="card-header"><div class="card-title">📊 Bilan nutritionnel</div></div>
+                <div id="bilan-result"></div>
+              </div>
+              <div id="glucides-wrap"></div>
+              <div id="suggestions-wrap"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: HISTORIQUE -->
+      <div class="tab-content" id="tab-historique">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:700;color:var(--text);">Sessions enregistrées</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadSessionsForCurrentExp()">🔄 Actualiser</button>
+          </div>
+          <div id="sessions-list">
+            <div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune session enregistrée.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: RAPPORT -->
+      <div class="tab-content" id="tab-rapport">
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+          <div class="card" style="flex:1;min-width:280px;">
+            <div class="card-header"><div class="card-title">📄 Générer un rapport</div></div>
+            <div class="form-group">
+              <label>Titre du rapport</label>
+              <input type="text" class="form-input" id="rp-titre" placeholder="Ex: Bilan ration été 2025">
+            </div>
+            <div class="form-group">
+              <label>Conseiller (votre nom)</label>
+              <input type="text" class="form-input" id="rp-conseiller" placeholder="Votre nom / cabinet">
+            </div>
+            <div class="form-group">
+              <label>Observations / recommandations</label>
+              <textarea class="form-textarea" id="rp-obs" rows="4" placeholder="Vos commentaires pour l'éleveur…"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="printRapport()">🖨 Imprimer / PDF</button>
+              <button class="btn btn-ghost btn-sm" onclick="previewRapport()">👁 Aperçu</button>
+            </div>
+          </div>
+          <div class="card" style="flex:2;min-width:320px;" id="rapport-preview">
+            <div style="color:var(--text-muted);text-align:center;padding:32px;">
+              Remplissez les informations et cliquez sur "Aperçu"
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: RAPPORTS ══ -->
+    <div class="page-content hidden" id="page-rapports">
+      <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:20px;">Rapports récents</h2>
+      <div class="card">
+        <div id="rapports-list" style="color:var(--text-muted);text-align:center;padding:48px;">
+          <div style="font-size:2rem;margin-bottom:12px;">📄</div>
+          <p>Ouvrez une exploitation et enregistrez des sessions pour voir vos rapports ici.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: PARAMÈTRES ══ -->
+    <div class="page-content hidden" id="page-settings">
+      <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:20px;">Paramètres</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">👤 Mon profil</div></div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+            <div class="sidebar-avatar" style="width:52px;height:52px;font-size:1.3rem;" id="settings-avatar">?</div>
+            <div>
+              <div style="font-weight:700;font-size:1rem;" id="settings-name">—</div>
+              <div style="color:var(--text-muted);font-size:.83rem;" id="settings-email">—</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nouveau mot de passe</label>
+            <div style="position:relative;">
+              <input type="password" class="form-input" id="new-pass" placeholder="••••••••" style="padding-right:44px;">
+              <button type="button" onclick="togglePwd('new-pass',this)" tabindex="-1" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirmer</label>
+            <div style="position:relative;">
+              <input type="password" class="form-input" id="conf-pass" placeholder="••••••••" style="padding-right:44px;">
+              <button type="button" onclick="togglePwd('conf-pass',this)" tabindex="-1" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;">👁</button>
+            </div>
+          </div>
+          <div id="pass-msg" style="display:none;font-size:.82rem;margin-bottom:10px;padding:7px 10px;border-radius:6px;"></div>
+          <button class="btn btn-primary btn-sm" onclick="changePass()">Changer le mot de passe</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🎨 Apparence</div></div>
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <button class="btn btn-ghost" id="th-light" onclick="setTheme('light')">☀️ Clair</button>
+            <button class="btn btn-ghost" id="th-dark" onclick="setTheme('dark')">🌙 Sombre</button>
+          </div>
+          <div class="card-header"><div class="card-title">🔗 Liens</div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="./app.html" class="btn btn-ghost btn-sm">🐄 BoviCalc Éleveur</a>
+            <a href="index_conseiller.html" class="btn btn-ghost btn-sm">← Page d'accueil Conseiller</a>
+            <button class="btn btn-danger btn-sm" onclick="logoutUser()" style="margin-top:8px;">⏻ Se déconnecter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<!-- ────────── MODAL: EXPLOITATION ────────── -->
+<div class="modal-overlay hidden" id="exp-modal" onclick="if(event.target===this)closeExpModal()">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <h3 id="exp-modal-title">Nouvelle exploitation</h3>
+      <button class="modal-close" onclick="closeExpModal()">×</button>
+    </div>
+    <input type="hidden" id="exp-modal-id">
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Nom de l'exploitation <span style="color:#dc2626;">*</span></label>
+        <input type="text" class="form-input" id="em-nom" placeholder="Ex: GAEC du Marais">
+      </div>
+      <div class="form-group">
+        <label>Type de production</label>
+        <select class="form-select" id="em-type">
+          <option value="lait">Lait</option>
+          <option value="viande">Viande</option>
+          <option value="mixte">Mixte</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nb. animaux (indicatif)</label>
+        <input type="number" class="form-input" id="em-nb-animaux" min="1" placeholder="Ex: 80">
+      </div>
+      <div class="form-group">
+        <label>Contact — Nom</label>
+        <input type="text" class="form-input" id="em-contact-nom" placeholder="Nom de l'éleveur">
+      </div>
+      <div class="form-group">
+        <label>Contact — Téléphone</label>
+        <input type="tel" class="form-input" id="em-contact-tel" placeholder="06 00 00 00 00">
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Contact — Email</label>
+        <input type="email" class="form-input" id="em-contact-email" placeholder="eleveur@exemple.fr">
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Adresse</label>
+        <input type="text" class="form-input" id="em-adresse" placeholder="Commune, département">
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Notes internes</label>
+        <textarea class="form-textarea" id="em-notes" rows="3" placeholder="Contexte, problématiques connues…"></textarea>
+      </div>
+    </div>
+    <div id="exp-modal-err" style="display:none;color:#dc2626;font-size:.82rem;margin-top:8px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeExpModal()">Annuler</button>
+      <button class="btn btn-danger btn-sm" id="btn-delete-exp" onclick="deleteCurrentExp()" style="display:none;">🗑 Supprimer</button>
+      <button class="btn btn-primary" onclick="saveExp()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── MODAL: SAVE SESSION ────────── -->
+<div class="modal-overlay hidden" id="session-modal" onclick="if(event.target===this)closeSessionModal()">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <h3>💾 Sauvegarder la session</h3>
+      <button class="modal-close" onclick="closeSessionModal()">×</button>
+    </div>
+    <div class="form-group">
+      <label>Nom de la session</label>
+      <input type="text" class="form-input" id="sm-name" placeholder="Ex: Ration été 2025">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSessionModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmSaveSession()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── PRINT TEMPLATE ────────── -->
+<div id="print-template" style="display:none;">
+</div>
+
+<style>
+@media print {
+  body > *:not(#print-template) { display: none !important; }
+  #print-template { display: block !important; }
+  .no-print { display: none !important; }
+}
+.ration-layout { }
+@media (max-width: 860px) {
+  .ration-layout { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0 !important; }
+  #sidebar-toggle-btn { display: flex !important; }
+}
+</style>
+
+<script>
+/* ══════════════════════════════════════════════
+   ALIMENTS DATABASE (compact — clés identiques à app.html)
+══════════════════════════════════════════════ */
+const RB_CSV = `Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS
+Avoine,87.6,0.87,88,1.1,3.3,0.2,1.4,4.5,1.7,3.7,220,170,15
+Avoine décortiquée,85.7,1.00,100,0.7,3.8,0.2,1.2,4.2,2.0,4.2,240,180,15
+Betterave fourragère,12.0,1.05,75,0.5,2.0,0.6,1.2,4.5,1.2,3.5,0,0,120
+Betterave sucrière,22.0,1.08,78,0.4,1.5,0.5,1.0,4.8,1.0,3.2,0,0,150
+Blé tendre,86.0,1.16,112,0.5,3.4,0.2,1.1,4.8,1.9,3.2,0,600,30
+Blé aplati,86.0,1.15,108,0.5,3.4,0.2,1.1,4.8,1.9,3.2,0,580,30
+Colza (tourteau),89.0,0.98,338,7.6,11.9,0.4,5.6,13.8,1.8,5.5,0,0,50
+Drêches de brasserie,22.0,0.90,215,3.1,6.5,0.2,2.0,0.9,1.7,3.8,0,0,30
+Ensilage de maïs (30% MS),30.0,0.90,58,2.1,2.0,0.2,1.4,3.9,1.5,3.0,250,30,20
+Ensilage de maïs (35% MS),35.0,0.93,60,2.0,1.9,0.2,1.3,3.7,1.5,3.0,270,35,20
+Ensilage d'herbe,28.0,0.82,88,5.8,3.5,0.4,1.9,28.5,1.9,4.8,0,0,50
+Ensilage de sorgho,28.0,0.84,54,3.0,2.2,0.2,1.5,4.0,1.4,2.8,200,25,15
+Enrubannage d'herbe,40.0,0.84,92,6.0,3.8,0.4,2.0,30.0,2.0,5.0,0,0,55
+Farine de luzerne,90.0,0.75,155,16.0,3.2,0.3,2.5,22.5,1.6,5.7,0,0,25
+Fétuque élevée (pâturage),18.0,0.90,125,5.5,4.0,0.5,2.0,32.0,2.2,5.5,0,0,60
+Foin de graminées,85.0,0.68,55,4.5,2.8,0.3,1.4,18.5,1.3,3.8,0,0,20
+Foin de luzerne,85.0,0.73,125,14.5,2.7,0.3,2.5,22.5,1.5,5.2,0,0,25
+Foin de prairie naturelle,85.0,0.65,62,5.0,3.0,0.3,1.5,20.0,1.4,4.0,0,0,25
+Foin de RGA,85.0,0.72,75,6.0,3.5,0.4,1.6,22.0,1.6,4.5,0,0,30
+Herbe ray-grass (printemps),18.0,1.00,150,5.5,4.2,0.4,2.0,30.5,2.2,6.0,0,0,80
+Lin (graine extrudée),92.0,1.35,210,2.5,6.6,0.3,4.3,7.5,2.4,4.5,0,0,15
+Luzerne (déshydratée),90.0,0.73,150,16.0,2.8,0.3,2.8,22.5,1.7,5.8,0,0,25
+Maïs grain,86.0,1.25,90,0.3,2.8,0.2,1.0,3.4,1.8,2.5,500,50,25
+Maïs aplati,86.0,1.22,88,0.3,2.8,0.2,1.0,3.4,1.8,2.5,480,45,25
+Maïs floconné,86.0,1.30,95,0.3,2.8,0.2,1.0,3.4,1.8,2.5,520,60,25
+Manioc,86.0,1.10,35,1.0,0.8,0.1,0.6,8.5,0.8,1.8,700,0,30
+Mélasse de betterave,75.0,1.05,45,0.9,0.9,4.0,3.2,46.5,1.2,2.8,0,0,600
+Orge,86.0,1.12,105,0.5,3.8,0.2,1.3,5.3,1.7,3.8,80,500,25
+Orge aplati,86.0,1.12,105,0.5,3.8,0.2,1.3,5.3,1.7,3.8,80,500,25
+Paille de blé,86.0,0.43,22,2.5,0.8,0.5,0.6,9.0,0.8,1.2,0,0,5
+Paille d'orge,86.0,0.44,24,3.0,0.9,0.5,0.6,8.5,0.8,1.2,0,0,5
+Pomme de terre,22.0,1.04,85,0.3,2.0,0.3,0.8,5.5,1.4,3.8,350,0,40
+Pulpe de betterave (sèche),87.0,0.98,80,8.0,0.9,2.3,2.8,1.0,1.3,2.8,0,0,30
+Pulpe de betterave (ensilée),20.0,0.95,75,7.5,0.9,2.2,2.5,1.0,1.2,2.6,0,0,35
+Ray-grass anglais (foin),85.0,0.70,70,5.5,3.5,0.4,1.7,22.0,1.6,4.5,0,0,30
+Soja (tourteau 48),89.0,1.10,485,3.0,6.8,0.1,2.8,20.8,1.4,6.5,0,0,60
+Soja (tourteau 44),89.0,1.05,420,3.0,6.3,0.1,2.5,20.0,1.3,6.2,0,0,55
+Sorgho grain,86.0,1.10,95,0.3,3.0,0.1,1.2,3.8,1.5,2.4,400,20,15
+Triticale,86.0,1.08,98,0.5,3.5,0.2,1.1,4.5,1.7,3.5,100,400,20
+Trèfle blanc (pâturage),18.0,0.95,165,13.0,4.0,0.3,2.5,28.0,2.0,5.8,0,0,70`;
+
+function parseCsv(csv) {
+  const lines = csv.trim().split('\n');
+  const db = [];
+  for (let i=1;i<lines.length;i++) {
+    const c = lines[i].split(',');
+    const nom = c[0]?.trim(); const ms = parseFloat(c[1])||0;
+    if (!nom||!ms) continue;
+    db.push({
+      nom, ms,
+      uflPerKgMS: parseFloat(c[2])||0,
+      pdiPerKgMS: parseFloat(c[3])||0,
+      ca_gkgms:   parseFloat(c[4])||0,
+      p_gkgms:    parseFloat(c[5])||0,
+      na_gkgms:   parseFloat(c[6])||0,
+      mg_gkgms:   parseFloat(c[7])||0,
+      k_gkgms:    parseFloat(c[8])||0,
+      met_gkgms:  parseFloat(c[9])||0,
+      lys_gkgms:  parseFloat(c[10])||0,
+      al_gkgms:   parseFloat(c[11])||0,
+      ar_gkgms:   parseFloat(c[12])||0,
+      ss_gkgms:   parseFloat(c[13])||0,
+    });
+  }
+  return db;
+}
+
+const alimentsDb = parseCsv(RB_CSV);
+const alimentNames = alimentsDb.map(a=>a.nom);
+
+function findFood(nom) {
+  const n = nom.toLowerCase().trim();
+  return alimentsDb.find(a=>a.nom.toLowerCase()===n)||alimentsDb.find(a=>a.nom.toLowerCase().includes(n));
+}
+
+/* ══ STATE ══ */
+let exploitations = [];
+let currentExp = null;
+let lastBesoins = null;
+let lastApports = null;
+let prevPage = 'dashboard';
+
+/* ══ INIT ══ */
+window.addEventListener('DOMContentLoaded', async () => {
+  await initAuth();
+  const supa = getSupa();
+  if (supa) {
+    const sd = await supa.auth.getSession();
+    if (sd.data?.session?.user) {
+      currentUser = sd.data.session.user;
+      onSignIn();
+    }
+  }
+});
+
+async function onSignIn() {
+  updateSidebarUser();
+  document.getElementById('app-layout').style.display = 'flex';
+  addRationRow(); addRationRow(); addRationRow();
+  buildDatalist();
+  await loadExploitations();
+  showPage('dashboard');
+}
+
+async function logoutUser() {
+  const supa = getSupa();
+  try { if(supa) await supa.auth.signOut(); } catch(e) {}
+  currentUser = null;
+  window.location.reload();
+}
+
+function updateSidebarUser() {
+  if (!currentUser) return;
+  const prenom = currentUser.user_metadata?.prenom || '';
+  const name = prenom || currentUser.email?.split('@')[0] || '?';
+  const initiale = name.charAt(0).toUpperCase();
+  const el = id => document.getElementById(id);
+  if(el('sb-avatar')) el('sb-avatar').textContent = initiale;
+  if(el('sb-name')) el('sb-name').textContent = name.charAt(0).toUpperCase()+name.slice(1);
+  if(el('sb-email')) el('sb-email').textContent = currentUser.email || '';
+  if(el('settings-avatar')) el('settings-avatar').textContent = initiale;
+  if(el('settings-name')) el('settings-name').textContent = name.charAt(0).toUpperCase()+name.slice(1);
+  if(el('settings-email')) el('settings-email').textContent = currentUser.email || '';
+}
+
+/* ══ NAVIGATION ══ */
+function showPage(page) {
+  const pages = ['dashboard','exploitations','exp-detail','rapports','settings'];
+  pages.forEach(p => {
+    const el = document.getElementById('page-'+p);
+    if (el) el.classList.toggle('hidden', p !== page);
+  });
+  const navs = ['dashboard','exploitations','rapports','settings'];
+  navs.forEach(n => {
+    const el = document.getElementById('nav-'+n);
+    if(el) el.classList.toggle('active', n===page);
+  });
+  const titles = {
+    'dashboard':'Tableau de bord',
+    'exploitations':'Mes exploitations',
+    'exp-detail': currentExp ? currentExp.nom : 'Exploitation',
+    'rapports':'Rapports',
+    'settings':'Paramètres'
+  };
+  document.getElementById('page-title').textContent = titles[page] || '';
+
+  // top bar actions
+  const tba = document.getElementById('top-bar-actions');
+  if (page === 'exp-detail') {
+    tba.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="editCurrentExp()">✏️ Modifier</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSession()">💾 Sauvegarder</button>
+      <button class="btn btn-secondary btn-sm" onclick="printRapport()">📄 PDF</button>`;
+  } else {
+    tba.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openExpModal(null)">+ Nouvelle exploitation</button>`;
+  }
+
+  if (page !== 'exp-detail') prevPage = page;
+}
+
+function goBack() { showPage(prevPage || 'dashboard'); }
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('#page-exp-detail .tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-exp-detail .tab-btn').forEach(b => b.classList.remove('active'));
+  const t = document.getElementById(tabId);
+  if (t) t.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tabId === 'tab-historique') loadSessionsForCurrentExp();
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('open');
+}
+
+/* ══ EXPLOITATIONS (Supabase) ══ */
+async function loadExploitations() {
+  const supa = getSupa();
+  if (!supa || !currentUser) return;
+  try {
+    const { data, error } = await supa.from('exploitations').select('*').order('created_at', {ascending:false});
+    if (error) throw error;
+    exploitations = data || [];
+  } catch(e) {
+    console.warn('loadExploitations:', e);
+    exploitations = [];
+  }
+  renderExpCards();
+  renderExpTable();
+  renderSidebarExps();
+  updateDashMetrics();
+}
+
+function renderExpCards() {
+  const grid = document.getElementById('exp-cards-grid');
+  const q = (document.getElementById('search-exp')?.value||'').toLowerCase();
+  const ft = document.getElementById('filter-type')?.value||'';
+  const exps = exploitations.filter(e => {
+    if (q && !e.nom.toLowerCase().includes(q)) return false;
+    if (ft && e.type !== ft) return false;
+    return true;
+  });
+
+  if (!exps.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-muted);">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🐄</div>
+      <p>${exploitations.length?'Aucun résultat':'Aucune exploitation. '}<a href="#" onclick="openExpModal(null);return false;" style="color:#15803d;">Créer la première →</a></p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = exps.map(e => {
+    const score = e.last_score||'';
+    const scoreClass = score ? 'exp-score-'+score : 'exp-score-empty';
+    const scoreLabel = score || '—';
+    const typeClass = e.type==='viande'?'type-viande':e.type==='mixte'?'type-mixte':'';
+    const lastDate = e.last_session_date ? new Date(e.last_session_date).toLocaleDateString('fr-FR') : 'Jamais';
+    return `<div class="exp-card ${typeClass}" onclick="openExp('${e.id}')">
+      <div class="exp-card-name">${escHtml(e.nom)}</div>
+      <div class="exp-card-type">${e.type||'lait'} ${e.nb_animaux?'• '+e.nb_animaux+' animaux':''}</div>
+      <div class="exp-card-stats">
+        <div class="exp-stat"><div class="exp-stat-val" style="color:#f97316;">${e.last_ufl||'—'}</div><div class="exp-stat-lbl">UFL</div></div>
+        <div class="exp-stat"><div class="exp-stat-val" style="color:#2563eb;">${e.last_pdi||'—'}</div><div class="exp-stat-lbl">PDI (g)</div></div>
+        <div class="exp-stat"><div class="exp-stat-val">${e.last_ms||'—'}</div><div class="exp-stat-lbl">kg MS</div></div>
+      </div>
+      <div class="exp-card-footer">
+        <span>Dernier bilan : ${lastDate}</span>
+        <span class="exp-score-badge ${scoreClass}">Score ${scoreLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('sb-exp-count').textContent = exploitations.length;
+}
+
+function filterExpCards() { renderExpCards(); }
+
+function renderExpTable() {
+  const tbody = document.getElementById('exp-tbody');
+  if (!exploitations.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Aucune exploitation</td></tr>';
+    return;
+  }
+  tbody.innerHTML = exploitations.map(e => {
+    const score = e.last_score||'';
+    const scoreClass = score?'badge-'+(score==='A'||score==='B'?'green':score==='C'?'amber':'red'):'badge-gray';
+    const lastDate = e.last_session_date ? new Date(e.last_session_date).toLocaleDateString('fr-FR') : '—';
+    return `<tr>
+      <td><strong>${escHtml(e.nom)}</strong></td>
+      <td><span class="badge badge-${e.type==='lait'?'green':e.type==='viande'?'amber':'blue'}">${e.type||'lait'}</span></td>
+      <td>${escHtml(e.contact_nom||'')} ${e.contact_tel?'· '+e.contact_tel:''}</td>
+      <td>${lastDate}</td>
+      <td><span class="badge ${scoreClass}">${score||'—'}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="openExp('${e.id}')">Ouvrir</button>
+        <button class="btn btn-ghost btn-sm" onclick="openExpModal('${e.id}')">✏️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderSidebarExps() {
+  const cont = document.getElementById('sidebar-exp-list');
+  if (!exploitations.length) {
+    cont.innerHTML = '<div style="font-size:.75rem;color:#475569;padding:8px 10px;">Aucune exploitation</div>';
+    return;
+  }
+  cont.innerHTML = exploitations.map(e => `
+    <button class="sidebar-exp-item ${currentExp&&currentExp.id===e.id?'active':''}" onclick="openExp('${e.id}')">
+      <span class="sidebar-exp-dot"></span>
+      <span class="sidebar-exp-name">${escHtml(e.nom)}</span>
+      <span class="sidebar-exp-type">${e.type||''}</span>
+    </button>`).join('');
+}
+
+function updateDashMetrics() {
+  const total = exploitations.length;
+  const good = exploitations.filter(e=>e.last_score==='A'||e.last_score==='B').length;
+  const warn = total - good;
+  document.getElementById('m-total').textContent = total;
+  document.getElementById('m-good').textContent = good;
+  document.getElementById('m-warn').textContent = warn;
+  // Sessions ce mois — on laisse async
+  loadMonthSessionCount();
+}
+
+async function loadMonthSessionCount() {
+  const supa = getSupa(); if(!supa||!currentUser) return;
+  const start = new Date(); start.setDate(1); start.setHours(0,0,0,0);
+  try {
+    const { count } = await supa.from('exploitation_sessions')
+      .select('id', {count:'exact',head:true})
+      .gte('date', start.toISOString());
+    document.getElementById('m-sessions').textContent = count||0;
+  } catch(e) { document.getElementById('m-sessions').textContent = '—'; }
+}
+
+/* ══ OPEN EXPLOITATION ══ */
+async function openExp(id) {
+  currentExp = exploitations.find(e=>e.id===id);
+  if (!currentExp) return;
+  lastBesoins = null; lastApports = null;
+
+  document.getElementById('exp-detail-name').textContent = currentExp.nom;
+  document.getElementById('exp-detail-meta').textContent =
+    (currentExp.type||'lait') + (currentExp.contact_nom?' · '+currentExp.contact_nom:'') +
+    (currentExp.adresse?' · '+currentExp.adresse:'');
+
+  // Restore last session data if any
+  if (currentExp.last_ration_data) {
+    try { restoreRationData(JSON.parse(currentExp.last_ration_data)); } catch(e) {}
+  }
+
+  // Reset bilan
+  document.getElementById('bilan-result-wrap').style.display = 'none';
+  document.getElementById('card-besoins').style.display = 'none';
+
+  // Set tab back to ration
+  switchTab('tab-ration', document.querySelector('#page-exp-detail .tab-btn'));
+  renderSidebarExps();
+  showPage('exp-detail');
+}
+
+function editCurrentExp() { if(currentExp) openExpModal(currentExp.id); }
+
+/* ══ MODAL EXPLOITATION ══ */
+function openExpModal(id) {
+  const modal = document.getElementById('exp-modal');
+  const exp = id ? exploitations.find(e=>e.id===id) : null;
+  document.getElementById('exp-modal-title').textContent = exp ? 'Modifier l\'exploitation' : 'Nouvelle exploitation';
+  document.getElementById('exp-modal-id').value = id || '';
+  document.getElementById('em-nom').value = exp?.nom || '';
+  document.getElementById('em-type').value = exp?.type || 'lait';
+  document.getElementById('em-nb-animaux').value = exp?.nb_animaux || '';
+  document.getElementById('em-contact-nom').value = exp?.contact_nom || '';
+  document.getElementById('em-contact-tel').value = exp?.contact_tel || '';
+  document.getElementById('em-contact-email').value = exp?.contact_email || '';
+  document.getElementById('em-adresse').value = exp?.adresse || '';
+  document.getElementById('em-notes').value = exp?.notes || '';
+  document.getElementById('exp-modal-err').style.display = 'none';
+  document.getElementById('btn-delete-exp').style.display = exp ? '' : 'none';
+  modal.classList.remove('hidden');
+}
+function closeExpModal() { document.getElementById('exp-modal').classList.add('hidden'); }
+
+async function saveExp() {
+  const nom = document.getElementById('em-nom').value.trim();
+  if (!nom) { showExpErr('Le nom est obligatoire.'); return; }
+  const id = document.getElementById('exp-modal-id').value;
+  const supa = getSupa();
+  const payload = {
+    nom,
+    type: document.getElementById('em-type').value,
+    nb_animaux: parseInt(document.getElementById('em-nb-animaux').value)||null,
+    contact_nom: document.getElementById('em-contact-nom').value.trim()||null,
+    contact_tel: document.getElementById('em-contact-tel').value.trim()||null,
+    contact_email: document.getElementById('em-contact-email').value.trim()||null,
+    adresse: document.getElementById('em-adresse').value.trim()||null,
+    notes: document.getElementById('em-notes').value.trim()||null,
+    updated_at: new Date().toISOString(),
+  };
+  try {
+    if (id) {
+      const { error } = await supa.from('exploitations').update(payload).eq('id',id);
+      if (error) throw error;
+    } else {
+      payload.conseiller_id = currentUser.id;
+      const { error } = await supa.from('exploitations').insert(payload);
+      if (error) throw error;
+    }
+    closeExpModal();
+    await loadExploitations();
+    if (id && currentExp?.id===id) {
+      currentExp = exploitations.find(e=>e.id===id);
+      document.getElementById('exp-detail-name').textContent = currentExp?.nom||'';
+    }
+  } catch(e) { showExpErr(e.message||'Erreur lors de la sauvegarde.'); }
+}
+
+function showExpErr(m) { const e=document.getElementById('exp-modal-err'); e.textContent=m; e.style.display='block'; }
+
+async function deleteCurrentExp() {
+  const id = document.getElementById('exp-modal-id').value;
+  if (!id) return;
+  const exp = exploitations.find(e=>e.id===id);
+  if (!confirm(`Supprimer "${exp?.nom}" et toutes ses sessions ?\nCette action est irréversible.`)) return;
+  const supa = getSupa();
+  try {
+    const { error } = await supa.from('exploitations').delete().eq('id',id);
+    if (error) throw error;
+    closeExpModal();
+    if (currentExp?.id===id) { currentExp=null; showPage('dashboard'); }
+    await loadExploitations();
+  } catch(e) { showExpErr(e.message||'Erreur lors de la suppression.'); }
+}
+
+/* ══ CALCULATION ENGINE ══ */
+function gN(id) { const v=parseFloat(document.getElementById(id)?.value); return isFinite(v)?v:0; }
+
+function onAnimalTypeChange() {
+  const v = document.getElementById('r-type-animal').value;
+  const lait = ['vache-laitiere','vache-tarie','vache-prepa-velage'].includes(v);
+  const viande = ['genisse','genisse-engrais','vache-reforme','veau'].includes(v);
+  document.getElementById('rg-prod').style.display = lait?'':'none';
+  document.getElementById('rg-tb').style.display   = lait?'':'none';
+  document.getElementById('rg-gmq').style.display  = viande?'':'none';
+}
+
+function computeBesoins(pv,prod,activite,tb,type,gmq) {
+  const pv075n = Math.pow(pv,0.75);
+  const coef = activite==='paturage'?1.1:1;
+  let bUFL=0, bPDI=0, lait=0, cap=0;
+  switch(type) {
+    case 'vache-laitiere':
+      lait = (prod*(tb||40))/40;
+      bUFL = (1.4+0.006*pv+0.44*lait)*coef;
+      bPDI = (95+0.5*pv+lait*48)*coef;
+      cap  = (0.025*pv+0.1*prod)*coef;
+      break;
+    case 'vache-tarie':
+      bUFL = (0.054*pv075n+2.5)*coef; bPDI=(95+0.5*pv+150)*coef; cap=pv*0.018*coef; break;
+    case 'vache-prepa-velage':
+      bUFL = (0.054*pv075n+1.5)*coef; bPDI=(95+0.5*pv+180)*coef; cap=pv*0.02*coef; break;
+    case 'genisse': case 'genisse-engrais': {
+      const g=gmq||0.7;
+      bUFL=(0.041*pv075n+4.5*g)*coef; bPDI=(2.5*pv075n+330*g)*coef; cap=pv*0.025*coef; break;
+    }
+    case 'vache-reforme': {
+      const g=gmq||0.8;
+      bUFL=(0.041*pv075n+4.5*g)*coef; bPDI=(2.5*pv075n+330*g)*coef; cap=pv*0.022*coef; break;
+    }
+    case 'veau': {
+      const g=gmq||1.2;
+      bUFL=(0.03*pv075n+3.5*g)*coef; bPDI=(1.8*pv075n+280*g)*coef; cap=pv*0.03*coef; break;
+    }
+    default:
+      bUFL=(0.054*pv075n+3)*coef; bPDI=(95+0.5*pv+200)*coef; cap=pv*0.02*coef;
+  }
+  return { bUFL, bPDI, laitStandard:lait, ingestionCapacite:cap, typeLabel:type };
+}
+
+function calcBesoins() {
+  const type = document.getElementById('r-type-animal').value;
+  const pv   = gN('r-pv');
+  const prod = gN('r-prod');
+  const tb   = gN('r-tb');
+  const gmq  = gN('r-gmq');
+  const act  = document.getElementById('r-activite').value;
+
+  if (!type||!pv) { alert('Sélectionnez un type d\'animal et indiquez le poids vif.'); return; }
+  lastBesoins = computeBesoins(pv,prod,act,tb,type,gmq);
+
+  const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(type)?'UFV':'UFL';
+  const card = document.getElementById('card-besoins');
+  const res = document.getElementById('besoins-result');
+  res.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="background:#fff7ed;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:#92400e;margin-bottom:4px;">Énergie</div>
+        <div style="font-size:1.8rem;font-weight:900;color:#f97316;line-height:1;">${lastBesoins.bUFL.toFixed(2)}</div>
+        <div style="font-size:.75rem;color:#92400e;">${eu}/j</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:#1e40af;margin-bottom:4px;">PDI</div>
+        <div style="font-size:1.8rem;font-weight:900;color:#2563eb;line-height:1;">${lastBesoins.bPDI.toFixed(0)}</div>
+        <div style="font-size:.75rem;color:#1e40af;">g/j</div>
+      </div>
+    </div>
+    ${lastBesoins.ingestionCapacite>0?`<div style="font-size:.82rem;color:var(--text-muted);text-align:center;">Ingestion max : <strong>${lastBesoins.ingestionCapacite.toFixed(1)} kg MS/j</strong></div>`:''}`;
+  card.style.display = '';
+}
+
+/* ══ RATION ROWS ══ */
+function addRationRow() {
+  const cont = document.getElementById('ration-rows');
+  const row = document.createElement('div');
+  row.className = 'ration-row';
+  row.innerHTML = `
+    <input type="text" list="aliments-list" placeholder="Aliment…" class="ration-input-nom">
+    <input type="number" min="0" step="0.1" placeholder="0" class="ration-input-qty">
+    <button type="button" onclick="this.closest('.ration-row').remove()" style="background:#fee2e2;border:none;border-radius:6px;width:36px;height:36px;cursor:pointer;color:#dc2626;font-size:.9rem;">✕</button>`;
+  cont.appendChild(row);
+}
+
+function clearRation() {
+  document.getElementById('ration-rows').innerHTML = '';
+  document.getElementById('bilan-result-wrap').style.display = 'none';
+  lastApports = null;
+  addRationRow(); addRationRow(); addRationRow();
+}
+
+function buildDatalist() {
+  const cont = document.getElementById('ration-datalist-container');
+  if (!cont) return;
+  const dl = document.createElement('datalist');
+  dl.id = 'aliments-list';
+  alimentNames.forEach(n => { const o=document.createElement('option'); o.value=n; dl.appendChild(o); });
+  cont.appendChild(dl);
+}
+
+function parseRation() {
+  const items = [];
+  document.querySelectorAll('#ration-rows .ration-row').forEach(row => {
+    const nom = row.querySelector('.ration-input-nom')?.value?.trim();
+    const qty = parseFloat(row.querySelector('.ration-input-qty')?.value);
+    if (!nom||!qty||qty<=0) return;
+    const f = findFood(nom);
+    if (f) items.push({
+      nom:f.nom, qty,
+      ufl:f.uflPerKgMS*qty, pdi:f.pdiPerKgMS*qty,
+      al:(f.al_gkgms||0)*qty, ar:(f.ar_gkgms||0)*qty, ss:(f.ss_gkgms||0)*qty,
+    });
+  });
+  return {
+    items,
+    totalMS:  items.reduce((s,i)=>s+i.qty,0),
+    totalUFL: items.reduce((s,i)=>s+i.ufl,0),
+    totalPDI: items.reduce((s,i)=>s+i.pdi,0),
+    totalAL:  items.reduce((s,i)=>s+i.al,0),
+    totalAR:  items.reduce((s,i)=>s+i.ar,0),
+    totalSS:  items.reduce((s,i)=>s+i.ss,0),
+  };
+}
+
+function calcBilan() {
+  const a = parseRation();
+  if (!a.items.length) { alert('Ajoutez au moins un aliment.'); return; }
+  lastApports = a;
+  if (!lastBesoins) { calcBesoins(); if(!lastBesoins) return; }
+  const b = lastBesoins;
+  const rUFL = b.bUFL>0?a.totalUFL/b.bUFL:0;
+  const rPDI = b.bPDI>0?a.totalPDI/b.bPDI:0;
+  const ppu  = a.totalUFL>0?a.totalPDI/a.totalUFL:0;
+  const eu   = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+  const bcls = r=>r>=0.9&&r<=1.1?'badge-green':r<0.9?'badge-red':'badge-amber';
+  const blbl = r=>r>=0.9&&r<=1.1?'OK':r<0.9?'Déficit':'Excès';
+  const pbar = r=>`style="width:${Math.min(100,r*100)}%;background:${r>=0.9&&r<=1.1?'#16a34a':r<0.9?'#dc2626':'#d97706'};"`;
+
+  document.getElementById('bilan-result').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="background:#fff7ed;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#92400e;">Énergie ${eu}</div>
+          <span class="badge ${bcls(rUFL)}">${blbl(rUFL)}</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" ${pbar(rUFL)}></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:.82rem;">
+          <span>Apport : <strong style="color:#f97316;">${a.totalUFL.toFixed(2)} ${eu}</strong></span>
+          <span>Besoin : ${b.bUFL.toFixed(2)} ${eu}</span>
+        </div>
+        <div style="text-align:right;font-size:1.1rem;font-weight:800;color:${rUFL>=0.9&&rUFL<=1.1?'#16a34a':rUFL<0.9?'#dc2626':'#d97706'};">${(rUFL*100).toFixed(0)}%</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#1e40af;">PDI</div>
+          <span class="badge ${bcls(rPDI)}">${blbl(rPDI)}</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" ${pbar(rPDI)}></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:.82rem;">
+          <span>Apport : <strong style="color:#2563eb;">${a.totalPDI.toFixed(0)} g</strong></span>
+          <span>Besoin : ${b.bPDI.toFixed(0)} g</span>
+        </div>
+        <div style="text-align:right;font-size:1.1rem;font-weight:800;color:${rPDI>=0.9&&rPDI<=1.1?'#16a34a':rPDI<0.9?'#dc2626':'#d97706'};">${(rPDI*100).toFixed(0)}%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:.68rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">MS totale</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--text);">${a.totalMS.toFixed(1)}</div>
+        <div style="font-size:.7rem;color:var(--text-muted);">kg MS/j${b.ingestionCapacite>0?' / max '+b.ingestionCapacite.toFixed(1):''}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:.68rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">PDI/${eu}</div>
+        <div style="font-size:1.3rem;font-weight:800;color:${ppu>=90&&ppu<=105?'#16a34a':'#d97706'};">${ppu.toFixed(0)}</div>
+        <div style="font-size:.7rem;color:var(--text-muted);">g/${eu} (cible 90–105)</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:.68rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Score</div>
+        <div style="font-size:1.3rem;font-weight:800;color:${getScoreColor(rUFL,rPDI,ppu)};">${computeScore(rUFL,rPDI,ppu)}</div>
+        <div style="font-size:.7rem;color:var(--text-muted);">Équilibre global</div>
+      </div>
+    </div>
+    <table class="data-table" style="font-size:.8rem;">
+      <thead><tr><th>Aliment</th><th>kg MS</th><th style="color:#f97316;">${eu}</th><th style="color:#2563eb;">PDI (g)</th></tr></thead>
+      <tbody>
+        ${a.items.map(i=>`<tr><td>${escHtml(i.nom)}</td><td>${i.qty.toFixed(1)}</td><td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
+        <tr style="font-weight:700;"><td>Total</td><td>${a.totalMS.toFixed(1)}</td><td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td></tr>
+      </tbody>
+    </table>`;
+
+  document.getElementById('glucides-wrap').innerHTML = renderGlucides(a);
+  document.getElementById('suggestions-wrap').innerHTML = renderSuggestions(a, b);
+  document.getElementById('bilan-result-wrap').style.display = '';
+
+  // Persist score
+  if (currentExp) updateExpScore(rUFL, rPDI, ppu, a);
+}
+
+function computeScore(rUFL,rPDI,ppu) {
+  const ok = r=>r>=0.9&&r<=1.1;
+  if(ok(rUFL)&&ok(rPDI)&&ppu>=90&&ppu<=110) return 'A';
+  if(ok(rUFL)&&ok(rPDI)) return 'B';
+  const def = r=>r<0.85;
+  if(def(rUFL)||def(rPDI)) return 'D';
+  return 'C';
+}
+function getScoreColor(rUFL,rPDI,ppu) {
+  const s=computeScore(rUFL,rPDI,ppu);
+  return {A:'#16a34a',B:'#22c55e',C:'#d97706',D:'#dc2626'}[s]||'#64748b';
+}
+
+async function updateExpScore(rUFL,rPDI,ppu,a) {
+  if (!currentExp) return;
+  const score = computeScore(rUFL,rPDI,ppu);
+  const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(lastBesoins.typeLabel)?'UFV':'UFL';
+  const rationData = JSON.stringify({
+    type: document.getElementById('r-type-animal').value,
+    pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), gmq: gN('r-gmq'),
+    activite: document.getElementById('r-activite').value,
+    rows: getRationRows(),
+  });
+  const payload = {
+    last_score: score,
+    last_ufl: a.totalUFL.toFixed(2)+' '+eu,
+    last_pdi: a.totalPDI.toFixed(0)+'g',
+    last_ms: a.totalMS.toFixed(1)+'kg',
+    last_session_date: new Date().toISOString(),
+    last_ration_data: rationData,
+  };
+  try {
+    const supa=getSupa();
+    await supa.from('exploitations').update(payload).eq('id',currentExp.id);
+    Object.assign(currentExp, payload);
+    renderExpCards();
+    renderSidebarExps();
+    renderExpTable();
+  } catch(e) {}
+}
+
+function getRationRows() {
+  const rows = [];
+  document.querySelectorAll('#ration-rows .ration-row').forEach(row => {
+    const nom = row.querySelector('.ration-input-nom')?.value?.trim();
+    const qty = row.querySelector('.ration-input-qty')?.value;
+    if (nom) rows.push({nom, qty});
+  });
+  return rows;
+}
+
+function restoreRationData(data) {
+  if (!data) return;
+  if (data.type) document.getElementById('r-type-animal').value = data.type;
+  if (data.pv) document.getElementById('r-pv').value = data.pv;
+  if (data.prod) document.getElementById('r-prod').value = data.prod;
+  if (data.tb) document.getElementById('r-tb').value = data.tb;
+  if (data.gmq) document.getElementById('r-gmq').value = data.gmq;
+  if (data.activite) document.getElementById('r-activite').value = data.activite;
+  onAnimalTypeChange();
+  if (data.rows && data.rows.length) {
+    const cont = document.getElementById('ration-rows');
+    cont.innerHTML = '';
+    data.rows.forEach(r => {
+      addRationRow();
+      const rows2 = cont.querySelectorAll('.ration-row');
+      const last = rows2[rows2.length-1];
+      if (last) {
+        last.querySelector('.ration-input-nom').value = r.nom||'';
+        last.querySelector('.ration-input-qty').value = r.qty||'';
+      }
+    });
+  }
+}
+
+/* ══ GLUCIDES ══ */
+function renderGlucides(a) {
+  const al=a.totalAL||0, ar=a.totalAR||0, ss=a.totalSS||0;
+  const total=al+ar+ss;
+  if(total<1) return '';
+  const ms=a.totalMS||1;
+  const alK=al/ms, arK=ar/ms, ssK=ss/ms, totK=alK+arK+ssK;
+  const alP=totK>0?(alK/totK*100).toFixed(0):0;
+  const arP=totK>0?(arK/totK*100).toFixed(0):0;
+  const ssP=totK>0?(ssK/totK*100).toFixed(0):0;
+  const ferment=arK+ssK;
+  const risk=arK>150||ferment>220;
+  const warn=!risk&&(arK>100||ferment>160);
+  const rc=risk?'#dc2626':warn?'#d97706':'#16a34a';
+  const rl=risk?'⚠️ Risque acidose élevé':warn?'⚡ Surveiller la fermentation':'✅ Équilibre glucidique correct';
+  const seg=(p,c,l)=>p>0?`<div title="${l}: ${p}%" style="width:${p}%;background:${c};height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600;overflow:hidden;">${p>8?l:''}</div>`:'';
+  return `<div class="card" style="margin-bottom:16px;">
+    <div class="card-header"><div class="card-title">🌾 Glucides fermentescibles</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+      <div style="background:#f0fdf4;border-left:4px solid #16a34a;border-radius:8px;padding:10px;">
+        <div style="font-size:.65rem;text-transform:uppercase;color:#6b7280;font-weight:700;">Amidon lent</div>
+        <div style="font-size:1.4rem;font-weight:800;color:#15803d;">${alK.toFixed(0)}<span style="font-size:.75rem;font-weight:400"> g/kg MS</span></div>
+        <div style="font-size:.7rem;color:#6b7280;">Maïs, manioc…</div>
+      </div>
+      <div style="background:#fff7ed;border-left:4px solid #ea580c;border-radius:8px;padding:10px;">
+        <div style="font-size:.65rem;text-transform:uppercase;color:#6b7280;font-weight:700;">Amidon rapide</div>
+        <div style="font-size:1.4rem;font-weight:800;color:#c2410c;">${arK.toFixed(0)}<span style="font-size:.75rem;font-weight:400"> g/kg MS</span></div>
+        <div style="font-size:.7rem;color:#6b7280;">Blé, orge…</div>
+      </div>
+      <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:10px;">
+        <div style="font-size:.65rem;text-transform:uppercase;color:#6b7280;font-weight:700;">Sucres solubles</div>
+        <div style="font-size:1.4rem;font-weight:800;color:#1d4ed8;">${ssK.toFixed(0)}<span style="font-size:.75rem;font-weight:400"> g/kg MS</span></div>
+        <div style="font-size:.7rem;color:#6b7280;">Betterave, herbe…</div>
+      </div>
+    </div>
+    <div style="display:flex;height:26px;border-radius:6px;overflow:hidden;background:#e5e7eb;margin-bottom:6px;">
+      ${seg(alP,'#16a34a','Lent')}${seg(arP,'#ea580c','Rapide')}${seg(ssP,'#2563eb','Solubles')}
+    </div>
+    <div style="display:flex;gap:14px;font-size:.75rem;margin-bottom:10px;">
+      <span style="color:#16a34a;">● Lent ${alP}%</span>
+      <span style="color:#ea580c;">● Rapide ${arP}%</span>
+      <span style="color:#2563eb;">● Solubles ${ssP}%</span>
+    </div>
+    <div style="padding:8px 12px;border-radius:6px;background:${risk?'#fef2f2':warn?'#fffbeb':'#f0fdf4'};border:1px solid ${rc};font-size:.83rem;font-weight:600;color:${rc};">
+      ${rl}${risk||warn?`<span style="font-weight:400;font-size:.75rem;margin-left:8px;">AR+SS = ${ferment.toFixed(0)} g/kg MS (seuil 200)</span>`:''}
+    </div>
+  </div>`;
+}
+
+/* ══ SUGGESTIONS ══ */
+function renderSuggestions(a, b) {
+  if (!b) return '';
+  const rUFL = b.bUFL>0?a.totalUFL/b.bUFL:0;
+  const rPDI = b.bPDI>0?a.totalPDI/b.bPDI:0;
+  const ppu  = a.totalUFL>0?a.totalPDI/a.totalUFL:0;
+  const ms   = a.totalMS;
+  const ferment = a.totalMS>0?(a.totalAR+a.totalSS)/a.totalMS:0;
+  const suggs = [];
+  if(rUFL<0.9) suggs.push({c:'badge-red',t:'⚡ Énergie insuffisante',d:'Augmenter les concentrés énergétiques (maïs grain, orge aplati) ou l\'ensilage de maïs. Déficit : '+(((1-rUFL)*b.bUFL).toFixed(2))+' UFL/j'});
+  if(rUFL>1.15) suggs.push({c:'badge-amber',t:'⚡ Excès énergétique',d:'Réduire les concentrés ou augmenter la proportion de fourrages secs (foin, paille).'});
+  if(rPDI<0.9) suggs.push({c:'badge-red',t:'🔴 PDI insuffisants',d:'Ajouter du tourteau de soja (PDI 485 g/kg) ou de colza. Déficit : '+(((1-rPDI)*b.bPDI).toFixed(0))+' g PDI/j'});
+  if(rPDI>1.2) suggs.push({c:'badge-amber',t:'🔵 Excès de PDI',d:'Réduire les concentrés azotés pour équilibrer énergie/protéines.'});
+  if(ppu<82) suggs.push({c:'badge-amber',t:'⚖️ Déséquilibre PDI/UFL',d:`Ratio PDI/UFL = ${ppu.toFixed(0)} g/UFL (cible 90–105). Ajouter un apport protéique.`});
+  if(ppu>115) suggs.push({c:'badge-amber',t:'⚖️ Déséquilibre PDI/UFL',d:`Ratio PDI/UFL = ${ppu.toFixed(0)} g/UFL. Augmenter la part énergétique.`});
+  if(ferment>200) suggs.push({c:'badge-red',t:'⚠️ Risque acidose',d:`Amidon rapide+solubles = ${ferment.toFixed(0)} g/kg MS. Réduire orge/blé, introduire des tampons (bicarbonate 100–150 g/j).`});
+  if(b.ingestionCapacite>0&&ms>b.ingestionCapacite*1.08) suggs.push({c:'badge-amber',t:'📦 Surcharge ingestion',d:`MS = ${ms.toFixed(1)} kg vs max ${b.ingestionCapacite.toFixed(1)} kg. Vérifiez la palatabilité et l'état corporel.`});
+  if(!suggs.length) suggs.push({c:'badge-green',t:'✅ Ration bien équilibrée',d:'Les apports énergétiques et azotés couvrent les besoins. Surveillez les minéraux.'});
+  return `<div class="card" style="margin-bottom:16px;">
+    <div class="card-header"><div class="card-title">💡 Recommandations</div></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      ${suggs.map(s=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px;border-left:3px solid ${s.c.includes('red')?'#dc2626':s.c.includes('green')?'#16a34a':'#d97706'};">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:3px;"><span class="badge ${s.c}" style="margin-right:6px;"></span>${s.t}</div>
+          <div style="font-size:.8rem;color:var(--text-muted);">${s.d}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ══ SESSIONS ══ */
+function saveSession() {
+  if (!lastApports) { alert('Calculez d\'abord un bilan.'); return; }
+  if (!currentExp) { alert('Ouvrez d\'abord une exploitation.'); return; }
+  const now = new Date();
+  document.getElementById('sm-name').value = `Session du ${now.toLocaleDateString('fr-FR')}`;
+  document.getElementById('session-modal').classList.remove('hidden');
+}
+function closeSessionModal() { document.getElementById('session-modal').classList.add('hidden'); }
+
+async function confirmSaveSession() {
+  const name = document.getElementById('sm-name').value.trim() || 'Session sans titre';
+  const supa = getSupa();
+  const sessionData = {
+    besoins: lastBesoins,
+    apports: lastApports,
+    animalParams: {
+      type: document.getElementById('r-type-animal').value,
+      pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), gmq: gN('r-gmq'),
+      activite: document.getElementById('r-activite').value,
+    },
+    rows: getRationRows(),
+    score: lastBesoins ? computeScore(
+      lastBesoins.bUFL>0?lastApports.totalUFL/lastBesoins.bUFL:0,
+      lastBesoins.bPDI>0?lastApports.totalPDI/lastBesoins.bPDI:0,
+      lastApports.totalUFL>0?lastApports.totalPDI/lastApports.totalUFL:0
+    ) : '—',
+  };
+  try {
+    const { error } = await supa.from('exploitation_sessions').insert({
+      exploitation_id: currentExp.id,
+      name,
+      date: new Date().toISOString(),
+      data: sessionData,
+    });
+    if (error) throw error;
+    closeSessionModal();
+    alert('✅ Session sauvegardée.');
+  } catch(e) { alert('Erreur : '+(e.message||e)); }
+}
+
+async function loadSessionsForCurrentExp() {
+  if (!currentExp) return;
+  const supa = getSupa();
+  const list = document.getElementById('sessions-list');
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">Chargement…</div>';
+  try {
+    const { data, error } = await supa.from('exploitation_sessions')
+      .select('*').eq('exploitation_id', currentExp.id).order('date',{ascending:false}).limit(50);
+    if (error) throw error;
+    if (!data||!data.length) {
+      list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune session enregistrée.</div>';
+      return;
+    }
+    list.innerHTML = `<table class="data-table">
+      <thead><tr><th>Date</th><th>Nom</th><th>Score</th><th>UFL</th><th>PDI</th><th>Actions</th></tr></thead>
+      <tbody>${data.map(s=>{
+        const d=s.data||{};
+        const score=d.score||'—';
+        const sc='badge-'+(score==='A'||score==='B'?'green':score==='C'?'amber':score==='D'?'red':'gray');
+        const ufl=d.apports?.totalUFL?d.apports.totalUFL.toFixed(2):'—';
+        const pdi=d.apports?.totalPDI?d.apports.totalPDI.toFixed(0)+'g':'—';
+        return `<tr>
+          <td>${new Date(s.date).toLocaleDateString('fr-FR')}</td>
+          <td>${escHtml(s.name||'')}</td>
+          <td><span class="badge ${sc}">${score}</span></td>
+          <td style="color:#f97316;font-weight:600;">${ufl}</td>
+          <td style="color:#2563eb;font-weight:600;">${pdi}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="restoreSession(${s.id})">Restaurer</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteSession(${s.id})">🗑</button></td>
+        </tr>`;}).join('')}
+      </tbody>
+    </table>`;
+    // cache sessions for restore
+    window._loadedSessions = data;
+  } catch(e) { list.innerHTML = `<div style="padding:20px;color:#dc2626;">Erreur : ${e.message}</div>`; }
+}
+
+function restoreSession(id) {
+  const sessions = window._loadedSessions||[];
+  const s = sessions.find(x=>x.id===id);
+  if (!s||!s.data) return;
+  const d = s.data;
+  if (d.animalParams) {
+    const p = d.animalParams;
+    document.getElementById('r-type-animal').value = p.type||'';
+    document.getElementById('r-pv').value = p.pv||'';
+    document.getElementById('r-prod').value = p.prod||'';
+    document.getElementById('r-tb').value = p.tb||'';
+    document.getElementById('r-gmq').value = p.gmq||'';
+    document.getElementById('r-activite').value = p.activite||'stabulation';
+    onAnimalTypeChange();
+  }
+  if (d.rows&&d.rows.length) {
+    const cont = document.getElementById('ration-rows');
+    cont.innerHTML='';
+    d.rows.forEach(r=>{ addRationRow();
+      const rows2=cont.querySelectorAll('.ration-row');
+      const last=rows2[rows2.length-1];
+      if(last){last.querySelector('.ration-input-nom').value=r.nom||'';last.querySelector('.ration-input-qty').value=r.qty||'';}
+    });
+  }
+  lastBesoins = d.besoins||null;
+  lastApports = d.apports||null;
+  switchTab('tab-ration', document.querySelector('#page-exp-detail .tab-btn'));
+  if (lastBesoins) {
+    // Show besoins card
+    document.getElementById('card-besoins').style.display='';
+    calcBilan();
+  }
+  alert('Session restaurée.');
+}
+
+async function deleteSession(id) {
+  if (!confirm('Supprimer cette session ?')) return;
+  const supa=getSupa();
+  try {
+    const {error}=await supa.from('exploitation_sessions').delete().eq('id',id);
+    if(error) throw error;
+    loadSessionsForCurrentExp();
+  } catch(e) { alert('Erreur : '+e.message); }
+}
+
+/* ══ RAPPORT / PDF ══ */
+function previewRapport() {
+  const preview = document.getElementById('rapport-preview');
+  preview.innerHTML = buildRapportHtml(false);
+}
+
+function printRapport() {
+  const html = buildRapportHtml(true);
+  const pt = document.getElementById('print-template');
+  pt.innerHTML = html;
+  pt.style.display = 'block';
+  window.print();
+  pt.style.display = 'none';
+}
+
+function buildRapportHtml(forPrint) {
+  const exp = currentExp||{};
+  const titre = document.getElementById('rp-titre')?.value || 'Bilan nutritionnel';
+  const conseiller = document.getElementById('rp-conseiller')?.value || '';
+  const obs = document.getElementById('rp-obs')?.value || '';
+  const date = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const a = lastApports;
+  const b = lastBesoins;
+
+  let bilanHtml = '<p style="color:#64748b;font-style:italic;">Aucun bilan calculé pour cette session.</p>';
+  if (a && b) {
+    const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:0;
+    const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:0;
+    const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
+    const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+    const score=computeScore(rUFL,rPDI,ppu);
+    bilanHtml = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;">
+        <div style="border:2px solid #f97316;border-radius:8px;padding:14px;">
+          <div style="font-size:.72rem;text-transform:uppercase;color:#92400e;font-weight:700;margin-bottom:6px;">Énergie ${eu}</div>
+          <div style="font-size:1.4rem;font-weight:800;color:#f97316;">${a.totalUFL.toFixed(2)} ${eu}</div>
+          <div style="font-size:.82rem;color:#64748b;">Besoin : ${b.bUFL.toFixed(2)} ${eu} — Couverture : <strong style="color:${rUFL>=0.9&&rUFL<=1.1?'#16a34a':'#dc2626'}">${(rUFL*100).toFixed(0)}%</strong></div>
+        </div>
+        <div style="border:2px solid #2563eb;border-radius:8px;padding:14px;">
+          <div style="font-size:.72rem;text-transform:uppercase;color:#1e40af;font-weight:700;margin-bottom:6px;">PDI</div>
+          <div style="font-size:1.4rem;font-weight:800;color:#2563eb;">${a.totalPDI.toFixed(0)} g</div>
+          <div style="font-size:.82rem;color:#64748b;">Besoin : ${b.bPDI.toFixed(0)} g — Couverture : <strong style="color:${rPDI>=0.9&&rPDI<=1.1?'#16a34a':'#dc2626'}">${(rPDI*100).toFixed(0)}%</strong></div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0;">
+        <thead><tr style="background:#f1f5f9;"><th style="padding:8px;text-align:left;border-bottom:2px solid #e2e8f0;">Aliment</th><th style="padding:8px;border-bottom:2px solid #e2e8f0;">kg MS</th><th style="padding:8px;border-bottom:2px solid #e2e8f0;color:#f97316;">${eu}</th><th style="padding:8px;border-bottom:2px solid #e2e8f0;color:#2563eb;">PDI (g)</th></tr></thead>
+        <tbody>${a.items.map(i=>`<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 8px;">${escHtml(i.nom)}</td><td style="padding:7px 8px;">${i.qty.toFixed(1)}</td><td style="padding:7px 8px;color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="padding:7px 8px;color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
+        <tr style="font-weight:700;background:#f0fdf4;"><td style="padding:8px;">Total</td><td style="padding:8px;">${a.totalMS.toFixed(1)}</td><td style="padding:8px;color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="padding:8px;color:#2563eb;">${a.totalPDI.toFixed(0)}</td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;gap:12px;margin:12px 0;align-items:center;">
+        <div style="padding:10px 20px;background:#f0fdf4;border-radius:8px;border:2px solid #16a34a;text-align:center;">
+          <div style="font-size:.7rem;font-weight:700;color:#15803d;text-transform:uppercase;">Score global</div>
+          <div style="font-size:2rem;font-weight:900;color:${getScoreColor(rUFL,rPDI,ppu)};">${score}</div>
+        </div>
+        <div style="font-size:.82rem;color:#64748b;line-height:1.7;">
+          MS totale : <strong>${a.totalMS.toFixed(1)} kg/j</strong><br>
+          PDI/${eu} : <strong>${ppu.toFixed(0)} g/${eu}</strong> (cible 90–105)<br>
+          ${b.ingestionCapacite>0?`Capacité ingestion : <strong>${b.ingestionCapacite.toFixed(1)} kg MS</strong>`:''}
+        </div>
+      </div>`;
+  }
+
+  return `<div style="font-family:'Inter',sans-serif;max-width:720px;margin:0 auto;color:#0f172a;${forPrint?'padding:0;':''}">
+    <!-- EN-TÊTE -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px;border-bottom:3px solid #15803d;margin-bottom:20px;">
+      <div>
+        <div style="font-size:1.3rem;font-weight:900;color:#14532d;letter-spacing:-.02em;">BoviCalc <span style="color:#15803d;">Conseiller</span></div>
+        ${conseiller?`<div style="font-size:.82rem;color:#64748b;margin-top:2px;">${escHtml(conseiller)}</div>`:''}
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:.75rem;color:#64748b;">Rapport établi le</div>
+        <div style="font-size:.9rem;font-weight:700;color:#0f172a;">${date}</div>
+      </div>
+    </div>
+
+    <!-- EXPLOITATION -->
+    <div style="background:#f0fdf4;border-radius:10px;padding:16px;margin-bottom:20px;">
+      <div style="font-size:.7rem;text-transform:uppercase;color:#16a34a;font-weight:700;letter-spacing:.08em;margin-bottom:6px;">Exploitation</div>
+      <div style="font-size:1.2rem;font-weight:900;color:#14532d;">${escHtml(exp.nom||'—')}</div>
+      <div style="font-size:.82rem;color:#4b7c5f;margin-top:4px;">${[exp.type,exp.contact_nom,exp.adresse].filter(Boolean).map(escHtml).join(' · ')}</div>
+    </div>
+
+    <!-- TITRE -->
+    <h2 style="font-size:1rem;font-weight:800;color:#14532d;margin-bottom:12px;">${escHtml(titre)}</h2>
+
+    <!-- BILAN -->
+    ${bilanHtml}
+
+    <!-- OBSERVATIONS -->
+    ${obs?`<div style="margin-top:20px;padding:16px;background:#fffbeb;border-radius:8px;border-left:4px solid #d97706;">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#92400e;margin-bottom:8px;">Observations et recommandations</div>
+      <div style="font-size:.88rem;color:#0f172a;white-space:pre-wrap;">${escHtml(obs)}</div>
+    </div>`:''}
+
+    <!-- PIED DE PAGE -->
+    <div style="margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:.72rem;color:#94a3b8;">
+      <span>Généré avec BoviCalc Conseiller — bovicalc.netlify.app</span>
+      <span>${date}</span>
+    </div>
+  </div>`;
+}
+
+/* ══ PARAMÈTRES ══ */
+async function changePass() {
+  const np = document.getElementById('new-pass')?.value||'';
+  const cp = document.getElementById('conf-pass')?.value||'';
+  const msg = document.getElementById('pass-msg');
+  if (!np||np.length<6) { showPassMsg('Minimum 6 caractères.','error'); return; }
+  if (np!==cp) { showPassMsg('Les mots de passe ne correspondent pas.','error'); return; }
+  const supa=getSupa(); if(!supa) return;
+  const {error}=await supa.auth.updateUser({password:np});
+  if(error) showPassMsg(error.message,'error');
+  else { showPassMsg('✅ Mot de passe modifié !','ok'); document.getElementById('new-pass').value=''; document.getElementById('conf-pass').value=''; }
+}
+function showPassMsg(m,t) {
+  const e=document.getElementById('pass-msg');
+  e.textContent=m; e.style.display='block';
+  e.style.background=t==='ok'?'#f0fdf4':'#fee2e2';
+  e.style.color=t==='ok'?'#15803d':'#dc2626';
+}
+
+/* ══ UTILS ══ */
+function escHtml(s) {
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
+

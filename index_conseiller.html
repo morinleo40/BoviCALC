@@ -1,0 +1,332 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BoviCalc Conseiller — Gestion multi-exploitations</title>
+  <link rel="icon" type="image/png" href="Logo Bovicalc.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #0f172a; background: #fff; }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 66px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { height: 36px; border-radius: 6px; }
+    .nav-logo-text { line-height: 1.2; }
+    .nav-logo-main { font-size: 1.1rem; font-weight: 900; color: #14532d; letter-spacing: -.02em; }
+    .nav-logo-sub { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #16a34a; }
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+    .nav-link { padding: 8px 14px; border-radius: 8px; font-size: .88rem; font-weight: 500; color: #475569; text-decoration: none; transition: all .15s; }
+    .nav-link:hover { background: #f1f5f9; color: #15803d; }
+    .nav-cta { padding: 9px 20px; border-radius: 9px; background: #15803d; color: #fff; font-weight: 700; font-size: .88rem; text-decoration: none; transition: all .2s; box-shadow: 0 2px 8px rgba(21,128,61,.3); }
+    .nav-cta:hover { background: #166534; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(150deg, #0f172a 0%, #1e293b 50%, #0f2718 100%);
+      padding: 96px 32px 80px;
+    }
+    .hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    @media (max-width: 768px) { .hero-inner { grid-template-columns: 1fr; } .hero-visual { display: none; } }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(22,163,74,.2); border: 1px solid rgba(22,163,74,.3); border-radius: 20px; padding: 5px 14px; font-size: .8rem; font-weight: 700; color: #4ade80; margin-bottom: 20px; }
+    .hero h1 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 16px; letter-spacing: -.03em; }
+    .hero h1 em { font-style: normal; color: #4ade80; }
+    .hero p { font-size: 1.05rem; color: #94a3b8; margin-bottom: 32px; line-height: 1.75; }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-hero { padding: 13px 28px; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; transition: all .2s; }
+    .btn-hero-primary { background: #15803d; color: #fff; box-shadow: 0 4px 16px rgba(21,128,61,.4); }
+    .btn-hero-primary:hover { background: #166534; transform: translateY(-2px); }
+    .btn-hero-outline { background: transparent; color: #e2e8f0; border: 2px solid #334155; }
+    .btn-hero-outline:hover { border-color: #4ade80; color: #4ade80; }
+
+    /* Dashboard mockup */
+    .hero-visual { position: relative; }
+    .mockup {
+      background: #1e293b; border-radius: 14px;
+      border: 1px solid #334155;
+      box-shadow: 0 24px 64px rgba(0,0,0,.4);
+      overflow: hidden; font-size: 12px;
+    }
+    .mockup-bar { background: #111827; padding: 10px 16px; display: flex; gap: 6px; align-items: center; border-bottom: 1px solid #334155; }
+    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-sidebar { width: 180px; background: #111827; border-right: 1px solid #334155; padding: 12px 10px; float: left; }
+    .mockup-si { padding: 6px 8px; border-radius: 6px; color: #64748b; font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+    .mockup-si.active { background: #15803d; color: #fff; }
+    .mockup-exp { padding: 5px 8px; border-radius: 5px; color: #94a3b8; font-size: 10px; display: flex; align-items: center; gap: 5px; cursor: default; }
+    .mockup-dot-exp { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+    .mockup-main { overflow: hidden; padding: 14px; background: #1e293b; }
+    .mockup-card { background: #283548; border-radius: 8px; padding: 12px; margin-bottom: 8px; border: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+    .mockup-card-name { color: #e2e8f0; font-weight: 700; font-size: 11px; }
+    .mockup-card-sub { color: #64748b; font-size: 10px; margin-top: 2px; }
+    .mockup-badge { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+    .mockup-badge-A { background: #dcfce7; color: #15803d; }
+    .mockup-badge-B { background: #fef3c7; color: #92400e; }
+
+    /* SECTIONS */
+    .section { padding: 80px 32px; }
+    .section.alt { background: #f8fafc; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 56px; }
+    .tag { display: inline-block; background: #dcfce7; color: #15803d; padding: 4px 14px; border-radius: 20px; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px; }
+    .section-header h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 900; color: #0f172a; line-height: 1.2; letter-spacing: -.02em; }
+    .section-header p { margin-top: 14px; color: #64748b; font-size: 1rem; max-width: 580px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+    .text-green { color: #15803d; }
+
+    /* FEATURES */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .feature-card { padding: 28px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; transition: all .2s; }
+    .feature-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .feature-icon { font-size: 2rem; margin-bottom: 14px; }
+    .feature-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 8px; color: #0f172a; }
+    .feature-card p { font-size: .88rem; color: #64748b; line-height: 1.65; }
+
+    /* HOW IT WORKS */
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
+    .step { text-align: center; }
+    .step-num { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #15803d, #22c55e); color: #fff; font-size: 1.3rem; font-weight: 900; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 4px 14px rgba(21,128,61,.3); }
+    .step h3 { font-size: .95rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .step p { font-size: .85rem; color: #64748b; line-height: 1.65; }
+
+    /* PRICING */
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 860px; margin: 0 auto; }
+    .plan { background: #fff; border: 2px solid #e2e8f0; border-radius: 18px; padding: 32px 28px; position: relative; }
+    .plan.featured { border-color: #15803d; box-shadow: 0 8px 32px rgba(21,128,61,.15); transform: scale(1.02); }
+    .plan-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #15803d; color: #fff; font-size: .75rem; font-weight: 700; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
+    .plan-name { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+    .plan-desc { font-size: .85rem; color: #64748b; margin-bottom: 20px; }
+    .plan-price { font-size: 2.8rem; font-weight: 900; color: #0f172a; }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: #94a3b8; }
+    .plan-period { font-size: .82rem; color: #94a3b8; margin-bottom: 24px; }
+    .plan-features { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 8px; font-size: .88rem; color: #475569; }
+    .plan-features li.no { color: #94a3b8; text-decoration: line-through; }
+    .plan-btn { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: .95rem; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; border: none; transition: all .2s; }
+    .plan-btn-primary { background: #15803d; color: #fff; box-shadow: 0 3px 12px rgba(21,128,61,.25); }
+    .plan-btn-primary:hover { background: #166534; }
+    .plan-btn-outline { background: #fff; color: #15803d; border: 2px solid #15803d; }
+    .plan-btn-outline:hover { background: #f0fdf4; }
+
+    /* CTA */
+    .cta { background: linear-gradient(135deg, #0f172a, #1e293b); padding: 80px 32px; text-align: center; }
+    .cta h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 900; color: #fff; margin-bottom: 14px; }
+    .cta p { color: #94a3b8; font-size: 1rem; max-width: 500px; margin: 0 auto 32px; line-height: 1.7; }
+
+    /* FOOTER */
+    footer { background: #0f172a; padding: 28px 32px; text-align: center; color: #475569; font-size: .82rem; }
+    footer a { color: #64748b; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index_conseiller.html" class="nav-logo">
+    <img src="Logo Bovicalc.png" alt="BoviCalc">
+    <div class="nav-logo-text">
+      <div class="nav-logo-main">BoviCalc</div>
+      <div class="nav-logo-sub">Conseiller</div>
+    </div>
+  </a>
+  <div class="nav-actions">
+    <a href="index.html" class="nav-link">Version Éleveur</a>
+    <a href="#pricing" class="nav-link" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">Tarifs</a>
+    <a href="app_conseiller.html" class="nav-cta">Accéder à l'app →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">🌿 Pour les conseillers agricoles</div>
+      <h1>Gérez <em>toutes</em> vos exploitations depuis un seul outil.</h1>
+      <p>BoviCalc Conseiller vous permet de suivre plusieurs élevages clients, créer des rations pour chacun, générer des rapports PDF professionnels et partager les bilans avec vos éleveurs.</p>
+      <div class="hero-btns">
+        <a href="app_conseiller.html" class="btn-hero btn-hero-primary">Commencer gratuitement</a>
+        <a href="#features" class="btn-hero btn-hero-outline" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'});return false;">Voir les fonctionnalités</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dot" style="background:#f87171;"></div>
+          <div class="mockup-dot" style="background:#fbbf24;"></div>
+          <div class="mockup-dot" style="background:#4ade80;"></div>
+          <span style="color:#475569;font-size:11px;margin-left:8px;font-family:monospace;">BoviCalc Conseiller</span>
+        </div>
+        <div style="display:flex;">
+          <div class="mockup-sidebar">
+            <div class="mockup-si active">🏠 Dashboard</div>
+            <div class="mockup-si">📊 Rations</div>
+            <div class="mockup-si">📄 Rapports</div>
+            <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;padding:10px 8px 4px;">Exploitations</div>
+            <div class="mockup-exp"><div class="mockup-dot-exp"></div>GAEC Moreau</div>
+            <div class="mockup-exp"><div class="mockup-dot-exp"></div>Ferme Dupont</div>
+            <div class="mockup-exp"><div class="mockup-dot-exp" style="background:#f97316;"></div>EARL Leblanc</div>
+            <div class="mockup-exp"><div class="mockup-dot-exp"></div>SAS Bertrand</div>
+          </div>
+          <div class="mockup-main" style="flex:1;">
+            <div style="color:#94a3b8;font-size:10px;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Mes exploitations — 4 clients</div>
+            <div class="mockup-card">
+              <div><div class="mockup-card-name">GAEC Moreau</div><div class="mockup-card-sub">Lait · 85 VL · dernière ration il y a 3 j</div></div>
+              <span class="mockup-badge mockup-badge-A">A — 91/100</span>
+            </div>
+            <div class="mockup-card">
+              <div><div class="mockup-card-name">Ferme Dupont</div><div class="mockup-card-sub">Mixte · 60 VL · dernière ration il y a 1 sem</div></div>
+              <span class="mockup-badge mockup-badge-A">B — 76/100</span>
+            </div>
+            <div class="mockup-card" style="border-color:#f97316;">
+              <div><div class="mockup-card-name" style="color:#f97316;">EARL Leblanc</div><div class="mockup-card-sub">Viande · 120 bovins · ⚠ Ration à revoir</div></div>
+              <span class="mockup-badge" style="background:#fee2e2;color:#dc2626;">C — 54/100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Fonctionnalités</div>
+      <h2>Tout ce dont un conseiller <span class="text-green">a besoin</span></h2>
+      <p>Un outil pensé pour la réalité du terrain — visite après visite, exploitation après exploitation.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🏘️</div>
+        <h3>Gestion multi-exploitations</h3>
+        <p>Créez autant d'exploitations que nécessaire. Chaque client a son propre espace avec ses rations, sessions et historique.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🐄</div>
+        <h3>Calculs INRA 2018 complets</h3>
+        <p>Toute la puissance de BoviCalc : UFL/PDI, besoins animaux, bilan fourrager, glucides, minéraux, BACA, acides aminés.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📄</div>
+        <h3>Rapports PDF professionnels</h3>
+        <p>Chaque rapport est personnalisé avec votre nom, le nom de l'exploitation et la date. Prêt à imprimer ou envoyer par email.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Dashboard de suivi</h3>
+        <p>Vue d'ensemble de tous vos clients : score ABCD, dernière ration, alertes nutritionnelles. Repérez en un coup d'œil qui a besoin d'attention.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3>Partage avec l'éleveur</h3>
+        <p>Générez un lien de partage pour que votre client puisse consulter son bilan nutritionnel depuis son propre appareil.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <h3>Historique des rations</h3>
+        <p>Toutes les rations de chaque exploitation sont sauvegardées. Comparez l'évolution dans le temps et retrouvez n'importe quelle session.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section alt">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Prise en main</div>
+      <h2>Simple à utiliser <span class="text-green">dès le premier jour</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Créez vos exploitations</h3>
+        <p>Ajoutez chaque élevage client : nom, type (lait/viande/mixte), contact, notes. Accessible depuis la sidebar en un clic.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Calculez les rations</h3>
+        <p>Le wizard complet BoviCalc est disponible pour chaque exploitation. Besoins, ration, bilan, coûts — exactement comme pour votre propre élevage.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Générez les rapports</h3>
+        <p>Un clic sur "PDF" et le rapport est prêt — avec votre nom de conseiller et le nom de l'exploitation en en-tête.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Suivez vos clients</h3>
+        <p>Le dashboard centralise tous vos élevages. Les scores et alertes vous permettent de prioriser les visites.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TARIFS -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Tarifs</div>
+      <h2>Un forfait <span class="text-green">tout inclus</span></h2>
+      <p>Sans engagement, résiliable à tout moment.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan">
+        <div class="plan-name">Découverte</div>
+        <div class="plan-desc">Pour tester avant de s'engager.</div>
+        <div class="plan-price">0 €</div>
+        <div class="plan-period">/ mois — 2 exploitations max</div>
+        <ul class="plan-features">
+          <li>✅ 2 exploitations</li>
+          <li>✅ Calculs INRA complets</li>
+          <li>✅ Historique 30 jours</li>
+          <li class="no">Export PDF conseiller</li>
+          <li class="no">Partage client</li>
+          <li class="no">Exploitations illimitées</li>
+        </ul>
+        <a href="app_conseiller.html" class="plan-btn plan-btn-outline">Commencer gratuit</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">⭐ Recommandé</div>
+        <div class="plan-name">Conseiller Pro</div>
+        <div class="plan-desc">Pour les conseillers actifs.</div>
+        <div class="plan-price">35 €<span> / mois</span></div>
+        <div class="plan-period">Sans engagement</div>
+        <ul class="plan-features">
+          <li>✅ Exploitations illimitées</li>
+          <li>✅ Calculs INRA complets</li>
+          <li>✅ Historique illimité</li>
+          <li>✅ Export PDF avec votre nom</li>
+          <li>✅ Partage lien client</li>
+          <li>✅ Support prioritaire</li>
+        </ul>
+        <a href="app_conseiller.html" class="plan-btn plan-btn-primary">Démarrer l'essai</a>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:28px;font-size:.85rem;color:#94a3b8;">
+      Questions ? <a href="mailto:bovicalc@gmail.com" style="color:#15803d;font-weight:600;">bovicalc@gmail.com</a>
+    </p>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Prêt à gérer tous vos élevages ?</h2>
+  <p>Créez votre compte conseiller gratuitement et ajoutez votre première exploitation en 2 minutes.</p>
+  <a href="app_conseiller.html" class="btn-hero btn-hero-primary">Accéder à BoviCalc Conseiller →</a>
+</div>
+
+<footer>
+  <p>© 2026 BoviCalc Conseiller · <a href="mailto:bovicalc@gmail.com">bovicalc@gmail.com</a> · <a href="index.html">Version Éleveur</a></p>
+</footer>
+
+</body>
+</html>
+
