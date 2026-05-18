@@ -125,6 +125,8 @@ function openAccountModal() {
   // Bouton upgrade
   var upBtn = _$$('acct-upgrade-btn');
   if (upBtn) upBtn.style.display = (currentUser && userPlan !== 'pro') ? '' : 'none';
+  // Sync boutons thème
+  try { var curTheme = localStorage.getItem('bovicalc-theme') || 'light'; if (typeof setTheme === 'function') setTheme(curTheme); } catch(e) {}
   var bd = _$$('acct-plan-badge');
   if (bd) bd.innerHTML = userPlan === 'pro'
     ? '<span class="plan-badge-pro">⭐ Pro</span>'
@@ -4262,6 +4264,48 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   }
 
   // =====================================================
+  // THÈME CLAIR / SOMBRE
+  // =====================================================
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('bovicalc-theme', t); } catch(e) {}
+    const lb = $('theme-light-btn'), db = $('theme-dark-btn');
+    if (lb) { lb.style.background = t==='light'?'#15803d':'transparent'; lb.style.color = t==='light'?'#fff':'var(--text-muted)'; lb.style.borderColor = t==='light'?'#15803d':'var(--border)'; }
+    if (db) { db.style.background = t==='dark'?'#1e293b':'transparent'; db.style.color = t==='dark'?'#f1f5f9':'var(--text-muted)'; db.style.borderColor = t==='dark'?'#475569':'var(--border)'; }
+  }
+  // Appliquer le thème sauvegardé au chargement
+  (function() { try { const t = localStorage.getItem('bovicalc-theme'); if (t) setTheme(t); } catch(e) {} })();
+
+  // =====================================================
+  // CHANGEMENT DE MOT DE PASSE
+  // =====================================================
+  async function changeAccountPassword() {
+    const np = $('acct-new-pass')?.value || '';
+    const cp = $('acct-confirm-pass')?.value || '';
+    const msg = $('acct-pass-msg');
+    const showMsg = (txt, ok) => {
+      if (!msg) return;
+      msg.textContent = txt;
+      msg.style.display = 'block';
+      msg.style.color = ok ? '#15803d' : '#dc2626';
+      msg.style.background = ok ? '#f0fdf4' : '#fef2f2';
+      msg.style.padding = '8px 12px';
+      msg.style.borderRadius = '6px';
+    };
+    if (np.length < 6) { showMsg('Mot de passe trop court (6 caractères minimum).', false); return; }
+    if (np !== cp)     { showMsg('Les mots de passe ne correspondent pas.', false); return; }
+    const supa = getSupa(); if (!supa) return;
+    const { error } = await supa.auth.updateUser({ password: np });
+    if (error) { showMsg('Erreur : ' + error.message, false); }
+    else {
+      showMsg('✅ Mot de passe mis à jour avec succès !', true);
+      if ($('acct-new-pass'))    $('acct-new-pass').value = '';
+      if ($('acct-confirm-pass')) $('acct-confirm-pass').value = '';
+      setTimeout(() => { if (msg) msg.style.display = 'none'; }, 3000);
+    }
+  }
+
+  // =====================================================
   // CODE PROMO
   // =====================================================
   function openPromoModal() {
@@ -4382,6 +4426,40 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     <div style="background:var(--green-50);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;border:1px solid #bbf7d0;">
       <div id="acct-plan-details" style="font-size:.88rem;color:var(--text-muted);line-height:1.6;"></div>
     </div>
+
+    <!-- Thème clair / sombre -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--green-50);border-radius:10px;margin-bottom:10px;border:1px solid var(--border);">
+      <span style="font-size:.88rem;font-weight:600;color:var(--text);">🌗 Thème</span>
+      <div style="display:flex;gap:6px;">
+        <button id="theme-light-btn" onclick="setTheme('light')" style="padding:6px 14px;border-radius:8px;border:2px solid #15803d;background:#15803d;color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;">☀️ Clair</button>
+        <button id="theme-dark-btn" onclick="setTheme('dark')" style="padding:6px 14px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--text-muted);font-size:.8rem;font-weight:700;cursor:pointer;">🌙 Sombre</button>
+      </div>
+    </div>
+
+    <!-- Changer le mot de passe -->
+    <details style="margin-bottom:10px;">
+      <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:var(--green-50);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);">
+        🔑 Changer le mot de passe <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
+      </summary>
+      <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
+        <div class="rb-form-group" style="margin-bottom:10px;">
+          <label style="font-size:.82rem;">Nouveau mot de passe</label>
+          <div style="position:relative;">
+            <input type="password" id="acct-new-pass" class="rb-input" placeholder="6 caractères minimum" style="padding-right:44px;">
+            <button type="button" onclick="togglePwd('acct-new-pass',this)" tabindex="-1" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.1rem;">👁</button>
+          </div>
+        </div>
+        <div class="rb-form-group" style="margin-bottom:12px;">
+          <label style="font-size:.82rem;">Confirmer</label>
+          <div style="position:relative;">
+            <input type="password" id="acct-confirm-pass" class="rb-input" placeholder="Répétez le mot de passe" style="padding-right:44px;">
+            <button type="button" onclick="togglePwd('acct-confirm-pass',this)" tabindex="-1" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.1rem;">👁</button>
+          </div>
+        </div>
+        <div id="acct-pass-msg" style="font-size:.82rem;margin-bottom:10px;display:none;"></div>
+        <button class="rb-btn rb-btn-primary" style="width:100%;" onclick="changeAccountPassword()">Mettre à jour le mot de passe</button>
+      </div>
+    </details>
 
     <!-- Actions -->
     <div style="display:flex;flex-direction:column;gap:8px;">

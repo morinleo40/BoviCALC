@@ -90,6 +90,55 @@
 }
 
 /* =====================================================
+   DARK MODE
+   ===================================================== */
+[data-theme="dark"] {
+  --bg:        #0f172a;
+  --bg-card:   #1e293b;
+  --border:    #334155;
+  --border-md: #475569;
+  --border-strong: #64748b;
+  --text:       #f1f5f9;
+  --text-2:     #e2e8f0;
+  --text-light: #cbd5e1;
+  --text-muted: #94a3b8;
+  --green-50:   #0d2018;
+  --green-100:  #14321f;
+  --shadow-sm:  0 2px 8px rgba(0,0,0,.3);
+  --shadow:     0 4px 16px rgba(0,0,0,.4);
+  --shadow-md:  0 8px 24px rgba(0,0,0,.5);
+}
+[data-theme="dark"] body { background: var(--bg); color: var(--text); }
+[data-theme="dark"] .rb-main { background: var(--bg); }
+[data-theme="dark"] .rb-card,
+[data-theme="dark"] .rb-panel,
+[data-theme="dark"] .rb-modal-card,
+[data-theme="dark"] .rb-metric,
+[data-theme="dark"] .rb-indicator { background: var(--bg-card); border-color: var(--border); }
+[data-theme="dark"] .rb-input,
+[data-theme="dark"] .rb-select { background: #0f172a; color: var(--text); border-color: var(--border); }
+[data-theme="dark"] .rb-table thead th { background: #0f172a; color: var(--text-muted); }
+[data-theme="dark"] .rb-table tbody tr:hover { background: rgba(255,255,255,.03); }
+[data-theme="dark"] .home-sessions-grid .sess-card { background: var(--bg-card); }
+[data-theme="dark"] .lp-section.alt { background: #0d1a2a; }
+[data-theme="dark"] p { color: var(--text-light); }
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3,
+[data-theme="dark"] h4 { color: var(--text); }
+[data-theme="dark"] .rb-section-detail { background: var(--bg); }
+[data-theme="dark"] .rb-details summary { background: var(--bg-card); color: var(--text); }
+[data-theme="dark"] #tt-popup { background: #e2e8f0; color: #0f172a; }
+[data-theme="dark"] #tt-popup strong { color: #15803d; }
+[data-theme="dark"] .rb-ration-row input { background: #0f172a; color: var(--text); border-color: var(--border); }
+[data-theme="dark"] .toolbar-btn { background: var(--bg-card); color: var(--text-light); border-color: var(--border); }
+[data-theme="dark"] .rt-panel { background: #0d1a2a; border-color: var(--border); }
+
+/* Transition fluide entre thèmes */
+body, .rb-card, .rb-panel, .rb-modal-card, .rb-metric, .rb-indicator,
+.rb-input, .rb-select, .rb-table, .toolbar-btn, .rt-panel {
+  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
+}
+
+/* =====================================================
    RESET & BASE
    ===================================================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
