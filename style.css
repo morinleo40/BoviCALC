@@ -202,6 +202,19 @@ a:hover { color: var(--primary-dark); }
   background: rgba(255,255,255,.1);
   border-color: rgba(255,255,255,.7);
 }
+.hdr-btn-account {
+  background: #fff;
+  color: #15803d;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.hdr-btn-account:hover {
+  background: #f0fdf4;
+  color: #14532d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+}
 
 /* =====================================================
    MAIN LAYOUT
