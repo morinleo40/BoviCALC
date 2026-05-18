@@ -72,7 +72,7 @@ function showAccessWall() {
   var em=_$('access-wall-email'); if(em) em.textContent=email;
   // Pré-remplir l'email dans le lien mailto
   var lk=_$('subscribe-link');
-  if(lk&&email) lk.href='mailto:bovicalc@gmail.com?subject=Abonnement BoviCalc Conseiller&body=Bonjour, je souhaite souscrire à BoviCalc Conseiller (20€/mois). Mon email de compte : '+encodeURIComponent(email);
+  if(lk&&email) lk.href='mailto:contact@bovicalc-app.com?subject=Abonnement BoviCalc Conseiller&body=Bonjour, je souhaite souscrire à BoviCalc Conseiller (20€/mois). Mon email de compte : '+encodeURIComponent(email);
 }
 function hideAccessWall() { var w=_$('access-wall'); if(w) w.style.display='none'; }
 function showCodeErr(m) { var e=_$('code-err'); if(e){e.textContent=m;e.style.display='block';} }
@@ -1912,7 +1912,7 @@ function buildRapportBody() {
     h += '<div class="rp-section"><p style="color:#64748b;font-style:italic;">Aucun bilan calculé. Calculez la ration depuis l\'onglet "Ration & Bilan" puis revenez générer le rapport.</p></div>';
     h += '</div>';
     if (obs) h += '<div class="rp-obs"><div class="rp-obs-title">Observations</div><div class="rp-obs-body">'+escHtml(obs)+'</div></div>';
-    h += '<div class="rp-footer"><span>BoviCalc Conseiller · bovicalc.netlify.app</span><span>'+date+'</span></div>';
+    h += '<div class="rp-footer"><span>BoviCalc Conseiller · bovicalc-app.com</span><span>'+date+'</span></div>';
     return h;
   }
 
