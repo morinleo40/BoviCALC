@@ -1459,8 +1459,10 @@ function calcBilan() {
     </table>`;
 
   document.getElementById('glucides-wrap').innerHTML = renderGlucides(a);
-  document.getElementById('suggestions-wrap').innerHTML = renderSuggestions(a, b);
   document.getElementById('bilan-result-wrap').style.display = '';
+
+  renderQualityScore(a, b);
+  renderIndicateurs(a, b);
 
   // Persist score
   if (currentExp) updateExpScore(rUFL, rPDI, ppu, a);
@@ -2271,16 +2273,6 @@ function transferTmsToStock() {
   alert(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`);
 }
 
-/* ══ MISE À JOUR calcBilan POUR INCLURE SCORE + INDICATEURS ══ */
-// Override calcBilan pour appeler le moteur complet
-const _calcBilanOrig = calcBilan;
-calcBilan = function() {
-  _calcBilanOrig();
-  if(lastApports && lastBesoins) {
-    renderQualityScore(lastApports, lastBesoins);
-    renderIndicateurs(lastApports, lastBesoins);
-  }
-};
 </script>
 </body>
 </html>
