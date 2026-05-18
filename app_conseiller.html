@@ -66,18 +66,58 @@ async function resetWallPwd() {
   var res=await supa.auth.resetPasswordForEmail(email);
   if(!res.error)alert('📧 Email envoyé à '+email); else showWallErr(res.error.message);
 }
+function showAccessWall() {
+  var w=_$('access-wall'); if(w) w.style.display='flex';
+  var em=_$('access-wall-email'); if(em&&currentUser) em.textContent=currentUser.email||'';
+}
+function hideAccessWall() { var w=_$('access-wall'); if(w) w.style.display='none'; }
+function showCodeErr(m) { var e=_$('code-err'); if(e){e.textContent=m;e.style.display='block';} }
+
+async function checkConseillerAccess() {
+  var supa=getSupa(); if(!supa||!currentUser) return false;
+  try {
+    var res=await supa.from('user_plans').select('plan').eq('user_id',currentUser.id).single();
+    return res.data&&res.data.plan==='conseiller';
+  } catch(e){ return false; }
+}
+
+async function activateCode() {
+  var code=(_$('code-input')||{}).value||'';
+  code=code.trim().toUpperCase();
+  var btn=_$('btn-activate');
+  if(!code){showCodeErr('Entrez votre code d\'accès.');return;}
+  var supa=getSupa(); if(!supa){showCodeErr('Service indisponible.');return;}
+  if(btn){btn.disabled=true;btn.textContent='Vérification...';}
+  try {
+    var res=await supa.rpc('activate_conseiller_code',{input_code:code});
+    if(res.error){showCodeErr('Erreur : '+res.error.message);if(btn){btn.disabled=false;btn.textContent='Activer mon accès';} return;}
+    if(res.data==='ok'){hideAccessWall();onSignIn();}
+    else if(res.data==='invalid'){showCodeErr('Code invalide ou déjà utilisé. Contactez votre conseiller.');}
+    else {showCodeErr('Erreur inconnue.');}
+  } catch(e){showCodeErr('Erreur réseau.');}
+  if(btn){btn.disabled=false;btn.textContent='Activer mon accès';}
+}
+
 async function initAuth() {
   showAuthWall();
   var supa=getSupa(); if(!supa)return;
   try {
     var sd=await supa.auth.getSession();
     if(sd.data&&sd.data.session&&sd.data.session.user){
-      currentUser=sd.data.session.user; hideAuthWall();
+      currentUser=sd.data.session.user;
+      hideAuthWall();
+      var hasAccess=await checkConseillerAccess();
+      if(hasAccess) onSignIn(); else showAccessWall();
     }
     supa.auth.onAuthStateChange(async function(evt,session){
       currentUser=session?session.user:null;
-      if(currentUser){ hideAuthWall(); if(evt==='SIGNED_IN') onSignIn(); }
-      else { showAuthWall(); }
+      if(currentUser){
+        hideAuthWall();
+        if(evt==='SIGNED_IN'){
+          var hasAccess=await checkConseillerAccess();
+          if(hasAccess) onSignIn(); else showAccessWall();
+        }
+      } else { hideAccessWall(); showAuthWall(); }
     });
   } catch(e){ console.warn('Auth init failed:',e); }
 }
@@ -121,6 +161,32 @@ function setTheme(t) {
       <a href="index_conseiller.html" style="font-size:.78rem;color:#475569;text-decoration:none;">← Retour à l'accueil</a>
       <span style="color:#334155;margin:0 8px;">|</span>
       <a href="./app.html" style="font-size:.78rem;color:#475569;text-decoration:none;">BoviCalc Éleveur</a>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── CODE D'ACCÈS WALL ────────── -->
+<div id="access-wall" style="display:none;position:fixed;inset:0;z-index:99998;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2718 100%);align-items:center;justify-content:center;padding:20px;">
+  <div class="auth-card" style="max-width:440px;">
+    <div class="auth-logo">
+      <div style="font-size:2.5rem;margin-bottom:8px;">🔐</div>
+      <h1 style="font-size:1.3rem;">Accès Conseiller</h1>
+      <p style="color:#94a3b8;font-size:.85rem;margin-top:6px;">Entrez votre code d'accès unique pour activer votre abonnement.</p>
+    </div>
+    <div style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.25);border-radius:10px;padding:14px;margin-bottom:18px;font-size:.82rem;color:#4ade80;line-height:1.6;">
+      Votre code vous a été envoyé par email après votre souscription à <strong>BoviCalc Conseiller — 20 €/mois</strong>.<br>
+      <span style="color:#64748b;">Pas encore de code ? <a href="mailto:bovicalc@gmail.com" style="color:#22c55e;">Contactez-nous →</a></span>
+    </div>
+    <input type="text" id="code-input" class="auth-input" placeholder="Ex : BOVI-2025-XXXX"
+           style="text-transform:uppercase;letter-spacing:.12em;font-size:1.1rem;text-align:center;font-family:monospace;"
+           onkeydown="if(event.key==='Enter')activateCode()"
+           oninput="this.value=this.value.toUpperCase()">
+    <div id="code-err" class="auth-error" style="display:none;"></div>
+    <button id="btn-activate" class="auth-btn" onclick="activateCode()">Activer mon accès</button>
+    <div style="text-align:center;margin-top:14px;font-size:.78rem;color:#475569;">
+      <span>Connecté en tant que : </span><span id="access-wall-email" style="color:#94a3b8;"></span>
+      <span style="margin:0 8px;">·</span>
+      <a href="#" onclick="logoutUser();return false;" style="color:#64748b;text-decoration:underline;">Changer de compte</a>
     </div>
   </div>
 </div>
