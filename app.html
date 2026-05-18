@@ -113,7 +113,18 @@ function openAuthModal()  { var m = _$$('auth-modal');  if (m) m.classList.remov
 function closeAuthModal() { var m = _$$('auth-modal');  if (m) m.classList.add('hidden'); }
 function openAccountModal() {
   var m = _$$('account-modal'); if (!m) return;
+  // Email
   var em = _$$('acct-email'); if (em) em.textContent = currentUser ? currentUser.email || '' : '';
+  // Avatar initiale
+  var av = _$$('acct-avatar');
+  if (av && currentUser) {
+    var prenom3 = (currentUser.user_metadata && currentUser.user_metadata.prenom) || '';
+    var initiale = (prenom3 || (currentUser.email || 'U')).charAt(0).toUpperCase();
+    av.textContent = initiale;
+  }
+  // Bouton upgrade
+  var upBtn = _$$('acct-upgrade-btn');
+  if (upBtn) upBtn.style.display = (currentUser && userPlan !== 'pro') ? '' : 'none';
   var bd = _$$('acct-plan-badge');
   if (bd) bd.innerHTML = userPlan === 'pro'
     ? '<span class="plan-badge-pro">⭐ Pro</span>'
@@ -4353,22 +4364,34 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 </div>
 
 <!-- ========== ACCOUNT MODAL ========== -->
-<div id="account-modal" class="modal-backdrop hidden" onclick="if(event.target===this)closeAccountModal()">
-  <div class="modal-box" style="max-width:380px;">
-    <div class="modal-header">
+<div id="account-modal" class="rb-modal hidden" onclick="if(event.target===this)closeAccountModal()">
+  <div class="rb-modal-card" style="max-width:380px;">
+    <div class="rb-modal-header">
       <h3>Mon compte</h3>
-      <button onclick="closeAccountModal()" class="modal-close" aria-label="Fermer">&times;</button>
+      <span class="rb-modal-close" onclick="closeAccountModal()">&times;</span>
     </div>
-    <div class="modal-body">
-      <div style="text-align:center;padding:10px 0 20px;">
-        <div style="font-size:3rem;">👤</div>
-        <div id="acct-email" style="font-weight:700;color:var(--green-900);margin-top:8px;word-break:break-all;"></div>
-        <div id="acct-plan-badge" style="margin-top:10px;"></div>
-      </div>
-      <div style="background:var(--green-50);border-radius:var(--r-md);padding:14px 16px;margin-bottom:16px;">
-        <div id="acct-plan-details"></div>
-      </div>
-      <button class="rb-btn rb-btn-ghost" style="width:100%;margin-top:4px;color:var(--danger);border-color:var(--danger);" onclick="logoutUser()">🚪 Se déconnecter</button>
+
+    <!-- Avatar + email -->
+    <div style="text-align:center;padding:20px 0 16px;">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#15803d,#22c55e);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;font-weight:700;" id="acct-avatar">?</div>
+      <div id="acct-email" style="font-weight:700;color:var(--green-900);font-size:.95rem;word-break:break-all;"></div>
+      <div id="acct-plan-badge" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Détails plan -->
+    <div style="background:var(--green-50);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;border:1px solid #bbf7d0;">
+      <div id="acct-plan-details" style="font-size:.88rem;color:var(--text-muted);line-height:1.6;"></div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a href="https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00" target="_blank" id="acct-upgrade-btn"
+         style="display:none;width:100%;padding:11px;background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;border-radius:10px;font-weight:700;font-size:.9rem;text-align:center;text-decoration:none;">
+        ⭐ Passer au plan Pro — 15 €/mois
+      </a>
+      <button class="rb-btn rb-btn-ghost" style="width:100%;color:var(--danger);border-color:var(--danger);" onclick="logoutUser()">
+        🚪 Se déconnecter
+      </button>
     </div>
   </div>
 </div>
