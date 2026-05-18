@@ -370,6 +370,8 @@ function setTheme(t) {
 
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('tab-ration',this)">🌾 Ration & Bilan</button>
+        <button class="tab-btn" onclick="switchTab('tab-couts',this)">💰 Coûts</button>
+        <button class="tab-btn" onclick="switchTab('tab-bf',this)">📦 Bilan fourrager</button>
         <button class="tab-btn" onclick="switchTab('tab-historique',this)">🕐 Historique</button>
         <button class="tab-btn" onclick="switchTab('tab-rapport',this)">📄 Rapport</button>
       </div>
@@ -427,6 +429,29 @@ function setTheme(t) {
               <button class="btn btn-primary" style="width:100%;" onclick="calcBesoins()">Calculer les besoins →</button>
             </div>
 
+            <!-- Minéraux (optionnel) -->
+            <div class="card" style="margin-bottom:16px;">
+              <div class="card-header" style="cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
+                <div class="card-title">⚗️ Minéraux <span style="font-size:.72rem;color:var(--text-muted);font-weight:400;">(optionnel)</span></div>
+                <span style="color:var(--text-muted);font-size:.8rem;">▼</span>
+              </div>
+              <div style="display:none;">
+                <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+                  <div class="form-group"><label>Ca (g/kg MS)</label><input type="number" class="form-input" id="mineraux-ca" min="0" step="0.1" placeholder="0"></div>
+                  <div class="form-group"><label>P (g/kg MS)</label><input type="number" class="form-input" id="mineraux-p" min="0" step="0.1" placeholder="0"></div>
+                  <div class="form-group"><label>Na (g/kg MS)</label><input type="number" class="form-input" id="mineraux-na" min="0" step="0.1" placeholder="0"></div>
+                  <div class="form-group"><label>K (g/kg MS)</label><input type="number" class="form-input" id="mineraux-k" min="0" step="0.1" placeholder="0"></div>
+                  <div class="form-group"><label>Mg (g/kg MS)</label><input type="number" class="form-input" id="mineraux-mg" min="0" step="0.1" placeholder="0"></div>
+                  <div class="form-group"><label>Cl (g/kg MS)</label><input type="number" class="form-input" id="mineraux-cl" min="0" step="0.1" placeholder="0"></div>
+                  <div class="form-group"><label>S (g/kg MS)</label><input type="number" class="form-input" id="mineraux-s" min="0" step="0.1" placeholder="0"></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns:1fr 1fr;margin-top:4px;">
+                  <div class="form-group"><label>Met (g/j)</label><input type="number" class="form-input" id="aa-met" min="0" step="0.5" placeholder="0"></div>
+                  <div class="form-group"><label>Lys (g/j)</label><input type="number" class="form-input" id="aa-lys" min="0" step="0.5" placeholder="0"></div>
+                </div>
+              </div>
+            </div>
+
             <!-- Résultats besoins -->
             <div class="card" id="card-besoins" style="display:none;margin-bottom:16px;">
               <div class="card-header"><div class="card-title">📊 Besoins calculés</div></div>
@@ -459,8 +484,135 @@ function setTheme(t) {
                 <div id="bilan-result"></div>
               </div>
               <div id="glucides-wrap"></div>
-              <div id="suggestions-wrap"></div>
+              <!-- Score qualité -->
+              <div id="bilan-score"></div>
+              <!-- Indicateurs cliquables -->
+              <div id="bilan-indicateurs" style="margin-bottom:16px;"></div>
+              <!-- Optimiseur -->
+              <div class="card" style="margin-bottom:16px;">
+                <div class="card-header">
+                  <div class="card-title">🔧 Suggestions d'ajustement</div>
+                  <button class="btn btn-primary btn-sm" onclick="runOptimizer()">Analyser</button>
+                </div>
+                <div id="bilan-optimizer" style="color:var(--text-muted);font-size:.85rem;padding:8px 0;">Cliquez sur "Analyser" après avoir calculé le bilan.</div>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: COÛTS -->
+      <div class="tab-content" id="tab-couts">
+        <div class="grid-2" style="align-items:start;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">💰 Prix des aliments</div><button class="btn btn-primary btn-sm" onclick="chargerRationCouts()">📥 Charger la ration</button></div>
+            <div id="cout-prix-lines"><p style="color:var(--text-muted);font-size:.85rem;">Chargez d'abord la ration depuis l'onglet "Ration & Bilan".</p></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🐄 Paramètres troupeau</div></div>
+            <div class="form-grid">
+              <div class="form-group"><label>Nb animaux</label><input type="number" class="form-input" id="cout-nb-vl" value="50" min="1"></div>
+              <div class="form-group"><label>Production (L/an)</label><input type="number" class="form-input" id="cout-ref-lait" value="9000" min="0"></div>
+              <div class="form-group"><label>Durée ration (jours)</label><input type="number" class="form-input" id="cout-duree" value="180" min="1"></div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="calcCouts()">💰 Calculer le coût</button>
+          </div>
+        </div>
+        <div id="cout-resultats" style="display:none;margin-top:16px;">
+          <div class="grid-4">
+            <div class="metric-card"><div class="metric-lbl">Coût / animal / jour</div><div class="metric-val" id="cout-vl-jour">—</div></div>
+            <div class="metric-card"><div class="metric-lbl">Coût / kg MS</div><div class="metric-val" id="cout-kg-ms">—</div></div>
+            <div class="metric-card"><div class="metric-lbl">Coût / 1000 L</div><div class="metric-val" id="cout-1000l">—</div></div>
+            <div class="metric-card"><div class="metric-lbl">Coût total troupeau/j</div><div class="metric-val" id="cout-troupeau">—</div></div>
+          </div>
+          <div class="card" style="margin-top:16px;padding:0;overflow:hidden;">
+            <table class="data-table" id="cout-detail-table">
+              <thead><tr><th>Aliment</th><th>kg MS/j</th><th>€/t MS</th><th>€/j</th><th>% coût</th></tr></thead>
+              <tbody id="cout-detail-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: BILAN FOURRAGER -->
+      <div class="tab-content" id="tab-bf">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+          <button class="bf-btn active" id="bfbtn-stocks" onclick="bfSwitch('stocks',this)">📦 Stocks</button>
+          <button class="bf-btn" id="bfbtn-troupeau" onclick="bfSwitch('troupeau',this)">🐄 Troupeau</button>
+          <button class="bf-btn" id="bfbtn-resultat" onclick="bfSwitch('resultat',this)">📊 Résultat</button>
+          <button class="bf-btn" id="bfbtn-silo" onclick="bfSwitch('silo',this)">📐 Calculateur silo</button>
+        </div>
+
+        <div id="bf-stocks">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📦 Stocks de fourrages</div><button class="btn btn-ghost btn-sm" onclick="addBfStock()">+ Ajouter</button></div>
+            <div style="display:grid;grid-template-columns:1fr 110px 90px 40px;gap:6px;margin-bottom:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);padding:0 4px;">
+              <span>Fourrage</span><span>t brutes</span><span>% MS</span><span></span>
+            </div>
+            <div id="bf-stock-lines"></div>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="bfSwitch('troupeau',document.getElementById('bfbtn-troupeau'))">Étape suivante →</button>
+          </div>
+        </div>
+
+        <div id="bf-troupeau" style="display:none;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">🐄 Besoins du troupeau</div></div>
+            <div class="form-grid">
+              <div class="form-group"><label>Nb vaches laitières</label><input type="number" class="form-input" id="bf-nb-vl" min="0" placeholder="0"></div>
+              <div class="form-group"><label>Consommation VL (kg MS/j)</label><input type="number" class="form-input" id="bf-conso-vl" value="20" min="0" step="0.5"></div>
+              <div class="form-group"><label>Nb bovins viande/génisses</label><input type="number" class="form-input" id="bf-nb-bv" min="0" placeholder="0"></div>
+              <div class="form-group"><label>Consommation BV (kg MS/j)</label><input type="number" class="form-input" id="bf-conso-bv" value="12" min="0" step="0.5"></div>
+              <div class="form-group"><label>Durée hivernage (jours)</label><input type="number" class="form-input" id="bf-duree" value="180" min="1"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn btn-ghost btn-sm" onclick="bfSwitch('stocks',document.getElementById('bfbtn-stocks'))">← Stocks</button>
+              <button class="btn btn-primary btn-sm" onclick="calcBilanFourrager()">Calculer le bilan →</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="bf-resultat" style="display:none;">
+          <div id="bf-resultat-content"><p style="color:var(--text-muted);">Renseignez vos stocks et votre troupeau, puis cliquez sur "Calculer".</p></div>
+        </div>
+
+        <div id="bf-silo" style="display:none;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📐 Calculateur de silo</div></div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Culture</label>
+                <select class="form-select" id="tms-culture" onchange="onTmsCultureChange()">
+                  <option value="mais">🌽 Maïs ensilage</option>
+                  <option value="herbe">🌿 Herbe ensilage</option>
+                  <option value="enrub">🎁 Enrubannage</option>
+                  <option value="foin">🌾 Foin</option>
+                  <option value="paille">🌾 Paille</option>
+                  <option value="triticale">🌱 Triticale ensilé</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Forme du silo</label>
+                <select class="form-select" id="tms-shape" onchange="onTmsShapeChange()">
+                  <option value="bunker">Silo couloir (bunker)</option>
+                  <option value="tower">Silo tour (cylindre)</option>
+                  <option value="talon">Talon de silo (triangle)</option>
+                  <option value="round">Balles rondes</option>
+                </select>
+              </div>
+              <div class="form-group" id="tms-f-longueur"><label>Longueur (m)</label><input type="number" class="form-input" id="tms-longueur" min="0" step="0.5" oninput="calcTmsLive()"></div>
+              <div class="form-group" id="tms-f-largeur"><label>Largeur (m)</label><input type="number" class="form-input" id="tms-largeur" min="0" step="0.5" oninput="calcTmsLive()"></div>
+              <div class="form-group" id="tms-f-hauteur"><label>Hauteur (m)</label><input type="number" class="form-input" id="tms-hauteur" min="0" step="0.5" oninput="calcTmsLive()"></div>
+              <div class="form-group" id="tms-f-diametre" style="display:none;"><label>Diamètre (m)</label><input type="number" class="form-input" id="tms-diametre" min="0" step="0.1" oninput="calcTmsLive()"></div>
+              <div class="form-group" id="tms-f-balles" style="display:none;"><label>Nb balles</label><input type="number" class="form-input" id="tms-nb-balles" min="0" oninput="calcTmsLive()"></div>
+              <div class="form-group"><label>Densité (kg/m³)</label><input type="number" class="form-input" id="tms-densite" step="10" oninput="calcTmsLive()"></div>
+              <div class="form-group"><label>% MS</label><input type="number" class="form-input" id="tms-pourcent-ms" min="1" max="100" step="1" oninput="calcTmsLive()"></div>
+            </div>
+            <div style="background:var(--green-50);border:2px solid #16a34a;border-radius:10px;padding:16px;margin-top:12px;text-align:center;">
+              <div style="font-size:.75rem;color:#16a34a;font-weight:700;text-transform:uppercase;margin-bottom:4px;">TMS calculée</div>
+              <div style="font-size:2.2rem;font-weight:900;color:#15803d;"><span id="tms-result-val">—</span> <span style="font-size:1rem;font-weight:400;">t MS</span></div>
+              <div id="tms-result-details" style="font-size:.8rem;color:var(--text-muted);margin-top:8px;"></div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="transferTmsToStock()">↳ Ajouter aux stocks</button>
           </div>
         </div>
       </div>
@@ -647,6 +799,49 @@ function setTheme(t) {
 </div>
 
 <style>
+/* Bilan fourrager buttons */
+.bf-btn { padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-md);background:var(--bg-card);color:var(--text-muted);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .18s; }
+.bf-btn:hover { border-color:#15803d;color:#15803d; }
+.bf-btn.active { background:#15803d;border-color:#15803d;color:#fff; }
+/* Indicateurs */
+.rb-indicator { background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .18s;overflow:hidden; }
+.rb-indicator:hover { border-color:#15803d; }
+.rb-ind-main { display:flex;align-items:center;gap:10px;padding:12px 14px; }
+.rb-ind-icon { font-size:1.3rem;width:28px;text-align:center;flex-shrink:0; }
+.rb-ind-text { flex:1;min-width:0; }
+.rb-ind-title { font-size:.83rem;font-weight:700;color:var(--text); }
+.rb-ind-val { font-size:.78rem;color:var(--text-muted);margin-top:1px; }
+.rb-ind-arrow { color:var(--text-muted);font-size:.7rem;transition:transform .2s; }
+.rb-indicator.ind-open .rb-ind-arrow { transform:rotate(180deg); }
+.rb-ind-detail-inner { max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s; }
+.rb-indicator.ind-open .rb-ind-detail-inner { max-height:800px;padding:0 14px 14px; }
+.rb-ind-tip { display:flex;align-items:flex-start;gap:8px;padding:6px 10px;border-radius:6px;margin-top:5px;font-size:.78rem;line-height:1.5; }
+.rb-ind-tip.ok { background:#f0fdf4;color:#15803d; }
+.rb-ind-tip.warn { background:#fffbeb;color:#92400e; }
+.rb-ind-tip.danger { background:#fef2f2;color:#dc2626; }
+.rb-ind-tip.info { background:#eff6ff;color:#1d4ed8; }
+.rb-ind-advice { font-size:.82rem;color:var(--text-light);line-height:1.6;margin:0 0 6px; }
+/* Score qualité */
+.quality-card { border-radius:10px;padding:16px;margin-bottom:12px; }
+.quality-main { display:flex;align-items:center;gap:14px;margin-bottom:10px; }
+.quality-grade { font-size:2.8rem;font-weight:900;line-height:1;width:52px;text-align:center; }
+.quality-title { font-size:.9rem;font-weight:700;color:var(--text); }
+.quality-msg { font-size:.78rem;color:var(--text-muted);margin-top:2px; }
+.quality-breakdown { display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px; }
+.qb-item { font-size:.75rem;color:var(--text-muted);display:flex;flex-direction:column;gap:2px; }
+.qb-item span:nth-child(2) { font-weight:700;color:var(--text);font-size:.82rem; }
+/* Badges */
+.rb-badge { display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap; }
+.rb-badge-green { background:#dcfce7;color:#15803d; }
+.rb-badge-red { background:#fee2e2;color:#dc2626; }
+.rb-badge-orange { background:#fef3c7;color:#92400e; }
+.rb-badge-gray { background:#f1f5f9;color:#475569; }
+/* Optimizer */
+.opti-panel { border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px; }
+.opti-header { padding:12px 16px;font-weight:700;font-size:.88rem;background:var(--bg);border-bottom:1px solid var(--border); }
+.opti-row { display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border); }
+.opti-row:last-child { border-bottom:none; }
+/* Print */
 @media print {
   body > *:not(#print-template) { display: none !important; }
   #print-template { display: block !important; }
@@ -769,6 +964,10 @@ async function onSignIn() {
   document.getElementById('app-layout').style.display = 'flex';
   addRationRow(); addRationRow(); addRationRow();
   buildDatalist();
+  // Init calculateur silo
+  onTmsCultureChange();
+  // Init bilan fourrager avec 3 lignes de stock
+  addBfStock(); addBfStock(); addBfStock();
   await loadExploitations();
   showPage('dashboard');
 }
@@ -1575,7 +1774,8 @@ function buildRapportHtml(forPrint) {
     const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:0;
     const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
     const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
-    const score=computeScore(rUFL,rPDI,ppu);
+    const q=computeQualityScore(a,b);
+    const score=q.grade;
     bilanHtml = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;">
         <div style="border:2px solid #f97316;border-radius:8px;padding:14px;">
@@ -1595,17 +1795,22 @@ function buildRapportHtml(forPrint) {
         <tr style="font-weight:700;background:#f0fdf4;"><td style="padding:8px;">Total</td><td style="padding:8px;">${a.totalMS.toFixed(1)}</td><td style="padding:8px;color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="padding:8px;color:#2563eb;">${a.totalPDI.toFixed(0)}</td></tr>
         </tbody>
       </table>
-      <div style="display:flex;gap:12px;margin:12px 0;align-items:center;">
-        <div style="padding:10px 20px;background:#f0fdf4;border-radius:8px;border:2px solid #16a34a;text-align:center;">
+      <div style="display:flex;gap:12px;margin:12px 0;align-items:center;flex-wrap:wrap;">
+        <div style="padding:12px 20px;background:#f0fdf4;border-radius:8px;border:2px solid #16a34a;text-align:center;">
           <div style="font-size:.7rem;font-weight:700;color:#15803d;text-transform:uppercase;">Score global</div>
           <div style="font-size:2rem;font-weight:900;color:${getScoreColor(rUFL,rPDI,ppu)};">${score}</div>
+          <div style="font-size:.75rem;color:#64748b;">${q.total}/100</div>
         </div>
-        <div style="font-size:.82rem;color:#64748b;line-height:1.7;">
+        <div style="font-size:.82rem;color:#64748b;line-height:1.9;">
           MS totale : <strong>${a.totalMS.toFixed(1)} kg/j</strong><br>
           PDI/${eu} : <strong>${ppu.toFixed(0)} g/${eu}</strong> (cible 90–105)<br>
-          ${b.ingestionCapacite>0?`Capacité ingestion : <strong>${b.ingestionCapacite.toFixed(1)} kg MS</strong>`:''}
+          Énergie : <strong style="color:${rUFL>=0.9&&rUFL<=1.1?'#16a34a':'#dc2626'}">${(rUFL*100).toFixed(0)}%</strong> des besoins
+          · PDI : <strong style="color:${rPDI>=0.9&&rPDI<=1.1?'#16a34a':'#dc2626'}">${(rPDI*100).toFixed(0)}%</strong> des besoins<br>
+          ${b.ingestionCapacite>0?`Ingestion max : <strong>${b.ingestionCapacite.toFixed(1)} kg MS</strong>`:''}
         </div>
-      </div>`;
+      </div>
+      <!-- Glucides dans le PDF -->
+      ${(function(){const al=(a.totalAL||0)/(a.totalMS||1),ar=(a.totalAR||0)/(a.totalMS||1),ss=(a.totalSS||0)/(a.totalMS||1);const f=ar+ss;if(f<1)return '';const risk=ar>150||f>220;return `<div style="padding:10px 14px;background:${risk?'#fef2f2':'#f0fdf4'};border-radius:8px;border:1px solid ${risk?'#dc2626':'#16a34a'};font-size:.8rem;margin:8px 0;"><strong>Glucides fermentescibles :</strong> Amidon lent ${al.toFixed(0)} g/kg MS · Amidon rapide ${ar.toFixed(0)} g/kg MS · Solubles ${ss.toFixed(0)} g/kg MS · <strong style="color:${risk?'#dc2626':'#16a34a'}">${risk?'⚠️ Risque acidose':'✅ Équilibre correct'}</strong></div>`;})()} `;
   }
 
   return `<div style="font-family:'Inter',sans-serif;max-width:720px;margin:0 auto;color:#0f172a;${forPrint?'padding:0;':''}">
@@ -1672,6 +1877,410 @@ function escHtml(s) {
   if(!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ══ CATÉGORIE ALIMENT ══ */
+function getFeedCategory(nom) {
+  const n=(nom||'').toLowerCase();
+  if(/(ensilage|foin|paille|pâturage|paturage|enrubann|herbe|ray.grass|rga|rgi|luzerne|fétuque|fetuque|regain)/.test(n)) return 'fourrage';
+  if(/(maïs|mais|blé|ble|orge|avoine|sorgho|triticale|seigle|mil\b|millet)/.test(n)) return 'cereal';
+  return 'concentre';
+}
+
+/* ══ SCORE QUALITÉ ══ */
+function computeQualityScore(a,b) {
+  const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:0;
+  const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:0;
+  const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
+  let foragekgMS=0;
+  a.items.forEach(i=>{if(getFeedCategory(i.nom)==='fourrage')foragekgMS+=i.qty;});
+  const pctConc=a.totalMS>0?(1-foragekgMS/a.totalMS)*100:0;
+  const arKg=(a.totalAR||0)/(a.totalMS||1), ssKg=(a.totalSS||0)/(a.totalMS||1);
+  const ferment=arKg+ssKg;
+  // Énergie /30
+  const eS=rUFL>=0.95&&rUFL<=1.05?30:rUFL>=0.9&&rUFL<=1.1?24:rUFL>=0.85&&rUFL<=1.15?16:rUFL>=0.8?8:0;
+  // Protéines /30
+  const pS=rPDI>=0.95&&rPDI<=1.1?30:rPDI>=0.9&&rPDI<=1.15?24:rPDI>=0.85&&rPDI<=1.2?16:rPDI>=0.8?8:0;
+  // Équilibre /20
+  const bS=ppu>=90&&ppu<=105?20:ppu>=82&&ppu<=115?14:ppu>=75&&ppu<=125?8:4;
+  // Acidose /10
+  const aS=pctConc<35?10:pctConc<50?7:pctConc<60?3:0;
+  // Ingestion /10
+  const cS=b.ingestionCapacite>0?Math.max(0,10-Math.round(Math.max(0,a.totalMS-b.ingestionCapacite)/b.ingestionCapacite*20)):8;
+  const total=eS+pS+bS+aS+cS;
+  const grade=total>=85?'A':total>=70?'B':total>=50?'C':'D';
+  return {total,grade,eS,pS,bS,aS,cS};
+}
+
+function renderQualityScore(a,b) {
+  const q=computeQualityScore(a,b);
+  const colors={A:'#15803d',B:'#0369a1',C:'#b45309',D:'#b91c1c'};
+  const bg={A:'#dcfce7',B:'#dbeafe',C:'#fef3c7',D:'#fee2e2'};
+  const msgs={A:'Ration excellente — tous les indicateurs sont dans les cibles optimales.',B:'Bonne ration — quelques ajustements mineurs amélioreraient encore l\'équilibre.',C:'Ration acceptable — des déséquilibres notables nécessitent des corrections.',D:'Ration à revoir — des déficits ou excès importants peuvent nuire aux performances.'};
+  const cont=document.getElementById('bilan-score'); if(!cont)return;
+  const bar=(s,m,c)=>`<div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:2px;"><div style="width:${(s/m*100).toFixed(0)}%;height:100%;background:${c};border-radius:3px;"></div></div>`;
+  cont.innerHTML=`<div class="quality-card" style="border-left:5px solid ${colors[q.grade]};background:${bg[q.grade]};margin-bottom:12px;">
+    <div class="quality-main">
+      <div class="quality-grade" style="color:${colors[q.grade]};">${q.grade}</div>
+      <div class="quality-info" style="flex:1;">
+        <div class="quality-title">Score global : <strong>${q.total}/100</strong></div>
+        <div class="quality-msg">${msgs[q.grade]}</div>
+        <div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden;margin-top:8px;"><div style="width:${q.total}%;height:100%;background:${colors[q.grade]};border-radius:4px;transition:width .7s;"></div></div>
+      </div>
+    </div>
+    <div class="quality-breakdown">
+      <div class="qb-item"><span>⚡ Énergie</span><span>${q.eS}/30</span>${bar(q.eS,30,colors[q.grade])}</div>
+      <div class="qb-item"><span>🧬 Protéines</span><span>${q.pS}/30</span>${bar(q.pS,30,colors[q.grade])}</div>
+      <div class="qb-item"><span>⚖️ Équilibre</span><span>${q.bS}/20</span>${bar(q.bS,20,colors[q.grade])}</div>
+      <div class="qb-item"><span>🔥 Acidose</span><span>${q.aS}/10</span>${bar(q.aS,10,colors[q.grade])}</div>
+      <div class="qb-item"><span>🐄 Ingestion</span><span>${q.cS}/10</span>${bar(q.cS,10,colors[q.grade])}</div>
+    </div>
+  </div>`;
+}
+
+/* ══ INDICATEURS CLIQUABLES ══ */
+function toggleInd(id) {
+  const card=document.getElementById('ind-'+id); if(!card)return;
+  const isOpen=card.classList.contains('ind-open');
+  document.querySelectorAll('.rb-indicator').forEach(c=>c.classList.remove('ind-open'));
+  if(!isOpen)card.classList.add('ind-open');
+}
+
+function renderIndicateurs(a,b) {
+  const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+  const pv=gN('r-pv'), prod=gN('r-prod');
+  const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:0;
+  const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:0;
+  const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
+  let foragekgMS=0;
+  a.items.forEach(i=>{if(getFeedCategory(i.nom)==='fourrage')foragekgMS+=i.qty;});
+  const pctConc=a.totalMS>0?(1-foragekgMS/a.totalMS)*100:0;
+  const pctFourrage=100-pctConc;
+  const na=gN('mineraux-na'),k=gN('mineraux-k'),ca=gN('mineraux-ca');
+  const mg=gN('mineraux-mg'),cl=gN('mineraux-cl'),s=gN('mineraux-s');
+  const hasBaca=na||k||ca||mg||cl||s;
+  const baca=hasBaca?(na*43.5+k*25.6+ca*49.9+mg*82.2)-(cl*28.2+s*62.4):null;
+  const caApport=ca*a.totalMS,mgApport=mg*a.totalMS,naApport=na*a.totalMS;
+  let caReq=50,mgReq=15,naReq=8;
+  if(b.typeLabel==='vache-laitiere'){caReq=45+prod;mgReq=Math.max(20,0.02*pv+0.15*prod);naReq=Math.max(8,0.015*pv+0.1*prod);}
+  else if(['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)){caReq=30;mgReq=10;naReq=6;}
+  const metApport=gN('aa-met'),lysApport=gN('aa-lys');
+  const metPct=a.totalPDI>0&&metApport>0?metApport/a.totalPDI*100:0;
+  const lysPct=a.totalPDI>0&&lysApport>0?lysApport/a.totalPDI*100:0;
+
+  const tip=(t,icon,txt)=>`<div class="rb-ind-tip ${t}"><span style="font-size:.9rem;">${icon}</span><span>${txt}</span></div>`;
+  const adv=t=>`<p class="rb-ind-advice">${t}</p>`;
+  function card(id,icon,title,cls,badgeTxt,badgeCls,resume,detail){
+    return `<div class="rb-indicator ind-${cls}" id="ind-${id}" onclick="toggleInd('${id}')">
+      <div class="rb-ind-main">
+        <span class="rb-ind-icon">${icon}</span>
+        <div class="rb-ind-text"><div class="rb-ind-title">${title}</div><div class="rb-ind-val">${resume}</div></div>
+        <span class="rb-badge ${badgeCls}">${badgeTxt}</span>
+        <span class="rb-ind-arrow">▼</span>
+      </div>
+      <div class="rb-ind-detail"><div class="rb-ind-detail-inner">${detail}</div></div>
+    </div>`;
+  }
+
+  // 1. ÉNERGIE
+  let eCls,eBadge,eBadgeCls,eDetail;
+  if(rUFL<0.8){eCls='bad';eBadge='Déficit sévère';eBadgeCls='rb-badge-red';eDetail=adv(`Déficit énergétique sévère (${(rUFL*100).toFixed(0)}%). Risque élevé de cétose, mobilisation massive des réserves.`)+tip('danger','⚠️','Surveiller corps cétoniques urinaires')+tip('ok','🌽','Augmenter ensilage de maïs ou céréales aplaties')+tip('ok','🍬','Ajouter pulpe de betterave ou mélasse');}
+  else if(rUFL<0.9){eCls='warn';eBadge='Déficit modéré';eBadgeCls='rb-badge-orange';eDetail=adv(`Déficit modéré (${(rUFL*100).toFixed(0)}%). Mobilisation légère des réserves.`)+tip('warn','📈','Augmenter légèrement les concentrés énergétiques')+tip('warn','📏','Surveiller note d\'état corporel (cible ≥ 2.5/5)');}
+  else if(rUFL<=1.1){eCls='ok';eBadge='Optimal';eBadgeCls='rb-badge-green';eDetail=adv(`Apport énergétique optimal (${(rUFL*100).toFixed(0)}%).`)+tip('ok','✅','Maintenir la proportion fourrages/concentrés actuelle');}
+  else if(rUFL<=1.2){eCls='warn';eBadge='Léger excès';eBadgeCls='rb-badge-orange';eDetail=adv(`Léger excès d'énergie (${(rUFL*100).toFixed(0)}%).`)+tip('warn','✂️','Réduire légèrement les concentrés énergétiques');}
+  else{eCls='bad';eBadge='Excès important';eBadgeCls='rb-badge-red';eDetail=adv(`Excès énergétique important (${(rUFL*100).toFixed(0)}%). Risque d'engraissement et stéatose.`)+tip('danger','🚨','Réduire significativement les concentrés')+tip('danger','🌾','Augmenter fourrages grossiers');}
+
+  // 2. PROTÉINES
+  let pCls,pBadge,pBadgeCls,pDetail;
+  if(rPDI<0.8){pCls='bad';pBadge='Déficit sévère';pBadgeCls='rb-badge-red';pDetail=adv(`Déficit protéique sévère (${(rPDI*100).toFixed(0)}%). Baisse de production et immunité.`)+tip('danger','🧬','Ajouter du tourteau de soja ou colza d\'urgence');}
+  else if(rPDI<0.9){pCls='warn';pBadge='Déficit modéré';pBadgeCls='rb-badge-orange';pDetail=adv(`Déficit modéré en PDI (${(rPDI*100).toFixed(0)}%).`)+tip('warn','🌱','Augmenter les concentrés azotés (colza, soja)');}
+  else if(rPDI<=1.1){pCls='ok';pBadge='Optimal';pBadgeCls='rb-badge-green';pDetail=adv(`Apport protéique optimal (${(rPDI*100).toFixed(0)}%).`)+tip('ok','✅','Bonne couverture PDI');}
+  else if(rPDI<=1.2){pCls='warn';pBadge='Léger excès';pBadgeCls='rb-badge-orange';pDetail=adv(`Léger excès de PDI (${(rPDI*100).toFixed(0)}%). Coûteux mais sans risque majeur.`);}
+  else{pCls='bad';pBadge='Excès';pBadgeCls='rb-badge-red';pDetail=adv(`Excès de PDI (${(rPDI*100).toFixed(0)}%). Génère un surplus d'azote (urée lait élevée).`)+tip('danger','✂️','Réduire les concentrés azotés');}
+
+  // 3. ÉQUILIBRE E/P
+  let eCls2,eBadge2,eBadgeCls2,eDetail2;
+  if(ppu>=90&&ppu<=105){eCls2='ok';eBadge2='Idéal';eBadgeCls2='rb-badge-green';eDetail2=adv(`Ratio PDI/${eu} = ${ppu.toFixed(0)} g/${eu} — parfaitement dans la cible (90–105).`);}
+  else if(ppu>=82&&ppu<=115){eCls2='warn';eBadge2='Acceptable';eBadgeCls2='rb-badge-orange';eDetail2=adv(`Ratio PDI/${eu} = ${ppu.toFixed(0)} g/${eu} (cible 90–105). Acceptable mais peut être amélioré.`);}
+  else if(ppu<82){eCls2='bad';eBadge2='Trop bas';eBadgeCls2='rb-badge-red';eDetail2=adv(`Ratio PDI/${eu} trop bas (${ppu.toFixed(0)}). Manque de protéines relative à l'énergie.`)+tip('warn','🌱','Ajouter un tourteau protéique');}
+  else{eCls2='bad';eBadge2='Trop élevé';eBadgeCls2='rb-badge-red';eDetail2=adv(`Ratio PDI/${eu} trop élevé (${ppu.toFixed(0)}). Excès protéique relatif.`)+tip('warn','🌽','Ajouter un aliment énergétique');}
+
+  // 4. ACIDOSE
+  let aCls,aBadge,aBadgeCls,aDetail;
+  if(pctConc<35){aCls='ok';aBadge='Risque faible';aBadgeCls='rb-badge-green';aDetail=adv(`Ration équilibrée (${pctConc.toFixed(0)}% concentrés). Risque d'acidose très faible.`)+tip('ok','✅','Proportion fourrages/concentrés optimale');}
+  else if(pctConc<50){aCls='warn';aBadge='Risque modéré';aBadgeCls='rb-badge-orange';aDetail=adv(`${pctConc.toFixed(0)}% concentrés. Risque de SARA si distribution en un seul repas.`)+tip('warn','⏰','Fractionner en ≥ 3 repas/jour')+tip('warn','🌾','Garantir foin/paille à disposition')+tip('info','💊','Tampon possible : bicarbonate 200 g/j');}
+  else if(pctConc<62){aCls='bad';aBadge='Risque élevé';aBadgeCls='rb-badge-red';aDetail=adv(`Ration très concentrée (${pctConc.toFixed(0)}%). Risque SARA/acidose clinique.`)+tip('danger','🚨','Réduire les concentrés (objectif < 50% MS)')+tip('danger','🌾','Augmenter fourrages grossiers impérativement')+tip('danger','💊','NaHCO₃ 200g + MgO 50g/j indispensable');}
+  else{aCls='bad';aBadge='Danger acidose';aBadgeCls='rb-badge-red';aDetail=adv(`⚠️ Proportion dangereuse (${pctConc.toFixed(0)}%). Acidose clinique très probable.`)+tip('danger','🚨','ARRÊTER ce niveau de concentrés')+tip('danger','🏥','Consulter un vétérinaire si signes cliniques');}
+
+  // 5. MINÉRAUX
+  let mCls,mBadge,mBadgeCls,mResume,mDetail;
+  if(!hasBaca){mCls='info';mBadge='Non renseigné';mBadgeCls='rb-badge-gray';mResume='Saisir Na, K, Ca, Mg, Cl, S';mDetail=adv('Renseignez les teneurs minérales pour obtenir la BACA et le statut calcique, magnésien et sodique.')+tip('info','⚗️','BACA : équilibre acido-basique de la ration')+tip('info','Ca','Calcium : prévention fièvre de lait')+tip('info','Mg','Magnésium : prévention tétanie d\'herbage');}
+  else{const bacaOk=baca>=-100&&baca<=100;mResume=`BACA = ${baca.toFixed(0)} mEq/kg MS`;if(baca<-150&&b.typeLabel==='vache-prepa-velage'){mCls='ok';mBadge='BACA anionique';mBadgeCls='rb-badge-green';mDetail=adv(`BACA négatif (${baca.toFixed(0)}) — intentionnel en prépa vêlage.`)+tip('ok','✅','BACA anionique adapté');}else if(baca<-150){mCls='warn';mBadge='BACA très acide';mBadgeCls='rb-badge-orange';mDetail=adv(`BACA très négatif (${baca.toFixed(0)}) hors prépa vêlage.`);}else if(baca>200){mCls='warn';mBadge='BACA alcalin';mBadgeCls='rb-badge-orange';mDetail=adv(`BACA très élevé (${baca.toFixed(0)}). Risque tétanie si K élevé.`)+tip('warn','💊','Supplémenter magnésium : 50–80 g MgO/j');}else{mCls='ok';mBadge='BACA optimal';mBadgeCls='rb-badge-green';mDetail=adv(`BACA de ${baca.toFixed(0)} — dans la plage optimale (−100 à +100).`)+tip('ok','✅','BACA dans la zone optimale');}
+  if(ca>0){const r=caApport/caReq;mDetail+=tip(r<0.75?'danger':r>1.4?'warn':'ok','Ca',`Ca : apport ${caApport.toFixed(0)} g/j — besoin ${caReq.toFixed(0)} g/j — ${r<0.75?'⚠️ Déficit (risque fièvre de lait)':r>1.4?'Excès':'✅ Correct'}`);}
+  if(mg>0){const r=mgApport/mgReq;mDetail+=tip(r<0.75?'danger':r>1.8?'warn':'ok','Mg',`Mg : apport ${mgApport.toFixed(0)} g/j — besoin ${mgReq.toFixed(0)} g/j — ${r<0.75?'⚠️ Déficit (risque tétanie)':r>1.8?'Excès léger':'✅ Correct'}`);}
+  if(na>0){const r=naApport/naReq;mDetail+=tip(r<0.7?'warn':r>2.5?'warn':'ok','Na',`Na : apport ${naApport.toFixed(0)} g/j — besoin ${naReq.toFixed(0)} g/j — ${r<0.7?'Déficit':r>2.5?'Excès':'✅ Correct'}`);}
+  }
+
+  // 6. ACIDES AMINÉS
+  let aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail;
+  if(!metApport&&!lysApport){aaCls='info';aaBadge='Non renseigné';aaBadgeCls='rb-badge-gray';aaResume='Saisir Met et Lys (g/j)';aaDetail=adv('Renseignez Met et Lys pour évaluer les AA limitants — essentiel pour les vaches hautes productrices.')+tip('info','Met','Méthionine : 1er AA limitant')+tip('info','Lys','Lysine : 2e AA limitant')+tip('info','📊','Cibles INRA : Met ≥ 2.4% PDI — Lys ≥ 7.2% PDI');}
+  else{const metOk=!metApport||metPct>=2.0,lysOk=!lysApport||lysPct>=6.5;aaCls=metOk&&lysOk?'ok':'bad';aaBadge=metOk&&lysOk?'Équilibré':'À corriger';aaBadgeCls=metOk&&lysOk?'rb-badge-green':'rb-badge-red';aaResume=[metApport?`Met ${metPct.toFixed(1)}%`:'',lysApport?`Lys ${lysPct.toFixed(1)}%`:''].filter(Boolean).join(' / ')+' du PDI';aaDetail=adv('Les AA limitants chez la vache laitière sont la Méthionine et la Lysine.');if(metApport){const st=metPct>=2.4?'ok':metPct>=2.0?'warn':'danger';aaDetail+=tip(st,'Met',`Met : ${metApport.toFixed(0)} g/j = ${metPct.toFixed(1)}% PDI (cible ≥ 2.4%) — ${metPct>=2.4?'✅ Optimal':metPct>=2.0?'Correct':'⚠️ Déficit'}`);}if(lysApport){const st=lysPct>=7.2?'ok':lysPct>=6.5?'warn':'danger';aaDetail+=tip(st,'Lys',`Lys : ${lysApport.toFixed(0)} g/j = ${lysPct.toFixed(1)}% PDI (cible ≥ 7.2%) — ${lysPct>=7.2?'✅ Optimal':lysPct>=6.5?'Correct':'⚠️ Déficit'}`);}}
+
+  const container=document.getElementById('bilan-indicateurs'); if(!container)return;
+  container.innerHTML=`<div style="margin-bottom:10px;font-size:.82rem;color:var(--text-muted);">🔍 Cliquez sur une carte pour afficher les conseils</div>`+
+    card('energie','⚡','Énergie',eCls,eBadge,eBadgeCls,`${a.totalUFL.toFixed(2)} / ${b.bUFL.toFixed(2)} ${eu} — ${(rUFL*100).toFixed(0)}%`,eDetail)+
+    card('proteines','🧬','Protéines (PDI)',pCls,pBadge,pBadgeCls,`${a.totalPDI.toFixed(0)} / ${b.bPDI.toFixed(0)} g/j — ${(rPDI*100).toFixed(0)}%`,pDetail)+
+    card('equilibre','⚖️',`Équilibre E/P`,eCls2,eBadge2,eBadgeCls2,`PDI/${eu} = ${ppu.toFixed(0)} g/${eu}`,eDetail2)+
+    card('acidose','🔥','Risque Acidose',aCls,aBadge,aBadgeCls,`${pctConc.toFixed(0)}% concentrés / ${pctFourrage.toFixed(0)}% fourrages`,aDetail)+
+    card('mineraux','⚗️','Minéraux & BACA',mCls,mBadge,mBadgeCls,mResume,mDetail)+
+    card('aa','🔬','Acides aminés',aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail);
+}
+
+/* ══ OPTIMISEUR ══ */
+function runOptimizer() {
+  if(!lastApports||!lastBesoins){alert('Calculez d\'abord le bilan.');return;}
+  const a=lastApports,b=lastBesoins;
+  const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+  const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:1;
+  const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:1;
+  const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
+  const suggs=[];
+
+  function bestExisting(fn){return [...a.items].sort((x,y)=>fn(y)-fn(x))[0];}
+  function bestFromDB(filter,fn){return alimentsDb.filter(filter).sort((x,y)=>fn(y)-fn(x))[0];}
+
+  if(rUFL<0.90){const d=b.bUFL-a.totalUFL;const f=bestExisting(x=>x.ufl/x.qty);const alt=bestFromDB(x=>x.uflPerKgMS>1.0,x=>x.uflPerKgMS);const feed=f||alt;if(feed){const u=f?f.ufl/f.qty:alt.uflPerKgMS;const dq=Math.min(d/u,3);suggs.push({icon:'⚡',tag:'Énergie',sev:'bad',title:`Augmenter "${feed.nom||alt?.nom}"`,qty:`+${dq.toFixed(1)} kg MS/j`,effect:`Énergie : ${((a.totalUFL+dq*u)/b.bUFL*100).toFixed(0)}% des besoins`,feed:feed.nom||alt?.nom,sign:'+'});}}
+  if(rUFL>1.15){const f=bestExisting(x=>x.ufl/x.qty);if(f){const dq=Math.min(f.qty*0.4,(a.totalUFL-b.bUFL)/(f.ufl/f.qty));suggs.push({icon:'✂️',tag:'Énergie',sev:'warn',title:`Réduire "${f.nom}"`,qty:`-${dq.toFixed(1)} kg MS/j`,effect:`Énergie : ${((a.totalUFL-dq*(f.ufl/f.qty))/b.bUFL*100).toFixed(0)}% des besoins`,feed:f.nom,sign:'-'});}}
+  if(rPDI<0.90){const d=b.bPDI-a.totalPDI;const f=bestExisting(x=>x.pdi/x.qty);const alt=bestFromDB(x=>x.pdiPerKgMS>200,x=>x.pdiPerKgMS);const feed=f||alt;if(feed){const p=f?f.pdi/f.qty:alt?.pdiPerKgMS;const dq=Math.min(d/p,2);suggs.push({icon:'🧬',tag:'Protéines',sev:'bad',title:`Augmenter "${feed.nom||alt?.nom}"`,qty:`+${dq.toFixed(1)} kg MS/j`,effect:`PDI : ${((a.totalPDI+dq*p)/b.bPDI*100).toFixed(0)}% des besoins`,feed:feed.nom||alt?.nom,sign:'+'});}}
+  if(rPDI>1.20){const f=bestExisting(x=>x.pdi/x.qty);if(f){const dq=Math.min(f.qty*0.3,(a.totalPDI-b.bPDI)/(f.pdi/f.qty));suggs.push({icon:'✂️',tag:'Protéines',sev:'warn',title:`Réduire "${f.nom}"`,qty:`-${dq.toFixed(1)} kg MS/j`,effect:`PDI : ${((a.totalPDI-dq*(f.pdi/f.qty))/b.bPDI*100).toFixed(0)}%`,feed:f.nom,sign:'-'});}}
+  if(ppu<82&&rUFL>=0.88)suggs.push({icon:'⚖️',tag:'Équilibre',sev:'warn',title:'Ajouter un tourteau protéique',qty:'+0.5 kg MS/j',effect:`PDI/${eu} : ${((a.totalPDI+0.5*230)/a.totalUFL).toFixed(0)} g/${eu}`,feed:'Colza (tourteau)',sign:'+'});
+  if(ppu>115&&rPDI>=0.95)suggs.push({icon:'⚖️',tag:'Équilibre',sev:'warn',title:'Ajouter un aliment énergétique',qty:'+0.5 kg MS/j',effect:`Ratio PDI/${eu} amélioré`,feed:'Maïs grain',sign:'+'});
+  if(b.ingestionCapacite>0&&a.totalMS>b.ingestionCapacite*1.08){const f=bestExisting(x=>x.qty);if(f){const dq=Math.min(a.totalMS-b.ingestionCapacite,f.qty*0.4);suggs.push({icon:'🫁',tag:'Ingestion',sev:'bad',title:`Réduire "${f.nom}"`,qty:`-${dq.toFixed(1)} kg MS/j`,effect:`MS : ${(a.totalMS-dq).toFixed(1)} kg (max ${b.ingestionCapacite.toFixed(1)} kg)`,feed:f.nom,sign:'-'});}}
+  if((a.totalAR||0)>0||(a.totalSS||0)>0){const arKg=(a.totalAR||0)/(a.totalMS||1),ssKg=(a.totalSS||0)/(a.totalMS||1);if(arKg+ssKg>200){const fast=a.items.filter(i=>{const f=findFood(i.nom);return f&&(f.ar_gkgms||0)>100;}).sort((x,y)=>y.qty-x.qty)[0];if(fast)suggs.push({icon:'🔥',tag:'Acidose',sev:'bad',title:`Réduire "${fast.nom}"`,qty:`-${(fast.qty*0.25).toFixed(1)} kg MS/j`,effect:'AR+SS estimé < 200 g/kg MS',feed:fast.nom,sign:'-'});}}
+
+  const cont=document.getElementById('bilan-optimizer'); if(!cont)return;
+  const sc=s=>s==='bad'?'#dc2626':s==='warn'?'#d97706':'#16a34a';
+  const sb=s=>s==='bad'?'#fef2f2':s==='warn'?'#fffbeb':'#f0fdf4';
+  if(!suggs.length){cont.innerHTML=`<div style="padding:14px;color:#16a34a;font-weight:700;">✅ Ration bien équilibrée — aucun ajustement nécessaire.</div>`;return;}
+  cont.innerHTML=`<div style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px;">${suggs.length} suggestion${suggs.length>1?'s':''} d'ajustement :</div>`+
+    suggs.map((s,i)=>`<div class="opti-row" id="opti-row-${i}" style="border-left:4px solid ${sc(s.sev)};background:${sb(s.sev)};">
+      <span style="font-size:1.3rem;">${s.icon}</span>
+      <div style="flex:1;">
+        <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:${sc(s.sev)};margin-bottom:3px;">${s.tag}</div>
+        <div style="font-weight:700;font-size:.88rem;">${s.title} <span style="font-weight:400;color:#0369a1;">${s.qty}</span></div>
+        <div style="font-size:.78rem;color:#16a34a;font-weight:600;">→ ${s.effect}</div>
+      </div>
+      ${s.feed&&s.sign?`<button class="btn btn-primary btn-sm" onclick="applyOpt(${i},'${s.feed.replace(/'/g,'')}','${s.sign}','${(parseFloat(s.qty)||0.5).toFixed(1)}')">Appliquer</button>`:''}
+    </div>`).join('');
+}
+
+function applyOpt(i,feed,sign,qtyStr) {
+  const qty=parseFloat(qtyStr);
+  const rows=document.querySelectorAll('#ration-rows .ration-row');
+  let applied=false;
+  for(const row of rows){
+    const nom=row.querySelector('.ration-input-nom')?.value||'';
+    if(nom.toLowerCase().includes(feed.toLowerCase())){
+      const inp=row.querySelector('.ration-input-qty');
+      const cur=parseFloat(inp?.value)||0;
+      if(inp)inp.value=Math.max(0,sign==='+'?cur+qty:cur-qty).toFixed(1);
+      applied=true;break;
+    }
+  }
+  if(!applied&&sign==='+'){
+    addRationRow();
+    const rows2=document.querySelectorAll('#ration-rows .ration-row');
+    const last=rows2[rows2.length-1];
+    if(last){last.querySelector('.ration-input-nom').value=feed;last.querySelector('.ration-input-qty').value=qty.toFixed(1);}
+    applied=true;
+  }
+  if(applied){const row=document.getElementById('opti-row-'+i);if(row){row.style.opacity='.5';const btn=row.querySelector('button');if(btn){btn.textContent='✅ Appliqué';btn.disabled=true;}}}
+}
+
+/* ══ COÛTS ══ */
+function chargerRationCouts() {
+  const a=parseRation(); if(!a.items.length){alert('Aucun aliment dans la ration.');return;}
+  const cont=document.getElementById('cout-prix-lines');
+  cont.innerHTML=`<div style="display:grid;grid-template-columns:1fr 90px;gap:6px;margin-bottom:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);padding:0 4px;"><span>Aliment</span><span>€/t MS</span></div>`+
+    a.items.map((it,i)=>`<div style="display:grid;grid-template-columns:1fr 90px;gap:6px;margin-bottom:6px;align-items:center;">
+      <div style="font-size:.85rem;">${escHtml(it.nom)} <span style="color:var(--text-muted);font-size:.75rem;">${it.qty.toFixed(1)} kg MS</span></div>
+      <input type="number" class="form-input" id="cout-prix-${i}" min="0" step="10" placeholder="0" style="padding:6px 8px;font-size:.85rem;">
+    </div>`).join('');
+  cont._items=a.items;
+}
+
+function calcCouts() {
+  const items=document.getElementById('cout-prix-lines')?._items;
+  if(!items||!items.length){alert('Chargez d\'abord la ration.');return;}
+  let totalCoutJour=0;
+  const rows=[];
+  let totalPrix=0;
+  items.forEach((it,i)=>{
+    const prix=parseFloat(document.getElementById('cout-prix-'+i)?.value)||0;
+    const coutJ=it.qty*prix/1000;
+    totalCoutJour+=coutJ;
+    rows.push({nom:it.nom,qty:it.qty,prix,coutJ});
+    totalPrix+=prix>0?1:0;
+  });
+  const nbVL=parseInt(document.getElementById('cout-nb-vl')?.value)||50;
+  const refLait=parseInt(document.getElementById('cout-ref-lait')?.value)||9000;
+  const duree=parseInt(document.getElementById('cout-duree')?.value)||180;
+  const totalMS=(lastApports?.totalMS||0);
+  document.getElementById('cout-vl-jour').textContent=totalCoutJour.toFixed(2)+' €';
+  document.getElementById('cout-kg-ms').textContent=totalMS>0?(totalCoutJour/totalMS*1000).toFixed(0)+' €/t MS':'-';
+  document.getElementById('cout-1000l').textContent=refLait>0?(totalCoutJour/(refLait/365)*1000).toFixed(2)+' €':'-';
+  document.getElementById('cout-troupeau').textContent=(totalCoutJour*nbVL).toFixed(0)+' €/j';
+  document.getElementById('cout-resultats').style.display='';
+  const tbody=document.getElementById('cout-detail-body');
+  tbody.innerHTML=rows.map(r=>`<tr><td>${escHtml(r.nom)}</td><td>${r.qty.toFixed(1)}</td><td>${r.prix}</td><td>${r.coutJ.toFixed(2)} €</td><td>${totalCoutJour>0?(r.coutJ/totalCoutJour*100).toFixed(0)+'%':'-'}</td></tr>`).join('')+
+    `<tr style="font-weight:700;"><td>Total</td><td>${totalMS.toFixed(1)}</td><td>—</td><td>${totalCoutJour.toFixed(2)} €</td><td>100%</td></tr>`;
+}
+
+/* ══ BILAN FOURRAGER ══ */
+function bfSwitch(tab,btn) {
+  ['stocks','troupeau','resultat','silo'].forEach(t=>{
+    const el=document.getElementById('bf-'+t); if(el)el.style.display=t===tab?'':'none';
+  });
+  document.querySelectorAll('.bf-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+let _bfStocks=[];
+function addBfStock() {
+  const cont=document.getElementById('bf-stock-lines');
+  const row=document.createElement('div');
+  row.style.cssText='display:grid;grid-template-columns:1fr 110px 90px 40px;gap:6px;margin-bottom:6px;align-items:center;';
+  row.innerHTML=`<input type="text" class="form-input" placeholder="Maïs ensilage…" style="padding:7px 8px;font-size:.83rem;">
+    <input type="number" class="form-input" min="0" step="1" placeholder="t brutes" style="padding:7px 8px;font-size:.83rem;">
+    <input type="number" class="form-input" min="1" max="100" step="1" placeholder="% MS" style="padding:7px 8px;font-size:.83rem;">
+    <button type="button" onclick="this.closest('div').remove()" style="background:#fee2e2;border:none;border-radius:6px;height:34px;width:34px;cursor:pointer;color:#dc2626;">✕</button>`;
+  cont.appendChild(row);
+}
+
+function calcBilanFourrager() {
+  const rows=document.querySelectorAll('#bf-stock-lines > div');
+  let totalTMS=0;
+  const stocks=[];
+  rows.forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const nom=inputs[0]?.value?.trim();
+    const tb=parseFloat(inputs[1]?.value)||0;
+    const ms=parseFloat(inputs[2]?.value)||0;
+    if(!nom||!tb||!ms)return;
+    const tms=tb*(ms/100);
+    totalTMS+=tms; stocks.push({nom,tb,ms,tms});
+  });
+  const nbVL=parseInt(document.getElementById('bf-nb-vl')?.value)||0;
+  const consoVL=parseFloat(document.getElementById('bf-conso-vl')?.value)||20;
+  const nbBV=parseInt(document.getElementById('bf-nb-bv')?.value)||0;
+  const consoBV=parseFloat(document.getElementById('bf-conso-bv')?.value)||12;
+  const duree=parseInt(document.getElementById('bf-duree')?.value)||180;
+  const besoinTMS=(nbVL*consoVL+nbBV*consoBV)*duree/1000;
+  const solde=totalTMS-besoinTMS;
+  const pct=besoinTMS>0?(totalTMS/besoinTMS*100).toFixed(0):0;
+  const ok=solde>=0;
+  const cont=document.getElementById('bf-resultat-content');
+  cont.innerHTML=`
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="metric-card"><div class="metric-lbl">Stock disponible</div><div class="metric-val" style="color:#15803d;">${totalTMS.toFixed(1)}</div><div class="metric-sub">t MS</div></div>
+      <div class="metric-card"><div class="metric-lbl">Besoins troupeau</div><div class="metric-val" style="color:#f97316;">${besoinTMS.toFixed(1)}</div><div class="metric-sub">t MS sur ${duree} j</div></div>
+      <div class="metric-card"><div class="metric-lbl">Solde</div><div class="metric-val" style="color:${ok?'#16a34a':'#dc2626'};">${ok?'+':''}${solde.toFixed(1)}</div><div class="metric-sub">t MS</div></div>
+      <div class="metric-card"><div class="metric-lbl">Couverture</div><div class="metric-val" style="color:${pct>=100?'#16a34a':'#dc2626'};">${pct}%</div><div class="metric-sub">des besoins</div></div>
+    </div>
+    <div style="padding:12px 16px;border-radius:8px;background:${ok?'#f0fdf4':'#fef2f2'};border:1px solid ${ok?'#16a34a':'#dc2626'};font-size:.88rem;font-weight:600;color:${ok?'#15803d':'#dc2626'};margin-bottom:16px;">
+      ${ok?`✅ Stocks suffisants — excédent de ${solde.toFixed(1)} t MS`:`⚠️ Stocks insuffisants — déficit de ${Math.abs(solde).toFixed(1)} t MS à combler`}
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="data-table">
+        <thead><tr><th>Fourrage</th><th>t brutes</th><th>% MS</th><th>TMS</th><th>% stock</th></tr></thead>
+        <tbody>${stocks.map(s=>`<tr><td>${escHtml(s.nom)}</td><td>${s.tb}</td><td>${s.ms}%</td><td>${s.tms.toFixed(1)} t MS</td><td>${totalTMS>0?(s.tms/totalTMS*100).toFixed(0)+'%':'-'}</td></tr>`).join('')}
+        <tr style="font-weight:700;"><td>Total</td><td>—</td><td>—</td><td>${totalTMS.toFixed(1)} t MS</td><td>100%</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+  bfSwitch('resultat',document.getElementById('bfbtn-resultat'));
+}
+
+/* ══ CALCULATEUR SILO ══ */
+const TMS_CULTURES={
+  mais:{label:'Maïs ensilage',densite:700,ms:33},herbe:{label:'Herbe ensilage',densite:600,ms:30},
+  enrub:{label:'Enrubannage',densite:500,ms:45},foin:{label:'Foin',densite:130,ms:87},
+  paille:{label:'Paille',densite:100,ms:87},triticale:{label:'Triticale ensilé',densite:650,ms:32}
+};
+
+function onTmsCultureChange() {
+  const v=document.getElementById('tms-culture')?.value;
+  const c=TMS_CULTURES[v]||TMS_CULTURES.mais;
+  if(document.getElementById('tms-densite'))document.getElementById('tms-densite').value=c.densite;
+  if(document.getElementById('tms-pourcent-ms'))document.getElementById('tms-pourcent-ms').value=c.ms;
+  calcTmsLive();
+}
+
+function onTmsShapeChange() {
+  const shape=document.getElementById('tms-shape')?.value;
+  const show=(id,v)=>{const e=document.getElementById(id);if(e)e.style.display=v?'':'none';};
+  show('tms-f-longueur',shape==='bunker'||shape==='talon');
+  show('tms-f-largeur',shape==='bunker'||shape==='talon');
+  show('tms-f-hauteur',shape==='bunker'||shape==='talon'||shape==='tower');
+  show('tms-f-diametre',shape==='tower'||shape==='round');
+  show('tms-f-balles',shape==='round');
+  calcTmsLive();
+}
+
+function calcTmsLive() {
+  const c=TMS_CULTURES[document.getElementById('tms-culture')?.value]||TMS_CULTURES.mais;
+  const densite=parseFloat(document.getElementById('tms-densite')?.value)||c.densite;
+  const msPct=parseFloat(document.getElementById('tms-pourcent-ms')?.value)||c.ms;
+  const shape=document.getElementById('tms-shape')?.value||'bunker';
+  let volume=0;
+  if(shape==='bunker'||shape==='talon'){
+    const l=parseFloat(document.getElementById('tms-longueur')?.value)||0;
+    const w=parseFloat(document.getElementById('tms-largeur')?.value)||0;
+    const h=parseFloat(document.getElementById('tms-hauteur')?.value)||0;
+    volume=shape==='talon'?l*w*h*0.5:l*w*h;
+  } else if(shape==='tower'){
+    const d=parseFloat(document.getElementById('tms-diametre')?.value)||0;
+    const h=parseFloat(document.getElementById('tms-hauteur')?.value)||0;
+    volume=Math.PI*(d/2)*(d/2)*h;
+  } else if(shape==='round'){
+    const d=parseFloat(document.getElementById('tms-diametre')?.value)||1.2;
+    const nb=parseFloat(document.getElementById('tms-nb-balles')?.value)||0;
+    volume=Math.PI*(d/2)*(d/2)*1.2*nb;
+  }
+  const tms=volume*densite*(msPct/100)/1000;
+  const rv=document.getElementById('tms-result-val'); if(rv)rv.textContent=volume>0?tms.toFixed(2):'—';
+  const rd=document.getElementById('tms-result-details');
+  if(rd&&volume>0)rd.innerHTML=`Volume : <b>${volume.toFixed(1)} m³</b> · Densité : <b>${densite} kg/m³</b> · %MS : <b>${msPct}%</b>`;
+}
+
+function transferTmsToStock() {
+  const rv=document.getElementById('tms-result-val')?.textContent;
+  const tms=parseFloat(rv);
+  if(!tms||isNaN(tms)){alert('Calculez d\'abord la TMS du silo.');return;}
+  const cult=document.getElementById('tms-culture')?.value||'mais';
+  const c=TMS_CULTURES[cult];
+  addBfStock();
+  const rows=document.querySelectorAll('#bf-stock-lines > div');
+  const last=rows[rows.length-1];
+  if(last){
+    const inputs=last.querySelectorAll('input');
+    inputs[0].value=c.label;
+    inputs[1].value=(tms/(c.ms/100)).toFixed(1);
+    inputs[2].value=c.ms;
+  }
+  bfSwitch('stocks',document.getElementById('bfbtn-stocks'));
+  alert(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`);
+}
+
+/* ══ MISE À JOUR calcBilan POUR INCLURE SCORE + INDICATEURS ══ */
+// Override calcBilan pour appeler le moteur complet
+const _calcBilanOrig = calcBilan;
+calcBilan = function() {
+  _calcBilanOrig();
+  if(lastApports && lastBesoins) {
+    renderQualityScore(lastApports, lastBesoins);
+    renderIndicateurs(lastApports, lastBesoins);
+  }
+};
 </script>
 </body>
 </html>
