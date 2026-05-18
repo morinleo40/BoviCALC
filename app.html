@@ -183,9 +183,9 @@ function updateAuthUI() {
     btn.textContent = '🔑 Connexion';
     btn.classList.remove('hdr-btn-connected');
   }
-  // Bouton promo : visible si connecté + plan free
-  var promoBtn = _$$('btn-promo');
-  if (promoBtn) promoBtn.style.display = (currentUser && userPlan === 'free') ? '' : 'none';
+  // Bouton déconnexion : visible uniquement si connecté
+  var logoutBtn = _$$('btn-logout');
+  if (logoutBtn) logoutBtn.style.display = currentUser ? '' : 'none';
 }
 function requireAuth(feature) {
   if (currentUser) return true;
@@ -290,7 +290,7 @@ async function initAuth() {
       <button onclick="backToHome()" class="hdr-btn">☰ Menu</button>
       <a href="index.html" class="hdr-btn hdr-btn-outline">🏠 Accueil</a>
       <button onclick="showTutorial()" class="hdr-btn hdr-btn-outline" title="Guide de démarrage">? Aide</button>
-      <button id="btn-promo" onclick="openPromoModal()" class="hdr-btn hdr-btn-outline" title="Entrer un code promo" style="display:none;">🎁 Code promo</button>
+      <button id="btn-logout" onclick="logoutUser()" class="hdr-btn hdr-btn-outline" style="display:none;color:var(--danger);" title="Se déconnecter">🚪 Déconnexion</button>
       <button id="btn-header-auth" class="hdr-btn hdr-btn-auth" onclick="onAuthBtnClick()">🔑 Connexion</button>
     </div>
   </div>
@@ -368,7 +368,6 @@ async function initAuth() {
         <button class="rb-btn rb-btn-ghost" onclick="openSessionsModal()" title="Voir toutes les sessions">📁 Mes sessions</button>
         <button class="rb-btn rb-btn-ghost" onclick="openCompareModal()" title="Comparer deux sessions">⚖️ Comparer</button>
         <button class="rb-btn rb-btn-ghost" data-close>← Menu</button>
-        <button class="rb-btn rb-btn-ghost" onclick="logoutUser()" style="color:var(--danger);border-color:var(--danger);" title="Se déconnecter">🚪 Déconnexion</button>
       </div>
     </div>
 
