@@ -81,7 +81,7 @@ async function checkConseillerAccess() {
   var supa=getSupa(); if(!supa||!currentUser) return false;
   try {
     var res=await supa.from('user_plans').select('plan').eq('user_id',currentUser.id).single();
-    return res.data&&res.data.plan==='conseiller';
+    return res.data&&(res.data.plan==='conseiller'||res.data.plan==='pro');
   } catch(e){ return false; }
 }
 
