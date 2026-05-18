@@ -183,6 +183,12 @@ async function resetPassword() {
   if (!res.error) alert('📧 Email envoyé à ' + email);
   else showAuthError(res.error.message);
 }
+function openStripeCheckout() {
+  var email = currentUser ? (currentUser.email || '') : '';
+  var url = 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00';
+  if (email) url += '?prefilled_email=' + encodeURIComponent(email);
+  window.open(url, '_blank');
+}
 async function logoutUser() {
   var supa = getSupa();
   try { if (supa) await supa.auth.signOut(); } catch(e) {}
@@ -4479,7 +4485,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
     <!-- Actions -->
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <a href="https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00" target="_blank" id="acct-upgrade-btn"
+      <a href="#" onclick="openStripeCheckout();return false;" id="acct-upgrade-btn"
          style="display:none;width:100%;padding:11px;background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;border-radius:10px;font-weight:700;font-size:.9rem;text-align:center;text-decoration:none;">
         ⭐ Passer au plan Pro — 15 €/mois
       </a>
