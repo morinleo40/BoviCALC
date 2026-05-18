@@ -185,9 +185,11 @@ async function resetPassword() {
 }
 async function logoutUser() {
   var supa = getSupa();
-  if (supa) await supa.auth.signOut();
+  try { if (supa) await supa.auth.signOut(); } catch(e) {}
   currentUser = null; userPlan = 'free';
-  updateAuthUI(); closeAccountModal(); showAuthWall();
+  closeAccountModal();
+  // Rechargement propre — supprime tout état résiduel en mémoire
+  window.location.reload();
 }
 function togglePwd(id, btn) {
   var inp = _$$(id); if (!inp) return;
@@ -227,15 +229,22 @@ function updateAuthUI() {
       }
       var lastEl = _$$('home-last-login');
       if (lastEl) {
-        var lastSign = currentUser.last_sign_in_at;
-        if (lastSign) {
-          var diff = Date.now() - new Date(lastSign).getTime();
+        try {
+          var storedTs = parseInt(localStorage.getItem('bovicalc-last-login') || '0');
+          var diff = storedTs > 0 ? Date.now() - storedTs : 0;
           var mins = Math.floor(diff/60000), hrs = Math.floor(mins/60), days = Math.floor(hrs/24);
-          var txt = days > 0 ? 'Dernière connexion il y a ' + days + ' jour' + (days>1?'s':'') :
-                    hrs  > 0 ? 'Dernière connexion il y a ' + hrs  + ' heure' + (hrs>1?'s':'') :
-                    mins > 1 ? 'Dernière connexion il y a ' + mins + ' minutes' : 'Connexion en cours';
+          var txt;
+          if (!storedTs || diff < 60000) {
+            txt = '🟢 Connecté maintenant';
+          } else if (days > 0) {
+            txt = 'Dernière connexion il y a ' + days + ' jour' + (days > 1 ? 's' : '');
+          } else if (hrs > 0) {
+            txt = 'Dernière connexion il y a ' + hrs + ' heure' + (hrs > 1 ? 's' : '');
+          } else {
+            txt = 'Dernière connexion il y a ' + mins + ' minute' + (mins > 1 ? 's' : '');
+          }
           lastEl.textContent = txt;
-        }
+        } catch(e) { lastEl.textContent = ''; }
       }
       var planPill = _$$('home-plan-pill');
       if (planPill) {
@@ -283,7 +292,10 @@ async function initAuth() {
       currentUser = session ? session.user : null;
       if (currentUser) {
         await loadUserPlan(); hideAuthWall();
-        if (evt === 'SIGNED_IN') { setTimeout(restoreAutoSave, 500); setTimeout(maybeShowTutorial, 800); }
+        if (evt === 'SIGNED_IN') {
+          try { localStorage.setItem('bovicalc-last-login', Date.now().toString()); } catch(e) {}
+          setTimeout(restoreAutoSave, 500); setTimeout(maybeShowTutorial, 800);
+        }
       }
       else { userPlan = 'free'; updateAuthUI(); showAuthWall(); }
     });
