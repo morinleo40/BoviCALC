@@ -68,7 +68,11 @@ async function resetWallPwd() {
 }
 function showAccessWall() {
   var w=_$('access-wall'); if(w) w.style.display='flex';
-  var em=_$('access-wall-email'); if(em&&currentUser) em.textContent=currentUser.email||'';
+  var email = currentUser ? (currentUser.email||'') : '';
+  var em=_$('access-wall-email'); if(em) em.textContent=email;
+  // Pré-remplir l'email dans le lien mailto
+  var lk=_$('subscribe-link');
+  if(lk&&email) lk.href='mailto:bovicalc@gmail.com?subject=Abonnement BoviCalc Conseiller&body=Bonjour, je souhaite souscrire à BoviCalc Conseiller (20€/mois). Mon email de compte : '+encodeURIComponent(email);
 }
 function hideAccessWall() { var w=_$('access-wall'); if(w) w.style.display='none'; }
 function showCodeErr(m) { var e=_$('code-err'); if(e){e.textContent=m;e.style.display='block';} }
@@ -165,29 +169,49 @@ function setTheme(t) {
   </div>
 </div>
 
-<!-- ────────── CODE D'ACCÈS WALL ────────── -->
-<div id="access-wall" style="display:none;position:fixed;inset:0;z-index:99998;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2718 100%);align-items:center;justify-content:center;padding:20px;">
-  <div class="auth-card" style="max-width:440px;">
-    <div class="auth-logo">
-      <div style="font-size:2.5rem;margin-bottom:8px;">🔐</div>
-      <h1 style="font-size:1.3rem;">Accès Conseiller</h1>
-      <p style="color:#94a3b8;font-size:.85rem;margin-top:6px;">Entrez votre code d'accès unique pour activer votre abonnement.</p>
+<!-- ────────── ABONNEMENT WALL ────────── -->
+<div id="access-wall" style="display:none;position:fixed;inset:0;z-index:99998;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2718 100%);align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+  <div class="auth-card" style="max-width:460px;width:100%;">
+
+    <!-- Compte créé -->
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3);border-radius:10px;padding:12px 14px;margin-bottom:22px;">
+      <span style="font-size:1.2rem;">✅</span>
+      <div>
+        <div style="font-size:.82rem;font-weight:700;color:#4ade80;">Compte créé avec succès</div>
+        <div id="access-wall-email" style="font-size:.75rem;color:#64748b;"></div>
+      </div>
+      <a href="#" onclick="logoutUser();return false;" style="margin-left:auto;font-size:.72rem;color:#475569;text-decoration:underline;">Changer</a>
     </div>
-    <div style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.25);border-radius:10px;padding:14px;margin-bottom:18px;font-size:.82rem;color:#4ade80;line-height:1.6;">
-      Votre code vous a été envoyé par email après votre souscription à <strong>BoviCalc Conseiller — 20 €/mois</strong>.<br>
-      <span style="color:#64748b;">Pas encore de code ? <a href="mailto:bovicalc@gmail.com" style="color:#22c55e;">Contactez-nous →</a></span>
+
+    <!-- Étape 1 : Souscrire -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#475569;margin-bottom:12px;">Étape 1 — Souscrire</div>
+      <div style="background:#1e3a2e;border:1px solid #16a34a;border-radius:12px;padding:20px;text-align:center;margin-bottom:12px;">
+        <div style="font-size:.78rem;color:#4ade80;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">BoviCalc Conseiller</div>
+        <div style="font-size:2.4rem;font-weight:900;color:#fff;line-height:1;">20 €<span style="font-size:1rem;font-weight:400;color:#64748b;"> / mois</span></div>
+        <div style="font-size:.75rem;color:#64748b;margin:6px 0 16px;">Sans engagement · Résiliable à tout moment</div>
+        <ul style="list-style:none;text-align:left;font-size:.82rem;color:#94a3b8;margin-bottom:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>✅ Exploitations illimitées</li>
+          <li>✅ Calculs INRA 2018 complets</li>
+          <li>✅ Historique et PDF avec votre nom</li>
+          <li>✅ Code d'accès unique et personnel</li>
+        </ul>
+        <a href="mailto:bovicalc@gmail.com?subject=Abonnement BoviCalc Conseiller&body=Bonjour, je souhaite souscrire à BoviCalc Conseiller (20€/mois). Mon email de compte : " id="subscribe-link" class="auth-btn" style="display:block;text-decoration:none;text-align:center;">Souscrire par email →</a>
+      </div>
+      <p style="font-size:.75rem;color:#475569;text-align:center;">Après paiement, vous recevrez votre <strong style="color:#94a3b8;">code d'accès personnel</strong> par email sous 24h.</p>
     </div>
-    <input type="text" id="code-input" class="auth-input" placeholder="Ex : BOVI-2025-XXXX"
-           style="text-transform:uppercase;letter-spacing:.12em;font-size:1.1rem;text-align:center;font-family:monospace;"
-           onkeydown="if(event.key==='Enter')activateCode()"
-           oninput="this.value=this.value.toUpperCase()">
-    <div id="code-err" class="auth-error" style="display:none;"></div>
-    <button id="btn-activate" class="auth-btn" onclick="activateCode()">Activer mon accès</button>
-    <div style="text-align:center;margin-top:14px;font-size:.78rem;color:#475569;">
-      <span>Connecté en tant que : </span><span id="access-wall-email" style="color:#94a3b8;"></span>
-      <span style="margin:0 8px;">·</span>
-      <a href="#" onclick="logoutUser();return false;" style="color:#64748b;text-decoration:underline;">Changer de compte</a>
+
+    <!-- Étape 2 : Entrer le code -->
+    <div style="border-top:1px solid #334155;padding-top:20px;">
+      <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#475569;margin-bottom:12px;">Étape 2 — Entrer votre code</div>
+      <input type="text" id="code-input" class="auth-input" placeholder="BOVI-2025-XXXX"
+             style="text-transform:uppercase;letter-spacing:.12em;font-size:1rem;text-align:center;font-family:monospace;"
+             onkeydown="if(event.key==='Enter')activateCode()"
+             oninput="this.value=this.value.toUpperCase()">
+      <div id="code-err" class="auth-error" style="display:none;"></div>
+      <button id="btn-activate" class="auth-btn" onclick="activateCode()" style="margin-top:4px;">Activer mon accès</button>
     </div>
+
   </div>
 </div>
 
