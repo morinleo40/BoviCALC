@@ -183,6 +183,9 @@ function updateAuthUI() {
     btn.textContent = '🔑 Connexion';
     btn.classList.remove('hdr-btn-connected');
   }
+  // Bouton promo : visible si connecté + plan free
+  var promoBtn = _$$('btn-promo');
+  if (promoBtn) promoBtn.style.display = (currentUser && userPlan === 'free') ? '' : 'none';
 }
 function requireAuth(feature) {
   if (currentUser) return true;
@@ -287,6 +290,7 @@ async function initAuth() {
       <button onclick="backToHome()" class="hdr-btn">☰ Menu</button>
       <a href="index.html" class="hdr-btn hdr-btn-outline">🏠 Accueil</a>
       <button onclick="showTutorial()" class="hdr-btn hdr-btn-outline" title="Guide de démarrage">? Aide</button>
+      <button id="btn-promo" onclick="openPromoModal()" class="hdr-btn hdr-btn-outline" title="Entrer un code promo" style="display:none;">🎁 Code promo</button>
       <button id="btn-header-auth" class="hdr-btn hdr-btn-auth" onclick="onAuthBtnClick()">🔑 Connexion</button>
     </div>
   </div>
@@ -364,6 +368,7 @@ async function initAuth() {
         <button class="rb-btn rb-btn-ghost" onclick="openSessionsModal()" title="Voir toutes les sessions">📁 Mes sessions</button>
         <button class="rb-btn rb-btn-ghost" onclick="openCompareModal()" title="Comparer deux sessions">⚖️ Comparer</button>
         <button class="rb-btn rb-btn-ghost" data-close>← Menu</button>
+        <button class="rb-btn rb-btn-ghost" onclick="logoutUser()" style="color:var(--danger);border-color:var(--danger);" title="Se déconnecter">🚪 Déconnexion</button>
       </div>
     </div>
 
@@ -1170,6 +1175,29 @@ async function initAuth() {
 
 <!-- ====== TOOLTIP ====== -->
 <div id="tt-popup"></div>
+
+<!-- ====== MODAL CODE PROMO ====== -->
+<div id="promo-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:420px;">
+    <div class="rb-modal-header">
+      <h3>🎁 Code promo — 1 mois Pro gratuit</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('promo-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <p style="font-size:.9rem;color:var(--text-light);margin-bottom:16px;">Entrez votre code pour activer le plan Pro gratuitement pendant 30 jours.</p>
+    <div class="rb-form-group">
+      <label>Code promo</label>
+      <input type="text" id="promo-code-input" class="rb-input" placeholder="Ex : BOVIPRO1"
+             style="text-transform:uppercase;letter-spacing:.1em;font-weight:700;"
+             onkeydown="if(event.key==='Enter')redeemPromo()">
+    </div>
+    <div id="promo-error" style="display:none;color:var(--danger);font-size:.85rem;margin-top:8px;padding:8px 12px;background:#fee2e2;border-radius:6px;"></div>
+    <div id="promo-success" style="display:none;color:#15803d;font-size:.9rem;margin-top:8px;padding:10px 14px;background:#f0fdf4;border-radius:6px;font-weight:600;"></div>
+    <div class="rb-form-actions" style="margin-top:20px;">
+      <button class="rb-btn rb-btn-ghost" onclick="document.getElementById('promo-modal').classList.add('hidden')">Annuler</button>
+      <button class="rb-btn rb-btn-primary" id="promo-submit-btn" onclick="redeemPromo()">Activer le code</button>
+    </div>
+  </div>
+</div>
 
 <!-- ====== TOAST AUTOSAVE ====== -->
 <div id="autosave-toast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;background:#1e293b;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .3s;">
@@ -3738,6 +3766,67 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   function maybeShowTutorial() {
     try { if (!localStorage.getItem(TUTORIAL_KEY)) showTutorial(); } catch(e) {}
+  }
+
+  // =====================================================
+  // CODE PROMO
+  // =====================================================
+  function openPromoModal() {
+    if (!requireAuth('Code promo')) return;
+    const inp = $('promo-code-input');
+    if (inp) inp.value = '';
+    $('promo-error') && ($('promo-error').style.display = 'none');
+    $('promo-success') && ($('promo-success').style.display = 'none');
+    const btn = $('promo-submit-btn');
+    if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
+    $('promo-modal')?.classList.remove('hidden');
+    setTimeout(() => $('promo-code-input')?.focus(), 100);
+  }
+
+  async function redeemPromo() {
+    if (!currentUser) return;
+    const code = ($('promo-code-input')?.value || '').trim().toUpperCase();
+    const errEl = $('promo-error'), okEl = $('promo-success'), btn = $('promo-submit-btn');
+    if (errEl) errEl.style.display = 'none';
+    if (okEl)  okEl.style.display  = 'none';
+    if (!code) { if (errEl) { errEl.textContent = 'Entrez un code.'; errEl.style.display = 'block'; } return; }
+    if (btn) { btn.textContent = 'Vérification…'; btn.disabled = true; }
+    try {
+      const res = await fetch('/.netlify/functions/redeem-promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, userId: currentUser.id }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        if (errEl) { errEl.textContent = data.error || 'Code invalide.'; errEl.style.display = 'block'; }
+        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
+        return;
+      }
+      // Succès
+      userPlan = 'pro';
+      updateAuthUI();
+      if (okEl) {
+        const until = data.until ? new Date(data.until).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '';
+        okEl.innerHTML = `✅ Plan Pro activé jusqu'au ${until} !`;
+        okEl.style.display = 'block';
+      }
+      if (btn) { btn.textContent = '✅ Activé !'; btn.disabled = true; }
+      // Masquer le bouton promo (code utilisé)
+      const promoBtn = $('btn-promo');
+      if (promoBtn) promoBtn.style.display = 'none';
+      // Fermer après 3s
+      setTimeout(() => $('promo-modal')?.classList.add('hidden'), 3000);
+    } catch(e) {
+      if (errEl) { errEl.textContent = 'Erreur réseau. Réessayez.'; errEl.style.display = 'block'; }
+      if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
+    }
+  }
+
+  // Afficher le bouton promo si plan free
+  function updatePromoBtn() {
+    const btn = $('btn-promo');
+    if (btn && currentUser) btn.style.display = userPlan === 'free' ? '' : 'none';
   }
 
   initAuth();
