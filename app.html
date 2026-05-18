@@ -47,6 +47,8 @@ function switchWallTab(tab) {
   if (btn) btn.textContent = tab === 'login' ? 'Se connecter' : 'Créer mon compte';
   var cg = _$$('wall-confirm-group');
   if (cg) cg.classList.toggle('hidden', tab !== 'register');
+  var pg = _$$('wall-prenom-group');
+  if (pg) pg.classList.toggle('hidden', tab !== 'register');
   var fg = _$$('wall-forgot');
   if (fg) fg.classList.toggle('hidden', tab === 'register');
   var err = _$$('wall-error'); if (err) err.style.display = 'none';
@@ -75,7 +77,8 @@ async function submitWall() {
         showWallError('Mot de passe : 6 caractères minimum.');
         if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
       }
-      var r1 = await supa.auth.signUp({ email: email, password: pass });
+      var prenom = ((_$$('wall-prenom') || {}).value || '').trim();
+      var r1 = await supa.auth.signUp({ email: email, password: pass, options: { data: { prenom: prenom } } });
       if (r1.error) {
         showWallError(r1.error.message);
         if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
@@ -173,6 +176,12 @@ async function logoutUser() {
   currentUser = null; userPlan = 'free';
   updateAuthUI(); closeAccountModal(); showAuthWall();
 }
+function togglePwd(id, btn) {
+  var inp = _$$(id); if (!inp) return;
+  var show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+}
 function updateAuthUI() {
   var btn = _$$('btn-header-auth'); if (!btn) return;
   if (currentUser) {
@@ -186,6 +195,41 @@ function updateAuthUI() {
   // Bouton déconnexion : visible uniquement si connecté
   var logoutBtn = _$$('btn-logout');
   if (logoutBtn) logoutBtn.style.display = currentUser ? '' : 'none';
+  // Bandeau de bienvenue
+  var welcome = _$$('home-welcome');
+  if (welcome) {
+    if (currentUser) {
+      welcome.style.display = 'flex';
+      var prenom = (currentUser.user_metadata && currentUser.user_metadata.prenom) || '';
+      var name = prenom || (currentUser.email ? currentUser.email.split('@')[0] : '');
+      var greeting = _$$('home-greeting');
+      if (greeting) {
+        var h = new Date().getHours();
+        var salut = h < 12 ? 'Bonjour' : h < 18 ? 'Bonjour' : 'Bonsoir';
+        greeting.textContent = salut + (name ? ', ' + name.charAt(0).toUpperCase() + name.slice(1) : '') + ' 👋';
+      }
+      var lastEl = _$$('home-last-login');
+      if (lastEl) {
+        var lastSign = currentUser.last_sign_in_at;
+        if (lastSign) {
+          var diff = Date.now() - new Date(lastSign).getTime();
+          var mins = Math.floor(diff/60000), hrs = Math.floor(mins/60), days = Math.floor(hrs/24);
+          var txt = days > 0 ? 'Dernière connexion il y a ' + days + ' jour' + (days>1?'s':'') :
+                    hrs  > 0 ? 'Dernière connexion il y a ' + hrs  + ' heure' + (hrs>1?'s':'') :
+                    mins > 1 ? 'Dernière connexion il y a ' + mins + ' minutes' : 'Connexion en cours';
+          lastEl.textContent = txt;
+        }
+      }
+      var planPill = _$$('home-plan-pill');
+      if (planPill) {
+        planPill.innerHTML = userPlan === 'pro'
+          ? '<span style="background:#15803d;color:#fff;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:700;">⭐ Plan Pro</span>'
+          : '<span style="background:#e2e8f0;color:#475569;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600;">Plan Gratuit</span>';
+      }
+    } else {
+      welcome.style.display = 'none';
+    }
+  }
 }
 function requireAuth(feature) {
   if (currentUser) return true;
@@ -254,12 +298,25 @@ async function initAuth() {
       </div>
       <div class="rb-form-group" style="margin-top:12px;">
         <label>Mot de passe</label>
-        <input type="password" id="wall-pass" class="rb-input" placeholder="••••••••"
-               autocomplete="current-password" onkeydown="if(event.key==='Enter')submitWall()">
+        <div style="position:relative;">
+          <input type="password" id="wall-pass" class="rb-input" placeholder="••••••••"
+                 autocomplete="current-password" onkeydown="if(event.key==='Enter')submitWall()"
+                 style="padding-right:44px;">
+          <button type="button" onclick="togglePwd('wall-pass',this)" tabindex="-1"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.1rem;padding:4px;">👁</button>
+        </div>
+      </div>
+      <div id="wall-prenom-group" class="rb-form-group hidden" style="margin-top:12px;">
+        <label>Prénom</label>
+        <input type="text" id="wall-prenom" class="rb-input" placeholder="Votre prénom" autocomplete="given-name">
       </div>
       <div id="wall-confirm-group" class="rb-form-group hidden" style="margin-top:12px;">
         <label>Confirmer le mot de passe</label>
-        <input type="password" id="wall-pass-confirm" class="rb-input" placeholder="••••••••">
+        <div style="position:relative;">
+          <input type="password" id="wall-pass-confirm" class="rb-input" placeholder="••••••••" style="padding-right:44px;">
+          <button type="button" onclick="togglePwd('wall-pass-confirm',this)" tabindex="-1"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.1rem;padding:4px;">👁</button>
+        </div>
       </div>
 
       <div id="wall-error" style="display:none;color:var(--danger);font-size:.85rem;margin-top:10px;padding:8px 12px;background:#fee2e2;border-radius:6px;"></div>
@@ -298,32 +355,50 @@ async function initAuth() {
 
 <main class="rb-main">
   <!-- Accueil -->
-  <section class="rb-section-grid" id="home-grid">
-    <article class="rb-card" data-section="ration-a-z" data-requires-pro="true">
-      <h2>🐄 Créer ma ration</h2>
-      <p>De A à Z : besoins, ration, analyse et coûts</p>
-      <button class="rb-btn rb-btn-primary">Commencer</button>
+  <section class="rb-section-grid" id="home-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;">
+
+    <article class="rb-card home-card-featured" data-section="ration-a-z" data-requires-pro="true" style="background:linear-gradient(135deg,#14532d,#15803d);color:#fff;border:none;cursor:pointer;">
+      <div style="font-size:2.4rem;margin-bottom:14px;">🐄</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#86efac;margin-bottom:6px;">Plan Pro</div>
+      <h2 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:8px;">Ration de A à Z</h2>
+      <p style="font-size:.88rem;color:#bbf7d0;line-height:1.6;margin-bottom:20px;">Besoins animaux, composition de ration, bilan nutritionnel complet et analyse des coûts.</p>
+      <button class="rb-btn" style="background:#fff;color:#15803d;font-weight:700;border:none;width:100%;">Commencer →</button>
     </article>
 
-    <article class="rb-card" data-section="besoins" data-requires-pro="true">
-      <h2>📊 Calculer mes besoins</h2>
-      <p>Sans faire de ration complète</p>
-      <button class="rb-btn">Ouvrir</button>
+    <article class="rb-card" data-section="ration-seule" style="cursor:pointer;border:2px solid #e2e8f0;transition:border-color .2s,box-shadow .2s;">
+      <div style="font-size:2.4rem;margin-bottom:14px;">🌾</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin-bottom:6px;">Gratuit</div>
+      <h2 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Analyser ma ration</h2>
+      <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:20px;">Calculez les apports UFL, PDI et glucides de vos aliments sans saisir les besoins.</p>
+      <button class="rb-btn" style="width:100%;">Ouvrir →</button>
     </article>
 
-    <article class="rb-card" data-section="ration-seule">
-      <h2>🌾 Analyser ma ration</h2>
-      <p>Apports seuls - sans besoins</p>
-      <button class="rb-btn">Ouvrir</button>
+    <article class="rb-card" data-section="besoins" data-requires-pro="true" style="cursor:pointer;border:2px solid #e2e8f0;transition:border-color .2s,box-shadow .2s;">
+      <div style="font-size:2.4rem;margin-bottom:14px;">📊</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin-bottom:6px;">Plan Pro</div>
+      <h2 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Calculer mes besoins</h2>
+      <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:20px;">Estimez les besoins en UFL et PDI d'un animal selon son type, son poids et sa production.</p>
+      <button class="rb-btn" style="width:100%;">Ouvrir →</button>
     </article>
 
-
-    <article class="rb-card" data-section="bilan-fourrager" data-requires-pro="true">
-      <h2>📦 Bilan fourrager</h2>
-      <p>Stocks vs besoins du troupeau</p>
-      <button class="rb-btn">Ouvrir</button>
+    <article class="rb-card" data-section="bilan-fourrager" data-requires-pro="true" style="cursor:pointer;border:2px solid #e2e8f0;transition:border-color .2s,box-shadow .2s;">
+      <div style="font-size:2.4rem;margin-bottom:14px;">📦</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin-bottom:6px;">Plan Pro</div>
+      <h2 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Bilan fourrager</h2>
+      <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:20px;">Comparez vos stocks fourragers aux besoins de votre troupeau sur la période hivernale.</p>
+      <button class="rb-btn" style="width:100%;">Ouvrir →</button>
     </article>
+
   </section>
+
+  <!-- Bandeau de bienvenue -->
+  <div id="home-welcome" style="display:none;margin-bottom:24px;padding:20px 24px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div id="home-greeting" style="font-size:1.25rem;font-weight:800;color:#14532d;"></div>
+      <div id="home-last-login" style="font-size:.82rem;color:#4b7c5f;margin-top:3px;"></div>
+    </div>
+    <div id="home-plan-pill" style=""></div>
+  </div>
 
   <!-- Dashboard dernières sessions -->
   <div id="home-dashboard" style="margin-top:32px;display:none;">
@@ -391,8 +466,8 @@ async function initAuth() {
       </div>
 
       <form id="form-besoins-tab">
-        <div class="rb-form-grid">
-          <div class="rb-form-group">
+        <div class="rb-form-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="rb-form-group" style="grid-column:1/-1;">
             <label>Type d'animal <span class="required">*</span></label>
             <select id="type-animal" required>
               <option value="">Sélectionner</option>
@@ -442,7 +517,15 @@ async function initAuth() {
             <small class="form-hint">Poids approximatif de l'animal</small>
           </div>
 
-          <div id="prod-group" class="rb-form-group">
+          <div class="rb-form-group">
+            <label>Activité <span class="tt-q" data-tt="paturage">?</span></label>
+            <select id="activite">
+              <option value="stabulation">Stabulation</option>
+              <option value="paturage">Pâturage</option>
+            </select>
+          </div>
+
+          <div id="prod-group" class="rb-form-group" style="grid-column:1/-1;">
             <label>Production laitière (kg/j)</label>
             <input type="number" id="production-lait" min="0" step="0.5" placeholder="Ex: 30">
           </div>
@@ -455,14 +538,6 @@ async function initAuth() {
           <div id="age-group" class="rb-form-group" style="display:none;">
             <label>Âge (mois)</label>
             <input type="number" id="age-mois" min="0" max="60" step="1" placeholder="Ex: 6">
-          </div>
-
-          <div class="rb-form-group">
-            <label>Activité <span class="tt-q" data-tt="paturage">?</span></label>
-            <select id="activite">
-              <option value="stabulation">Stabulation</option>
-              <option value="paturage">Pâturage</option>
-            </select>
           </div>
 
           <div id="tb-group" class="rb-form-group">
@@ -511,10 +586,16 @@ async function initAuth() {
 
       <!-- Barre d'outils compacte -->
       <div class="ration-toolbar">
+        <button class="toolbar-btn" onclick="rtToggle('rt-auto')">🤖 Ration auto</button>
+        <button class="toolbar-btn" onclick="openFeedTable()">📖 Consulter les aliments</button>
         <button class="toolbar-btn" onclick="rtToggle('rt-profiles')">📋 Profils</button>
-        <button class="toolbar-btn" onclick="rtToggle('rt-custom')">⚙️ Aliments perso</button>
-        <button class="toolbar-btn" onclick="rtToggle('rt-auto')">🤖 Auto</button>
-        <button class="toolbar-btn" onclick="rtToggle('rt-quick')">✏️ Saisie rapide</button>
+        <button class="toolbar-btn toolbar-btn-more" onclick="rtToggle('rt-more')">⋯ Plus</button>
+      </div>
+      <div id="rt-more" class="rt-panel" style="display:none;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="rb-btn rb-btn-ghost" onclick="rtToggle('rt-custom');rtToggle('rt-more')">⚙️ Aliments personnalisés</button>
+          <button class="rb-btn rb-btn-ghost" onclick="rtToggle('rt-quick');rtToggle('rt-more')">✏️ Saisie rapide</button>
+        </div>
       </div>
 
       <!-- Profils de ration (masqué par défaut) -->
@@ -602,11 +683,10 @@ async function initAuth() {
         <button type="button" class="rb-btn rb-btn-ghost" onclick="goToStep(2)">← Étape 2 : Ration</button>
       </div>
 
-      <div class="rb-panel panel-minerals">
-        <h4>⚗️ Données complémentaires (optionnel)</h4>
-        <p style="font-size:.85rem;color:var(--text-light);margin-bottom:16px;">Ces données enrichissent l'analyse : minéraux pour la BACA, acides aminés pour les vaches hautes productrices.</p>
-
-        <details class="rb-details" open>
+      <details class="rb-details" style="margin-bottom:12px;">
+        <summary style="font-size:.9rem;font-weight:600;color:var(--text-muted);">⚗️ Données complémentaires — Minéraux &amp; acides aminés (optionnel)</summary>
+        <div class="rb-panel panel-minerals" style="margin-top:10px;">
+        <details class="rb-details" style="margin-bottom:0;">
           <summary>Minéraux de la ration (g/kg MS)</summary>
           <div style="padding:16px;">
             <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;">BACA = (Na×43.5 + K×25.6 + Ca×49.9 + Mg×82.2) − (Cl×28.2 + S×62.4). Plage optimale : −100 à +100 mEq/kg MS.</p>
@@ -631,14 +711,14 @@ async function initAuth() {
             </div>
           </div>
         </details>
-      </div>
+        </div>
+      </details>
 
       <div class="wizard-actions">
         <button type="button" class="rb-btn rb-btn-ghost" onclick="goToStep(2)">← Étape 2 : Ration</button>
         <button type="button" id="btn-calc-bilan" class="rb-btn rb-btn-primary">📊 Calculer le bilan</button>
         <button type="button" id="btn-optimize" class="rb-btn hidden">🔧 Suggestions d'ajustements</button>
-        <button type="button" id="btn-export-pdf" class="rb-btn" onclick="exportPDF()">📄 Imprimer / PDF</button>
-        <button type="button" id="btn-goto-costs" class="rb-btn rb-btn-secondary">💰 Coûts →</button>
+        <button type="button" id="btn-export-pdf" class="rb-btn" onclick="exportPDF()">📄 PDF</button>
       </div>
 
       <div id="resultat-bilan" class="rb-panel hidden result-panel">
@@ -649,6 +729,10 @@ async function initAuth() {
       <div id="bilan-score" class="hidden" style="margin-top:24px;"></div>
       <div id="bilan-indicateurs" class="hidden" style="margin-top:24px;"></div>
       <div id="bilan-optimizer" class="hidden" style="margin-top:16px;"></div>
+
+      <div id="bilan-costs-btn" class="hidden" style="margin-top:20px;text-align:right;">
+        <button type="button" class="rb-btn rb-btn-secondary" onclick="goToStep(4)">💰 Analyser les coûts →</button>
+      </div>
 
     </div>
 
@@ -1203,6 +1287,46 @@ async function initAuth() {
   💾 Sauvegardé automatiquement
 </div>
 
+<!-- ====== MODAL BASE ALIMENTS ====== -->
+<div id="feed-table-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:900px;width:96vw;">
+    <div class="rb-modal-header">
+      <h3>📖 Base d'aliments</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('feed-table-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="feed-table-search" class="rb-input" placeholder="🔍 Rechercher un aliment…" style="flex:1;min-width:200px;" oninput="renderFeedTable()">
+      <select id="feed-table-cat" class="rb-select" style="min-width:160px;" onchange="renderFeedTable()">
+        <option value="">Toutes catégories</option>
+        <option value="fourrage">Fourrages</option>
+        <option value="cereal">Céréales</option>
+        <option value="concentre">Concentrés / Tourteaux</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+      <table class="rb-table" id="feed-table-body" style="font-size:.82rem;">
+        <thead style="position:sticky;top:0;background:#fff;z-index:2;">
+          <tr>
+            <th>Aliment</th>
+            <th style="text-align:right;">MS %</th>
+            <th style="text-align:right;color:#f97316;">UFL</th>
+            <th style="text-align:right;color:#2563eb;">PDI g</th>
+            <th style="text-align:right;">Ca</th>
+            <th style="text-align:right;">P</th>
+            <th style="text-align:right;">Mg</th>
+            <th style="text-align:right;color:#15803d;">AL</th>
+            <th style="text-align:right;color:#ea580c;">AR</th>
+            <th style="text-align:right;color:#2563eb;">SS</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="feed-table-rows"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:.75rem;color:#94a3b8;">UFL/PDI par kg MS · Ca/P/Mg en g/kg MS · AL=Amidon lent · AR=Amidon rapide · SS=Sucres solubles (g/kg MS)</div>
+  </div>
+</div>
+
 <!-- ====== MODAL TUTORIEL ====== -->
 <div id="tutorial-modal" class="rb-modal hidden">
   <div class="rb-modal-card" style="max-width:560px;">
@@ -1719,11 +1843,11 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
         </div>
         <div class="rb-metric">
           <div class="rb-metric-head"><div class="rb-metric-title">Énergie apportée</div></div>
-          <div class="result-value">${a.totalUFL.toFixed(2)}<span class="result-unit">UFL/j</span></div>
+          <div class="result-value" style="color:#f97316;">${a.totalUFL.toFixed(2)}<span class="result-unit">UFL/j</span></div>
         </div>
         <div class="rb-metric">
           <div class="rb-metric-head"><div class="rb-metric-title">PDI apportés</div></div>
-          <div class="result-value">${a.totalPDI.toFixed(0)}<span class="result-unit">g/j</span></div>
+          <div class="result-value" style="color:#2563eb;">${a.totalPDI.toFixed(0)}<span class="result-unit">g/j</span></div>
         </div>
         <div class="rb-metric">
           <div class="rb-metric-head"><div class="rb-metric-title">Rapport PDI/UFL</div></div>
@@ -1858,16 +1982,17 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       <div class="rb-panel" style="margin-top:16px;">
         <h4>Composition de la ration</h4>
         <table class="rb-table">
-          <thead><tr><th>Aliment</th><th>kg MS</th><th>${eu}</th><th>PDI (g)</th></tr></thead>
+          <thead><tr><th>Aliment</th><th>kg MS</th><th style="color:#f97316;">${eu}</th><th style="color:#2563eb;">PDI (g)</th></tr></thead>
           <tbody>
-            ${a.items.map(i=>`<tr><td>${i.nom}</td><td>${i.qty.toFixed(1)}</td><td>${i.ufl.toFixed(3)}</td><td>${i.pdi.toFixed(0)}</td></tr>`).join('')}
-            <tr style="font-weight:700;background:var(--green-50);"><td>TOTAL</td><td>${a.totalMS.toFixed(1)}</td><td>${a.totalUFL.toFixed(2)}</td><td>${a.totalPDI.toFixed(0)}</td></tr>
+            ${a.items.map(i=>`<tr><td>${i.nom}</td><td>${i.qty.toFixed(1)}</td><td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
+            <tr style="font-weight:700;background:var(--green-50);"><td>TOTAL</td><td>${a.totalMS.toFixed(1)}</td><td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td></tr>
           </tbody>
         </table>
       </div>
       ${renderGlucides(a)}`;
     $('resultat-bilan')?.classList.remove('hidden');
     $('btn-optimize')?.classList.remove('hidden');
+    $('bilan-costs-btn')?.classList.remove('hidden');
     renderQualityScore(a, b);
     renderIndicateurs(a, b);
   }
@@ -1886,7 +2011,12 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   function toggleInd(id) {
     const card = document.getElementById('ind-' + id);
-    if (card) card.classList.toggle('ind-open');
+    if (!card) return;
+    const isOpen = card.classList.contains('ind-open');
+    // Ferme tous les autres
+    document.querySelectorAll('.rb-indicator').forEach(c => c.classList.remove('ind-open'));
+    // Ouvre celui-ci s'il était fermé
+    if (!isOpen) card.classList.add('ind-open');
   }
 
   function renderIndicateurs(a, b) {
@@ -2736,8 +2866,46 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
        +'<div class="rp-box"><div class="rp-box-title">MS/VL/j</div><div style="font-size:1.1rem;font-weight:700;">'+(document.getElementById('cout-ms-vl')?.textContent||'—')+'</div></div>'
        +'</div></div>';
     }
+    // 7 Suggestions d'ajustements
+    const pdfSuggs = getPdfSuggestions(lastA, lastB);
+    if (pdfSuggs.length) {
+      h += '<div class="rp-section"><div class="rp-section-title">7 — Suggestions d\'ajustements</div>';
+      pdfSuggs.forEach(s => {
+        const col = s.severity==='bad'?'#dc2626':s.severity==='warn'?'#d97706':'#16a34a';
+        const bg  = s.severity==='bad'?'#fef2f2':s.severity==='warn'?'#fffbeb':'#f0fdf4';
+        h += '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-radius:8px;border-left:4px solid '+col+';background:'+bg+';margin-bottom:8px;">'
+          + '<span style="font-size:1.2rem;flex-shrink:0;">'+s.icon+'</span>'
+          + '<div><div style="font-weight:700;font-size:.88rem;color:'+col+';">['+s.tag+'] '+s.title+' <span style="color:#0369a1;">'+s.qty+'</span></div>'
+          + '<div style="font-size:.8rem;color:#475569;margin-top:3px;">'+s.consequence+'</div></div></div>';
+      });
+      h += '</div>';
+    } else {
+      h += '<div class="rp-section"><div class="rp-section-title">7 — Suggestions d\'ajustements</div>'
+        + '<div style="padding:12px 16px;background:#f0fdf4;border-radius:8px;border-left:4px solid #16a34a;font-size:.9rem;color:#15803d;font-weight:600;">✅ Ration bien équilibrée — aucun ajustement nécessaire</div></div>';
+    }
+
     h+='</div><div class="rp-footer"><span>BoviCalc — Outil de rationnement bovin</span><span>'+date+'</span></div>';
     return h;
+  }
+
+  // Génère les suggestions pour le PDF (version simplifiée sans DOM)
+  function getPdfSuggestions(a, b) {
+    if (!a || !b) return [];
+    const suggs = [];
+    const rUFL = b.bUFL>0 ? a.totalUFL/b.bUFL : 1;
+    const rPDI = b.bPDI>0 ? a.totalPDI/b.bPDI : 1;
+    const ppu  = a.totalUFL>0 ? a.totalPDI/a.totalUFL : 0;
+    const ms   = a.totalMS || 1;
+    const arKg = (a.totalAR||0)/ms, ssKg = (a.totalSS||0)/ms;
+    const ferment = arKg + ssKg;
+    if (rUFL < 0.90) suggs.push({icon:'⚡',tag:'Énergie',severity:'bad',title:'Déficit énergétique',qty:((b.bUFL-a.totalUFL).toFixed(2)+' UFL manquants'),consequence:'Un déficit énergétique entraîne une perte de poids, une chute de production et une mobilisation des réserves corporelles.'});
+    if (rUFL > 1.15) suggs.push({icon:'✂️',tag:'Énergie',severity:'warn',title:'Excès énergétique',qty:((a.totalUFL-b.bUFL).toFixed(2)+' UFL en excès'),consequence:'Un excès énergétique favorise l\'engraissement, le risque de cétose et augmente le coût de la ration.'});
+    if (rPDI < 0.90) suggs.push({icon:'🧬',tag:'Protéines',severity:'bad',title:'Déficit en PDI',qty:((b.bPDI-a.totalPDI).toFixed(0)+' g PDI manquants'),consequence:'Un déficit en PDI réduit la production laitière, dégrade la fertilité et affaiblit l\'immunité.'});
+    if (rPDI > 1.20) suggs.push({icon:'✂️',tag:'Protéines',severity:'warn',title:'Excès protéique',qty:((a.totalPDI-b.bPDI).toFixed(0)+' g PDI en excès'),consequence:'Un excès protéique est coûteux et génère un surplus d\'azote (urée lait élevée, charge hépatique).'});
+    if (ppu < 82 && rUFL >= 0.88) suggs.push({icon:'⚖️',tag:'Équilibre',severity:'warn',title:'PDI/UFL trop bas',qty:(ppu.toFixed(0)+' g/UFL (cible 90–105)'),consequence:'Un ratio PDI/UFL insuffisant limite la synthèse microbienne et réduit l\'efficacité de la ration.'});
+    if (b.ingestionCapacite>0 && a.totalMS>b.ingestionCapacite*1.08) suggs.push({icon:'🫁',tag:'Ingestion',severity:'bad',title:'Surcharge d\'ingestion',qty:(a.totalMS.toFixed(1)+' kg MS / max '+b.ingestionCapacite.toFixed(1)+' kg MS'),consequence:'Une ration au-dessus de la capacité d\'ingestion entraîne des refus et un risque d\'acidose.'});
+    if (ferment > 200) suggs.push({icon:'🔥',tag:'Acidose',severity:'bad',title:'Glucides fermentescibles élevés',qty:(ferment.toFixed(0)+' g/kg MS (seuil 200 g/kg MS)'),consequence:'Risque d\'acidose subclinique : chute du TB, fourbures, baisse de production.'});
+    return suggs;
   }
 
   function buildRapportRationSeule(){
@@ -3750,6 +3918,51 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if (tutorialStep >= TUTORIAL_STEPS.length) { closeTutorial(); return; }
     if (tutorialStep < 0) tutorialStep = 0;
     renderTutorialStep();
+  }
+
+  // =====================================================
+  // TABLE DES ALIMENTS
+  // =====================================================
+  function openFeedTable() {
+    $('feed-table-search') && ($('feed-table-search').value = '');
+    $('feed-table-cat') && ($('feed-table-cat').value = '');
+    renderFeedTable();
+    $('feed-table-modal')?.classList.remove('hidden');
+  }
+
+  function renderFeedTable() {
+    const q   = ($('feed-table-search')?.value || '').toLowerCase();
+    const cat = $('feed-table-cat')?.value || '';
+    const db  = [...alimentsDb, ...customFoodsDb];
+    const filtered = db.filter(f => {
+      if (q && !f.nom.toLowerCase().includes(q)) return false;
+      if (cat && getFeedCategory(f.nom) !== cat) return false;
+      return true;
+    });
+    const tbody = $('feed-table-rows');
+    if (!tbody) return;
+    tbody.innerHTML = filtered.map(f => `
+      <tr>
+        <td style="font-weight:600;">${f.nom}</td>
+        <td style="text-align:right;">${f.ms?.toFixed(1) || '—'}</td>
+        <td style="text-align:right;color:#f97316;font-weight:700;">${f.uflPerKgMS?.toFixed(3) || '—'}</td>
+        <td style="text-align:right;color:#2563eb;font-weight:700;">${f.pdiPerKgMS?.toFixed(0) || '—'}</td>
+        <td style="text-align:right;">${f.ca_gkgms?.toFixed(1) || '—'}</td>
+        <td style="text-align:right;">${f.p_gkgms?.toFixed(1)  || '—'}</td>
+        <td style="text-align:right;">${f.mg_gkgms?.toFixed(1) || '—'}</td>
+        <td style="text-align:right;color:#15803d;">${f.al_gkgms > 0 ? f.al_gkgms : '—'}</td>
+        <td style="text-align:right;color:#ea580c;">${f.ar_gkgms > 0 ? f.ar_gkgms : '—'}</td>
+        <td style="text-align:right;color:#2563eb;">${f.ss_gkgms > 0 ? f.ss_gkgms : '—'}</td>
+        <td><button class="rb-btn" style="padding:4px 10px;font-size:.75rem;" onclick="addFeedToRation('${f.nom.replace(/'/g,"\\'")}')">+ Ajouter</button></td>
+      </tr>`).join('');
+  }
+
+  function addFeedToRation(nom) {
+    addLine('ration-lines', 'aliments-list');
+    const rows = document.querySelectorAll('#ration-lines .rb-ration-row');
+    const last = rows[rows.length - 1];
+    if (last) last.querySelectorAll('input')[0].value = nom;
+    $('feed-table-modal')?.classList.add('hidden');
   }
 
   function showTutorial() {

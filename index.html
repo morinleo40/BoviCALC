@@ -3,117 +3,265 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BoviCalc - Rationnement bovin intelligent</title>
+  <title>BoviCalc — Rationnement bovin intelligent</title>
   <link rel="stylesheet" href="./style.css">
   <link rel="icon" type="image/png" href="./Logo Bovicalc.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
-  /* ── Landing-only styles ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1e293b; background: #fff; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
 
-  /* NAV */
+  /* ── NAV ── */
   .lp-nav {
     position: sticky; top: 0; z-index: 100;
-    background: rgba(255,255,255,.92);
-    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,.95);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid #e2e8f0;
-    padding: 0 24px;
+    padding: 0 32px;
     display: flex; align-items: center; justify-content: space-between;
-    height: 64px;
+    height: 68px;
   }
   .lp-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-  .lp-nav-logo img { height: 36px; }
-  .lp-nav-logo span { font-size: 1.2rem; font-weight: 800; color: #15803d; }
-  .lp-nav-links { display: flex; align-items: center; gap: 4px; }
+  .lp-nav-logo img { height: 38px; }
+  .lp-nav-logo span { font-size: 1.25rem; font-weight: 900; color: #15803d; letter-spacing: -.02em; }
+  .lp-nav-links { display: flex; align-items: center; gap: 2px; }
   .lp-nav-link {
-    padding: 8px 14px; border-radius: 8px; text-decoration: none;
-    font-size: .9rem; font-weight: 500; color: #475569;
-    transition: background .15s, color .15s; cursor: pointer; border: none; background: none;
+    padding: 8px 15px; border-radius: 8px; text-decoration: none;
+    font-size: .88rem; font-weight: 500; color: #475569;
+    transition: all .15s; cursor: pointer; border: none; background: none;
   }
   .lp-nav-link:hover { background: #f1f5f9; color: #15803d; }
   .lp-nav-link.active { color: #15803d; font-weight: 700; }
   .lp-nav-cta {
-    padding: 9px 20px; border-radius: 8px;
+    padding: 10px 22px; border-radius: 9px;
     background: #15803d; color: #fff; font-weight: 700; font-size: .9rem;
     text-decoration: none; border: none; cursor: pointer;
-    transition: background .15s; box-shadow: 0 2px 8px rgba(21,128,61,.3);
+    transition: all .2s; box-shadow: 0 2px 10px rgba(21,128,61,.3);
   }
-  .lp-nav-cta:hover { background: #166534; }
-  @media (max-width: 640px) {
-    .lp-nav-links { display: none; }
-  }
+  .lp-nav-cta:hover { background: #166534; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(21,128,61,.4); }
+  @media (max-width: 640px) { .lp-nav-links { display: none; } }
 
-  /* SECTIONS */
-  .lp-section { padding: 80px 24px; }
-  .lp-section.alt { background: #f8fafc; }
-  .lp-container { max-width: 1100px; margin: 0 auto; }
-  .lp-section-header { text-align: center; margin-bottom: 56px; }
-  .lp-tag {
-    display: inline-block; background: #dcfce7; color: #15803d;
-    padding: 4px 14px; border-radius: 20px; font-size: .8rem; font-weight: 700;
-    letter-spacing: .04em; text-transform: uppercase; margin-bottom: 14px;
-  }
-  .lp-section-header h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: #0f172a; line-height: 1.25; }
-  .lp-section-header p { margin-top: 14px; color: #64748b; font-size: 1.05rem; max-width: 640px; margin-left: auto; margin-right: auto; line-height: 1.7; }
-  .text-green { color: #15803d; }
-
-  /* HERO */
+  /* ── HERO ── */
   .lp-hero {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
-    padding: 96px 24px 80px;
-    text-align: center;
+    background: linear-gradient(150deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
+    padding: 88px 32px 72px;
   }
+  .lp-hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  @media (max-width: 768px) { .lp-hero-inner { grid-template-columns: 1fr; text-align: center; } .lp-hero-visual { display: none; } }
   .lp-hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
     background: #fff; border: 1px solid #bbf7d0; border-radius: 20px;
-    padding: 6px 16px; font-size: .85rem; font-weight: 600; color: #15803d;
-    margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    padding: 5px 14px; font-size: .82rem; font-weight: 700; color: #15803d;
+    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
   }
   .lp-hero h1 {
-    font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 900; color: #0f172a;
-    line-height: 1.1; margin-bottom: 20px;
+    font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 900; color: #0f172a;
+    line-height: 1.1; margin-bottom: 18px; letter-spacing: -.03em;
   }
+  .lp-hero h1 em { font-style: normal; color: #15803d; }
   .lp-hero p {
-    font-size: clamp(1rem, 2vw, 1.2rem); color: #475569; max-width: 560px;
-    margin: 0 auto 36px; line-height: 1.7;
+    font-size: 1.08rem; color: #475569; margin-bottom: 32px; line-height: 1.75;
   }
-  .lp-hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
-  .btn-hero-primary {
-    padding: 14px 32px; background: #15803d; color: #fff; border: none;
-    border-radius: 10px; font-size: 1.05rem; font-weight: 700; cursor: pointer;
+  .lp-hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+  @media (max-width: 768px) { .lp-hero-buttons { justify-content: center; } }
+  .btn-primary {
+    padding: 13px 28px; background: #15803d; color: #fff; border: none;
+    border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer;
     box-shadow: 0 4px 16px rgba(21,128,61,.35); transition: all .2s;
     text-decoration: none; display: inline-block;
   }
-  .btn-hero-primary:hover { background: #166534; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(21,128,61,.4); }
-  .btn-hero-secondary {
-    padding: 14px 32px; background: #fff; color: #15803d;
-    border: 2px solid #15803d; border-radius: 10px; font-size: 1.05rem;
+  .btn-primary:hover { background: #166534; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(21,128,61,.4); }
+  .btn-outline {
+    padding: 13px 28px; background: #fff; color: #15803d;
+    border: 2px solid #15803d; border-radius: 10px; font-size: 1rem;
     font-weight: 700; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-block;
   }
-  .btn-hero-secondary:hover { background: #f0fdf4; }
-  .lp-hero-stats { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
-  .lp-stat { text-align: center; }
-  .lp-stat-val { display: block; font-size: 1.8rem; font-weight: 900; color: #15803d; }
-  .lp-stat-lbl { font-size: .85rem; color: #64748b; }
+  .btn-outline:hover { background: #f0fdf4; }
 
-  /* FEATURES GRID */
-  .lp-features-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px;
+  /* ── APP MOCKUP (visuel hero) ── */
+  .lp-hero-visual { position: relative; }
+  .app-mockup {
+    background: #fff; border-radius: 18px; box-shadow: 0 24px 64px rgba(0,0,0,.14), 0 4px 16px rgba(0,0,0,.08);
+    overflow: hidden; border: 1px solid #e2e8f0;
   }
-  .lp-feature-card {
+  .app-mockup-bar {
+    background: #f8fafc; padding: 10px 16px; border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .mockup-dot.red { background: #f87171; }
+  .mockup-dot.yellow { background: #fbbf24; }
+  .mockup-dot.green { background: #4ade80; }
+  .mockup-bar-title { margin-left: 10px; font-size: .78rem; font-weight: 600; color: #94a3b8; }
+  .app-mockup-body { padding: 20px; }
+  .mockup-grade {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+    background: #f0fdf4; border-radius: 12px; padding: 14px 18px;
+  }
+  .mockup-grade-letter {
+    font-size: 2.8rem; font-weight: 900; color: #15803d;
+    line-height: 1; font-family: 'Georgia', serif;
+  }
+  .mockup-grade-info { flex: 1; }
+  .mockup-grade-title { font-size: .8rem; font-weight: 700; color: #15803d; }
+  .mockup-grade-sub { font-size: .72rem; color: #64748b; margin-top: 2px; }
+  .mockup-score-bar { height: 6px; background: #dcfce7; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .mockup-score-bar span { display: block; width: 87%; height: 100%; background: #15803d; border-radius: 3px; }
+  .mockup-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .mockup-metric {
+    background: #f8fafc; border-radius: 10px; padding: 10px 12px;
+    border-left: 3px solid;
+  }
+  .mockup-metric.green { border-color: #15803d; }
+  .mockup-metric.orange { border-color: #f97316; }
+  .mockup-metric.blue { border-color: #3b82f6; }
+  .mockup-metric.amber { border-color: #f59e0b; }
+  .mockup-metric-label { font-size: .68rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .mockup-metric-val { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-top: 2px; }
+  .mockup-metric-sub { font-size: .65rem; color: #94a3b8; }
+  .mockup-feeds { }
+  .mockup-feed-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; border-radius: 7px; font-size: .75rem;
+    background: #f8fafc; margin-bottom: 4px;
+  }
+  .mockup-feed-name { font-weight: 600; color: #334155; }
+  .mockup-feed-vals { display: flex; gap: 10px; }
+  .mockup-feed-ufl { color: #f97316; font-weight: 700; font-size: .7rem; }
+  .mockup-feed-pdi { color: #3b82f6; font-weight: 700; font-size: .7rem; }
+
+  /* ── SECTIONS communes ── */
+  .lp-section { padding: 88px 32px; }
+  .lp-section.alt { background: #f8fafc; }
+  .lp-container { max-width: 1100px; margin: 0 auto; }
+  .lp-section-header { text-align: center; margin-bottom: 60px; }
+  .lp-tag {
+    display: inline-block; background: #dcfce7; color: #15803d;
+    padding: 4px 14px; border-radius: 20px; font-size: .78rem; font-weight: 800;
+    letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px;
+  }
+  .lp-section-header h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 900; color: #0f172a; line-height: 1.2; letter-spacing: -.02em; }
+  .lp-section-header p { margin-top: 16px; color: #64748b; font-size: 1.05rem; max-width: 620px; margin-left: auto; margin-right: auto; line-height: 1.75; }
+  .text-green { color: #15803d; }
+
+  /* ── ABOUT (storytelling) ── */
+  .lp-story {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  @media (max-width: 768px) { .lp-story { grid-template-columns: 1fr; } }
+  .lp-story-text h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 900; color: #0f172a; line-height: 1.25; margin-bottom: 20px; letter-spacing: -.02em; }
+  .lp-story-text p { color: #475569; line-height: 1.8; margin-bottom: 16px; font-size: .98rem; }
+  .lp-story-text p:last-child { margin-bottom: 0; }
+  .lp-story-text strong { color: #15803d; }
+  .lp-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .lp-pill {
+    padding: 6px 14px; border-radius: 20px; font-size: .82rem; font-weight: 600;
+    background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;
+  }
+  .lp-story-cards { display: flex; flex-direction: column; gap: 14px; }
+  .lp-story-card {
     background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
-    padding: 28px 24px; text-align: center;
-    transition: box-shadow .2s, transform .2s;
+    padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: box-shadow .2s;
   }
-  .lp-feature-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.09); transform: translateY(-2px); }
-  .lp-feature-icon { font-size: 2.2rem; margin-bottom: 14px; }
-  .lp-feature-card h3 { font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-  .lp-feature-card p { font-size: .9rem; color: #64748b; line-height: 1.6; }
+  .lp-story-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+  .lp-story-card-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .lp-story-card h3 { font-size: .95rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .lp-story-card p { font-size: .85rem; color: #64748b; line-height: 1.6; }
 
-  /* PRICING */
+  /* ── COMMENT ÇA MARCHE ── */
+  .lp-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  @media (max-width: 768px) { .lp-steps { grid-template-columns: 1fr; } }
+  .lp-step { position: relative; text-align: center; }
+  .lp-step-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, #15803d, #22c55e);
+    color: #fff; font-size: 1.4rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; box-shadow: 0 4px 14px rgba(21,128,61,.35);
+  }
+  .lp-step-connector {
+    position: absolute; top: 28px; left: calc(50% + 28px);
+    width: calc(100% - 56px); height: 2px;
+    background: linear-gradient(90deg, #bbf7d0, #dcfce7);
+  }
+  .lp-step:last-child .lp-step-connector { display: none; }
+  .lp-step h3 { font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; }
+  .lp-step p { font-size: .875rem; color: #64748b; line-height: 1.7; }
+  .lp-step-card {
+    margin-top: 20px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 14px 16px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+
+  /* ── FONCTIONNALITÉS (numéros) ── */
+  .lp-feature-list { display: flex; flex-direction: column; gap: 0; }
+  .lp-feature-item {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 28px; align-items: start;
+    padding: 32px 0; border-bottom: 1px solid #f1f5f9;
+  }
+  .lp-feature-item:last-child { border-bottom: none; }
+  .lp-feature-num {
+    font-size: 3.2rem; font-weight: 900; color: #15803d;
+    line-height: 1; text-align: center; opacity: .18;
+    font-variant-numeric: tabular-nums;
+    transition: opacity .2s;
+  }
+  .lp-feature-item:hover .lp-feature-num { opacity: 1; }
+  .lp-feature-body h3 { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+  .lp-feature-body p { font-size: .9rem; color: #64748b; line-height: 1.75; }
+  .lp-feature-body .lp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .lp-feature-body .lp-tag-small {
+    padding: 3px 10px; background: #f0fdf4; color: #15803d;
+    border-radius: 12px; font-size: .75rem; font-weight: 600;
+    border: 1px solid #bbf7d0;
+  }
+  .lp-feature-body .lp-tag-small.blue { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+  .lp-feature-body .lp-tag-small.orange { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+
+  /* ── BILAN ABCD ── */
+  .lp-abcd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 48px; }
+  @media (max-width: 768px) { .lp-abcd-grid { grid-template-columns: repeat(2,1fr); } }
+  .lp-abcd-card {
+    border-radius: 16px; padding: 24px 20px; text-align: center;
+    border: 2px solid; transition: transform .2s;
+  }
+  .lp-abcd-card:hover { transform: translateY(-4px); }
+  .lp-abcd-card.a { background: #f0fdf4; border-color: #16a34a; }
+  .lp-abcd-card.b { background: #f0fdf4; border-color: #4ade80; }
+  .lp-abcd-card.c { background: #fffbeb; border-color: #f59e0b; }
+  .lp-abcd-card.d { background: #fef2f2; border-color: #f87171; }
+  .lp-abcd-letter { font-size: 3.5rem; font-weight: 900; line-height: 1; font-family: 'Georgia', serif; margin-bottom: 8px; }
+  .lp-abcd-card.a .lp-abcd-letter { color: #15803d; }
+  .lp-abcd-card.b .lp-abcd-letter { color: #16a34a; }
+  .lp-abcd-card.c .lp-abcd-letter { color: #d97706; }
+  .lp-abcd-card.d .lp-abcd-letter { color: #dc2626; }
+  .lp-abcd-range { font-size: .82rem; font-weight: 700; color: #64748b; margin-bottom: 8px; }
+  .lp-abcd-desc { font-size: .82rem; color: #475569; line-height: 1.55; }
+
+  .lp-abcd-mockup {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.1); overflow: hidden; max-width: 680px; margin: 0 auto;
+  }
+  .lp-abcd-mockup-header {
+    background: #f8fafc; padding: 14px 20px; border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .lp-abcd-mockup-title { font-size: .85rem; font-weight: 700; color: #334155; }
+  .lp-abcd-mockup-body { padding: 24px; }
+  .abcd-mockup-row {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+  }
+  .abcd-mockup-label { font-size: .8rem; font-weight: 600; color: #475569; width: 80px; flex-shrink: 0; }
+  .abcd-mockup-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 4px; height: 10px; overflow: hidden; }
+  .abcd-mockup-bar { height: 100%; border-radius: 4px; }
+  .abcd-mockup-pct { font-size: .78rem; font-weight: 700; width: 36px; text-align: right; }
+
+  /* ── TARIFS ── */
   .lp-pricing-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 28px; align-items: stretch; max-width: 900px; margin: 0 auto;
@@ -121,28 +269,23 @@
   .lp-plan {
     background: #fff; border: 2px solid #e2e8f0; border-radius: 18px;
     padding: 32px 28px; display: flex; flex-direction: column;
-    transition: box-shadow .2s;
+    transition: box-shadow .2s; position: relative;
   }
   .lp-plan:hover { box-shadow: 0 12px 32px rgba(0,0,0,.1); }
-  .lp-plan.highlighted {
-    border-color: #15803d; box-shadow: 0 8px 32px rgba(21,128,61,.18);
-    position: relative; transform: scale(1.02);
-  }
+  .lp-plan.highlighted { border-color: #15803d; box-shadow: 0 8px 32px rgba(21,128,61,.18); transform: scale(1.02); }
   .lp-plan-badge {
     position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
     background: #15803d; color: #fff; font-size: .78rem; font-weight: 700;
-    padding: 4px 16px; border-radius: 20px; white-space: nowrap;
-    letter-spacing: .04em;
+    padding: 4px 16px; border-radius: 20px; white-space: nowrap; letter-spacing: .04em;
   }
   .lp-plan-name { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
   .lp-plan-desc { font-size: .88rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
   .lp-plan-price { margin-bottom: 28px; }
   .lp-plan-amount { font-size: 2.8rem; font-weight: 900; color: #0f172a; line-height: 1; }
-  .lp-plan-amount span { font-size: 1.1rem; font-weight: 500; color: #64748b; }
   .lp-plan-period { font-size: .85rem; color: #94a3b8; margin-top: 4px; }
   .lp-plan-features { list-style: none; margin-bottom: 28px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
   .lp-plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: .9rem; color: #475569; }
-  .lp-plan-features li .fi { flex-shrink: 0; font-size: 1rem; }
+  .lp-plan-features li .fi { flex-shrink: 0; }
   .lp-plan-features li.excluded { color: #94a3b8; text-decoration: line-through; }
   .lp-plan-btn {
     display: block; width: 100%; padding: 13px 20px; border-radius: 10px;
@@ -154,37 +297,24 @@
   .lp-plan-btn.outline { background: #fff; color: #15803d; border: 2px solid #15803d; }
   .lp-plan-btn.outline:hover { background: #f0fdf4; }
 
-  /* AUDIENCE */
+  /* ── PUBLIC ── */
   .lp-audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
   .lp-audience-card {
     background: #fff; border-radius: 14px; padding: 28px 24px;
-    border: 1px solid #e2e8f0; text-align: center;
+    border: 1px solid #e2e8f0; transition: box-shadow .2s, transform .2s;
   }
+  .lp-audience-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
   .lp-audience-icon { font-size: 2.5rem; margin-bottom: 14px; }
-  .lp-audience-card h3 { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-  .lp-audience-card p { font-size: .9rem; color: #64748b; line-height: 1.6; }
+  .lp-audience-card h3 { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+  .lp-audience-card p { font-size: .88rem; color: #64748b; line-height: 1.65; }
 
-  /* FEATURE LIST */
-  .lp-feature-list { display: flex; flex-direction: column; gap: 0; }
-  .lp-feature-item {
-    display: flex; gap: 24px; align-items: flex-start;
-    padding: 28px 0; border-bottom: 1px solid #f1f5f9;
-  }
-  .lp-feature-item:last-child { border-bottom: none; }
-  .lp-feature-num {
-    font-size: 2rem; font-weight: 900; color: #dcfce7; flex-shrink: 0;
-    width: 60px; text-align: center;
-  }
-  .lp-feature-item h3 { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-  .lp-feature-item p { font-size: .9rem; color: #64748b; line-height: 1.7; }
+  /* ── CTA ── */
+  .lp-cta { background: linear-gradient(135deg, #14532d, #15803d); padding: 88px 32px; text-align: center; }
+  .lp-cta h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 900; color: #fff; margin-bottom: 18px; letter-spacing: -.02em; }
+  .lp-cta p { color: #bbf7d0; font-size: 1.05rem; max-width: 520px; margin: 0 auto 36px; line-height: 1.75; }
 
-  /* CTA */
-  .lp-cta { background: linear-gradient(135deg, #15803d, #166534); padding: 80px 24px; text-align: center; }
-  .lp-cta h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: #fff; margin-bottom: 16px; }
-  .lp-cta p { color: #bbf7d0; font-size: 1.05rem; max-width: 540px; margin: 0 auto 32px; line-height: 1.7; }
-
-  /* FOOTER */
-  .lp-footer { background: #0f172a; padding: 32px 24px; text-align: center; color: #64748b; font-size: .85rem; }
+  /* ── FOOTER ── */
+  .lp-footer { background: #0f172a; padding: 36px 32px; text-align: center; color: #64748b; font-size: .85rem; }
   .lp-footer a { color: #94a3b8; text-decoration: none; }
   .lp-footer a:hover { color: #fff; }
   </style>
@@ -193,74 +323,45 @@
 <body>
 
 <script>
-/* ══════════════════════════════════════════════════
-   CONFIGURATION DES ABONNEMENTS — modifiez ici
-   ══════════════════════════════════════════════════ */
 const PRICING_CONFIG = {
-
   plans: [
     {
-      id:          'free',
-      name:        'Gratuit',
-      description: 'Pour découvrir BoviCalc, sans engagement.',
-      price:       0,
-      priceLabel:  '0 €',
-      period:      '/ mois',
-      badge:       null,
-      highlighted: false,
-      ctaText:     'Commencer gratuitement',
-      ctaLink:     'app.html',
-      ctaStyle:    'outline',
+      id: 'free', name: 'Gratuit', description: 'Pour découvrir BoviCalc, sans engagement.',
+      price: 0, priceLabel: '0 €', period: '/ mois', badge: null, highlighted: false,
+      ctaText: 'Commencer gratuitement', ctaLink: 'app.html', ctaStyle: 'outline',
       features: [
         { text: 'Analyser ma ration (apports seuls)',  ok: true  },
-        { text: 'Base de 60+ aliments INRA 2018',      ok: true  },
+        { text: 'Base de 115 aliments INRA 2018',      ok: true  },
         { text: 'Créer ma ration de A à Z',            ok: false },
-        { text: 'Calculer mes besoins seuls',          ok: false },
-        { text: 'Bilan fourrager',                     ok: false },
+        { text: 'Calculer mes besoins animaux',        ok: false },
+        { text: 'Bilan fourrager troupeau',            ok: false },
         { text: 'Sauvegarde des sessions',             ok: false },
         { text: 'Export PDF professionnel',            ok: false },
-        { text: 'Optimiseur de ration',                ok: false },
-        { text: 'Aliments personnalisés',              ok: false },
+        { text: 'Optimiseur & suggestions',            ok: false },
       ],
     },
-
     {
-      id:          'pro',
-      name:        'Pro',
-      description: 'Accès complet pour les éleveurs et conseillers exigeants.',
-      price:       15,
-      priceLabel:  '15 €',
-      period:      '/ mois',
-      badge:       '⭐ Accès complet',
-      highlighted: true,
-      ctaText:     'Souscrire au Pro',
-      /* ► Remplacez ce lien par votre lien Stripe Checkout ou Payment Link */
-      ctaLink:     'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00',
-      ctaStyle:    'primary',
+      id: 'pro', name: 'Pro', description: 'Accès complet pour les éleveurs et conseillers exigeants.',
+      price: 15, priceLabel: '15 €', period: '/ mois', badge: '⭐ Accès complet', highlighted: true,
+      ctaText: 'Souscrire au Pro', ctaLink: 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00', ctaStyle: 'primary',
       features: [
-        { text: 'Créer ma ration de A à Z',            ok: true  },
-        { text: 'Analyser ma ration (apports seuls)',   ok: true  },
-        { text: 'Calculer mes besoins seuls',           ok: true  },
-        { text: 'Bilan fourrager troupeau',             ok: true  },
-        { text: 'Sauvegarde illimitée (cloud)',         ok: true  },
-        { text: 'Export PDF professionnel',             ok: true  },
-        { text: 'Optimiseur de ration intelligent',     ok: true  },
-        { text: 'Aliments personnalisés illimités',     ok: true  },
-        { text: 'Support prioritaire par email',        ok: true  },
+        { text: 'Ration de A à Z complète',            ok: true },
+        { text: 'Calcul des besoins animaux',          ok: true },
+        { text: 'Bilan fourrager troupeau',            ok: true },
+        { text: 'Sauvegarde illimitée',                ok: true },
+        { text: 'Export PDF professionnel',            ok: true },
+        { text: 'Optimiseur & suggestions',            ok: true },
+        { text: 'Aliments personnalisés illimités',    ok: true },
+        { text: 'Support prioritaire par email',       ok: true },
       ],
     },
   ],
-
-  /* Texte sous le titre de la section tarifs */
   pricingSubtitle: 'Sans engagement, résiliable à tout moment.',
-
-  /* Contact affiché pour toute question */
   contactEmail: 'bovicalc@gmail.com',
 };
-/* ══════════════════════════════════════════════════ */
 </script>
 
-<!-- ═══════════ NAV ═══════════ -->
+<!-- NAV -->
 <nav class="lp-nav">
   <a href="#" class="lp-nav-logo">
     <img src="Logo Bovicalc.png" alt="BoviCalc">
@@ -268,65 +369,403 @@ const PRICING_CONFIG = {
   </a>
   <div class="lp-nav-links">
     <button class="lp-nav-link" onclick="scrollToSection('about')">À propos</button>
+    <button class="lp-nav-link" onclick="scrollToSection('how')">Comment ça marche</button>
     <button class="lp-nav-link" onclick="scrollToSection('features')">Fonctionnalités</button>
+    <button class="lp-nav-link" onclick="scrollToSection('bilan')">Le Bilan</button>
     <button class="lp-nav-link" onclick="scrollToSection('pricing')">Tarifs</button>
-    <button class="lp-nav-link" onclick="scrollToSection('audience')">Public</button>
   </div>
   <a href="app.html" class="lp-nav-cta">Accéder à l'app →</a>
 </nav>
 
-<!-- ═══════════ HERO ═══════════ -->
+<!-- HERO -->
 <section class="lp-hero">
-  <div class="lp-hero-badge">🚀 Nouveauté 2026</div>
-  <h1>BoviCalc</h1>
-  <p>L'outil de rationnement bovin <strong>simple, rapide et précis</strong> conçu pour les éleveurs et conseillers sur le terrain.</p>
-  <div class="lp-hero-buttons">
-    <a href="app.html" class="btn-hero-primary">Commencer gratuitement</a>
-    <button class="btn-hero-secondary" onclick="scrollToSection('pricing')">Voir les tarifs</button>
-  </div>
-  <div class="lp-hero-stats">
-    <div class="lp-stat"><span class="lp-stat-val">500+</span><span class="lp-stat-lbl">éleveurs</span></div>
-    <div class="lp-stat"><span class="lp-stat-val">10k+</span><span class="lp-stat-lbl">rations calculées</span></div>
-    <div class="lp-stat"><span class="lp-stat-val">98%</span><span class="lp-stat-lbl">satisfaction</span></div>
+  <div class="lp-hero-inner">
+    <div class="lp-hero-text">
+      <div class="lp-hero-badge">🌱 Outil de rationnement bovin</div>
+      <h1>Équilibrez vos rations.<br><em>En quelques minutes.</em></h1>
+      <p>BoviCalc calcule les besoins de vos animaux, analyse votre ration et vous donne un bilan nutritionnel complet — UFL, PDI, minéraux, glucides. Simple, précis, basé sur l'INRA 2018.</p>
+      <div class="lp-hero-buttons">
+        <a href="app.html" class="btn-primary">Essayer gratuitement</a>
+        <button class="btn-outline" onclick="scrollToSection('how')">Comment ça marche</button>
+      </div>
+    </div>
+    <div class="lp-hero-visual">
+      <div class="app-mockup">
+        <div class="app-mockup-bar">
+          <div class="mockup-dot red"></div>
+          <div class="mockup-dot yellow"></div>
+          <div class="mockup-dot green"></div>
+          <span class="mockup-bar-title">BoviCalc — Bilan nutritionnel</span>
+        </div>
+        <div class="app-mockup-body">
+          <div class="mockup-grade">
+            <div class="mockup-grade-letter">A</div>
+            <div class="mockup-grade-info">
+              <div class="mockup-grade-title">Ration équilibrée — 87/100</div>
+              <div class="mockup-grade-sub">Vache laitière · 650 kg · 32 kg lait/j</div>
+              <div class="mockup-score-bar"><span></span></div>
+            </div>
+          </div>
+          <div class="mockup-metrics">
+            <div class="mockup-metric orange">
+              <div class="mockup-metric-label">UFL / jour</div>
+              <div class="mockup-metric-val">18.4</div>
+              <div class="mockup-metric-sub">Besoin : 17.8 ✓</div>
+            </div>
+            <div class="mockup-metric blue">
+              <div class="mockup-metric-label">PDI g / jour</div>
+              <div class="mockup-metric-val">1 820</div>
+              <div class="mockup-metric-sub">Besoin : 1 790 ✓</div>
+            </div>
+            <div class="mockup-metric green">
+              <div class="mockup-metric-label">MS totale</div>
+              <div class="mockup-metric-val">19.2 kg</div>
+              <div class="mockup-metric-sub">Cap. max : 20.5 kg</div>
+            </div>
+            <div class="mockup-metric amber">
+              <div class="mockup-metric-label">PDI / UFL</div>
+              <div class="mockup-metric-val">99 g</div>
+              <div class="mockup-metric-sub">Cible 90–105 ✓</div>
+            </div>
+          </div>
+          <div class="mockup-feeds">
+            <div class="mockup-feed-row">
+              <span class="mockup-feed-name">Ensilage maïs</span>
+              <div class="mockup-feed-vals">
+                <span class="mockup-feed-ufl">UFL 7.83</span>
+                <span class="mockup-feed-pdi">PDI 558 g</span>
+              </div>
+            </div>
+            <div class="mockup-feed-row">
+              <span class="mockup-feed-name">Foin de prairie</span>
+              <div class="mockup-feed-vals">
+                <span class="mockup-feed-ufl">UFL 2.88</span>
+                <span class="mockup-feed-pdi">PDI 272 g</span>
+              </div>
+            </div>
+            <div class="mockup-feed-row">
+              <span class="mockup-feed-name">Tourteau de colza</span>
+              <div class="mockup-feed-vals">
+                <span class="mockup-feed-ufl">UFL 1.58</span>
+                <span class="mockup-feed-pdi">PDI 345 g</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ═══════════ À PROPOS ═══════════ -->
+<!-- À PROPOS — storytelling -->
 <section class="lp-section" id="about">
   <div class="lp-container">
-    <div class="lp-section-header">
-      <div class="lp-tag">À propos</div>
-      <h2>Le rationnement bovin <span class="text-green">repensé</span></h2>
-      <p>BoviCalc simplifie le calcul et l'analyse des rations bovines. Conçu par des experts pour les besoins réels du terrain, il permet d'obtenir des résultats précis en quelques minutes.</p>
-    </div>
-    <div class="lp-features-grid">
-      <div class="lp-feature-card"><div class="lp-feature-icon">🎯</div><h3>Simplicité</h3><p>Interface intuitive, pas de formation nécessaire. Créez une ration complète en 5 minutes chrono.</p></div>
-      <div class="lp-feature-card"><div class="lp-feature-icon">📊</div><h3>Précision</h3><p>Base de 60+ aliments avec valeurs nutritionnelles certifiées INRA 2018.</p></div>
-      <div class="lp-feature-card"><div class="lp-feature-icon">⚡</div><h3>Rapidité</h3><p>Calculs instantanés, export PDF en un clic. Travaillez efficacement sans latence.</p></div>
-      <div class="lp-feature-card"><div class="lp-feature-icon">📱</div><h3>Mobilité</h3><p>Utilisable sur tablette et mobile. Idéal pour les visites en étables.</p></div>
+    <div class="lp-story">
+      <div class="lp-story-text">
+        <h2>Le rationnement, c'est l'une des décisions les plus impactantes que vous prenez chaque jour.</h2>
+        <p>Une ration mal équilibrée, c'est une production en dessous de son potentiel, une fertilité dégradée, des coûts qui s'envolent. Pourtant, les outils disponibles sont souvent trop complexes, trop lents, ou trop éloignés des réalités du terrain.</p>
+        <p><strong>BoviCalc est né de ce constat.</strong> Un outil pensé par et pour les éleveurs et conseillers qui ont besoin de résultats fiables, rapides, directement exploitables — en étable, en camion, ou au bureau.</p>
+        <p>Basé sur les <strong>tables INRA 2018</strong>, BoviCalc couvre 115 aliments avec leurs valeurs énergétiques, protéiques, minérales et glucidiques. Chaque calcul est expliqué, chaque indicateur est interprété.</p>
+        <div class="lp-pills">
+          <span class="lp-pill">✓ INRA 2018</span>
+          <span class="lp-pill">✓ 115 aliments</span>
+          <span class="lp-pill">✓ UFL / PDI / Minéraux</span>
+          <span class="lp-pill">✓ Export PDF</span>
+          <span class="lp-pill">✓ Utilisable hors-ligne</span>
+        </div>
+      </div>
+      <div class="lp-story-cards">
+        <div class="lp-story-card">
+          <div class="lp-story-card-icon">🎯</div>
+          <div>
+            <h3>Conçu pour le terrain</h3>
+            <p>Interface simple et rapide. Pas de formation, pas de tableur. Une ration complète en moins de 5 minutes, même en visite d'élevage.</p>
+          </div>
+        </div>
+        <div class="lp-story-card">
+          <div class="lp-story-card-icon">🧬</div>
+          <div>
+            <h3>Précision scientifique</h3>
+            <p>Calculs basés sur les normes INRA 2018 : UFL, UFV, PDI, lait corrigé, BACA, acides aminés. Aucun compromis sur la rigueur.</p>
+          </div>
+        </div>
+        <div class="lp-story-card">
+          <div class="lp-story-card-icon">📊</div>
+          <div>
+            <h3>Résultats exploitables</h3>
+            <p>Score ABCD, indicateurs colorés, suggestions d'ajustements, export PDF professionnel. Tout ce dont vous avez besoin pour agir.</p>
+          </div>
+        </div>
+        <div class="lp-story-card">
+          <div class="lp-story-card-icon">📱</div>
+          <div>
+            <h3>Disponible partout</h3>
+            <p>Fonctionne sur ordinateur, tablette et mobile. Idéal pour les visites en étable, sans avoir besoin de connexion permanente.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ FONCTIONNALITÉS ═══════════ -->
-<section class="lp-section alt" id="features">
+<!-- COMMENT ÇA MARCHE -->
+<section class="lp-section alt" id="how">
+  <div class="lp-container">
+    <div class="lp-section-header">
+      <div class="lp-tag">Prise en main</div>
+      <h2>Comment ça <span class="text-green">marche ?</span></h2>
+      <p>Trois étapes suffisent pour obtenir un bilan nutritionnel complet et des recommandations d'ajustement.</p>
+    </div>
+    <div class="lp-steps">
+
+      <div class="lp-step">
+        <div class="lp-step-num">1</div>
+        <div class="lp-step-connector"></div>
+        <h3>Décrivez votre animal</h3>
+        <p>Type (vache laitière, génisse, veau…), poids vif, production, taux butyreux et protéique, activité. BoviCalc calcule instantanément les besoins en énergie (UFL) et protéines (PDI).</p>
+        <div class="lp-step-card">
+          <div style="font-size:.75rem;color:#64748b;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Exemple de résultat</div>
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
+            <span style="color:#475569;">Besoin UFL/j</span>
+            <span style="font-weight:700;color:#f97316;">17.8 UFL</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
+            <span style="color:#475569;">Besoin PDI/j</span>
+            <span style="font-weight:700;color:#3b82f6;">1 790 g</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;">
+            <span style="color:#475569;">Ingestion max</span>
+            <span style="font-weight:700;color:#15803d;">20.5 kg MS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-step">
+        <div class="lp-step-num">2</div>
+        <div class="lp-step-connector"></div>
+        <h3>Composez votre ration</h3>
+        <p>Ajoutez vos aliments ligne par ligne depuis la base de 115 aliments. Chaque ajout met à jour les apports en temps réel. Utilisez l'auto-ration pour une composition de départ automatique.</p>
+        <div class="lp-step-card">
+          <div style="font-size:.75rem;color:#64748b;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Aliments disponibles</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">
+            <span style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:600;">Ensilage maïs</span>
+            <span style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:600;">Foin prairie</span>
+            <span style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:600;">Tourteau colza</span>
+            <span style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:600;">Orge</span>
+            <span style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:600;">+ vos aliments</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-step">
+        <div class="lp-step-num">3</div>
+        <h3>Analysez le bilan</h3>
+        <p>BoviCalc compare vos apports à vos besoins et vous donne un score de A à D, des indicateurs colorés, une analyse des glucides fermentescibles, et des suggestions d'ajustements précises.</p>
+        <div class="lp-step-card">
+          <div style="font-size:.75rem;color:#64748b;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Indicateurs analysés</div>
+          <div style="display:flex;flex-direction:column;gap:3px;font-size:.78rem;">
+            <span>⚡ <strong style="color:#f97316;">UFL</strong> — Énergie</span>
+            <span>🧬 <strong style="color:#3b82f6;">PDI</strong> — Protéines</span>
+            <span>⚗️ <strong style="color:#8b5cf6;">BACA</strong> — Balance minérale</span>
+            <span>🌾 <strong style="color:#15803d;">Glucides</strong> — Risque acidose</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FONCTIONNALITÉS -->
+<section class="lp-section" id="features">
   <div class="lp-container">
     <div class="lp-section-header">
       <div class="lp-tag">Fonctionnalités</div>
       <h2>Tout ce dont vous avez <span class="text-green">besoin</span></h2>
+      <p>Du simple calcul d'apports au rapport PDF complet, BoviCalc couvre l'ensemble des besoins du rationnement bovin.</p>
     </div>
     <div class="lp-feature-list">
-      <div class="lp-feature-item"><div class="lp-feature-num">01</div><div><h3>Calcul complet de A à Z</h3><p>Construisez une ration équilibrée en partant de zéro. L'outil vous guide à chaque étape.</p></div></div>
-      <div class="lp-feature-item"><div class="lp-feature-num">02</div><div><h3>Calcul des besoins animaux</h3><p>Estimez précisément les besoins selon le type d'animal, la production, le poids vif et la race. Base INRA 2018.</p></div></div>
-      <div class="lp-feature-item"><div class="lp-feature-num">03</div><div><h3>Analyse nutritionnelle détaillée</h3><p>Bilan complet UFL, PDI, fibres, minéraux, BACA. Visualisation claire des excès et manques.</p></div></div>
-      <div class="lp-feature-item"><div class="lp-feature-num">04</div><div><h3>Bilan fourrager</h3><p>Stocks vs besoins du troupeau. Visualisation graphique avec silos. Calculateur TMS intégré.</p></div></div>
-      <div class="lp-feature-item"><div class="lp-feature-num">05</div><div><h3>Analyse des coûts</h3><p>Coût de la ration par vache/jour, par 1000 L de lait ou par kg MS. Suivez vos budgets.</p></div></div>
-      <div class="lp-feature-item"><div class="lp-feature-num">06</div><div><h3>Export PDF professionnel</h3><p>Rapports PDF prêts à imprimer ou partager avec vos clients. Mise en page soignée.</p></div></div>
+
+      <div class="lp-feature-item">
+        <div class="lp-feature-num">01</div>
+        <div class="lp-feature-body">
+          <h3>Ration de A à Z</h3>
+          <p>Partez de zéro et construisez une ration équilibrée en trois étapes guidées : définition de l'animal, composition de la ration, analyse du bilan. L'outil vous accompagne à chaque étape avec des indicateurs en temps réel.</p>
+          <div class="lp-tags">
+            <span class="lp-tag-small">UFL / UFV</span>
+            <span class="lp-tag-small blue">PDI</span>
+            <span class="lp-tag-small orange">Score ABCD</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-feature-item">
+        <div class="lp-feature-num">02</div>
+        <div class="lp-feature-body">
+          <h3>Calcul des besoins animaux</h3>
+          <p>Estimez les besoins en énergie et protéines selon le type d'animal (vache laitière, génisse, veau…), son poids vif, sa production, ses taux TB/TP et son niveau d'activité. Formules basées sur l'INRA 2018 avec lait corrigé.</p>
+          <div class="lp-tags">
+            <span class="lp-tag-small">Vache laitière</span>
+            <span class="lp-tag-small">Génisse</span>
+            <span class="lp-tag-small">Veau</span>
+            <span class="lp-tag-small">Prépa vêlage</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-feature-item">
+        <div class="lp-feature-num">03</div>
+        <div class="lp-feature-body">
+          <h3>Analyse nutritionnelle complète</h3>
+          <p>Bilan UFL/PDI avec couverture en pourcentage, rapport PDI/UFL, capacité d'ingestion, BACA (balance acido-basique), acides aminés (méthionine, lysine), et répartition des glucides fermentescibles avec indicateur de risque acidose.</p>
+          <div class="lp-tags">
+            <span class="lp-tag-small orange">UFL/UFV</span>
+            <span class="lp-tag-small blue">PDI</span>
+            <span class="lp-tag-small">BACA</span>
+            <span class="lp-tag-small">Méthionine · Lysine</span>
+            <span class="lp-tag-small orange">Glucides</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-feature-item">
+        <div class="lp-feature-num">04</div>
+        <div class="lp-feature-body">
+          <h3>Bilan fourrager troupeau</h3>
+          <p>Visualisez vos stocks fourragers (silos, bottes, remorques) face aux besoins estimés de votre troupeau sur la période hivernale. Calculateur de teneur en matière sèche (TMS) intégré. Idéal pour la planification d'automne.</p>
+          <div class="lp-tags">
+            <span class="lp-tag-small">Stocks vs besoins</span>
+            <span class="lp-tag-small">Calcul TMS</span>
+            <span class="lp-tag-small">Solde en t MS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-feature-item">
+        <div class="lp-feature-num">05</div>
+        <div class="lp-feature-body">
+          <h3>Analyse des coûts</h3>
+          <p>Renseignez le prix de chaque aliment et obtenez instantanément le coût de la ration par vache et par jour, par 1 000 litres de lait produits, et par kilogramme de matière sèche. Utile pour comparer différentes stratégies de ration.</p>
+          <div class="lp-tags">
+            <span class="lp-tag-small">€ / VL / jour</span>
+            <span class="lp-tag-small">€ / 1000 L</span>
+            <span class="lp-tag-small">€ / kg MS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-feature-item">
+        <div class="lp-feature-num">06</div>
+        <div class="lp-feature-body">
+          <h3>Export PDF professionnel</h3>
+          <p>Générez en un clic un rapport complet : identification de l'animal, besoins calculés, composition de la ration, bilan nutritionnel détaillé, analyse des glucides, bilan minéral, coûts. Format A4 prêt à imprimer ou à envoyer.</p>
+          <div class="lp-tags">
+            <span class="lp-tag-small">Format A4</span>
+            <span class="lp-tag-small">Score ABCD</span>
+            <span class="lp-tag-small">Tous les indicateurs</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
-<!-- ═══════════ TARIFS ═══════════ -->
+<!-- LE BILAN ABCD -->
+<section class="lp-section alt" id="bilan">
+  <div class="lp-container">
+    <div class="lp-section-header">
+      <div class="lp-tag">Le Bilan</div>
+      <h2>Un score <span class="text-green">A, B, C ou D</span> pour chaque ration</h2>
+      <p>BoviCalc évalue chaque ration selon 5 critères et lui attribue une note globale. Un coup d'œil suffit pour savoir si votre ration est optimale ou si elle nécessite des ajustements.</p>
+    </div>
+
+    <div class="lp-abcd-grid">
+      <div class="lp-abcd-card a">
+        <div class="lp-abcd-letter">A</div>
+        <div class="lp-abcd-range">85 – 100 pts</div>
+        <div class="lp-abcd-desc">Ration optimale. Énergie, protéines et équilibre nutritionnel sont dans les cibles. Aucun ajustement nécessaire.</div>
+      </div>
+      <div class="lp-abcd-card b">
+        <div class="lp-abcd-letter">B</div>
+        <div class="lp-abcd-range">70 – 84 pts</div>
+        <div class="lp-abcd-desc">Bonne ration avec des points d'amélioration mineurs. Des ajustements simples permettent d'atteindre le niveau A.</div>
+      </div>
+      <div class="lp-abcd-card c">
+        <div class="lp-abcd-letter">C</div>
+        <div class="lp-abcd-range">50 – 69 pts</div>
+        <div class="lp-abcd-desc">Ration acceptable mais des déséquilibres notables nécessitent des corrections pour préserver les performances.</div>
+      </div>
+      <div class="lp-abcd-card d">
+        <div class="lp-abcd-letter">D</div>
+        <div class="lp-abcd-range">0 – 49 pts</div>
+        <div class="lp-abcd-desc">Ration à revoir. Déficits ou excès importants qui peuvent nuire à la production, la fertilité ou la santé.</div>
+      </div>
+    </div>
+
+    <!-- Mockup bilan -->
+    <div class="lp-abcd-mockup">
+      <div class="lp-abcd-mockup-header">
+        <span class="lp-abcd-mockup-title">📊 Exemple de bilan — Vache laitière 650 kg · 32 L/j</span>
+        <span style="font-size:.78rem;color:#94a3b8;">Score : 87/100 — Grade A</span>
+      </div>
+      <div class="lp-abcd-mockup-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div>
+            <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:12px;">Critères notés</div>
+            <div class="abcd-mockup-row">
+              <span class="abcd-mockup-label">⚡ Énergie</span>
+              <div class="abcd-mockup-bar-wrap">
+                <div class="abcd-mockup-bar" style="width:97%;background:#15803d;"></div>
+              </div>
+              <span class="abcd-mockup-pct" style="color:#15803d;">97%</span>
+            </div>
+            <div class="abcd-mockup-row">
+              <span class="abcd-mockup-label">🧬 PDI</span>
+              <div class="abcd-mockup-bar-wrap">
+                <div class="abcd-mockup-bar" style="width:102%;background:#15803d;"></div>
+              </div>
+              <span class="abcd-mockup-pct" style="color:#15803d;">102%</span>
+            </div>
+            <div class="abcd-mockup-row">
+              <span class="abcd-mockup-label">⚖️ Équilibre</span>
+              <div class="abcd-mockup-bar-wrap">
+                <div class="abcd-mockup-bar" style="width:85%;background:#22c55e;"></div>
+              </div>
+              <span class="abcd-mockup-pct" style="color:#16a34a;">85%</span>
+            </div>
+            <div class="abcd-mockup-row">
+              <span class="abcd-mockup-label">🌾 Acidose</span>
+              <div class="abcd-mockup-bar-wrap">
+                <div class="abcd-mockup-bar" style="width:90%;background:#22c55e;"></div>
+              </div>
+              <span class="abcd-mockup-pct" style="color:#16a34a;">OK</span>
+            </div>
+            <div class="abcd-mockup-row">
+              <span class="abcd-mockup-label">🫁 Ingestion</span>
+              <div class="abcd-mockup-bar-wrap">
+                <div class="abcd-mockup-bar" style="width:94%;background:#15803d;"></div>
+              </div>
+              <span class="abcd-mockup-pct" style="color:#15803d;">OK</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:12px;">Suggestions d'ajustements</div>
+            <div style="background:#f0fdf4;border-left:4px solid #15803d;border-radius:0 8px 8px 0;padding:10px 12px;font-size:.78rem;color:#166534;margin-bottom:8px;">
+              ✅ Ration bien équilibrée — aucun ajustement nécessaire
+            </div>
+            <div style="font-size:.75rem;color:#94a3b8;line-height:1.6;">
+              Si le bilan n'est pas optimal, BoviCalc vous propose des ajustements précis : quel aliment augmenter ou réduire, de combien, et quel sera l'impact sur chaque indicateur.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TARIFS -->
 <section class="lp-section" id="pricing">
   <div class="lp-container">
     <div class="lp-section-header">
@@ -341,41 +780,52 @@ const PRICING_CONFIG = {
   </div>
 </section>
 
-<!-- ═══════════ PUBLIC ═══════════ -->
+<!-- PUBLIC -->
 <section class="lp-section alt" id="audience">
   <div class="lp-container">
     <div class="lp-section-header">
-      <div class="lp-tag">Public</div>
-      <h2>Conçu pour <span class="text-green">vous</span></h2>
+      <div class="lp-tag">Pour qui ?</div>
+      <h2>Conçu pour <span class="text-green">le terrain</span></h2>
+      <p>Que vous soyez éleveur, conseiller ou formateur, BoviCalc s'adapte à vos besoins et à votre rythme de travail.</p>
     </div>
     <div class="lp-audience-grid">
-      <div class="lp-audience-card"><div class="lp-audience-icon">🐄</div><h3>Éleveurs bovins</h3><p>Optimisez la ration de votre troupeau, maîtrisez vos coûts et améliorez les performances.</p></div>
-      <div class="lp-audience-card"><div class="lp-audience-icon">👨‍🔬</div><h3>Conseillers agricoles</h3><p>Outil d'analyse rapide pour vos visites. Générez des rapports professionnels pour vos clients.</p></div>
-      <div class="lp-audience-card"><div class="lp-audience-icon">🎓</div><h3>Étudiants & Formateurs</h3><p>Support pédagogique complet pour comprendre les équilibres nutritionnels bovins.</p></div>
+      <div class="lp-audience-card">
+        <div class="lp-audience-icon">🐄</div>
+        <h3>Éleveurs bovins</h3>
+        <p>Composez et équilibrez la ration de votre troupeau, maîtrisez vos coûts alimentaires et anticipez vos stocks fourragers pour l'hiver.</p>
+      </div>
+      <div class="lp-audience-card">
+        <div class="lp-audience-icon">👨‍🔬</div>
+        <h3>Conseillers agricoles</h3>
+        <p>Un outil d'analyse rapide pour vos visites d'élevage. Générez des rapports PDF professionnels et partagez-les directement avec vos clients.</p>
+      </div>
+      <div class="lp-audience-card">
+        <div class="lp-audience-icon">🎓</div>
+        <h3>Étudiants & Formateurs</h3>
+        <p>Support pédagogique complet pour comprendre les équilibres nutritionnels bovins, les normes INRA et l'interprétation des bilans.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ CTA FINAL ═══════════ -->
+<!-- CTA -->
 <div class="lp-cta">
-  <h2>Prêt à optimiser vos rations ?</h2>
-  <p>Rejoignez plus de 500 éleveurs et professionnels qui utilisent BoviCalc pour améliorer la performance de leur troupeau.</p>
-  <a href="app.html" class="btn-hero-primary">Accéder à l'application →</a>
+  <h2>Prêt à équilibrer vos rations ?</h2>
+  <p>Accédez gratuitement à BoviCalc et calculez votre première ration en quelques minutes — sans installation, sans engagement.</p>
+  <a href="app.html" class="btn-primary">Commencer maintenant →</a>
 </div>
 
-<!-- ═══════════ FOOTER ═══════════ -->
+<!-- FOOTER -->
 <footer class="lp-footer">
-  <p>© 2025 BoviCalc · <a id="footer-email" href="#">contact@bovicalc.fr</a></p>
+  <p>© 2026 BoviCalc · <a id="footer-email" href="#">contact@bovicalc.fr</a></p>
 </footer>
 
 <script>
-/* Rendu dynamique à partir de PRICING_CONFIG */
 function scrollToSection(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 }
 
-/* Active nav link on scroll */
-const sections = ['about','features','pricing','audience'];
+const sections = ['about','how','features','bilan','pricing','audience'];
 window.addEventListener('scroll', () => {
   let cur = '';
   sections.forEach(id => {
@@ -383,11 +833,18 @@ window.addEventListener('scroll', () => {
     if (el && window.scrollY >= el.offsetTop - 120) cur = id;
   });
   document.querySelectorAll('.lp-nav-link').forEach(l => {
-    l.classList.toggle('active', l.textContent.toLowerCase().includes(cur));
+    const txt = l.textContent.toLowerCase();
+    l.classList.toggle('active',
+      (cur==='about'    && txt.includes('propos')) ||
+      (cur==='how'      && txt.includes('marche')) ||
+      (cur==='features' && txt.includes('fonc'))   ||
+      (cur==='bilan'    && txt.includes('bilan'))  ||
+      (cur==='pricing'  && txt.includes('tarif'))  ||
+      (cur==='audience' && txt.includes('public'))
+    );
   });
 });
 
-/* Build pricing cards */
 (function buildPricing() {
   const cfg = PRICING_CONFIG;
   document.getElementById('pricing-subtitle').textContent = cfg.pricingSubtitle;
@@ -395,34 +852,23 @@ window.addEventListener('scroll', () => {
   if (emailA) { emailA.textContent = cfg.contactEmail; emailA.href = 'mailto:' + cfg.contactEmail; }
   const footerEmail = document.getElementById('footer-email');
   if (footerEmail) { footerEmail.textContent = cfg.contactEmail; footerEmail.href = 'mailto:' + cfg.contactEmail; }
-
   const grid = document.getElementById('pricing-grid');
   cfg.plans.forEach(plan => {
     const card = document.createElement('div');
     card.className = 'lp-plan' + (plan.highlighted ? ' highlighted' : '');
-    card.style.position = 'relative';
-
-    const badge = plan.badge
-      ? `<div class="lp-plan-badge">${plan.badge}</div>` : '';
-
+    const badge = plan.badge ? `<div class="lp-plan-badge">${plan.badge}</div>` : '';
     const features = plan.features.map(f =>
-      `<li class="${f.ok ? '' : 'excluded'}">
-        <span class="fi">${f.ok ? '✅' : '❌'}</span>
-        <span>${f.text}</span>
-      </li>`
+      `<li class="${f.ok ? '' : 'excluded'}"><span class="fi">${f.ok ? '✅' : '❌'}</span><span>${f.text}</span></li>`
     ).join('');
-
-    card.innerHTML = `
-      ${badge}
+    card.innerHTML = `${badge}
       <div class="lp-plan-name">${plan.name}</div>
       <div class="lp-plan-desc">${plan.description}</div>
       <div class="lp-plan-price">
-        <div class="lp-plan-amount">${plan.priceLabel}<span>${plan.price > 0 ? '' : ''}</span></div>
-        ${plan.period ? `<div class="lp-plan-period">${plan.period}</div>` : '<div class="lp-plan-period">pour toujours</div>'}
+        <div class="lp-plan-amount">${plan.priceLabel}</div>
+        <div class="lp-plan-period">${plan.period}</div>
       </div>
       <ul class="lp-plan-features">${features}</ul>
-      <a href="${plan.ctaLink}" class="lp-plan-btn ${plan.ctaStyle}">${plan.ctaText}</a>
-    `;
+      <a href="${plan.ctaLink}" class="lp-plan-btn ${plan.ctaStyle}">${plan.ctaText}</a>`;
     grid.appendChild(card);
   });
 })();
