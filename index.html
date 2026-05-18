@@ -374,7 +374,10 @@ const PRICING_CONFIG = {
     <button class="lp-nav-link" onclick="scrollToSection('bilan')">Le Bilan</button>
     <button class="lp-nav-link" onclick="scrollToSection('pricing')">Tarifs</button>
   </div>
-  <a href="app.html" class="lp-nav-cta">Accéder à l'app →</a>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <a href="index_conseiller.html" style="padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:600;color:#475569;text-decoration:none;border:1.5px solid #e2e8f0;transition:all .15s;" onmouseover="this.style.borderColor='#15803d';this.style.color='#15803d'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#475569'">Je suis conseiller</a>
+    <a href="app.html" class="lp-nav-cta">Accéder à l'app →</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -387,6 +390,10 @@ const PRICING_CONFIG = {
       <div class="lp-hero-buttons">
         <a href="app.html" class="btn-primary">Essayer gratuitement</a>
         <button class="btn-outline" onclick="scrollToSection('how')">Comment ça marche</button>
+      </div>
+      <div style="margin-top:16px;padding:12px 16px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;display:inline-flex;align-items:center;gap:10px;font-size:.85rem;">
+        <span style="color:#4b7c5f;">🧑‍💼 Vous êtes conseiller agricole ?</span>
+        <a href="index_conseiller.html" style="color:#15803d;font-weight:700;text-decoration:none;white-space:nowrap;">Découvrir BoviCalc Conseiller →</a>
       </div>
     </div>
     <div class="lp-hero-visual">
