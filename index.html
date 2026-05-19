@@ -3,12 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BoviCalc — Rationnement bovin intelligent</title>
+  <title>BoviCalc — Logiciel de rationnement bovin en ligne | Calcul UFL PDI gratuit</title>
+  <meta name="description" content="BoviCalc : calculez gratuitement les rations de vos bovins en ligne. Calcul UFL, PDI, bilan nutritionnel, glucides, minéraux basé sur les normes INRA 2018. Vache laitière, génisse, veau.">
+  <meta name="keywords" content="rationnement bovin, calcul ration vache laitière, logiciel rationnement bovin, calcul UFL PDI, bilan nutritionnel bovin, ration bovins en ligne, INRA 2018, calcul besoins bovins">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://bovicalc-app.com/">
+  <!-- Open Graph -->
+  <meta property="og:title" content="BoviCalc — Logiciel de rationnement bovin en ligne gratuit">
+  <meta property="og:description" content="Calculez les rations de vos bovins en ligne : UFL, PDI, bilan nutritionnel complet basé sur les normes INRA 2018. Gratuit, sans installation.">
+  <meta property="og:url" content="https://bovicalc-app.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://bovicalc-app.com/Logo Bovicalc.png">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="BoviCalc — Rationnement bovin en ligne">
+  <meta name="twitter:description" content="Calculez gratuitement vos rations bovines : UFL, PDI, bilan complet INRA 2018.">
   <link rel="stylesheet" href="./style.css">
   <link rel="icon" type="image/png" href="./Logo Bovicalc.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Données structurées JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "BoviCalc",
+    "description": "Logiciel de rationnement bovin en ligne. Calcul UFL, PDI, bilan nutritionnel complet basé sur les normes INRA 2018 pour vaches laitières, génisses et veaux.",
+    "url": "https://bovicalc-app.com",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "featureList": "Calcul rations bovins, UFL PDI, bilan nutritionnel INRA 2018, vache laitière, génisse, veau, export PDF"
+  }
+  </script>
 
   <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -384,9 +416,9 @@ const PRICING_CONFIG = {
 <section class="lp-hero">
   <div class="lp-hero-inner">
     <div class="lp-hero-text">
-      <div class="lp-hero-badge">🌱 Outil de rationnement bovin</div>
-      <h1>Équilibrez vos rations.<br><em>En quelques minutes.</em></h1>
-      <p>BoviCalc calcule les besoins de vos animaux, analyse votre ration et vous donne un bilan nutritionnel complet — UFL, PDI, minéraux, glucides. Simple, précis, basé sur l'INRA 2018.</p>
+      <div class="lp-hero-badge">🌱 Logiciel de rationnement bovin en ligne — gratuit</div>
+      <h1>Calculez vos rations bovines.<br><em>UFL, PDI, bilan complet.</em></h1>
+      <p>BoviCalc est le logiciel de rationnement bovin en ligne basé sur les normes <strong>INRA 2018</strong>. Calculez les besoins de vos vaches laitières, génisses et veaux, composez vos rations et obtenez un bilan nutritionnel complet — UFL, PDI, minéraux, glucides fermentescibles — en quelques minutes.</p>
       <div class="lp-hero-buttons">
         <a href="app.html" class="btn-primary">Essayer gratuitement</a>
         <button class="btn-outline" onclick="scrollToSection('how')">Comment ça marche</button>
@@ -469,10 +501,10 @@ const PRICING_CONFIG = {
   <div class="lp-container">
     <div class="lp-story">
       <div class="lp-story-text">
-        <h2>Le rationnement, c'est l'une des décisions les plus impactantes que vous prenez chaque jour.</h2>
-        <p>Une ration mal équilibrée, c'est une production en dessous de son potentiel, une fertilité dégradée, des coûts qui s'envolent. Pourtant, les outils disponibles sont souvent trop complexes, trop lents, ou trop éloignés des réalités du terrain.</p>
-        <p><strong>BoviCalc est né de ce constat.</strong> Un outil pensé par et pour les éleveurs et conseillers qui ont besoin de résultats fiables, rapides, directement exploitables — en étable, en camion, ou au bureau.</p>
-        <p>Basé sur les <strong>tables INRA 2018</strong>, BoviCalc couvre 115 aliments avec leurs valeurs énergétiques, protéiques, minérales et glucidiques. Chaque calcul est expliqué, chaque indicateur est interprété.</p>
+        <h2>Le calcul de ration bovin, enfin accessible à tous les éleveurs.</h2>
+        <p>Une mauvaise ration coûte cher : production laitière en baisse, fertilité dégradée, risque d'acidose, coûts alimentaires inutiles. Pourtant, les logiciels de rationnement bovin existants sont souvent réservés aux conseillers ou trop complexes pour être utilisés au quotidien.</p>
+        <p><strong>BoviCalc change ça.</strong> Un outil de calcul de ration bovin en ligne, gratuit, utilisable depuis n'importe quel appareil — en étable, en visite ou au bureau — sans installation ni formation.</p>
+        <p>Basé sur les <strong>tables INRA 2018</strong>, BoviCalc intègre 115 aliments avec leurs valeurs UFL, PDI, minéraux et glucides fermentescibles. Chaque calcul est détaillé, chaque indicateur interprété avec des recommandations concrètes.</p>
         <div class="lp-pills">
           <span class="lp-pill">✓ INRA 2018</span>
           <span class="lp-pill">✓ 115 aliments</span>
@@ -485,15 +517,15 @@ const PRICING_CONFIG = {
         <div class="lp-story-card">
           <div class="lp-story-card-icon">🎯</div>
           <div>
-            <h3>Conçu pour le terrain</h3>
-            <p>Interface simple et rapide. Pas de formation, pas de tableur. Une ration complète en moins de 5 minutes, même en visite d'élevage.</p>
+            <h3>Calcul de ration bovin en 5 minutes</h3>
+            <p>Interface simple et rapide, sans formation. Calculez une ration complète pour vos vaches laitières, génisses ou veaux en moins de 5 minutes, même en visite d'élevage.</p>
           </div>
         </div>
         <div class="lp-story-card">
           <div class="lp-story-card-icon">🧬</div>
           <div>
-            <h3>Précision scientifique</h3>
-            <p>Calculs basés sur les normes INRA 2018 : UFL, UFV, PDI, lait corrigé, BACA, acides aminés. Aucun compromis sur la rigueur.</p>
+            <h3>Normes INRA 2018 — UFL, PDI, BACA</h3>
+            <p>Tous les calculs sont basés sur les normes INRA 2018 : UFL, UFV, PDI, lait corrigé, BACA, méthionine, lysine. Précision scientifique sans compromis.</p>
           </div>
         </div>
         <div class="lp-story-card">
@@ -520,16 +552,16 @@ const PRICING_CONFIG = {
   <div class="lp-container">
     <div class="lp-section-header">
       <div class="lp-tag">Prise en main</div>
-      <h2>Comment ça <span class="text-green">marche ?</span></h2>
-      <p>Trois étapes suffisent pour obtenir un bilan nutritionnel complet et des recommandations d'ajustement.</p>
+      <h2>Comment calculer une ration bovine <span class="text-green">avec BoviCalc ?</span></h2>
+      <p>Trois étapes pour obtenir un bilan nutritionnel bovin complet : calcul des besoins UFL/PDI, composition de la ration, analyse et recommandations d'ajustement.</p>
     </div>
     <div class="lp-steps">
 
       <div class="lp-step">
         <div class="lp-step-num">1</div>
         <div class="lp-step-connector"></div>
-        <h3>Décrivez votre animal</h3>
-        <p>Type (vache laitière, génisse, veau…), poids vif, production, taux butyreux et protéique, activité. BoviCalc calcule instantanément les besoins en énergie (UFL) et protéines (PDI).</p>
+        <h3>Calculez les besoins de votre bovin</h3>
+        <p>Renseignez le type d'animal (vache laitière, génisse, veau, prépa vêlage), le poids vif, la production laitière, les taux TB/TP. BoviCalc calcule instantanément les besoins journaliers en énergie (UFL) et protéines digestibles (PDI) selon l'INRA 2018.</p>
         <div class="lp-step-card">
           <div style="font-size:.75rem;color:#64748b;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Exemple de résultat</div>
           <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
@@ -550,8 +582,8 @@ const PRICING_CONFIG = {
       <div class="lp-step">
         <div class="lp-step-num">2</div>
         <div class="lp-step-connector"></div>
-        <h3>Composez votre ration</h3>
-        <p>Ajoutez vos aliments ligne par ligne depuis la base de 115 aliments. Chaque ajout met à jour les apports en temps réel. Utilisez l'auto-ration pour une composition de départ automatique.</p>
+        <h3>Composez votre ration avec 115 aliments</h3>
+        <p>Ajoutez vos aliments depuis la base de 115 fourrages et concentrés (ensilage maïs, foin, tourteau de colza, orge, soja…). Les apports UFL, PDI et glucides se mettent à jour en temps réel à chaque modification.</p>
         <div class="lp-step-card">
           <div style="font-size:.75rem;color:#64748b;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Aliments disponibles</div>
           <div style="display:flex;flex-wrap:wrap;gap:5px;">
@@ -566,8 +598,8 @@ const PRICING_CONFIG = {
 
       <div class="lp-step">
         <div class="lp-step-num">3</div>
-        <h3>Analysez le bilan</h3>
-        <p>BoviCalc compare vos apports à vos besoins et vous donne un score de A à D, des indicateurs colorés, une analyse des glucides fermentescibles, et des suggestions d'ajustements précises.</p>
+        <h3>Analysez le bilan nutritionnel bovin</h3>
+        <p>BoviCalc compare vos apports à vos besoins et génère un bilan nutritionnel complet : score de A à D, couverture UFL/PDI, analyse des glucides fermentescibles (risque acidose), BACA, acides aminés, et suggestions d'ajustements précises.</p>
         <div class="lp-step-card">
           <div style="font-size:.75rem;color:#64748b;margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Indicateurs analysés</div>
           <div style="display:flex;flex-direction:column;gap:3px;font-size:.78rem;">
@@ -588,8 +620,8 @@ const PRICING_CONFIG = {
   <div class="lp-container">
     <div class="lp-section-header">
       <div class="lp-tag">Fonctionnalités</div>
-      <h2>Tout ce dont vous avez <span class="text-green">besoin</span></h2>
-      <p>Du simple calcul d'apports au rapport PDF complet, BoviCalc couvre l'ensemble des besoins du rationnement bovin.</p>
+      <h2>Toutes les fonctionnalités du <span class="text-green">rationnement bovin</span></h2>
+      <p>Du calcul des besoins UFL/PDI au rapport PDF professionnel, BoviCalc est le logiciel de rationnement bovin le plus complet disponible gratuitement en ligne.</p>
     </div>
     <div class="lp-feature-list">
 
@@ -683,8 +715,8 @@ const PRICING_CONFIG = {
   <div class="lp-container">
     <div class="lp-section-header">
       <div class="lp-tag">Le Bilan</div>
-      <h2>Un score <span class="text-green">A, B, C ou D</span> pour chaque ration</h2>
-      <p>BoviCalc évalue chaque ration selon 5 critères et lui attribue une note globale. Un coup d'œil suffit pour savoir si votre ration est optimale ou si elle nécessite des ajustements.</p>
+      <h2>Un score <span class="text-green">A à D</span> pour évaluer chaque ration bovine</h2>
+      <p>BoviCalc note chaque ration bovine selon 5 critères nutritionnels (énergie, protéines, équilibre PDI/UFL, acidose, ingestion) et lui attribue une note de A à D. Un indicateur visuel immédiat pour optimiser l'alimentation de vos bovins.</p>
     </div>
 
     <div class="lp-abcd-grid">
