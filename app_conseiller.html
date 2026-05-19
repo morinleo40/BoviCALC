@@ -976,7 +976,8 @@ async function logoutUser() {
   const supa = getSupa();
   try { if(supa) await supa.auth.signOut(); } catch(e) {}
   currentUser = null;
-  window.location.reload();
+  try { localStorage.clear(); } catch(e) {}
+  window.location.href = 'app_conseiller.html';
 }
 
 function updateSidebarUser() {
