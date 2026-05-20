@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BoviCalc Conseiller</title>
+  <title>Rumicalc Conseiller</title>
   <link rel="stylesheet" href="./style_conseiller.css">
-  <link rel="icon" type="image/png" href="Logo Bovicalc.png">
+  <link rel="icon" type="image/png" href="Logo RumiCALC.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
@@ -72,7 +72,7 @@ function showAccessWall() {
   var em=_$('access-wall-email'); if(em) em.textContent=email;
   // Pré-remplir l'email dans le lien mailto
   var lk=_$('subscribe-link');
-  if(lk&&email) lk.href='mailto:contact@bovicalc-app.com?subject=Abonnement BoviCalc Conseiller&body=Bonjour, je souhaite souscrire à BoviCalc Conseiller. Mon email de compte : '+encodeURIComponent(email);
+  if(lk&&email) lk.href='mailto:contact@bovicalc-app.com?subject=Abonnement Rumicalc Conseiller&body=Bonjour, je souhaite souscrire à Rumicalc Conseiller. Mon email de compte : '+encodeURIComponent(email);
 }
 function hideAccessWall() { var w=_$('access-wall'); if(w) w.style.display='none'; }
 function showCodeErr(m) { var e=_$('code-err'); if(e){e.textContent=m;e.style.display='block';} }
@@ -141,8 +141,8 @@ function setTheme(t) {
 <div id="auth-wall" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2718 100%);display:flex;align-items:center;justify-content:center;padding:20px;">
   <div class="auth-card">
     <div class="auth-logo">
-      <img src="Logo Bovicalc.png" alt="BoviCalc" onerror="this.style.display='none'">
-      <h1>BoviCalc <span style="color:#22c55e;">Conseiller</span></h1>
+      <img src="Logo RumiCALC.png" alt="Rumicalc" onerror="this.style.display='none'">
+      <h1>Rumicalc <span style="color:#22c55e;">Conseiller</span></h1>
       <p>Gestion multi-exploitations pour conseillers agricoles</p>
     </div>
     <div class="auth-tabs" style="margin-bottom:18px;">
@@ -164,7 +164,7 @@ function setTheme(t) {
     <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #334155;">
       <a href="index_conseiller.html" style="font-size:.78rem;color:#475569;text-decoration:none;">← Retour à l'accueil</a>
       <span style="color:#334155;margin:0 8px;">|</span>
-      <a href="./app.html" style="font-size:.78rem;color:#475569;text-decoration:none;">BoviCalc Éleveur</a>
+      <a href="./app.html" style="font-size:.78rem;color:#475569;text-decoration:none;">Rumicalc Éleveur</a>
     </div>
   </div>
 </div>
@@ -187,7 +187,7 @@ function setTheme(t) {
     <div style="margin-bottom:24px;">
       <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#475569;margin-bottom:12px;">Étape 1 — Souscrire</div>
       <div style="background:#1e3a2e;border:1px solid #16a34a;border-radius:12px;padding:20px;text-align:center;margin-bottom:12px;">
-        <div style="font-size:.78rem;color:#4ade80;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">BoviCalc Conseiller</div>
+        <div style="font-size:.78rem;color:#4ade80;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Rumicalc Conseiller</div>
         <div style="font-size:1.4rem;font-weight:700;color:#fff;line-height:1;">Contactez-nous pour accéder</div>
         <div style="font-size:.75rem;color:#64748b;margin:6px 0 16px;">Sans engagement · Résiliable à tout moment</div>
         <ul style="list-style:none;text-align:left;font-size:.82rem;color:#94a3b8;margin-bottom:18px;display:flex;flex-direction:column;gap:6px;">
@@ -224,9 +224,9 @@ function setTheme(t) {
   <!-- SIDEBAR -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="Logo Bovicalc.png" alt="" onerror="this.style.display='none'">
+      <img src="Logo RumiCALC.png" alt="" onerror="this.style.display='none'">
       <div class="sidebar-logo-text">
-        <div class="sidebar-logo-title">BoviCalc</div>
+        <div class="sidebar-logo-title">Rumicalc</div>
         <div class="sidebar-logo-sub">Conseiller</div>
       </div>
       <button onclick="toggleSidebar()" style="background:none;border:none;cursor:pointer;color:#64748b;padding:4px;margin-left:auto;" title="Masquer">☰</button>
@@ -710,7 +710,7 @@ function setTheme(t) {
           </div>
           <div class="card-header"><div class="card-title">🔗 Liens</div></div>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <a href="./app.html" class="btn btn-ghost btn-sm">🐄 BoviCalc Éleveur</a>
+            <a href="./app.html" class="btn btn-ghost btn-sm">🐄 Rumicalc Éleveur</a>
             <a href="index_conseiller.html" class="btn btn-ghost btn-sm">← Page d'accueil Conseiller</a>
             <button class="btn btn-danger btn-sm" onclick="logoutUser()" style="margin-top:8px;">⏻ Se déconnecter</button>
           </div>
@@ -1842,7 +1842,7 @@ function printRapport() {
   const w = window.open('', '_blank');
   if (!w) { alert('Autorisez les popups pour générer le PDF.'); return; }
   w.document.write(`<!DOCTYPE html><html lang="fr"><head>
-    <meta charset="UTF-8"><title>Rapport BoviCalc Conseiller</title>
+    <meta charset="UTF-8"><title>Rapport Rumicalc Conseiller</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>${RP_CSS}</style>
   </head><body>${body}</body></html>`);
@@ -1877,19 +1877,19 @@ function buildRapportBody() {
     const q = computeQualityScore(a,b);
     const gc = scoreColor(q.grade);
     h += '<div class="rp-header">'
-      + '<div class="rp-logo">BoviCalc <span style="opacity:.7;font-size:.75em;">Conseiller</span></div>'
+      + '<div class="rp-logo">Rumicalc <span style="opacity:.7;font-size:.75em;">Conseiller</span></div>'
       + '<div class="rp-title-block"><div class="rp-title">'+escHtml(titre)+'</div>'
       + '<div class="rp-subtitle">'+escHtml(animalLabel)+(exp.nom?' — '+escHtml(exp.nom):'')+' · '+date+'</div></div>'
       + '<div class="rp-grade-badge" style="color:'+gc+';">'+q.grade+'<span class="rp-grade-sub">'+q.total+'/100</span></div>'
       + '</div>';
   } else {
-    h += '<div class="rp-header"><div class="rp-logo">BoviCalc Conseiller</div>'
+    h += '<div class="rp-header"><div class="rp-logo">Rumicalc Conseiller</div>'
       + '<div class="rp-title-block"><div class="rp-title">'+escHtml(titre)+'</div><div class="rp-subtitle">'+date+'</div></div></div>';
   }
 
   // Barre conseiller
   h += '<div class="rp-conseiller-bar">'
-    + '<span>'+(conseiller?'Établi par : <strong>'+escHtml(conseiller)+'</strong>':'BoviCalc Conseiller')+'</span>'
+    + '<span>'+(conseiller?'Établi par : <strong>'+escHtml(conseiller)+'</strong>':'Rumicalc Conseiller')+'</span>'
     + '<span>'+escHtml(exp.nom||'')+(exp.contact_nom?' · '+escHtml(exp.contact_nom):'')+'</span>'
     + '</div>';
 
@@ -1913,7 +1913,7 @@ function buildRapportBody() {
     h += '<div class="rp-section"><p style="color:#64748b;font-style:italic;">Aucun bilan calculé. Calculez la ration depuis l\'onglet "Ration & Bilan" puis revenez générer le rapport.</p></div>';
     h += '</div>';
     if (obs) h += '<div class="rp-obs"><div class="rp-obs-title">Observations</div><div class="rp-obs-body">'+escHtml(obs)+'</div></div>';
-    h += '<div class="rp-footer"><span>BoviCalc Conseiller · bovicalc-app.com</span><span>'+date+'</span></div>';
+    h += '<div class="rp-footer"><span>Rumicalc Conseiller · bovicalc-app.com</span><span>'+date+'</span></div>';
     return h;
   }
 
@@ -2051,7 +2051,7 @@ function buildRapportBody() {
 
   // ── PIED DE PAGE ──────────────────────────────────────
   h += '<div class="rp-footer">'
-    + '<span>BoviCalc Conseiller'+(conseiller?' · '+escHtml(conseiller):'')+'</span>'
+    + '<span>Rumicalc Conseiller'+(conseiller?' · '+escHtml(conseiller):'')+'</span>'
     + '<span>'+date+'</span></div>';
 
   return h;
@@ -2478,4 +2478,7 @@ function transferTmsToStock() {
 </script>
 </body>
 </html>
+
+
+
 
