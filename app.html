@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rumicalc - Rationnement bovin intelligent</title>
+  <title>Rumicore - Rationnement bovin intelligent</title>
   <link rel="stylesheet" href="./style.css">
-  <link rel="icon" type="image/png" href="./Logo RumiCALC.png">
+  <link rel="icon" type="image/png" href="./Logo Rumicore.png">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* Rumicalc Auth - chargé avant tout HTML */
+/* Rumicore Auth - chargé avant tout HTML */
 var SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
 var SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
 var _supa    = null;
@@ -315,8 +315,8 @@ async function initAuth() {
 <div id="auth-wall">
   <div class="auth-wall-card">
     <div class="auth-wall-logo">
-      <img src="Logo RumiCALC.png" alt="Rumicalc" style="height:64px;width:auto;">
-      <h1 style="margin:12px 0 4px;font-size:2rem;color:var(--green-900);">Rumicalc</h1>
+      <img src="Logo Rumicore.png" alt="Rumicore" style="height:64px;width:auto;">
+      <h1 style="margin:12px 0 4px;font-size:2rem;color:var(--green-900);">Rumicore</h1>
       <p style="margin:0;color:var(--text-muted);font-size:.95rem;">Optimisation des rations pour bovins</p>
     </div>
 
@@ -367,7 +367,7 @@ async function initAuth() {
       <p style="margin:0;font-size:.75rem;color:var(--text-muted);">En vous connectant, vous acceptez nos conditions d'utilisation.</p>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);text-align:center;">
         <span style="font-size:.78rem;color:var(--text-muted);">Vous êtes conseiller agricole ?</span>
-        <a href="app_conseiller.html" style="font-size:.78rem;color:#15803d;font-weight:700;text-decoration:none;margin-left:6px;">Accéder à Rumicalc Conseiller →</a>
+        <a href="app_conseiller.html" style="font-size:.78rem;color:#15803d;font-weight:700;text-decoration:none;margin-left:6px;">Accéder à Rumicore Conseiller →</a>
       </div>
     </div>
   </div>
@@ -376,8 +376,8 @@ async function initAuth() {
 <header class="rb-header">
   <div class="rb-header-inner">
     <div class="logo-box" onclick="backToHome()" style="cursor:pointer;gap:10px;">
-      <img src="Logo RumiCALC.png" alt="Rumicalc Logo" class="logo">
-      <span style="color:#fff;font-weight:800;font-size:1.1rem;letter-spacing:-.02em;">Rumicalc</span>
+      <img src="Logo Rumicore.png" alt="Rumicore Logo" class="logo">
+      <span style="color:#fff;font-weight:800;font-size:1.1rem;letter-spacing:-.02em;">Rumicore</span>
     </div>
     <div class="header-actions">
       <button onclick="backToHome()" class="hdr-btn" title="Menu principal">
@@ -1457,7 +1457,7 @@ async function initAuth() {
 <div id="tutorial-modal" class="rb-modal hidden">
   <div class="rb-modal-card" style="max-width:560px;">
     <div class="rb-modal-header">
-      <h3>👋 Bienvenue sur Rumicalc</h3>
+      <h3>👋 Bienvenue sur Rumicore</h3>
       <span class="rb-modal-close" onclick="closeTutorial()">&times;</span>
     </div>
     <div id="tutorial-body"></div>
@@ -1472,7 +1472,7 @@ async function initAuth() {
 </div>
 
 <footer class="rb-footer">
-  <p>© 2026 - Rumicalc | Outil pour les élevages</p>
+  <p>© 2026 - Rumicore | Outil pour les élevages</p>
 </footer>
 
 <script>
@@ -1597,7 +1597,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 </script>
 <script>
   // =====================================================
-  // Rumicalc — Script principal
+  // Rumicore — Script principal
   // =====================================================
   let alimentsDb = [];
   let customFoodsDb = [];
@@ -2887,7 +2887,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const kv=(l,v)=>'<div class="rp-kv"><span class="rp-kv-label">'+l+'</span><span class="rp-kv-val">'+v+'</span></div>';
     const ir=(ico,lbl,val,cls,badge)=>'<div class="rp-indicator-row"><span class="rp-ind-icon">'+ico+'</span><span class="rp-ind-label">'+lbl+'</span><span class="rp-ind-val">'+val+'</span>'+rpBadge(cls,badge)+'</div>';
 
-    let h='<div class="rp-header"><div class="rp-logo">Rumicalc</div>'
+    let h='<div class="rp-header"><div class="rp-logo">Rumicore</div>'
      +'<div class="rp-title-block"><div class="rp-title">Rapport de ration complet</div>'
      +'<div class="rp-subtitle">'+animalLabel+(race?' \xb7 '+race:'')+' — '+date+'</div></div>'
      +'<div class="rp-grade-badge" style="color:'+gc+';">'+q.grade+'<span class="rp-grade-sub">'+q.total+'/100</span></div></div>'
@@ -3010,7 +3010,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
         + '<div style="padding:12px 16px;background:#f0fdf4;border-radius:8px;border-left:4px solid #16a34a;font-size:.9rem;color:#15803d;font-weight:600;">✅ Ration bien équilibrée — aucun ajustement nécessaire</div></div>';
     }
 
-    h+='</div><div class="rp-footer"><span>Rumicalc · bovicalc-app.com</span><span>'+date+'</span></div>';
+    h+='</div><div class="rp-footer"><span>Rumicore · Rumicore.com</span><span>'+date+'</span></div>';
     return h;
   }
 
@@ -3040,7 +3040,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
     const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
     const rows=a.items.map(i=>'<tr><td>'+i.nom+'</td><td class="rp-num">'+i.qty.toFixed(1)+'</td><td class="rp-num">'+(a.totalMS>0?(i.qty/a.totalMS*100).toFixed(0)+'%':'')+'</td><td class="rp-num">'+i.ufl.toFixed(2)+'</td><td class="rp-num">'+i.pdi.toFixed(0)+'</td></tr>').join('');
-    return '<div class="rp-header"><div class="rp-logo">Rumicalc</div><div class="rp-title-block"><div class="rp-title">Analyse de ration — apports seuls</div><div class="rp-subtitle">'+date+'</div></div></div>'
+    return '<div class="rp-header"><div class="rp-logo">Rumicore</div><div class="rp-title-block"><div class="rp-title">Analyse de ration — apports seuls</div><div class="rp-subtitle">'+date+'</div></div></div>'
      +'<div class="rp-body"><div class="rp-section"><div class="rp-section-title">Composition</div>'
      +'<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j</th><th class="rp-num">% MS</th><th class="rp-num">UFL</th><th class="rp-num">PDI g</th></tr></thead>'
      +'<tbody>'+rows+'<tr class="rp-total"><td>TOTAL</td><td class="rp-num">'+a.totalMS.toFixed(1)+'</td><td class="rp-num">100%</td><td class="rp-num">'+a.totalUFL.toFixed(2)+'</td><td class="rp-num">'+a.totalPDI.toFixed(0)+'</td></tr></tbody></table></div>'
@@ -3050,7 +3050,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
      +'<div class="rp-box"><div class="rp-box-title">PDI</div><div style="font-size:1.4rem;font-weight:800;color:#15803d;">'+a.totalPDI.toFixed(0)+' g/j</div></div>'
      +'<div class="rp-box"><div class="rp-box-title">PDI/UFL</div><div style="font-size:1.4rem;font-weight:800;color:'+(ppu>=90&&ppu<=105?'#15803d':'#b45309')+';">'+ppu.toFixed(0)+' g/UFL</div><div style="font-size:.75rem;color:#64748b;">Cible 90–105</div></div>'
      +'</div></div></div>'
-     +'<div class="rp-footer"><span>Rumicalc</span><span>'+date+'</span></div>';
+     +'<div class="rp-footer"><span>Rumicore</span><span>'+date+'</span></div>';
   }
 
   function buildRapportBilanFourrager(){
@@ -3060,7 +3060,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if(!st||st==='—'){alert('Calculez d\'abord le bilan fourrager.');return false;}
     const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
     const solde=parseFloat(bv)||0;
-    return '<div class="rp-header"><div class="rp-logo">Rumicalc</div><div class="rp-title-block"><div class="rp-title">Bilan fourrager</div><div class="rp-subtitle">'+date+'</div></div></div>'
+    return '<div class="rp-header"><div class="rp-logo">Rumicore</div><div class="rp-title-block"><div class="rp-title">Bilan fourrager</div><div class="rp-subtitle">'+date+'</div></div></div>'
      +'<div class="rp-body"><div class="rp-section"><div class="rp-section-title">R\xe9sultat</div><div class="rp-two-col">'
      +'<div class="rp-box"><div class="rp-box-title">Stock total (t MS)</div><div style="font-size:1.8rem;font-weight:800;color:#0369a1;">'+st+'</div></div>'
      +'<div class="rp-box"><div class="rp-box-title">Besoin total (t MS)</div><div style="font-size:1.8rem;font-weight:800;color:#b45309;">'+bs+'</div></div>'
@@ -3069,7 +3069,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
      +'<div style="font-size:2rem;font-weight:900;color:'+(solde>=0?'#15803d':'#b91c1c')+';">'+bv+' t MS</div>'
      +'<div style="font-size:.9rem;color:#475569;margin-top:4px;">'+(solde>=0?'✓ Stocks suffisants':'⚠ D\xe9ficit fourrager')+'</div>'
      +'</div></div></div></div>'
-     +'<div class="rp-footer"><span>Rumicalc</span><span>'+date+'</span></div>';
+     +'<div class="rp-footer"><span>Rumicore</span><span>'+date+'</span></div>';
   }
 
   function exportPDF(mode){
@@ -4173,13 +4173,13 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     {
       icon: '🐄',
       title: 'Décrivez votre animal',
-      text: 'Commencez par l\'<strong>étape 1</strong> : sélectionnez le type d\'animal (vache laitière, génisse…), entrez son poids vif, sa production et son taux butyreux.<br><br>Rumicalc calcule automatiquement ses <strong>besoins en UFL et PDI</strong>.',
+      text: 'Commencez par l\'<strong>étape 1</strong> : sélectionnez le type d\'animal (vache laitière, génisse…), entrez son poids vif, sa production et son taux butyreux.<br><br>Rumicore calcule automatiquement ses <strong>besoins en UFL et PDI</strong>.',
       tip: 'UFL = Unité Fourragère Lait (énergie) · PDI = Protéines Digestibles dans l\'Intestin',
     },
     {
       icon: '🌾',
       title: 'Composez la ration',
-      text: 'À l\'<strong>étape 2</strong>, ajoutez vos aliments ligne par ligne : tapez le nom (ex: "Ensilage maïs") et la quantité en kg de matière sèche par jour.<br><br>Utilisez le bouton <strong>🤖 Auto</strong> pour laisser Rumicalc composer une ration de base automatiquement.',
+      text: 'À l\'<strong>étape 2</strong>, ajoutez vos aliments ligne par ligne : tapez le nom (ex: "Ensilage maïs") et la quantité en kg de matière sèche par jour.<br><br>Utilisez le bouton <strong>🤖 Auto</strong> pour laisser Rumicore composer une ration de base automatiquement.',
       tip: 'Les aliments sont issus des tables INRA. Vous pouvez aussi créer vos propres aliments avec vos analyses fourragères.',
     },
     {
@@ -4191,7 +4191,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     {
       icon: '💾',
       title: 'Sauvegardez vos rations',
-      text: 'Cliquez sur <strong>💾 Sauvegarder</strong> dans le menu pour enregistrer la ration. Vous pourrez la recharger plus tard ou comparer deux rations avec <strong>⚖️ Comparer</strong>.<br><br>Rumicalc sauvegarde aussi automatiquement votre saisie en cours toutes les 30 secondes.',
+      text: 'Cliquez sur <strong>💾 Sauvegarder</strong> dans le menu pour enregistrer la ration. Vous pourrez la recharger plus tard ou comparer deux rations avec <strong>⚖️ Comparer</strong>.<br><br>Rumicore sauvegarde aussi automatiquement votre saisie en cours toutes les 30 secondes.',
       tip: 'Accès complet (Ration de A à Z, Bilan fourrager…) avec le plan Pro.',
     },
   ];
@@ -4498,6 +4498,9 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
 </body>
 </html>
+
+
+
 
 
 
