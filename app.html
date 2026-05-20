@@ -194,8 +194,7 @@ async function logoutUser() {
   try { if (supa) await supa.auth.signOut(); } catch(e) {}
   currentUser = null; userPlan = 'free';
   closeAccountModal();
-  // Rechargement propre — supprime tout état résiduel en mémoire
-  window.location.reload();
+  window.location.href = 'index.html';
 }
 function togglePwd(id, btn) {
   var inp = _$$(id); if (!inp) return;
@@ -434,6 +433,14 @@ async function initAuth() {
       <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin-bottom:6px;">Plan Pro</div>
       <h2 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Bilan fourrager</h2>
       <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:20px;">Comparez vos stocks fourragers aux besoins de votre troupeau sur la période hivernale.</p>
+      <button class="rb-btn" style="width:100%;">Ouvrir →</button>
+    </article>
+
+    <article class="rb-card" data-section="rapports" data-requires-pro="true" style="cursor:pointer;border:2px solid #e2e8f0;transition:border-color .2s,box-shadow .2s;">
+      <div style="font-size:2.4rem;margin-bottom:14px;">📄</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin-bottom:6px;">Plan Pro</div>
+      <h2 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Mes rapports</h2>
+      <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:20px;">Exportez en PDF vos rations, bilans nutritionnels, analyses de coûts et bilan fourrager.</p>
       <button class="rb-btn" style="width:100%;">Ouvrir →</button>
     </article>
 
@@ -1082,7 +1089,7 @@ async function initAuth() {
       <div class="rb-panel">
         <div style="margin-bottom:16px;">
           <h4 style="margin:0 0 4px;">🐄 Mon troupeau</h4>
-          <p style="margin:0;font-size:.85rem;color:var(--text-muted);">Définissez la taille et les besoins de votre troupeau pour la période de stockage.</p>
+          <p style="margin:0;font-size:.85rem;color:var(--text-muted);">Définissez la composition et les besoins de votre troupeau pour la période de stockage.</p>
         </div>
         <div class="rb-panel" style="background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1092,21 +1099,31 @@ async function initAuth() {
             <button type="button" id="btn-delete-herd-profile" class="rb-btn" style="background:var(--danger);color:#fff;white-space:nowrap;">🗑️</button>
           </div>
         </div>
-        <div class="rb-form-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+        <div class="rb-form-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
           <div class="rb-form-group">
-            <label>Nombre d'animaux</label>
-            <input type="number" id="bf-nb-vaches" min="1" placeholder="Ex : 50">
-            <small class="form-hint">Vaches laitières ou équivalent</small>
+            <label>Nb vaches laitières (VL)</label>
+            <input type="number" id="bf-nb-vl" min="0" placeholder="Ex : 40">
+            <small class="form-hint">Vaches en production ou taries</small>
           </div>
           <div class="rb-form-group">
-            <label>Durée de stockage (jours)</label>
-            <input type="number" id="bf-duree" min="1" placeholder="Ex : 150">
+            <label>Consommation VL (kg MS/j)</label>
+            <input type="number" id="bf-conso-vl" value="20" min="0" step="0.5">
+            <small class="form-hint">Vache 30 L/j ≈ 20 kg MS · tarie ≈ 13 kg</small>
+          </div>
+          <div class="rb-form-group">
+            <label>Nb bovins viande / génisses</label>
+            <input type="number" id="bf-nb-bv" min="0" placeholder="Ex : 10">
+            <small class="form-hint">Animaux d'élevage ou engraissement</small>
+          </div>
+          <div class="rb-form-group">
+            <label>Consommation BV (kg MS/j)</label>
+            <input type="number" id="bf-conso-bv" value="12" min="0" step="0.5">
+            <small class="form-hint">Génisse ≈ 10 kg · taureau ≈ 14 kg</small>
+          </div>
+          <div class="rb-form-group">
+            <label>Durée hivernage (jours)</label>
+            <input type="number" id="bf-duree" value="180" min="1" placeholder="Ex : 180">
             <small class="form-hint">Période hivernale typique : 150–180 j</small>
-          </div>
-          <div class="rb-form-group">
-            <label>MS ingérée / animal / jour (kg)</label>
-            <input type="number" id="bf-ms-j" min="0" step="0.1" placeholder="Ex : 18">
-            <small class="form-hint">Vache laitière 30 L/j ≈ 18–20 kg MS</small>
           </div>
         </div>
         <div class="rb-form-actions" style="margin-top:8px;">
@@ -1124,11 +1141,11 @@ async function initAuth() {
         <button type="button" id="btn-export-bf-pdf" class="rb-btn" onclick="exportPDF('bilan-fourrager')">📄 PDF</button>
       </div>
       <div id="resultat-bilan-fourrager" class="hidden" style="margin-top:8px;">
-        <!-- Résumé 3 cartes -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
+        <!-- Résumé 4 cartes -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:24px;">
           <div id="bf-card-stock" style="background:#eff6ff;border-radius:14px;padding:20px;text-align:center;border-left:5px solid #3b82f6;">
             <div id="bf-stock-total" style="font-size:2rem;font-weight:900;color:#1d4ed8;">—</div>
-            <div style="font-size:.82rem;font-weight:600;color:#3b82f6;margin-top:4px;">t MS — Stock total</div>
+            <div style="font-size:.82rem;font-weight:600;color:#3b82f6;margin-top:4px;">t MS — Stock disponible</div>
           </div>
           <div id="bf-card-besoin" style="background:#fff7ed;border-radius:14px;padding:20px;text-align:center;border-left:5px solid #f97316;">
             <div id="bf-besoin-total" style="font-size:2rem;font-weight:900;color:#c2410c;">—</div>
@@ -1137,6 +1154,10 @@ async function initAuth() {
           <div id="bf-card-bilan" style="border-radius:14px;padding:20px;text-align:center;border-left:5px solid #15803d;background:#f0fdf4;">
             <div id="bf-bilan-value" style="font-size:2rem;font-weight:900;color:#15803d;">—</div>
             <div style="font-size:.82rem;font-weight:600;color:#15803d;margin-top:4px;">t MS — Solde</div>
+          </div>
+          <div id="bf-card-couverture" style="border-radius:14px;padding:20px;text-align:center;border-left:5px solid #8b5cf6;background:#f5f3ff;">
+            <div id="bf-couverture-value" style="font-size:2rem;font-weight:900;color:#7c3aed;">—</div>
+            <div style="font-size:.82rem;font-weight:600;color:#8b5cf6;margin-top:4px;">% — Couverture</div>
           </div>
         </div>
         <!-- Visualisation silos -->
@@ -1280,6 +1301,63 @@ async function initAuth() {
       </div>
     </div>
   </section>
+
+  <!-- ====== MES RAPPORTS ====== -->
+  <section id="section-rapports" class="rb-section-detail hidden">
+    <div class="rb-section-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">
+            📄 Plan Pro
+          </div>
+          <h2 style="margin:0 0 6px;font-size:1.6rem;font-weight:900;color:var(--green-900);">Mes rapports</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:.9rem;">Exportez vos analyses en PDF — chaque rapport se génère à partir des données calculées dans la session en cours.</p>
+        </div>
+        <button class="rb-btn rb-btn-ghost" data-close>← Retour</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:8px;">
+
+      <!-- Rapport Ration A→Z -->
+      <div class="rb-panel" style="border-left:4px solid #15803d;">
+        <div style="font-size:1.8rem;margin-bottom:10px;">🐄</div>
+        <h4 style="margin:0 0 6px;font-size:1rem;color:var(--green-900);">Bilan ration de A à Z</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">Animal, besoins, composition de ration, bilan nutritionnel complet UFL/PDI et score qualité.</p>
+        <div id="rp-status-az" style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">⚠️ Calculez d'abord le bilan (Étapes 1 → 3).</div>
+        <button class="rb-btn rb-btn-primary" style="width:100%;" onclick="exportPDF('ration-az')">📄 Exporter en PDF</button>
+      </div>
+
+      <!-- Rapport Ration seule -->
+      <div class="rb-panel" style="border-left:4px solid #f97316;">
+        <div style="font-size:1.8rem;margin-bottom:10px;">🌾</div>
+        <h4 style="margin:0 0 6px;font-size:1rem;color:var(--green-900);">Analyse de ration (apports)</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">Apports UFL, PDI, MS et glucides fermentescibles de votre ration, sans les besoins animaux.</p>
+        <div id="rp-status-seule" style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">⚠️ Calculez d'abord les apports (section "Analyser ma ration").</div>
+        <button class="rb-btn" style="width:100%;border:2px solid #f97316;color:#f97316;" onclick="exportPDF('ration-seule')">📄 Exporter en PDF</button>
+      </div>
+
+      <!-- Rapport Coûts -->
+      <div class="rb-panel" style="border-left:4px solid #8b5cf6;">
+        <div style="font-size:1.8rem;margin-bottom:10px;">💰</div>
+        <h4 style="margin:0 0 6px;font-size:1rem;color:var(--green-900);">Analyse des coûts</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">Coût de la ration au kg MS, au litre de lait et par vache laitière par jour.</p>
+        <div id="rp-status-cout" style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">⚠️ Calculez d'abord les coûts (Étape 4).</div>
+        <button class="rb-btn" style="width:100%;border:2px solid #8b5cf6;color:#8b5cf6;" onclick="exportPDF('couts')">📄 Exporter en PDF</button>
+      </div>
+
+      <!-- Rapport Bilan fourrager -->
+      <div class="rb-panel" style="border-left:4px solid #3b82f6;">
+        <div style="font-size:1.8rem;margin-bottom:10px;">📦</div>
+        <h4 style="margin:0 0 6px;font-size:1rem;color:var(--green-900);">Bilan fourrager</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">Stocks fourragers, besoins du troupeau et solde sur la période d'hivernage.</p>
+        <div id="rp-status-bf" style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">⚠️ Calculez d'abord le bilan fourrager.</div>
+        <button class="rb-btn" style="width:100%;border:2px solid #3b82f6;color:#3b82f6;" onclick="exportPDF('bilan-fourrager')">📄 Exporter en PDF</button>
+      </div>
+
+    </div>
+  </section>
+
 </main>
 
 <!-- ====== MODAL ALIMENT PERSONNALISÉ ====== -->
@@ -1678,7 +1756,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   // -- Navigation principale
   const homeGrid = $('home-grid');
-  const sectionIds = ['ration-a-z','besoins','ration-seule','bilan-fourrager'];
+  const sectionIds = ['ration-a-z','besoins','ration-seule','bilan-fourrager','rapports'];
 
   function showSection(id) {
     homeGrid?.classList.add('hidden');
@@ -2936,7 +3014,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
      +'<div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border-radius:8px;border-left:5px solid '+gc+';display:flex;align-items:center;gap:14px;">'
      +'<div style="font-size:1.8rem;font-weight:900;color:'+gc+';font-family:serif;">'+q.grade+'</div>'
      +'<div><div style="font-weight:700;color:#14532d;">Score : '+q.total+'/100</div>'
-     +'<div style="font-size:.78rem;color:#475569;">\xc9nergie '+q.eS+'/30 \xb7 PDI '+q.pS+'/30 \xb7 \xc9quilibre '+q.bS+'/20 \xb7 Acidose '+q.aS+'/10 \xb7 Ingestion '+q.cS+'/10</div>'
+     +'<div style="font-size:.78rem;color:#475569;">\xc9nergie '+q.eS+'/35 \xb7 PDI '+q.pS+'/35 \xb7 \xc9quilibre E/P '+q.bS+'/20 \xb7 Fourrages '+q.aS+'/10</div>'
      +'<div style="margin-top:6px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">'
      +'<div style="width:'+q.total+'%;height:100%;background:'+gc+';border-radius:3px;"></div></div></div></div>'
      +'</div>';
@@ -3194,7 +3272,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     row.className = 'rb-ration-row';
     row.style.gridTemplateColumns = '1fr 130px 110px 46px';
     row.innerHTML = `
-      <input list="aliments-list" placeholder="Fourrage..." autocomplete="off">
+      <input type="text" placeholder="Maïs ensilage…" autocomplete="off">
       <input type="number" placeholder="t brutes" step="0.1" min="0">
       <input type="number" placeholder="% MS" step="1" min="0" max="100">
       <button type="button" onclick="this.closest('.rb-ration-row').remove()"
@@ -3222,25 +3300,38 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       const inp = row.querySelectorAll('input');
       stockTMS += (parseFloat(inp[1]?.value)||0) * ((parseFloat(inp[2]?.value)||0)/100);
     });
-    const nbV    = parseFloat($('bf-nb-vaches')?.value)||0;
-    const duree  = parseFloat($('bf-duree')?.value)||0;
-    const msJ    = parseFloat($('bf-ms-j')?.value)||0;
-    const besoin = nbV * duree * msJ / 1000;
+    const nbVL   = parseFloat($('bf-nb-vl')?.value)||0;
+    const consoVL= parseFloat($('bf-conso-vl')?.value)||20;
+    const nbBV   = parseFloat($('bf-nb-bv')?.value)||0;
+    const consoBV= parseFloat($('bf-conso-bv')?.value)||12;
+    const duree  = parseFloat($('bf-duree')?.value)||180;
+    const consoJournaliere = nbVL * consoVL + nbBV * consoBV;
+    const besoin = consoJournaliere * duree / 1000;
     const solde  = stockTMS - besoin;
     const pct    = besoin > 0 ? stockTMS / besoin * 100 : 100;
-    const daysLeft = msJ > 0 && nbV > 0 ? stockTMS * 1000 / (nbV * msJ) : 0;
+    const daysLeft = consoJournaliere > 0 ? stockTMS * 1000 / consoJournaliere : 0;
 
     $('resultat-bilan-fourrager')?.classList.remove('hidden');
 
-    // Cartes
+    // Carte stock
     if($('bf-stock-total'))  $('bf-stock-total').textContent  = stockTMS.toFixed(1);
+    // Carte besoin
     if($('bf-besoin-total')) $('bf-besoin-total').textContent = besoin.toFixed(1);
+    // Carte solde
     const bilVal = $('bf-bilan-value');
     if (bilVal) {
       bilVal.textContent = (solde>=0?'+':'')+solde.toFixed(1);
       const bilCard = $('bf-card-bilan');
       if (bilCard) { bilCard.style.background = solde>=0?'#f0fdf4':'#fef2f2'; bilCard.style.borderLeftColor = solde>=0?'#15803d':'#dc2626'; }
-      if (bilVal) bilVal.style.color = solde>=0?'#15803d':'#dc2626';
+      bilVal.style.color = solde>=0?'#15803d':'#dc2626';
+    }
+    // Carte couverture %
+    const covVal = $('bf-couverture-value');
+    if (covVal) {
+      covVal.textContent = pct.toFixed(0)+'%';
+      const covCard = $('bf-card-couverture');
+      if (covCard) { covCard.style.background = pct>=100?'#f5f3ff':'#fef2f2'; covCard.style.borderLeftColor = pct>=100?'#8b5cf6':'#dc2626'; }
+      covVal.style.color = pct>=100?'#7c3aed':'#dc2626';
     }
     // Silos visuels
     const siloStock = $('bf-silo-stock');
@@ -3251,9 +3342,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       siloStock.style.background = solde>=0?'linear-gradient(180deg,#60a5fa,#3b82f6)':'linear-gradient(180deg,#f87171,#dc2626)';
     }
     if ($('bf-silo-stock-pct')) $('bf-silo-stock-pct').textContent = stockTMS.toFixed(1)+' t';
-    if (siloB) {
-      siloB.style.height = (besoin/maxTMS*100).toFixed(0)+'%';
-    }
+    if (siloB) siloB.style.height = (besoin/maxTMS*100).toFixed(0)+'%';
     if ($('bf-silo-besoin-pct')) $('bf-silo-besoin-pct').textContent = besoin.toFixed(1)+' t';
     if ($('bf-stock-lbl')) $('bf-stock-lbl').textContent = stockTMS.toFixed(1)+' t MS';
     if ($('bf-besoin-lbl')) $('bf-besoin-lbl').textContent = besoin.toFixed(1)+' t MS';
@@ -3262,17 +3351,20 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if (msg) {
       msg.style.color = solde>=0?'#15803d':'#dc2626';
       msg.textContent = solde>=0
-        ? `✅ Stocks suffisants — excédent de ${Math.abs(solde).toFixed(1)} t MS`
-        : `⚠️ Déficit fourrager de ${Math.abs(solde).toFixed(1)} t MS`;
+        ? `✅ Stocks suffisants — excédent de ${Math.abs(solde).toFixed(1)} t MS (couverture ${pct.toFixed(0)} %)`
+        : `⚠️ Déficit fourrager de ${Math.abs(solde).toFixed(1)} t MS — couverture à ${pct.toFixed(0)} %`;
     }
     const daysEl = $('bf-days-remaining');
-    if (daysEl && nbV > 0 && msJ > 0) {
-      daysEl.textContent = `Stock suffisant pour ${daysLeft.toFixed(0)} jours (besoin : ${duree} jours)`;
+    if (daysEl) {
+      daysEl.textContent = consoJournaliere > 0
+        ? `Stock suffisant pour ${daysLeft.toFixed(0)} jours d'hivernage (période visée : ${duree} j)`
+        : '';
     }
-    // Vaches
+    // Vaches (représentation visuelle)
     const cowRow = $('bf-cow-row');
-    if (cowRow && nbV > 0) {
-      const n = Math.min(nbV, 12), cov = Math.round(n * Math.min(1, pct/100));
+    const nbTotal = nbVL + nbBV;
+    if (cowRow && nbTotal > 0) {
+      const n = Math.min(Math.round(nbTotal), 12), cov = Math.round(n * Math.min(1, pct/100));
       cowRow.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">'
         + Array.from({length:n},(_,i)=>`<span style="font-size:1.4rem;opacity:${i<cov?1:.25};" title="${i<cov?'Besoins couverts':'Déficit'}">🐄</span>`).join('')
         + `<span style="font-size:.75rem;color:#64748b;width:100%;text-align:center;margin-top:4px;">${cov} / ${n} animaux couverts (${pct.toFixed(0)} %)</span></div>`;
@@ -3447,15 +3539,21 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   $('btn-save-herd-profile')?.addEventListener('click',()=>{
     const name=prompt('Nom du profil troupeau :'); if(!name?.trim()) return;
     const p=loadLS(LS.herdProfiles,{});
-    p[name.trim()]={nbVaches:$('bf-nb-vaches')?.value,duree:$('bf-duree')?.value,msJour:$('bf-ms-j')?.value};
+    p[name.trim()]={
+      nbVL:$('bf-nb-vl')?.value, consoVL:$('bf-conso-vl')?.value,
+      nbBV:$('bf-nb-bv')?.value, consoBV:$('bf-conso-bv')?.value,
+      duree:$('bf-duree')?.value
+    };
     saveLS(LS.herdProfiles,p); updateHerdProfiles(); $('herd-profiles').value=name.trim();
   });
   $('btn-load-herd-profile')?.addEventListener('click',()=>{
     const name=$('herd-profiles')?.value; if(!name) return;
     const p=loadLS(LS.herdProfiles,{})[name]; if(!p) return;
-    if($('bf-nb-vaches')) $('bf-nb-vaches').value=p.nbVaches||'';
-    if($('bf-duree'))     $('bf-duree').value=p.duree||'';
-    if($('bf-ms-j'))      $('bf-ms-j').value=p.msJour||'';
+    if($('bf-nb-vl'))    $('bf-nb-vl').value=p.nbVL||p.nbVaches||'';
+    if($('bf-conso-vl')) $('bf-conso-vl').value=p.consoVL||p.msJour||'20';
+    if($('bf-nb-bv'))    $('bf-nb-bv').value=p.nbBV||'';
+    if($('bf-conso-bv')) $('bf-conso-bv').value=p.consoBV||'12';
+    if($('bf-duree'))    $('bf-duree').value=p.duree||'180';
   });
   $('btn-delete-herd-profile')?.addEventListener('click',()=>{
     const name=$('herd-profiles')?.value; if(!name||!confirm('Supprimer "'+name+'" ?')) return;
@@ -3637,34 +3735,38 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const rPDI = b.bPDI > 0 ? a.totalPDI/b.bPDI : 0;
     const ppu  = a.totalUFL > 0 ? a.totalPDI/a.totalUFL : 0;
 
-    // Énergie — 30 pts
-    const eS = rUFL>=0.93&&rUFL<=1.08 ? 30 : rUFL>=0.88&&rUFL<=1.13 ? 20 : rUFL>=0.80&&rUFL<=1.20 ? 10 : 0;
-    // PDI — 30 pts
-    const pS = rPDI>=0.92&&rPDI<=1.10 ? 30 : rPDI>=0.85&&rPDI<=1.18 ? 20 : rPDI>=0.75&&rPDI<=1.25 ? 10 : 0;
-    // Équilibre E/P — 20 pts
-    const bS = ppu>=90&&ppu<=105 ? 20 : ppu>=82&&ppu<=115 ? 12 : ppu>=75&&ppu<=125 ? 5 : 0;
-    // Acidose — 10 pts
-    let foragekgMS2=0;
-    a.items.forEach(i=>{ if(getFeedCategory(i.nom)==='fourrage') foragekgMS2+=i.qty; });
-    const pctC2 = a.totalMS>0 ? (1-foragekgMS2/a.totalMS)*100 : 0;
-    const aS = pctC2<40 ? 10 : pctC2<50 ? 6 : pctC2<60 ? 3 : 0;
-    // Ingestion — 10 pts
-    const cS = b.ingestionCapacite>0 ? (a.totalMS/b.ingestionCapacite<=1.03 ? 10 : a.totalMS/b.ingestionCapacite<=1.10 ? 6 : 2) : 10;
+    // Énergie — 35 pts (seuils INRA 2018 : optimal 95–105 %, acceptable 90–110 %)
+    const eS = rUFL>=0.95&&rUFL<=1.05 ? 35 : rUFL>=0.90&&rUFL<=1.10 ? 25 : rUFL>=0.85&&rUFL<=1.15 ? 12 : 0;
+    // PDI — 35 pts
+    const pS = rPDI>=0.95&&rPDI<=1.05 ? 35 : rPDI>=0.90&&rPDI<=1.10 ? 25 : rPDI>=0.85&&rPDI<=1.15 ? 12 : 0;
+    // Équilibre E/P (g PDI / UFL) — 20 pts (cible 90–110 g/UFL)
+    const bS = ppu>=90&&ppu<=110 ? 20 : ppu>=83&&ppu<=120 ? 12 : ppu>=75&&ppu<=130 ? 5 : 0;
+    // Part concentrés (risque acidose) — 10 pts (fourrages ≥ 55 % de la MS)
+    let forageMS=0;
+    a.items.forEach(i=>{ if(getFeedCategory(i.nom)==='fourrage') forageMS+=i.qty; });
+    const pctConc = a.totalMS>0 ? (1-forageMS/a.totalMS)*100 : 0;
+    const aS = pctConc<35 ? 10 : pctConc<45 ? 6 : pctConc<55 ? 3 : 0;
 
-    const total = eS+pS+bS+aS+cS;
-    const grade = total>=85?'A':total>=68?'B':total>=48?'C':'D';
-    return { total, grade, eS, pS, bS, aS, cS };
+    const total = eS+pS+bS+aS;
+    // A = excellent (≥88/100) · B = bon (≥65) · C = acceptable (≥38) · D = à corriger
+    const grade = total>=88?'A':total>=65?'B':total>=38?'C':'D';
+    return { total, grade, eS, pS, bS, aS };
   }
 
   function renderQualityScore(a, b) {
     const q = computeQualityScore(a, b);
+    const rUFL = b.bUFL > 0 ? a.totalUFL/b.bUFL : 0;
+    const rPDI = b.bPDI > 0 ? a.totalPDI/b.bPDI : 0;
+    const ppu  = a.totalUFL > 0 ? a.totalPDI/a.totalUFL : 0;
+    let forageMS2=0; a.items.forEach(i=>{ if(getFeedCategory(i.nom)==='fourrage') forageMS2+=i.qty; });
+    const pctConc = a.totalMS>0 ? (1-forageMS2/a.totalMS)*100 : 0;
     const colors = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#b91c1c' };
     const bg     = { A:'#dcfce7', B:'#dbeafe', C:'#fef3c7', D:'#fee2e2' };
     const msgs   = {
-      A:'Ration excellente — tous les indicateurs sont dans les cibles optimales.',
-      B:'Bonne ration — quelques ajustements mineurs amélioreraient encore l\'équilibre.',
-      C:'Ration acceptable — des déséquilibres notables nécessitent des corrections.',
-      D:'Ration à revoir — des déficits ou excès importants peuvent nuire aux performances.'
+      A:'Ration excellente — couverture optimale en énergie, protéines et équilibre E/P.',
+      B:'Bonne ration — tous les critères principaux sont respectés, quelques ajustements possibles.',
+      C:'Ration acceptable — des déséquilibres doivent être corrigés pour éviter des pertes de production.',
+      D:'Ration à revoir — déficits ou excès significatifs nuisant aux performances et à la santé.'
     };
     const cont = $('bilan-score'); if (!cont) return;
     const bar = (score, max, color) => `<div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:3px;">
@@ -3684,11 +3786,10 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
           </div>
         </div>
         <div class="quality-breakdown">
-          <div class="qb-item"><span>⚡ Énergie</span><span>${q.eS}/30</span>${bar(q.eS,30,colors[q.grade])}</div>
-          <div class="qb-item"><span>🧬 Protéines</span><span>${q.pS}/30</span>${bar(q.pS,30,colors[q.grade])}</div>
-          <div class="qb-item"><span>⚖️ Équilibre E/P</span><span>${q.bS}/20</span>${bar(q.bS,20,colors[q.grade])}</div>
-          <div class="qb-item"><span>🔥 Acidose</span><span>${q.aS}/10</span>${bar(q.aS,10,colors[q.grade])}</div>
-          <div class="qb-item"><span>🐄 Ingestion</span><span>${q.cS}/10</span>${bar(q.cS,10,colors[q.grade])}</div>
+          <div class="qb-item"><span>⚡ Énergie (${(rUFL*100).toFixed(0)}%)</span><span>${q.eS}/35</span>${bar(q.eS,35,colors[q.grade])}</div>
+          <div class="qb-item"><span>🧬 Protéines PDI (${(rPDI*100).toFixed(0)}%)</span><span>${q.pS}/35</span>${bar(q.pS,35,colors[q.grade])}</div>
+          <div class="qb-item"><span>⚖️ Équilibre PDI/UFL (${ppu.toFixed(0)} g)</span><span>${q.bS}/20</span>${bar(q.bS,20,colors[q.grade])}</div>
+          <div class="qb-item"><span>🌾 Part fourrages (${(100-pctConc).toFixed(0)}% MS)</span><span>${q.aS}/10</span>${bar(q.aS,10,colors[q.grade])}</div>
         </div>
       </div>`;
     cont.classList.remove('hidden');
@@ -3848,7 +3949,26 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   }
 
   function arRunOptimize() {
-    if (!arBesoins) { alert('Calculez d\'abord les besoins (Étape 1).'); return; }
+    // Récupérer les besoins depuis lastB si arBesoins pas encore défini
+    if (!arBesoins && lastB) arBesoins = lastB;
+    if (!arBesoins) {
+      // Essayer de calculer depuis le formulaire étape 1
+      var type0 = ($('type-animal')||{}).value;
+      var pv0   = parseFloat(($('poids-vif')||{}).value);
+      if (!type0 || !pv0) {
+        alert('Calculez d\'abord les besoins (Étape 1) avant de lancer l\'optimisation automatique.');
+        return;
+      }
+      arBesoins = computeBesoins(
+        pv0,
+        parseFloat(($('production-lait')||{}).value)||0,
+        ($('activite')||{}).value||'stabulation',
+        parseFloat(($('tb')||{}).value)||0,
+        parseFloat(($('tp')||{}).value)||0,
+        type0,
+        parseFloat(($('gmq')||{}).value)||0
+      );
+    }
 
     // Collect selected feeds
     var selected = [];
@@ -3876,28 +3996,6 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
     var status = $('ar-status');
     if (status) status.textContent = 'Calcul en cours…';
-
-    // Use besoins from wizard step 1 if already computed, otherwise compute
-    if (!arBesoins && lastB) arBesoins = lastB;
-    if (!arBesoins) {
-      // Try to compute from wizard form
-      var type = ($('type-animal')||{}).value;
-      var pv   = parseFloat(($('poids-vif')||{}).value);
-      if (!type || !pv) {
-        alert('Renseignez d\'abord les données animal (Étape 1) pour calculer les besoins.');
-        if (status) status.textContent = '';
-        return;
-      }
-      arBesoins = computeBesoins(
-        pv,
-        parseFloat(($('production-lait')||{}).value)||0,
-        ($('activite')||{}).value||'stabulation',
-        parseFloat(($('tb')||{}).value)||0,
-        parseFloat(($('tp')||{}).value)||0,
-        type,
-        parseFloat(($('gmq')||{}).value)||0
-      );
-    }
 
     var result = arOptimize(selected, arBesoins);
     arOptResult = { feeds: selected, qty: result.qty, besoins: arBesoins };
@@ -4036,6 +4134,8 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   updateAnimalProfileSelects();
   addLine('ration-lines','aliments-list');
   addLine('ration-only-lines','aliments-list-ration-only');
+  // Pré-remplir 3 lignes de stock dans le bilan fourrager
+  addStockLine(); addStockLine(); addStockLine();
   refreshDashboard();
 
   // =====================================================
