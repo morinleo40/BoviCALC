@@ -1031,7 +1031,7 @@ async function initAuth() {
     <div id="resultat-ration-only" class="rb-panel hidden"></div>
   </section>
 
-  <!-- Bilan fourrager -->
+  <!-- ===== BILAN FOURRAGER ===== -->
   <section id="section-bilan-fourrager" class="rb-section-detail hidden">
     <div class="rb-section-header">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
@@ -1046,51 +1046,34 @@ async function initAuth() {
       </div>
     </div>
 
-    <!-- Onglets modernisés -->
-    <div class="bf-tabs-nav" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
-      <button class="bf-tab-btn active" data-tab="bf-stocks" onclick="bfTab(this,'bf-stocks')" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:2px solid #15803d;background:#15803d;color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s;">
-        <span style="background:rgba(255,255,255,.25);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;">1</span> 📦 Stocks
-      </button>
-      <button class="bf-tab-btn" data-tab="bf-troupeau" onclick="bfTab(this,'bf-troupeau')" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s;">
-        <span style="background:#f1f5f9;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;">2</span> 🐄 Troupeau
-      </button>
-      <button class="bf-tab-btn" data-tab="bf-resultat" onclick="bfTab(this,'bf-resultat')" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s;">
-        <span style="background:#f1f5f9;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;">3</span> 📊 Résultat
-      </button>
-      <button class="bf-tab-btn" data-tab="bf-calcul-tms" onclick="bfTab(this,'bf-calcul-tms')" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s;">
-        <span style="background:#f1f5f9;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;">📐</span> Calculateur de silo
-      </button>
+    <!-- Navigation onglets (même structure que conseiller) -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+      <button class="bf-btn active" id="bfbtn-stocks"   onclick="bfSwitch('stocks',this)">📦 Stocks</button>
+      <button class="bf-btn"        id="bfbtn-troupeau" onclick="bfSwitch('troupeau',this)">🐄 Troupeau</button>
+      <button class="bf-btn"        id="bfbtn-resultat" onclick="bfSwitch('resultat',this)">📊 Résultat</button>
+      <button class="bf-btn"        id="bfbtn-silo"     onclick="bfSwitch('silo',this)">📐 Calculateur silo</button>
     </div>
 
-    <!-- Onglet 1 : Stocks -->
-    <div id="tab-bf-stocks" class="rb-tab-content active">
+    <!-- Onglet Stocks -->
+    <div id="bf-stocks">
       <div class="rb-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-          <div>
-            <h4 style="margin:0 0 4px;">📦 Mes stocks de fourrages</h4>
-            <p style="margin:0;font-size:.85rem;color:var(--text-muted);">Saisissez vos stocks en tonnes brutes et leur teneur en matière sèche.</p>
-          </div>
-          <button class="rb-btn rb-btn-ghost" style="font-size:.8rem;" onclick="bfTab(document.querySelector('[data-tab=bf-calcul-tms]'),'bf-calcul-tms')">📐 Calculer la TMS d'un silo →</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <div class="rb-panel-title">📦 Stocks de fourrages</div>
+          <button class="rb-btn rb-btn-ghost" style="font-size:.82rem;" onclick="addBfStock()">+ Ajouter</button>
         </div>
-        <div class="rb-ration-lines">
-          <div class="rb-ration-lines-head" style="grid-template-columns:1fr 130px 110px 50px;background:#f0fdf4;border-radius:8px;padding:8px 12px;font-weight:700;font-size:.82rem;color:#15803d;">
-            <div>Fourrage</div><div>t brutes</div><div>% MS</div><div></div>
-          </div>
-          <div id="stock-lines"></div>
+        <div style="display:grid;grid-template-columns:1fr 110px 90px 40px;gap:6px;margin-bottom:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);padding:0 4px;">
+          <span>Fourrage</span><span>t brutes</span><span>% MS</span><span></span>
         </div>
-        <div class="rb-form-actions" style="margin-top:14px;">
-          <button type="button" id="btn-add-stock" class="rb-btn">+ Ajouter un fourrage</button>
-          <button type="button" class="rb-btn rb-btn-primary" onclick="bfTab(document.querySelector('[data-tab=bf-troupeau]'),'bf-troupeau')">Étape suivante : Troupeau →</button>
-        </div>
+        <div id="bf-stock-lines"></div>
+        <button class="rb-btn rb-btn-primary" style="margin-top:12px;" onclick="bfSwitch('troupeau',document.getElementById('bfbtn-troupeau'))">Étape suivante →</button>
       </div>
     </div>
 
-    <!-- Onglet 2 : Troupeau -->
-    <div id="tab-bf-troupeau" class="rb-tab-content" style="display:none;">
+    <!-- Onglet Troupeau -->
+    <div id="bf-troupeau" style="display:none;">
       <div class="rb-panel">
-        <div style="margin-bottom:16px;">
-          <h4 style="margin:0 0 4px;">🐄 Mon troupeau</h4>
-          <p style="margin:0;font-size:.85rem;color:var(--text-muted);">Définissez la composition et les besoins de votre troupeau pour la période de stockage.</p>
+        <div style="margin-bottom:14px;">
+          <div class="rb-panel-title">🐄 Besoins du troupeau</div>
         </div>
         <div class="rb-panel" style="background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1100,205 +1083,70 @@ async function initAuth() {
             <button type="button" id="btn-delete-herd-profile" class="rb-btn" style="background:var(--danger);color:#fff;white-space:nowrap;">🗑️</button>
           </div>
         </div>
-        <div class="rb-form-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
-          <div class="rb-form-group">
-            <label>Nb vaches laitières (VL)</label>
-            <input type="number" id="bf-nb-vl" min="0" placeholder="Ex : 40">
-            <small class="form-hint">Vaches en production ou taries</small>
-          </div>
-          <div class="rb-form-group">
-            <label>Consommation VL (kg MS/j)</label>
-            <input type="number" id="bf-conso-vl" value="20" min="0" step="0.5">
-            <small class="form-hint">Vache 30 L/j ≈ 20 kg MS · tarie ≈ 13 kg</small>
-          </div>
-          <div class="rb-form-group">
-            <label>Nb bovins viande / génisses</label>
-            <input type="number" id="bf-nb-bv" min="0" placeholder="Ex : 10">
-            <small class="form-hint">Animaux d'élevage ou engraissement</small>
-          </div>
-          <div class="rb-form-group">
-            <label>Consommation BV (kg MS/j)</label>
-            <input type="number" id="bf-conso-bv" value="12" min="0" step="0.5">
-            <small class="form-hint">Génisse ≈ 10 kg · taureau ≈ 14 kg</small>
-          </div>
-          <div class="rb-form-group">
-            <label>Durée hivernage (jours)</label>
-            <input type="number" id="bf-duree" value="180" min="1" placeholder="Ex : 180">
-            <small class="form-hint">Période hivernale typique : 150–180 j</small>
-          </div>
+        <div class="rb-form-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+          <div class="rb-form-group"><label>Nb vaches laitières</label><input type="number" class="rb-input" id="bf-nb-vl" min="0" placeholder="0"></div>
+          <div class="rb-form-group"><label>Consommation VL (kg MS/j)</label><input type="number" class="rb-input" id="bf-conso-vl" value="20" min="0" step="0.5"></div>
+          <div class="rb-form-group"><label>Nb bovins viande / génisses</label><input type="number" class="rb-input" id="bf-nb-bv" min="0" placeholder="0"></div>
+          <div class="rb-form-group"><label>Consommation BV (kg MS/j)</label><input type="number" class="rb-input" id="bf-conso-bv" value="12" min="0" step="0.5"></div>
+          <div class="rb-form-group"><label>Durée hivernage (jours)</label><input type="number" class="rb-input" id="bf-duree" value="180" min="1"></div>
         </div>
-        <div class="rb-form-actions" style="margin-top:8px;">
-          <button class="rb-btn rb-btn-ghost" onclick="bfTab(document.querySelector('[data-tab=bf-stocks]'),'bf-stocks')">← Stocks</button>
-          <button type="button" class="rb-btn rb-btn-primary" onclick="bfTab(document.querySelector('[data-tab=bf-resultat]'),'bf-resultat')">Voir le résultat →</button>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="rb-btn rb-btn-ghost" onclick="bfSwitch('stocks',document.getElementById('bfbtn-stocks'))">← Stocks</button>
+          <button class="rb-btn rb-btn-primary" onclick="calcBilanFourrager()">📊 Calculer le bilan →</button>
         </div>
       </div>
     </div>
 
-    <!-- Onglet 3 : Résultat -->
-    <div id="tab-bf-resultat" class="rb-tab-content" style="display:none;">
-      <div class="rb-form-actions" style="margin-bottom:16px;">
-        <button class="rb-btn rb-btn-ghost" onclick="bfTab(document.querySelector('[data-tab=bf-troupeau]'),'bf-troupeau')">← Troupeau</button>
-        <button type="button" id="btn-calc-bilan-fourrager" class="rb-btn rb-btn-primary">📊 Calculer le bilan fourrager</button>
-        <button type="button" id="btn-export-bf-pdf" class="rb-btn" onclick="exportPDF('bilan-fourrager')">📄 PDF</button>
+    <!-- Onglet Résultat -->
+    <div id="bf-resultat" style="display:none;">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="rb-btn rb-btn-ghost" onclick="bfSwitch('troupeau',document.getElementById('bfbtn-troupeau'))">← Troupeau</button>
+        <button id="btn-export-bf-pdf" class="rb-btn" onclick="exportPDF('bilan-fourrager')">📄 PDF</button>
       </div>
-      <div id="resultat-bilan-fourrager" class="hidden" style="margin-top:8px;">
-        <!-- Résumé 4 cartes -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:24px;">
-          <div id="bf-card-stock" style="background:#eff6ff;border-radius:14px;padding:20px;text-align:center;border-left:5px solid #3b82f6;">
-            <div id="bf-stock-total" style="font-size:2rem;font-weight:900;color:#1d4ed8;">—</div>
-            <div style="font-size:.82rem;font-weight:600;color:#3b82f6;margin-top:4px;">t MS — Stock disponible</div>
-          </div>
-          <div id="bf-card-besoin" style="background:#fff7ed;border-radius:14px;padding:20px;text-align:center;border-left:5px solid #f97316;">
-            <div id="bf-besoin-total" style="font-size:2rem;font-weight:900;color:#c2410c;">—</div>
-            <div style="font-size:.82rem;font-weight:600;color:#f97316;margin-top:4px;">t MS — Besoin troupeau</div>
-          </div>
-          <div id="bf-card-bilan" style="border-radius:14px;padding:20px;text-align:center;border-left:5px solid #15803d;background:#f0fdf4;">
-            <div id="bf-bilan-value" style="font-size:2rem;font-weight:900;color:#15803d;">—</div>
-            <div style="font-size:.82rem;font-weight:600;color:#15803d;margin-top:4px;">t MS — Solde</div>
-          </div>
-          <div id="bf-card-couverture" style="border-radius:14px;padding:20px;text-align:center;border-left:5px solid #8b5cf6;background:#f5f3ff;">
-            <div id="bf-couverture-value" style="font-size:2rem;font-weight:900;color:#7c3aed;">—</div>
-            <div style="font-size:.82rem;font-weight:600;color:#8b5cf6;margin-top:4px;">% — Couverture</div>
-          </div>
-        </div>
-        <!-- Visualisation silos -->
-        <div class="rb-panel" style="margin-bottom:16px;">
-          <h4 style="margin-bottom:16px;">📊 Visualisation</h4>
-          <div style="display:flex;align-items:flex-end;justify-content:center;gap:24px;flex-wrap:wrap;">
-            <div style="text-align:center;">
-              <div style="font-size:.8rem;font-weight:700;color:#3b82f6;margin-bottom:6px;">STOCK</div>
-              <div style="width:80px;height:150px;background:#e2e8f0;border-radius:8px 8px 0 0;border:2px solid #cbd5e1;position:relative;overflow:hidden;display:flex;align-items:flex-end;">
-                <div id="bf-silo-stock" style="width:100%;background:linear-gradient(180deg,#60a5fa,#3b82f6);transition:height .8s ease;border-radius:0 0 6px 6px;display:flex;align-items:center;justify-content:center;">
-                  <span id="bf-silo-stock-pct" style="font-size:.75rem;font-weight:800;color:#fff;writing-mode:vertical-lr;transform:rotate(180deg);">—</span>
-                </div>
-              </div>
-              <div style="font-size:.8rem;color:#64748b;margin-top:4px;" id="bf-stock-lbl">— t MS</div>
-            </div>
-            <div style="font-size:1.5rem;color:#94a3b8;align-self:center;">→</div>
-            <div style="text-align:center;">
-              <div style="font-size:.8rem;font-weight:700;color:#f97316;margin-bottom:6px;">BESOINS</div>
-              <div style="width:80px;height:150px;background:#e2e8f0;border-radius:8px 8px 0 0;border:2px solid #cbd5e1;position:relative;overflow:hidden;display:flex;align-items:flex-end;">
-                <div id="bf-silo-besoin" style="width:100%;background:linear-gradient(180deg,#fb923c,#f97316);transition:height .8s ease;border-radius:0 0 6px 6px;display:flex;align-items:center;justify-content:center;">
-                  <span id="bf-silo-besoin-pct" style="font-size:.75rem;font-weight:800;color:#fff;writing-mode:vertical-lr;transform:rotate(180deg);">—</span>
-                </div>
-              </div>
-              <div style="font-size:.8rem;color:#64748b;margin-top:4px;" id="bf-besoin-lbl">— t MS</div>
-            </div>
-            <div style="flex:1;min-width:160px;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
-              <div id="bf-status-msg" style="font-size:1rem;font-weight:700;color:#15803d;margin-bottom:8px;">—</div>
-              <div id="bf-days-remaining" style="font-size:.85rem;color:#64748b;"></div>
-            </div>
-          </div>
-        </div>
-        <div id="bf-cow-row" style="margin-bottom:16px;"></div>
-        <div id="bf-detail" class="rb-panel"></div>
+      <div id="bf-resultat-content" style="color:var(--text-muted);padding:24px;text-align:center;">
+        Renseignez vos stocks et votre troupeau, puis cliquez sur "Calculer".
       </div>
     </div>
 
-    <!-- Onglet 4 : Calculateur de silo -->
-    <div id="tab-bf-calcul-tms" class="rb-tab-content" style="display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
-        <!-- Colonne gauche : formulaire -->
-        <div class="rb-panel">
-          <h4 style="margin-bottom:4px;">🏗️ Calculateur de silo</h4>
-          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">Renseignez les dimensions et la culture — la TMS est calculée automatiquement.</p>
-
-          <div class="rb-form-group" style="margin-bottom:14px;">
-            <label style="font-weight:700;">Type de culture</label>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;" id="tms-culture-btns">
-              <button type="button" class="tms-culture-btn active" data-culture="mais" onclick="selectCulture(this)" style="padding:10px 8px;border-radius:10px;border:2px solid #15803d;background:#f0fdf4;color:#15803d;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">🌽<br>Maïs<br><span style="font-weight:400;font-size:.72rem;">ensilage</span></button>
-              <button type="button" class="tms-culture-btn" data-culture="herbe" onclick="selectCulture(this)" style="padding:10px 8px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">🌿<br>Herbe<br><span style="font-weight:400;font-size:.72rem;">ensilage</span></button>
-              <button type="button" class="tms-culture-btn" data-culture="enrub" onclick="selectCulture(this)" style="padding:10px 8px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">🎁<br>Enruban.<br><span style="font-weight:400;font-size:.72rem;">balles</span></button>
-              <button type="button" class="tms-culture-btn" data-culture="foin" onclick="selectCulture(this)" style="padding:10px 8px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">🌾<br>Foin<br><span style="font-weight:400;font-size:.72rem;">balles/vrac</span></button>
-              <button type="button" class="tms-culture-btn" data-culture="paille" onclick="selectCulture(this)" style="padding:10px 8px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">🌾<br>Paille<br><span style="font-weight:400;font-size:.72rem;">litière</span></button>
-              <button type="button" class="tms-culture-btn" data-culture="triticale" onclick="selectCulture(this)" style="padding:10px 8px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">🌱<br>Triticale<br><span style="font-weight:400;font-size:.72rem;">ensilage</span></button>
-            </div>
+    <!-- Onglet Calculateur silo -->
+    <div id="bf-silo" style="display:none;">
+      <div class="rb-panel">
+        <div class="rb-panel-title" style="margin-bottom:14px;">📐 Calculateur de silo</div>
+        <div class="rb-form-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+          <div class="rb-form-group">
+            <label>Culture</label>
+            <select class="rb-select" id="tms-culture" onchange="onTmsCultureChange()">
+              <option value="mais">🌽 Maïs ensilage</option>
+              <option value="herbe">🌿 Herbe ensilage</option>
+              <option value="enrub">🎁 Enrubannage</option>
+              <option value="foin">🌾 Foin</option>
+              <option value="paille">🌾 Paille</option>
+              <option value="triticale">🌱 Triticale ensilé</option>
+            </select>
           </div>
-
-          <div class="rb-form-group" style="margin-bottom:14px;">
-            <label style="font-weight:700;">Forme du silo</label>
-            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;" id="tms-shape-btns">
-              <button type="button" class="tms-shape-btn active" data-shape="bunker" onclick="selectShape(this)" style="padding:10px;border-radius:10px;border:2px solid #15803d;background:#f0fdf4;color:#15803d;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;">▬<br>Silo couloir</button>
-              <button type="button" class="tms-shape-btn" data-shape="tower" onclick="selectShape(this)" style="padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;">⬭<br>Silo tour</button>
-              <button type="button" class="tms-shape-btn" data-shape="talon" onclick="selectShape(this)" style="padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;">◭<br>Tas trapézoïdal</button>
-              <button type="button" class="tms-shape-btn" data-shape="round" onclick="selectShape(this)" style="padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;">⬤<br>Balle ronde</button>
-            </div>
+          <div class="rb-form-group">
+            <label>Forme du silo</label>
+            <select class="rb-select" id="tms-shape" onchange="onTmsShapeChange()">
+              <option value="bunker">Silo couloir (bunker)</option>
+              <option value="tower">Silo tour (cylindre)</option>
+              <option value="talon">Talon de silo (triangle)</option>
+              <option value="round">Balles rondes</option>
+            </select>
           </div>
-
-          <div class="rb-form-grid" id="tms-dims-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-            <div class="rb-form-group" id="dim-longueur-grp">
-              <label>Longueur (m)</label>
-              <input type="number" id="tms-longueur" min="0" step="0.1" placeholder="Ex : 30" oninput="calcTmsLive()">
-            </div>
-            <div class="rb-form-group" id="dim-largeur-grp">
-              <label>Largeur (m)</label>
-              <input type="number" id="tms-largeur" min="0" step="0.1" placeholder="Ex : 6" oninput="calcTmsLive()">
-            </div>
-            <div class="rb-form-group" id="dim-hauteur-grp">
-              <label>Hauteur / profondeur (m)</label>
-              <input type="number" id="tms-hauteur" min="0" step="0.1" placeholder="Ex : 2.5" oninput="calcTmsLive()">
-            </div>
-            <div class="rb-form-group" id="dim-diametre-grp" style="display:none;">
-              <label>Diamètre (m)</label>
-              <input type="number" id="tms-diametre" min="0" step="0.1" placeholder="Ex : 6" oninput="calcTmsLive()">
-            </div>
-            <div class="rb-form-group" id="dim-nb-balles-grp" style="display:none;">
-              <label>Nombre de balles</label>
-              <input type="number" id="tms-nb-balles" min="1" step="1" placeholder="Ex : 50" oninput="calcTmsLive()">
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-            <div class="rb-form-group">
-              <label>Densité (kg/m³) <span id="tms-densite-hint" style="font-size:.75rem;color:#94a3b8;"></span></label>
-              <input type="number" id="tms-densite" min="0" placeholder="Auto" oninput="calcTmsLive()">
-            </div>
-            <div class="rb-form-group">
-              <label>% MS <span id="tms-ms-hint" style="font-size:.75rem;color:#94a3b8;"></span></label>
-              <input type="number" id="tms-pourcent-ms" min="0" max="100" step="1" placeholder="Auto" oninput="calcTmsLive()">
-            </div>
-          </div>
-
-          <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button type="button" id="btn-add-tms-to-stock" class="rb-btn rb-btn-primary" onclick="addTmsToStock()">+ Ajouter aux stocks</button>
-            <button type="button" class="rb-btn rb-btn-ghost" onclick="resetTmsCalc()">🔄 Réinitialiser</button>
-          </div>
+          <div class="rb-form-group" id="tms-f-longueur"><label>Longueur (m)</label><input type="number" class="rb-input" id="tms-longueur" min="0" step="0.5" oninput="calcTmsLive()"></div>
+          <div class="rb-form-group" id="tms-f-largeur"><label>Largeur (m)</label><input type="number" class="rb-input" id="tms-largeur" min="0" step="0.5" oninput="calcTmsLive()"></div>
+          <div class="rb-form-group" id="tms-f-hauteur"><label>Hauteur (m)</label><input type="number" class="rb-input" id="tms-hauteur" min="0" step="0.5" oninput="calcTmsLive()"></div>
+          <div class="rb-form-group" id="tms-f-diametre" style="display:none;"><label>Diamètre (m)</label><input type="number" class="rb-input" id="tms-diametre" min="0" step="0.1" oninput="calcTmsLive()"></div>
+          <div class="rb-form-group" id="tms-f-balles" style="display:none;"><label>Nb balles</label><input type="number" class="rb-input" id="tms-nb-balles" min="0" oninput="calcTmsLive()"></div>
+          <div class="rb-form-group"><label>Densité (kg/m³)</label><input type="number" class="rb-input" id="tms-densite" step="10" oninput="calcTmsLive()"></div>
+          <div class="rb-form-group"><label>% MS</label><input type="number" class="rb-input" id="tms-pourcent-ms" min="1" max="100" step="1" oninput="calcTmsLive()"></div>
         </div>
-
-        <!-- Colonne droite : résultat en temps réel -->
-        <div>
-          <!-- Visuel silo CSS -->
-          <div style="text-align:center;margin-bottom:16px;">
-            <div id="tms-silo-visual" style="width:120px;height:180px;margin:0 auto 12px;position:relative;">
-              <!-- Dessiné en JS -->
-            </div>
-          </div>
-          <!-- Résultat live -->
-          <div class="rb-panel" id="tms-live-result" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #16a34a;">
-            <div style="text-align:center;margin-bottom:14px;">
-              <div style="font-size:2.8rem;font-weight:900;color:#15803d;" id="tms-result-val">—</div>
-              <div style="font-size:.9rem;font-weight:700;color:#16a34a;">tonnes de MS</div>
-            </div>
-            <div id="tms-result-details" style="font-size:.8rem;color:#475569;"></div>
-          </div>
-
-          <!-- Table densités -->
-          <div class="rb-panel" style="margin-top:14px;">
-            <h5 style="margin:0 0 10px;font-size:.85rem;font-weight:700;color:var(--text);">📋 Valeurs de référence</h5>
-            <table class="rb-table" style="font-size:.78rem;">
-              <thead><tr><th>Culture</th><th>Densité</th><th>% MS</th></tr></thead>
-              <tbody>
-                <tr><td>Maïs ensilage</td><td>650–750</td><td>30–35 %</td></tr>
-                <tr><td>Herbe ensilage</td><td>550–650</td><td>25–35 %</td></tr>
-                <tr><td>Enrubannage</td><td>450–550</td><td>40–55 %</td></tr>
-                <tr><td>Foin vrac</td><td>100–150</td><td>85–90 %</td></tr>
-                <tr><td>Foin balle ronde</td><td>160–200</td><td>85–90 %</td></tr>
-                <tr><td>Paille</td><td>80–120</td><td>85–90 %</td></tr>
-                <tr><td>Triticale ensilage</td><td>600–700</td><td>28–35 %</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:16px;margin-top:14px;text-align:center;">
+          <div style="font-size:.75rem;color:#16a34a;font-weight:700;text-transform:uppercase;margin-bottom:4px;">TMS calculée</div>
+          <div style="font-size:2.2rem;font-weight:900;color:#15803d;"><span id="tms-result-val">—</span> <span style="font-size:1rem;font-weight:400;">t MS</span></div>
+          <div id="tms-result-details" style="font-size:.8rem;color:var(--text-muted);margin-top:8px;"></div>
         </div>
+        <button class="rb-btn rb-btn-primary" style="margin-top:12px;" onclick="transferTmsToStock()">↳ Ajouter aux stocks</button>
       </div>
     </div>
   </section>
@@ -3266,234 +3114,159 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     cont.classList.remove('hidden');
   });
 
-  // -- Bilan fourrager
-  function addStockLine() {
-    const div = $('stock-lines'); if (!div) return;
+  // ── Bilan fourrager — fonctions identiques au conseiller ────────────────
+  function bfSwitch(tab, btn) {
+    ['stocks','troupeau','resultat','silo'].forEach(t => {
+      const el = document.getElementById('bf-'+t); if (el) el.style.display = t===tab ? '' : 'none';
+    });
+    document.querySelectorAll('.bf-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  function addBfStock() {
+    const cont = $('bf-stock-lines'); if (!cont) return;
     const row = document.createElement('div');
-    row.className = 'rb-ration-row';
-    row.style.gridTemplateColumns = '1fr 130px 110px 46px';
-    row.innerHTML = `
-      <input type="text" placeholder="Maïs ensilage…" autocomplete="off">
-      <input type="number" placeholder="t brutes" step="0.1" min="0">
-      <input type="number" placeholder="% MS" step="1" min="0" max="100">
-      <button type="button" onclick="this.closest('.rb-ration-row').remove()"
-        style="background:var(--danger);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer;padding:6px 10px;font-weight:bold;">×</button>`;
-    div.appendChild(row);
-  }
-  $('btn-add-stock')?.addEventListener('click', addStockLine);
-
-  // ── Navigation onglets bilan fourrager ──────────────
-  function bfTab(btn, tabId) {
-    document.querySelectorAll('.bf-tab-btn').forEach(b => {
-      const active = b === btn;
-      b.style.background = active ? '#15803d' : '#fff';
-      b.style.color = active ? '#fff' : '#475569';
-      b.style.borderColor = active ? '#15803d' : '#e2e8f0';
-    });
-    document.querySelectorAll('.rb-tab-content').forEach(t => {
-      t.style.display = (t.id === 'tab-' + tabId) ? '' : 'none';
-    });
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 110px 90px 40px;gap:6px;margin-bottom:6px;align-items:center;';
+    row.innerHTML = `<input type="text" class="rb-input" placeholder="Maïs ensilage…" style="padding:7px 8px;font-size:.83rem;">
+      <input type="number" class="rb-input" min="0" step="1" placeholder="t brutes" style="padding:7px 8px;font-size:.83rem;">
+      <input type="number" class="rb-input" min="1" max="100" step="1" placeholder="% MS" style="padding:7px 8px;font-size:.83rem;">
+      <button type="button" onclick="this.closest('div').remove()" style="background:#fee2e2;border:none;border-radius:6px;height:34px;width:34px;cursor:pointer;color:#dc2626;font-size:1rem;">✕</button>`;
+    cont.appendChild(row);
   }
 
-  $('btn-calc-bilan-fourrager')?.addEventListener('click', () => {
-    let stockTMS = 0;
-    document.querySelectorAll('#stock-lines .rb-ration-row').forEach(row => {
-      const inp = row.querySelectorAll('input');
-      stockTMS += (parseFloat(inp[1]?.value)||0) * ((parseFloat(inp[2]?.value)||0)/100);
+  function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function calcBilanFourrager() {
+    const rows = document.querySelectorAll('#bf-stock-lines > div');
+    let totalTMS = 0;
+    const stocks = [];
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const nom = inputs[0]?.value?.trim();
+      const tb  = parseFloat(inputs[1]?.value) || 0;
+      const ms  = parseFloat(inputs[2]?.value) || 0;
+      if (!nom || !tb || !ms) return;
+      const tms = tb * (ms/100);
+      totalTMS += tms;
+      stocks.push({ nom, tb, ms, tms });
     });
-    const nbVL   = parseFloat($('bf-nb-vl')?.value)||0;
-    const consoVL= parseFloat($('bf-conso-vl')?.value)||20;
-    const nbBV   = parseFloat($('bf-nb-bv')?.value)||0;
-    const consoBV= parseFloat($('bf-conso-bv')?.value)||12;
-    const duree  = parseFloat($('bf-duree')?.value)||180;
-    const consoJournaliere = nbVL * consoVL + nbBV * consoBV;
-    const besoin = consoJournaliere * duree / 1000;
-    const solde  = stockTMS - besoin;
-    const pct    = besoin > 0 ? stockTMS / besoin * 100 : 100;
-    const daysLeft = consoJournaliere > 0 ? stockTMS * 1000 / consoJournaliere : 0;
+    const nbVL    = parseInt($('bf-nb-vl')?.value) || 0;
+    const consoVL = parseFloat($('bf-conso-vl')?.value) || 20;
+    const nbBV    = parseInt($('bf-nb-bv')?.value) || 0;
+    const consoBV = parseFloat($('bf-conso-bv')?.value) || 12;
+    const duree   = parseInt($('bf-duree')?.value) || 180;
+    const besoinTMS = (nbVL*consoVL + nbBV*consoBV) * duree / 1000;
+    const solde = totalTMS - besoinTMS;
+    const pct   = besoinTMS > 0 ? (totalTMS/besoinTMS*100).toFixed(0) : 0;
+    const ok    = solde >= 0;
+    const cont  = $('bf-resultat-content'); if (!cont) return;
+    cont.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:18px;">
+        <div style="background:#eff6ff;border-radius:12px;padding:16px;text-align:center;border-left:4px solid #3b82f6;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#3b82f6;">Stock disponible</div>
+          <div style="font-size:1.8rem;font-weight:900;color:#1d4ed8;">${totalTMS.toFixed(1)}</div>
+          <div style="font-size:.75rem;color:#64748b;">t MS</div>
+        </div>
+        <div style="background:#fff7ed;border-radius:12px;padding:16px;text-align:center;border-left:4px solid #f97316;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#f97316;">Besoins troupeau</div>
+          <div style="font-size:1.8rem;font-weight:900;color:#c2410c;">${besoinTMS.toFixed(1)}</div>
+          <div style="font-size:.75rem;color:#64748b;">t MS sur ${duree} j</div>
+        </div>
+        <div style="background:${ok?'#f0fdf4':'#fef2f2'};border-radius:12px;padding:16px;text-align:center;border-left:4px solid ${ok?'#16a34a':'#dc2626'};">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:${ok?'#16a34a':'#dc2626'};">Solde</div>
+          <div style="font-size:1.8rem;font-weight:900;color:${ok?'#16a34a':'#dc2626'};">${ok?'+':''}${solde.toFixed(1)}</div>
+          <div style="font-size:.75rem;color:#64748b;">t MS</div>
+        </div>
+        <div style="background:${pct>=100?'#f5f3ff':'#fef2f2'};border-radius:12px;padding:16px;text-align:center;border-left:4px solid ${pct>=100?'#8b5cf6':'#dc2626'};">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:${pct>=100?'#8b5cf6':'#dc2626'};">Couverture</div>
+          <div style="font-size:1.8rem;font-weight:900;color:${pct>=100?'#7c3aed':'#dc2626'};">${pct}%</div>
+          <div style="font-size:.75rem;color:#64748b;">des besoins</div>
+        </div>
+      </div>
+      <div style="padding:12px 16px;border-radius:8px;background:${ok?'#f0fdf4':'#fef2f2'};border:1px solid ${ok?'#16a34a':'#dc2626'};font-size:.88rem;font-weight:600;color:${ok?'#15803d':'#dc2626'};margin-bottom:16px;">
+        ${ok ? `✅ Stocks suffisants — excédent de ${solde.toFixed(1)} t MS` : `⚠️ Stocks insuffisants — déficit de ${Math.abs(solde).toFixed(1)} t MS à combler`}
+      </div>
+      <div class="rb-panel" style="padding:0;overflow:hidden;">
+        <table class="rb-table">
+          <thead><tr><th>Fourrage</th><th>t brutes</th><th>% MS</th><th>TMS</th><th>% stock</th></tr></thead>
+          <tbody>${stocks.map(s=>`<tr><td>${_esc(s.nom)}</td><td>${s.tb}</td><td>${s.ms}%</td><td>${s.tms.toFixed(1)} t MS</td><td>${totalTMS>0?(s.tms/totalTMS*100).toFixed(0)+'%':'-'}</td></tr>`).join('')}
+          <tr style="font-weight:700;"><td>Total</td><td>—</td><td>—</td><td>${totalTMS.toFixed(1)} t MS</td><td>100%</td></tr>
+          </tbody>
+        </table>
+      </div>`;
+    bfSwitch('resultat', document.getElementById('bfbtn-resultat'));
+  }
 
-    $('resultat-bilan-fourrager')?.classList.remove('hidden');
-
-    // Carte stock
-    if($('bf-stock-total'))  $('bf-stock-total').textContent  = stockTMS.toFixed(1);
-    // Carte besoin
-    if($('bf-besoin-total')) $('bf-besoin-total').textContent = besoin.toFixed(1);
-    // Carte solde
-    const bilVal = $('bf-bilan-value');
-    if (bilVal) {
-      bilVal.textContent = (solde>=0?'+':'')+solde.toFixed(1);
-      const bilCard = $('bf-card-bilan');
-      if (bilCard) { bilCard.style.background = solde>=0?'#f0fdf4':'#fef2f2'; bilCard.style.borderLeftColor = solde>=0?'#15803d':'#dc2626'; }
-      bilVal.style.color = solde>=0?'#15803d':'#dc2626';
-    }
-    // Carte couverture %
-    const covVal = $('bf-couverture-value');
-    if (covVal) {
-      covVal.textContent = pct.toFixed(0)+'%';
-      const covCard = $('bf-card-couverture');
-      if (covCard) { covCard.style.background = pct>=100?'#f5f3ff':'#fef2f2'; covCard.style.borderLeftColor = pct>=100?'#8b5cf6':'#dc2626'; }
-      covVal.style.color = pct>=100?'#7c3aed':'#dc2626';
-    }
-    // Silos visuels
-    const siloStock = $('bf-silo-stock');
-    const siloB = $('bf-silo-besoin');
-    const maxTMS = Math.max(stockTMS, besoin, 0.01);
-    if (siloStock) {
-      siloStock.style.height = (stockTMS/maxTMS*100).toFixed(0)+'%';
-      siloStock.style.background = solde>=0?'linear-gradient(180deg,#60a5fa,#3b82f6)':'linear-gradient(180deg,#f87171,#dc2626)';
-    }
-    if ($('bf-silo-stock-pct')) $('bf-silo-stock-pct').textContent = stockTMS.toFixed(1)+' t';
-    if (siloB) siloB.style.height = (besoin/maxTMS*100).toFixed(0)+'%';
-    if ($('bf-silo-besoin-pct')) $('bf-silo-besoin-pct').textContent = besoin.toFixed(1)+' t';
-    if ($('bf-stock-lbl')) $('bf-stock-lbl').textContent = stockTMS.toFixed(1)+' t MS';
-    if ($('bf-besoin-lbl')) $('bf-besoin-lbl').textContent = besoin.toFixed(1)+' t MS';
-    // Message statut
-    const msg = $('bf-status-msg');
-    if (msg) {
-      msg.style.color = solde>=0?'#15803d':'#dc2626';
-      msg.textContent = solde>=0
-        ? `✅ Stocks suffisants — excédent de ${Math.abs(solde).toFixed(1)} t MS (couverture ${pct.toFixed(0)} %)`
-        : `⚠️ Déficit fourrager de ${Math.abs(solde).toFixed(1)} t MS — couverture à ${pct.toFixed(0)} %`;
-    }
-    const daysEl = $('bf-days-remaining');
-    if (daysEl) {
-      daysEl.textContent = consoJournaliere > 0
-        ? `Stock suffisant pour ${daysLeft.toFixed(0)} jours d'hivernage (période visée : ${duree} j)`
-        : '';
-    }
-    // Vaches (représentation visuelle)
-    const cowRow = $('bf-cow-row');
-    const nbTotal = nbVL + nbBV;
-    if (cowRow && nbTotal > 0) {
-      const n = Math.min(Math.round(nbTotal), 12), cov = Math.round(n * Math.min(1, pct/100));
-      cowRow.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">'
-        + Array.from({length:n},(_,i)=>`<span style="font-size:1.4rem;opacity:${i<cov?1:.25};" title="${i<cov?'Besoins couverts':'Déficit'}">🐄</span>`).join('')
-        + `<span style="font-size:.75rem;color:#64748b;width:100%;text-align:center;margin-top:4px;">${cov} / ${n} animaux couverts (${pct.toFixed(0)} %)</span></div>`;
-    }
-  });
-
-  // ── Calculateur de silo interactif ──────────────────
+  // ── Calculateur de silo ──────────────────────────────
   const TMS_CULTURES = {
-    mais:     { label:'Maïs ensilage',    densite:700, ms:33, icon:'🌽', color:'#f97316' },
-    herbe:    { label:'Herbe ensilage',   densite:600, ms:30, icon:'🌿', color:'#16a34a' },
-    enrub:    { label:'Enrubannage',      densite:500, ms:45, icon:'🎁', color:'#8b5cf6' },
-    foin:     { label:'Foin',             densite:130, ms:87, icon:'🌾', color:'#d97706' },
-    paille:   { label:'Paille',           densite:100, ms:87, icon:'🌾', color:'#b45309' },
-    triticale:{ label:'Triticale ensil.', densite:650, ms:32, icon:'🌱', color:'#15803d' },
+    mais:      { label:'Maïs ensilage',    densite:700, ms:33 },
+    herbe:     { label:'Herbe ensilage',   densite:600, ms:30 },
+    enrub:     { label:'Enrubannage',      densite:500, ms:45 },
+    foin:      { label:'Foin',             densite:130, ms:87 },
+    paille:    { label:'Paille',           densite:100, ms:87 },
+    triticale: { label:'Triticale ensilé', densite:650, ms:32 },
   };
-  let _tmsCulture = 'mais', _tmsShape = 'bunker', _tmsResultTMS = 0;
 
-  function selectCulture(btn) {
-    document.querySelectorAll('.tms-culture-btn').forEach(b => {
-      b.style.borderColor = '#e2e8f0'; b.style.background = '#fff'; b.style.color = '#475569';
-    });
-    btn.style.borderColor = '#15803d'; btn.style.background = '#f0fdf4'; btn.style.color = '#15803d';
-    _tmsCulture = btn.dataset.culture;
-    const c = TMS_CULTURES[_tmsCulture];
-    if (!$('tms-densite').value) {
-      $('tms-densite-hint') && ($('tms-densite-hint').textContent = `(défaut : ${c.densite})`);
-    }
-    if (!$('tms-pourcent-ms').value) {
-      $('tms-ms-hint') && ($('tms-ms-hint').textContent = `(défaut : ${c.ms} %)`);
-    }
+  function onTmsCultureChange() {
+    const v = $('tms-culture')?.value;
+    const c = TMS_CULTURES[v] || TMS_CULTURES.mais;
+    if ($('tms-densite'))     $('tms-densite').value    = c.densite;
+    if ($('tms-pourcent-ms')) $('tms-pourcent-ms').value = c.ms;
     calcTmsLive();
   }
 
-  function selectShape(btn) {
-    document.querySelectorAll('.tms-shape-btn').forEach(b => {
-      b.style.borderColor = '#e2e8f0'; b.style.background = '#fff'; b.style.color = '#475569';
-    });
-    btn.style.borderColor = '#15803d'; btn.style.background = '#f0fdf4'; btn.style.color = '#15803d';
-    _tmsShape = btn.dataset.shape;
-    // Afficher/masquer les champs selon la forme
-    const isDiam  = _tmsShape === 'tower';
-    const isRound = _tmsShape === 'round';
-    $('dim-diametre-grp') && ($('dim-diametre-grp').style.display = isDiam?'':'none');
-    $('dim-largeur-grp')  && ($('dim-largeur-grp').style.display  = (isDiam||isRound)?'none':'');
-    $('dim-longueur-grp') && ($('dim-longueur-grp').style.display = isRound?'none':'');
-    $('dim-nb-balles-grp')&& ($('dim-nb-balles-grp').style.display= isRound?'':'none');
+  function onTmsShapeChange() {
+    const shape = $('tms-shape')?.value;
+    const show = (id, v) => { const e=$(id); if(e) e.style.display=v?'':'none'; };
+    show('tms-f-longueur', shape==='bunker'||shape==='talon');
+    show('tms-f-largeur',  shape==='bunker'||shape==='talon');
+    show('tms-f-hauteur',  shape==='bunker'||shape==='talon'||shape==='tower');
+    show('tms-f-diametre', shape==='tower'||shape==='round');
+    show('tms-f-balles',   shape==='round');
     calcTmsLive();
   }
 
   function calcTmsLive() {
-    const c = TMS_CULTURES[_tmsCulture];
-    const densite  = parseFloat($('tms-densite')?.value)     || c.densite;
-    const msPct    = parseFloat($('tms-pourcent-ms')?.value) || c.ms;
+    const v = $('tms-culture')?.value || 'mais';
+    const c = TMS_CULTURES[v] || TMS_CULTURES.mais;
+    const densite = parseFloat($('tms-densite')?.value)      || c.densite;
+    const msPct   = parseFloat($('tms-pourcent-ms')?.value)  || c.ms;
+    const shape   = $('tms-shape')?.value || 'bunker';
     let volume = 0;
-    if (_tmsShape === 'bunker' || _tmsShape === 'talon') {
-      const l = parseFloat($('tms-longueur')?.value)||0;
-      const w = parseFloat($('tms-largeur')?.value)||0;
-      const h = parseFloat($('tms-hauteur')?.value)||0;
-      volume = _tmsShape === 'talon' ? l*w*h*0.5 : l*w*h;
-    } else if (_tmsShape === 'tower') {
-      const d = parseFloat($('tms-diametre')?.value)||0;
-      const h = parseFloat($('tms-hauteur')?.value)||0;
+    if (shape==='bunker'||shape==='talon') {
+      const l=parseFloat($('tms-longueur')?.value)||0, w=parseFloat($('tms-largeur')?.value)||0, h=parseFloat($('tms-hauteur')?.value)||0;
+      volume = shape==='talon' ? l*w*h*0.5 : l*w*h;
+    } else if (shape==='tower') {
+      const d=parseFloat($('tms-diametre')?.value)||0, h=parseFloat($('tms-hauteur')?.value)||0;
       volume = Math.PI*(d/2)*(d/2)*h;
-    } else if (_tmsShape === 'round') {
-      const d = parseFloat($('tms-diametre')?.value)||1.2;
-      const nb = parseFloat($('tms-nb-balles')?.value)||0;
-      volume = Math.PI*(d/2)*(d/2)*1.2*nb; // balle ronde Ø1.2m × 1.2m
+    } else if (shape==='round') {
+      const d=parseFloat($('tms-diametre')?.value)||1.2, nb=parseFloat($('tms-nb-balles')?.value)||0;
+      volume = Math.PI*(d/2)*(d/2)*1.2*nb;
     }
     const tms = volume * densite * (msPct/100) / 1000;
-    _tmsResultTMS = tms;
-    // Affichage résultat
-    const rv = $('tms-result-val');
-    if (rv) rv.textContent = volume > 0 ? tms.toFixed(2) : '—';
+    const rv = $('tms-result-val'); if (rv) rv.textContent = volume>0 ? tms.toFixed(2) : '—';
     const rd = $('tms-result-details');
-    if (rd && volume > 0) {
-      rd.innerHTML = `
-        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #dcfce7;"><span>Volume</span><span><b>${volume.toFixed(1)} m³</b></span></div>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #dcfce7;"><span>Densité</span><span><b>${densite} kg/m³</b></span></div>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #dcfce7;"><span>% MS</span><span><b>${msPct} %</b></span></div>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Masse brute</span><span><b>${(volume*densite/1000).toFixed(1)} t</b></span></div>`;
-    }
-    // Silo visuel CSS
-    renderSiloVisual(volume, _tmsShape, _tmsCulture);
+    if (rd && volume>0) rd.innerHTML = `Volume : <b>${volume.toFixed(1)} m³</b> · Densité : <b>${densite} kg/m³</b> · %MS : <b>${msPct}%</b>`;
   }
 
-  function renderSiloVisual(vol, shape, culture) {
-    const el = $('tms-silo-visual'); if (!el) return;
-    const c = TMS_CULTURES[culture];
-    const fillPct = vol > 0 ? Math.min(100, vol/500*100) : 0;
-    if (shape === 'round') {
-      el.innerHTML = `<div style="width:80px;height:80px;border-radius:50%;background:${c.color};opacity:.85;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 4px 12px rgba(0,0,0,.2);">${c.icon}</div><div style="font-size:.75rem;color:#64748b;text-align:center;margin-top:8px;">Balle ronde</div>`;
-    } else if (shape === 'tower') {
-      el.innerHTML = `<div style="width:80px;height:160px;border-radius:8px 8px 0 0;background:#e2e8f0;border:2px solid #cbd5e1;position:relative;overflow:hidden;margin:0 auto;">
-        <div style="position:absolute;bottom:0;left:0;right:0;height:${fillPct}%;background:${c.color};opacity:.85;transition:height .5s;"></div>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.5rem;">${c.icon}</div>
-      </div><div style="font-size:.75rem;color:#64748b;text-align:center;margin-top:4px;">Silo tour</div>`;
-    } else {
-      el.innerHTML = `<div style="width:140px;height:90px;background:#e2e8f0;border-radius:6px;border:2px solid #cbd5e1;position:relative;overflow:hidden;margin:0 auto;">
-        <div style="position:absolute;bottom:0;left:0;right:0;height:${fillPct}%;background:${c.color};opacity:.85;transition:height .5s;"></div>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.5rem;">${c.icon}</div>
-      </div><div style="font-size:.75rem;color:#64748b;text-align:center;margin-top:4px;">${shape==='talon'?'Tas trapézoïdal':'Silo couloir'}</div>`;
-    }
-  }
-
-  function addTmsToStock() {
-    if (_tmsResultTMS <= 0) { alert('Calculez d\'abord la TMS d\'un silo.'); return; }
-    const c = TMS_CULTURES[_tmsCulture];
-    // Aller sur l'onglet stocks et ajouter une ligne
-    bfTab(document.querySelector('[data-tab=bf-stocks]'), 'bf-stocks');
-    addStockLine();
-    const rows = document.querySelectorAll('#stock-lines .rb-ration-row');
+  function transferTmsToStock() {
+    const rv = $('tms-result-val')?.textContent;
+    const tms = parseFloat(rv);
+    if (!tms || isNaN(tms)) { alert('Calculez d\'abord la TMS du silo.'); return; }
+    const cult = $('tms-culture')?.value || 'mais';
+    const c = TMS_CULTURES[cult];
+    addBfStock();
+    const rows = document.querySelectorAll('#bf-stock-lines > div');
     const last = rows[rows.length-1];
     if (last) {
-      const inp = last.querySelectorAll('input');
+      const inputs = last.querySelectorAll('input');
       const msPct = parseFloat($('tms-pourcent-ms')?.value) || c.ms;
-      const brutT = msPct > 0 ? _tmsResultTMS / (msPct/100) : 0;
-      if (inp[0]) inp[0].value = c.label;
-      if (inp[1]) inp[1].value = brutT.toFixed(2);
-      if (inp[2]) inp[2].value = msPct.toFixed(0);
+      inputs[0].value = c.label;
+      inputs[1].value = (tms / (msPct/100)).toFixed(1);
+      inputs[2].value = msPct;
     }
-  }
-
-  function resetTmsCalc() {
-    ['tms-longueur','tms-largeur','tms-hauteur','tms-diametre','tms-densite','tms-pourcent-ms','tms-nb-balles'].forEach(id => { if($(id)) $(id).value=''; });
-    _tmsResultTMS = 0;
-    const rv=$('tms-result-val'); if(rv) rv.textContent='—';
-    const rd=$('tms-result-details'); if(rd) rd.innerHTML='';
-    const sv=$('tms-silo-visual'); if(sv) sv.innerHTML='';
+    bfSwitch('stocks', $('bfbtn-stocks'));
+    alert(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`);
   }
 
   // -- Profils ration
@@ -4140,7 +3913,9 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   addLine('ration-lines','aliments-list');
   addLine('ration-only-lines','aliments-list-ration-only');
   // Pré-remplir 3 lignes de stock dans le bilan fourrager
-  addStockLine(); addStockLine(); addStockLine();
+  addBfStock(); addBfStock(); addBfStock();
+  // Initialiser la culture et la forme du calculateur silo
+  onTmsCultureChange(); onTmsShapeChange();
   refreshDashboard();
 
   // =====================================================

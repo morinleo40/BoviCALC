@@ -1903,3 +1903,16 @@ a:hover { color: var(--primary-dark); }
 #tt-popup strong { color: #86efac; }
 
 .toolbar-btn-more { background: #f1f5f9; }
+
+/* ── Bilan fourrager — onglets (identique au conseiller) ── */
+.bf-btn {
+  padding: 8px 16px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--bg-card);
+  color: var(--text-muted); font-size: .83rem; font-weight: 600;
+  cursor: pointer; transition: all .18s;
+}
+.bf-btn:hover { border-color: #15803d; color: #15803d; }
+.bf-btn.active { background: #15803d; border-color: #15803d; color: #fff; }
+
+/* ── rb-panel-title ── */
+.rb-panel-title { font-size: .92rem; font-weight: 700; color: var(--green-900); }
