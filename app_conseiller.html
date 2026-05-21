@@ -435,7 +435,27 @@ function setTheme(t) {
                     <option value="rouge-des-pres">Rouge des Prés</option>
                   </optgroup>
                 </select>
-                <div id="r-race-img" style="margin-top:8px;"></div>
+                <div id="r-race-img" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;border:1.5px solid var(--border-md);background:#f8fafc;">
+                  <img class="race-ph" data-r="prim-holstein"    src="PrimHolstein.jpg"          style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="montbeliarde"     src="Montbeliarde.jfif"          style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="normande"         src="Normande.jpg"               style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="jersiaise"        src="Jersiaise.jpg"              style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="brune"            src="Brune.jpg"                  style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="pie-rouge"        src="Pie Rouge.jfif"             style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="tarentaise"       src="Tarentaise.jpg"             style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="simmental"        src="Simmental.webp"             style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="charolaise"       src="Charolaise.jpg"             style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="limousine"        src="Limousine.jpg"              style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="blonde-aquitaine" src="Blonde d'Aquitaine.jfif"   style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="salers"           src="Salers.jpg"                 style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="aubrac"           src="Aubrac.jpg"                 style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="gasconne"         src="Gasconne.jpg"               style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="herens"           src="Herens.jpg"                 style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="highland"         src="Highland.jpg"               style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="parthenaise"      src="Parthenaise.jpg"            style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="bazadaise"        src="Bazardaise.jpg"             style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                  <img class="race-ph" data-r="rouge-des-pres"   src="Rouge des prés.jfif"       style="display:none;width:100%;height:auto;max-height:220px;object-fit:contain;">
+                </div>
               </div>
               <div class="form-grid">
                 <div class="form-group">
@@ -1356,19 +1376,19 @@ const RACE_IMAGES = {
   'rouge-des-pres':  'Rouge des prés.jfif',
 };
 function getRaceImgSrc(race) {
-  const fn = RACE_IMAGES[race]; if (!fn) return null;
-  return './'+fn.split('').map(c=>c===' '?'%20':c).join('');
+  const fn = RACE_IMAGES[race]; if (!fn) return fn;
+  return fn.replace(/ /g,'%20');
 }
 function showRaceImage(selectId, previewId) {
-  const race = document.getElementById(selectId)?.value;
+  const race = document.getElementById(selectId)?.value || '';
   const wrap = document.getElementById(previewId); if (!wrap) return;
-  const src  = getRaceImgSrc(race);
-  if (src) {
-    wrap.style.cssText='margin-top:8px;width:100%;background:#f8fafc;border-radius:10px;border:1.5px solid #e2e8f0;overflow:hidden;';
-    wrap.innerHTML='<img src="'+src+'" alt="'+race+'" style="width:100%;max-height:220px;object-fit:contain;display:block;" onerror="this.parentNode.style.display=\'none\'">';
-  } else {
-    wrap.style.cssText=''; wrap.innerHTML='';
-  }
+  let found = false;
+  wrap.querySelectorAll('.race-ph').forEach(img => {
+    const show = img.dataset.r === race;
+    img.style.display = show ? 'block' : 'none';
+    if (show) found = true;
+  });
+  wrap.style.display = found ? '' : 'none';
 }
 
 const UFV_TYPES = ['genisse','genisse-engrais','vache-reforme','veau',
