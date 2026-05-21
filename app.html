@@ -642,14 +642,14 @@ async function initAuth() {
       <!-- Barre d'outils compacte -->
       <div class="ration-toolbar">
         <button class="toolbar-btn" onclick="rtToggle('rt-auto')">🤖 Ration auto</button>
-        <button class="toolbar-btn" onclick="openFeedTable()">📖 Consulter les aliments</button>
+        <button class="toolbar-btn" onclick="rtToggle('rt-custom')">🌿 Mes Aliments</button>
         <button class="toolbar-btn" onclick="rtToggle('rt-profiles')">📋 Profils</button>
         <button class="toolbar-btn toolbar-btn-more" onclick="rtToggle('rt-more')">⋯ Plus</button>
       </div>
       <div id="rt-more" class="rt-panel" style="display:none;">
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="rb-btn rb-btn-ghost" onclick="rtToggle('rt-custom');rtToggle('rt-more')">⚙️ Aliments personnalisés</button>
-          <button class="rb-btn rb-btn-ghost" onclick="rtToggle('rt-quick');rtToggle('rt-more')">✏️ Saisie rapide</button>
+          <button class="rb-btn rb-btn-ghost" onclick="openFeedTable()">📖 Consulter les aliments</button>
+          <button class="rb-btn rb-btn-ghost" onclick="rtToggle('rt-quick')">✏️ Saisie rapide</button>
         </div>
       </div>
 
@@ -665,10 +665,11 @@ async function initAuth() {
         </div>
       </div>
 
-      <!-- Aliments personnalisés (masqué par défaut) -->
+      <!-- Mes Aliments (masqué par défaut) -->
       <div id="rt-custom" class="rt-panel" style="display:none;">
+        <div style="font-size:.78rem;font-weight:700;color:var(--green-900);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">🌿 Mes Aliments personnalisés</div>
         <div class="rb-form-actions" style="gap:8px;flex-wrap:wrap;align-items:center;">
-          <button type="button" id="btn-open-custom-modal-ration" class="rb-btn">+ Nouvel aliment</button>
+          <button type="button" id="btn-open-custom-modal-ration" class="rb-btn rb-btn-primary">+ Ajouter un aliment</button>
           <select id="select-custom-aliment" class="rb-select" style="max-width:200px;">
             <option value="">Sélectionner...</option>
           </select>
@@ -1364,7 +1365,7 @@ async function initAuth() {
 <div id="custom-modal" class="rb-modal hidden">
   <div class="rb-modal-card" style="max-width:640px;">
     <div class="rb-modal-header">
-      <h3>✨ Ajouter un aliment</h3>
+      <h3>🌿 Mes Aliments — Ajouter / Modifier</h3>
       <span class="rb-modal-close" data-modal-close>&times;</span>
     </div>
     <div class="rb-form-grid">
@@ -3878,8 +3879,8 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   function rtToggle(id) {
     var panel = $(id); if (!panel) return;
     var isOpen = panel.style.display !== 'none';
-    // Close all panels first
-    ['rt-profiles','rt-custom','rt-auto','rt-quick'].forEach(function(pid) {
+    // Fermer tous les panels (y compris rt-more)
+    ['rt-profiles','rt-custom','rt-auto','rt-quick','rt-more'].forEach(function(pid) {
       var p = $(pid); if (p) p.style.display = 'none';
     });
     document.querySelectorAll('.toolbar-btn').forEach(function(b) {
@@ -3887,15 +3888,19 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     });
     if (!isOpen) {
       panel.style.display = 'block';
-      // Highlight active button
+      // Surligner le bouton actif
       document.querySelectorAll('.toolbar-btn').forEach(function(b) {
         if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id))
           b.classList.add('active');
       });
-      // Auto-build feed list when auto panel opens
+      // Construire la liste auto quand le panel auto s'ouvre
       if (id === 'rt-auto') {
         var fl = $('ar-feeds-list');
         if (fl && !fl.children.length) arBuildFeedList();
+      }
+      // Rafraîchir le select des aliments perso quand on ouvre Mes Aliments
+      if (id === 'rt-custom') {
+        refreshCustomSelect();
       }
     }
   }

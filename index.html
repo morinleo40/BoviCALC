@@ -375,8 +375,19 @@ const PRICING_CONFIG = {
     },
     {
       id: 'pro', name: 'Pro', description: 'Accès complet pour les éleveurs exigeants.',
-      price: 10, priceLabel: '10 €', period: '/ mois TTC', badge: '⭐ Accès complet', highlighted: true,
-      ctaText: 'Souscrire au Pro', ctaLink: 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00', ctaStyle: 'primary',
+      badge: '⭐ Accès complet', highlighted: true,
+      ctaStyle: 'primary',
+      monthly: {
+        price: 15, priceLabel: '15 €', period: '/ mois TTC',
+        ctaText: 'Souscrire au Pro', ctaLink: 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00',
+        savingsBadge: null,
+      },
+      annual: {
+        price: 160, priceLabel: '160 €', period: '/ an TTC',
+        ctaText: 'Souscrire au Pro (annuel)',
+        ctaLink: 'https://buy.stripe.com/9B614faqs8iS9312TGbMQ01',
+        savingsBadge: 'Économie 20 € · −10 %',
+      },
       features: [
         { text: 'Ration de A à Z complète',            ok: true },
         { text: 'Calcul des besoins animaux',          ok: true },
@@ -384,7 +395,7 @@ const PRICING_CONFIG = {
         { text: 'Sauvegarde illimitée',                ok: true },
         { text: 'Export PDF professionnel',            ok: true },
         { text: 'Optimiseur & suggestions',            ok: true },
-        { text: 'Aliments personnalisés illimités',    ok: true },
+        { text: 'Mes Aliments personnalisés',          ok: true },
         { text: 'Support prioritaire par email',       ok: true },
       ],
     },
@@ -813,6 +824,22 @@ const PRICING_CONFIG = {
       <h2>Un plan pour <span class="text-green">chaque besoin</span></h2>
       <p id="pricing-subtitle"></p>
     </div>
+
+    <!-- Toggle mensuel / annuel -->
+    <div style="display:flex;justify-content:center;margin-bottom:36px;">
+      <div style="display:inline-flex;align-items:center;gap:0;background:#f1f5f9;border-radius:12px;padding:4px;border:1px solid #e2e8f0;">
+        <button id="toggle-monthly" onclick="setBilling('monthly')"
+          style="padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;background:#15803d;color:#fff;box-shadow:0 2px 8px rgba(21,128,61,.25);">
+          Mensuel
+        </button>
+        <button id="toggle-annual" onclick="setBilling('annual')"
+          style="padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:#64748b;">
+          Annuel
+          <span id="annual-badge" style="margin-left:6px;background:#dcfce7;color:#15803d;font-size:.72rem;font-weight:800;padding:2px 7px;border-radius:20px;">−10 %</span>
+        </button>
+      </div>
+    </div>
+
     <div class="lp-pricing-grid" id="pricing-grid"></div>
     <p style="text-align:center;margin-top:32px;font-size:.88rem;color:#94a3b8;">
       Des questions ? Contactez-nous à <a id="pricing-email" href="#" style="color:#15803d;font-weight:600;"></a>
@@ -885,32 +912,78 @@ window.addEventListener('scroll', () => {
   });
 });
 
-(function buildPricing() {
+let _billing = 'monthly';
+
+function setBilling(mode) {
+  _billing = mode;
+  const btnM = document.getElementById('toggle-monthly');
+  const btnA = document.getElementById('toggle-annual');
+  if (btnM && btnA) {
+    if (mode === 'monthly') {
+      btnM.style.cssText = 'padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;background:#15803d;color:#fff;box-shadow:0 2px 8px rgba(21,128,61,.25);';
+      btnA.style.cssText = 'padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:#64748b;';
+    } else {
+      btnA.style.cssText = 'padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;background:#15803d;color:#fff;box-shadow:0 2px 8px rgba(21,128,61,.25);';
+      btnM.style.cssText = 'padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:#64748b;';
+    }
+  }
+  buildPricingGrid();
+}
+
+function buildPricingGrid() {
+  const cfg = PRICING_CONFIG;
+  const grid = document.getElementById('pricing-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  cfg.plans.forEach(plan => {
+    // Résoudre les valeurs selon le mode de facturation
+    let priceLabel, period, ctaText, ctaLink, savingsBadge;
+    if (plan.monthly && plan.annual) {
+      const billing = plan[_billing];
+      priceLabel    = billing.priceLabel;
+      period        = billing.period;
+      ctaText       = billing.ctaText;
+      ctaLink       = billing.ctaLink;
+      savingsBadge  = billing.savingsBadge;
+    } else {
+      priceLabel    = plan.priceLabel;
+      period        = plan.period;
+      ctaText       = plan.ctaText;
+      ctaLink       = plan.ctaLink;
+      savingsBadge  = null;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'lp-plan' + (plan.highlighted ? ' highlighted' : '');
+    const badge = plan.badge ? `<div class="lp-plan-badge">${plan.badge}</div>` : '';
+    const savings = savingsBadge
+      ? `<div style="margin-top:8px;display:inline-block;background:#dcfce7;color:#15803d;font-size:.8rem;font-weight:800;padding:4px 12px;border-radius:20px;border:1px solid #bbf7d0;">${savingsBadge}</div>`
+      : '';
+    const features = plan.features.map(f =>
+      `<li class="${f.ok ? '' : 'excluded'}"><span class="fi">${f.ok ? '✅' : '❌'}</span><span>${f.text}</span></li>`
+    ).join('');
+    card.innerHTML = `${badge}
+      <div class="lp-plan-name">${plan.name}</div>
+      <div class="lp-plan-desc">${plan.description || ''}</div>
+      <div class="lp-plan-price">
+        <div class="lp-plan-amount">${priceLabel}</div>
+        <div class="lp-plan-period">${period}</div>
+        ${savings}
+      </div>
+      <ul class="lp-plan-features">${features}</ul>
+      <a href="${ctaLink}" class="lp-plan-btn ${plan.ctaStyle}">${ctaText}</a>`;
+    grid.appendChild(card);
+  });
+}
+
+(function initPricing() {
   const cfg = PRICING_CONFIG;
   document.getElementById('pricing-subtitle').textContent = cfg.pricingSubtitle;
   const emailA = document.getElementById('pricing-email');
   if (emailA) { emailA.textContent = cfg.contactEmail; emailA.href = 'mailto:' + cfg.contactEmail; }
   const footerEmail = document.getElementById('footer-email');
   if (footerEmail) { footerEmail.textContent = cfg.contactEmail; footerEmail.href = 'mailto:' + cfg.contactEmail; }
-  const grid = document.getElementById('pricing-grid');
-  cfg.plans.forEach(plan => {
-    const card = document.createElement('div');
-    card.className = 'lp-plan' + (plan.highlighted ? ' highlighted' : '');
-    const badge = plan.badge ? `<div class="lp-plan-badge">${plan.badge}</div>` : '';
-    const features = plan.features.map(f =>
-      `<li class="${f.ok ? '' : 'excluded'}"><span class="fi">${f.ok ? '✅' : '❌'}</span><span>${f.text}</span></li>`
-    ).join('');
-    card.innerHTML = `${badge}
-      <div class="lp-plan-name">${plan.name}</div>
-      <div class="lp-plan-desc">${plan.description}</div>
-      <div class="lp-plan-price">
-        <div class="lp-plan-amount">${plan.priceLabel}</div>
-        <div class="lp-plan-period">${plan.period}</div>
-      </div>
-      <ul class="lp-plan-features">${features}</ul>
-      <a href="${plan.ctaLink}" class="lp-plan-btn ${plan.ctaStyle}">${plan.ctaText}</a>`;
-    grid.appendChild(card);
-  });
+  buildPricingGrid();
 })();
 </script>
 
