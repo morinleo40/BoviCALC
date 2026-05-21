@@ -2516,9 +2516,10 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   function deleteSessionById(id) {
     rbConfirm('Supprimer cette session définitivement ?', () => {
-    const sessions = loadLS(SESS_KEY, []).filter(x => x.id !== id);
-    saveLS(SESS_KEY, sessions);
-    refreshSessionsList(); refreshCompareSelects();
+      const sessions = loadLS(SESS_KEY, []).filter(x => x.id !== id);
+      saveLS(SESS_KEY, sessions);
+      refreshSessionsList(); refreshCompareSelects();
+    });
   }
 
   // =====================================================
@@ -3367,9 +3368,11 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     });
   });
   $('btn-delete-ration-profile')?.addEventListener('click',()=>{
-    const name=$('ration-profiles')?.value; if(!name){showToast('Sélectionnez un profil.','warn');return;} rbConfirm('Supprimer le profil "'+name+'" ?', () => {
-    const p=loadLS(LS.rationProfiles,{}); delete p[name];
-    saveLS(LS.rationProfiles,p); updateRationProfiles();
+    const name=$('ration-profiles')?.value; if(!name){showToast('Sélectionnez un profil.','warn');return;}
+    rbConfirm('Supprimer le profil "'+name+'" ?', () => {
+      const p=loadLS(LS.rationProfiles,{}); delete p[name];
+      saveLS(LS.rationProfiles,p); updateRationProfiles();
+    });
   });
 
   // -- Profils troupeau
@@ -3399,9 +3402,11 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if($('bf-duree'))    $('bf-duree').value=p.duree||'180';
   });
   $('btn-delete-herd-profile')?.addEventListener('click',()=>{
-    const name=$('herd-profiles')?.value; if(!name){showToast('Sélectionnez un profil.','warn');return;} rbConfirm('Supprimer le profil "'+name+'" ?', () => {
-    const p=loadLS(LS.herdProfiles,{}); delete p[name];
-    saveLS(LS.herdProfiles,p); updateHerdProfiles();
+    const name=$('herd-profiles')?.value; if(!name){showToast('Sélectionnez un profil.','warn');return;}
+    rbConfirm('Supprimer le profil "'+name+'" ?', () => {
+      const p=loadLS(LS.herdProfiles,{}); delete p[name];
+      saveLS(LS.herdProfiles,p); updateHerdProfiles();
+    });
   });
 
   // -- Aliments personnalisés
@@ -3456,8 +3461,10 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   });
   $('btn-delete-custom-aliment')?.addEventListener('click',()=>{
     const idx=parseInt($('select-custom-aliment')?.value);
-    if(isNaN(idx)){return;} rbConfirm('Supprimer cet aliment personnalisé ?', () => {
-    customFoodsDb.splice(idx,1); saveLS(LS.customFoods,customFoodsDb); hydrate();
+    if(isNaN(idx)){return;}
+    rbConfirm('Supprimer cet aliment personnalisé ?', () => {
+      customFoodsDb.splice(idx,1); saveLS(LS.customFoods,customFoodsDb); hydrate();
+    });
   });
   ['custom-na','custom-k','custom-ca','custom-mg','custom-cl','custom-s'].forEach(id=>{
     $(id)?.addEventListener('input',()=>{
@@ -3558,9 +3565,11 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     setAnimalFields(data, prefix);
   }
   function deleteAnimalProfile(selId) {
-    const name = $(selId)?.value; if (!name) return; rbConfirm(`Supprimer le profil "${name}" ?`, () => {
-    const profiles = loadLS(AP_KEY, {}); delete profiles[name];
-    saveLS(AP_KEY, profiles); updateAnimalProfileSelects();
+    const name = $(selId)?.value; if (!name) return;
+    rbConfirm(`Supprimer le profil "${name}" ?`, () => {
+      const profiles = loadLS(AP_KEY, {}); delete profiles[name];
+      saveLS(AP_KEY, profiles); updateAnimalProfileSelects();
+    });
   }
 
   $('btn-save-animal-profile')?.addEventListener('click', () => saveAnimalProfile(''));
@@ -4079,34 +4088,35 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       const ageMin = (Date.now() - state.ts) / 60000;
       if (ageMin > 120) return; // ignore si > 2h
       rbConfirm(`Une saisie non terminée trouvée (il y a ${Math.round(ageMin)} min). Restaurer ?`, () => {
-      // Restaurer step 1
-      const s1 = state.step1 || {};
-      if (s1.type && $('type-animal')) {
-        $('type-animal').value = s1.type;
-        $('type-animal').dispatchEvent(new Event('change'));
-      }
-      if (s1.pv   && $('pv'))   $('pv').value   = s1.pv;
-      if (s1.prod && $('prod')) $('prod').value  = s1.prod;
-      if (s1.tb   && $('tb'))   $('tb').value    = s1.tb;
-      if (s1.tp   && $('tp'))   $('tp').value    = s1.tp;
-      if (s1.gmq  && $('gmq')) $('gmq').value    = s1.gmq;
-      if (s1.activite && $('activite')) $('activite').value = s1.activite;
-      // Restaurer ration
-      if (state.rationLines?.length) {
-        const container = $('ration-lines');
-        if (container) {
-          container.innerHTML = '';
-          state.rationLines.forEach(() => addLine('ration-lines','aliments-list'));
-          const rows = container.querySelectorAll('.rb-ration-row');
-          state.rationLines.forEach((l, i) => {
-            if (rows[i]) {
-              const inp = rows[i].querySelectorAll('input');
-              if (inp[0]) inp[0].value = l.nom;
-              if (inp[1]) inp[1].value = l.qty;
-            }
-          });
+        // Restaurer step 1
+        const s1 = state.step1 || {};
+        if (s1.type && $('type-animal')) {
+          $('type-animal').value = s1.type;
+          $('type-animal').dispatchEvent(new Event('change'));
         }
-      }
+        if (s1.pv   && $('pv'))   $('pv').value   = s1.pv;
+        if (s1.prod && $('prod')) $('prod').value  = s1.prod;
+        if (s1.tb   && $('tb'))   $('tb').value    = s1.tb;
+        if (s1.tp   && $('tp'))   $('tp').value    = s1.tp;
+        if (s1.gmq  && $('gmq')) $('gmq').value    = s1.gmq;
+        if (s1.activite && $('activite')) $('activite').value = s1.activite;
+        // Restaurer ration
+        if (state.rationLines?.length) {
+          const container = $('ration-lines');
+          if (container) {
+            container.innerHTML = '';
+            state.rationLines.forEach(() => addLine('ration-lines','aliments-list'));
+            const rows = container.querySelectorAll('.rb-ration-row');
+            state.rationLines.forEach((l, i) => {
+              if (rows[i]) {
+                const inp = rows[i].querySelectorAll('input');
+                if (inp[0]) inp[0].value = l.nom;
+                if (inp[1]) inp[1].value = l.qty;
+              }
+            });
+          }
+        }
+      });
     } catch(e) {}
   }
 
