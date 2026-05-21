@@ -1283,6 +1283,18 @@ async function initAuth() {
 <!-- ── Toasts ── -->
 <div id="rb-toast-container" style="position:fixed;top:80px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:340px;"></div>
 
+<!-- ── Prompt dialog ── -->
+<div id="rb-prompt-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:24px 28px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:380px;width:90%;animation:fadeSlide .2s ease;">
+    <div id="rb-prompt-label" style="font-size:.95rem;font-weight:600;color:#1e293b;margin-bottom:12px;"></div>
+    <input id="rb-prompt-input" type="text" style="width:100%;height:40px;border:1.5px solid #e2e8f0;border-radius:8px;padding:0 12px;font-size:.9rem;outline:none;box-sizing:border-box;" onkeydown="if(event.key==='Enter')rbPromptOk();if(event.key==='Escape')rbPromptCancel();">
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button onclick="rbPromptCancel()" style="padding:9px 18px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;">Annuler</button>
+      <button onclick="rbPromptOk()" style="padding:9px 18px;border-radius:8px;border:none;background:#15803d;color:#fff;font-size:.875rem;font-weight:700;cursor:pointer;">OK</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Confirm dialog ── -->
 <div id="rb-confirm-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:14px;padding:24px 28px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:360px;width:90%;animation:fadeSlide .2s ease;">
@@ -1665,6 +1677,32 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if (ov) ov.style.display = 'none';
     _rbConfirmCb = null;
   }
+
+  // ── Prompt (remplace window.prompt) ─────────────────
+  var _rbPromptCb = null;
+  function rbPrompt(label, defaultVal, onOk) {
+    _rbPromptCb = onOk;
+    const lbl = document.getElementById('rb-prompt-label');
+    const inp = document.getElementById('rb-prompt-input');
+    const ov  = document.getElementById('rb-prompt-overlay');
+    if (lbl) lbl.textContent = label;
+    if (inp) inp.value = defaultVal || '';
+    if (ov)  ov.style.display = 'flex';
+    setTimeout(() => inp?.select(), 50);
+  }
+  function rbPromptOk() {
+    const inp = document.getElementById('rb-prompt-input');
+    const val = inp?.value?.trim() || '';
+    rbPromptCancel();
+    if (val && _rbPromptCb) _rbPromptCb(val);
+  }
+  function rbPromptCancel() {
+    const ov = document.getElementById('rb-prompt-overlay');
+    if (ov) ov.style.display = 'none';
+    _rbPromptCb = null;
+  }
+  window.rbPromptOk = rbPromptOk;
+  window.rbPromptCancel = rbPromptCancel;
   // Fermer sur clic overlay
   document.getElementById('rb-confirm-overlay')?.addEventListener('click', function(e) {
     if (e.target === this) rbConfirmCancel();
@@ -1777,8 +1815,8 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const wrap = $(previewId); if (!wrap) return;
     const src  = getRaceImgSrc(race);
     if (src) {
-      wrap.style.cssText = 'margin-top:8px;width:100%;height:160px;overflow:hidden;border-radius:10px;border:1.5px solid var(--border);background:#f8fafc;';
-      wrap.innerHTML = `<img src="${src}" alt="${race}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.style.display='none'">`;
+      wrap.style.cssText = 'margin-top:8px;width:100%;background:#f8fafc;border-radius:10px;border:1.5px solid var(--border);overflow:hidden;';
+      wrap.innerHTML = `<img src="${src}" alt="${race}" style="width:100%;max-height:220px;object-fit:contain;display:block;" onerror="this.parentNode.style.display='none'">`;
     } else {
       wrap.style.cssText = '';
       wrap.innerHTML = '';
@@ -2563,8 +2601,11 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if (!lastB || !lastA?.items?.length) {
       showToast('Calculez d\'abord un bilan complet avant de sauvegarder.', 'warn'); return;
     }
-    const name = prompt('Nom de la session :', `Ration du ${new Date().toLocaleDateString('fr-FR')}`);
-    if (!name?.trim()) return;
+    rbPrompt('Nom de la session :', `Ration du ${new Date().toLocaleDateString('fr-FR')}`, name => {
+      _doSaveSession(name);
+    });
+  }
+  function _doSaveSession(name) {
     const rationLines = [];
     document.querySelectorAll('#ration-lines .rb-ration-row').forEach(row => {
       const inp = row.querySelectorAll('input');
@@ -3534,15 +3575,17 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     Object.keys(p).forEach(n=>sel.innerHTML+=`<option value="${n}">${n}</option>`);
   }
   $('btn-save-ration-profile')?.addEventListener('click',()=>{
-    const name=prompt('Nom du profil :'); if(!name?.trim()) return;
-    const lines=[];
-    document.querySelectorAll('#ration-lines .rb-ration-row').forEach(row=>{
-      const inp=row.querySelectorAll('input');
-      if(inp[0]?.value) lines.push({nom:inp[0].value,qty:inp[1]?.value||''});
+    rbPrompt('Nom du profil de ration :', '', name => {
+      const lines=[];
+      document.querySelectorAll('#ration-lines .rb-ration-row').forEach(row=>{
+        const inp=row.querySelectorAll('input');
+        if(inp[0]?.value) lines.push({nom:inp[0].value,qty:inp[1]?.value||''});
+      });
+      const p=loadLS(LS.rationProfiles,{}); p[name]=lines;
+      saveLS(LS.rationProfiles,p); updateRationProfiles();
+      $('ration-profiles').value=name;
+      showToast(`Profil "${name}" sauvegardé.`,'success');
     });
-    const p=loadLS(LS.rationProfiles,{}); p[name.trim()]=lines;
-    saveLS(LS.rationProfiles,p); updateRationProfiles();
-    $('ration-profiles').value=name.trim();
   });
   $('btn-load-ration-profile')?.addEventListener('click',()=>{
     const name=$('ration-profiles')?.value; if(!name) return;
@@ -3570,14 +3613,14 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     Object.keys(p).forEach(n=>sel.innerHTML+=`<option value="${n}">${n}</option>`);
   }
   $('btn-save-herd-profile')?.addEventListener('click',()=>{
-    const name=prompt('Nom du profil troupeau :'); if(!name?.trim()) return;
-    const p=loadLS(LS.herdProfiles,{});
-    p[name.trim()]={
-      nbVL:$('bf-nb-vl')?.value, consoVL:$('bf-conso-vl')?.value,
-      nbBV:$('bf-nb-bv')?.value, consoBV:$('bf-conso-bv')?.value,
-      duree:$('bf-duree')?.value
-    };
-    saveLS(LS.herdProfiles,p); updateHerdProfiles(); $('herd-profiles').value=name.trim();
+    rbPrompt('Nom du profil troupeau :', '', name => {
+      const p=loadLS(LS.herdProfiles,{});
+      p[name]={ nbVL:$('bf-nb-vl')?.value, consoVL:$('bf-conso-vl')?.value,
+                nbBV:$('bf-nb-bv')?.value, consoBV:$('bf-conso-bv')?.value,
+                duree:$('bf-duree')?.value };
+      saveLS(LS.herdProfiles,p); updateHerdProfiles(); $('herd-profiles').value=name;
+      showToast(`Profil troupeau "${name}" sauvegardé.`,'success');
+    });
   });
   $('btn-load-herd-profile')?.addEventListener('click',()=>{
     const name=$('herd-profiles')?.value; if(!name) return;
@@ -3736,14 +3779,15 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   }
 
   function saveAnimalProfile(prefix='') {
-    const name = prompt('Nom du profil animal :'); if (!name?.trim()) return;
-    const profiles = loadLS(AP_KEY, {});
-    profiles[name.trim()] = getAnimalFields(prefix);
-    saveLS(AP_KEY, profiles);
-    updateAnimalProfileSelects();
-    const selId = prefix ? 'ba-animal-profiles' : 'animal-profiles';
-    if ($(selId)) $(selId).value = name.trim();
-    showToast(`Profil "${name.trim()}" sauvegardé.`, 'success');
+    rbPrompt('Nom du profil animal :', '', name => {
+      const profiles = loadLS(AP_KEY, {});
+      profiles[name] = getAnimalFields(prefix);
+      saveLS(AP_KEY, profiles);
+      updateAnimalProfileSelects();
+      const selId = prefix ? 'ba-animal-profiles' : 'animal-profiles';
+      if ($(selId)) $(selId).value = name;
+      showToast(`Profil "${name}" sauvegardé.`, 'success');
+    });
   }
   function loadAnimalProfile(selId, prefix='') {
     const name = $(selId)?.value; if (!name) return;
