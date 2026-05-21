@@ -533,25 +533,31 @@ async function initAuth() {
         <div class="rb-form-grid" style="grid-template-columns:1fr 1fr;">
           <div class="rb-form-group" style="grid-column:1/-1;">
             <label>Type d'animal <span class="required">*</span></label>
-            <select id="type-animal" required>
+            <select id="type-animal" required onchange="updateUfBadge('type-animal','uf-badge-main')">
               <option value="">Sélectionner</option>
-              <optgroup label="Lait (UFL)">
+              <optgroup label="Élevage laitier (UFL)">
                 <option value="vache-laitiere">Vache laitière</option>
                 <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
-                <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
+                <option value="vache-prepa-velage">Vache prépa vêlage (4-8 sem.)</option>
+                <option value="genisse">Génisse laitière (renouvellement)</option>
+                <option value="genisse-engrais">Génisse laitière (engraissement)</option>
+                <option value="vache-reforme">Vache réforme / engraissement</option>
+                <option value="veau">Veau de lait</option>
               </optgroup>
-              <optgroup label="Viande (UFV)">
-                <option value="genisse">Génisse (croissance)</option>
-                <option value="genisse-engrais">Génisse à engraisser</option>
-                <option value="vache-reforme">Vache réforme à engraisser</option>
-                <option value="veau">Veau</option>
+              <optgroup label="Élevage viande (UFV)">
+                <option value="taurillon">Taurillon à l'engrais (JB)</option>
+                <option value="boeuf-engrais">Bœuf à l'engrais</option>
+                <option value="vache-allaitante">Vache allaitante (nourrisse)</option>
+                <option value="genisse-viande">Génisse viande à l'engrais</option>
+                <option value="broutard">Broutard / Jeune bovin</option>
               </optgroup>
             </select>
+            <div id="uf-badge-main" style="display:none;margin-top:6px;"></div>
           </div>
 
           <div class="rb-form-group">
             <label>Race (optionnel)</label>
-            <select id="race-animal">
+            <select id="race-animal" onchange="showRaceImage('race-animal','race-img-preview')"
               <option value="">Non spécifiée</option>
               <optgroup label="Laitières">
                 <option value="prim-holstein">Prim'Holstein</option>
@@ -571,8 +577,13 @@ async function initAuth() {
                 <option value="aubrac">Aubrac</option>
                 <option value="gasconne">Gasconne</option>
                 <option value="herens">Hérens</option>
+                <option value="highland">Highland</option>
+                <option value="parthenaise">Parthenaise</option>
+                <option value="bazadaise">Bazadaise</option>
+                <option value="rouge-des-pres">Rouge des Prés (Maine-Anjou)</option>
               </optgroup>
             </select>
+            <div id="race-img-preview" style="margin-top:8px;"></div>
           </div>
 
           <div class="rb-form-group">
@@ -943,20 +954,26 @@ async function initAuth() {
     <div class="rb-form-grid">
       <div class="rb-form-group">
         <label>Type d'animal <span class="required">*</span></label>
-        <select id="ba-type-animal" required>
+        <select id="ba-type-animal" required onchange="updateUfBadge('ba-type-animal','uf-badge-ba')">
           <option value="">Sélectionner</option>
-          <optgroup label="Lait (UFL)">
+          <optgroup label="Élevage laitier (UFL)">
             <option value="vache-laitiere">Vache laitière</option>
             <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
-            <option value="vache-prepa-velage">Vache en prépa vêlage (4-8 sem.)</option>
+            <option value="vache-prepa-velage">Vache prépa vêlage (4-8 sem.)</option>
+            <option value="genisse">Génisse laitière (renouvellement)</option>
+            <option value="genisse-engrais">Génisse laitière (engraissement)</option>
+            <option value="vache-reforme">Vache réforme / engraissement</option>
+            <option value="veau">Veau de lait</option>
           </optgroup>
-          <optgroup label="Viande (UFV)">
-            <option value="genisse">Génisse (croissance)</option>
-            <option value="genisse-engrais">Génisse à engraisser</option>
-            <option value="vache-reforme">Vache réforme à engraisser</option>
-            <option value="veau">Veau</option>
+          <optgroup label="Élevage viande (UFV)">
+            <option value="taurillon">Taurillon à l'engrais (JB)</option>
+            <option value="boeuf-engrais">Bœuf à l'engrais</option>
+            <option value="vache-allaitante">Vache allaitante (nourrisse)</option>
+            <option value="genisse-viande">Génisse viande à l'engrais</option>
+            <option value="broutard">Broutard / Jeune bovin</option>
           </optgroup>
         </select>
+        <div id="uf-badge-ba" style="display:none;margin-top:6px;"></div>
       </div>
 
       <div class="rb-form-group">
@@ -1731,16 +1748,71 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     }
   }
 
+  const RACE_IMAGES = {
+    'prim-holstein':   'PrimHolstein.jpg',
+    'montbeliarde':    'Montbeliarde.jfif',
+    'normande':        'Normande.jpg',
+    'jersiaise':       'Jersiaise.jpg',
+    'brune':           'Brune.jpg',
+    'pie-rouge':       'Pie Rouge.jfif',
+    'tarentaise':      'Tarentaise.jpg',
+    'simmental':       'Simmental.webp',
+    'charolaise':      'Charolaise.jpg',
+    'limousine':       'Limousine.jpg',
+    'blonde-aquitaine':"Blonde d’Aquitaine.jfif",
+    'salers':          'Salers.jpg',
+    'aubrac':          'Aubrac.jpg',
+    'gasconne':        'Gasconne.jpg',
+    'herens':          'Herens.jpg',
+    'highland':        'Highland.jpg',
+    'parthenaise':     'Parthenaise.jpg',
+    'bazadaise':       'Bazardaise.jpg',
+    'rouge-des-pres':  'Rouge des prés.jfif',
+  };
+
+  function getRaceImgSrc(race) {
+    return RACE_IMAGES[race] ? './' + RACE_IMAGES[race] : null;
+  }
+  function showRaceImage(selectId, previewId) {
+    const race = $(selectId)?.value;
+    const wrap = $(previewId); if (!wrap) return;
+    const src  = getRaceImgSrc(race);
+    if (src) {
+      wrap.innerHTML = `<img src="${src}" alt="${race}"
+        style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;border:2px solid var(--border);display:block;"
+        onerror="this.parentNode.innerHTML=''">`;
+    } else {
+      wrap.innerHTML = '';
+    }
+  }
+  window.showRaceImage = showRaceImage;
+
+  const UFV_TYPES = ['genisse','genisse-engrais','vache-reforme','veau',
+                     'taurillon','boeuf-engrais','vache-allaitante','genisse-viande','broutard'];
+  const LAIT_TYPES = ['vache-laitiere','vache-tarie','vache-prepa-velage','vache-allaitante'];
+  const GMQ_TYPES  = ['genisse','genisse-engrais','vache-reforme','veau',
+                      'taurillon','boeuf-engrais','genisse-viande','broutard'];
+
+  function updateUfBadge(selectId, badgeId) {
+    const v = $(selectId)?.value;
+    const el = $(badgeId); if (!el || !v) { if(el) el.style.display='none'; return; }
+    const isUFV = UFV_TYPES.includes(v);
+    el.style.display = '';
+    el.innerHTML = isUFV
+      ? `<span style="display:inline-flex;align-items:center;gap:6px;background:#fff7ed;border:1.5px solid #fed7aa;color:#c2410c;border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;">⚡ Énergie calculée en <strong>UFV</strong> — Bovin viande / croissance</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1.5px solid #bbf7d0;color:#15803d;border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;">⚡ Énergie calculée en <strong>UFL</strong> — Vache laitière</span>`;
+  }
+  window.updateUfBadge = updateUfBadge;
+
   // -- Animal type fields
   $('type-animal')?.addEventListener('change', function() {
     const v = this.value;
-    const lait = ['vache-laitiere','vache-tarie','vache-prepa-velage'];
-    const via  = ['genisse','genisse-engrais','vache-reforme','veau'];
-    $('prod-group') && ($('prod-group').style.display = lait.includes(v) ? '' : 'none');
-    $('tb-group')   && ($('tb-group').style.display   = lait.includes(v) ? '' : 'none');
-    $('tp-group')   && ($('tp-group').style.display   = lait.includes(v) ? '' : 'none');
-    $('gmq-group')  && ($('gmq-group').style.display  = via.includes(v)  ? '' : 'none');
-    $('age-group')  && ($('age-group').style.display  = via.includes(v)  ? '' : 'none');
+    $('prod-group') && ($('prod-group').style.display = LAIT_TYPES.includes(v) ? '' : 'none');
+    $('tb-group')   && ($('tb-group').style.display   = LAIT_TYPES.includes(v) ? '' : 'none');
+    $('tp-group')   && ($('tp-group').style.display   = LAIT_TYPES.includes(v) ? '' : 'none');
+    $('gmq-group')  && ($('gmq-group').style.display  = GMQ_TYPES.includes(v)  ? '' : 'none');
+    $('age-group')  && ($('age-group').style.display  = GMQ_TYPES.includes(v)  ? '' : 'none');
+    updateUfBadge('type-animal','uf-badge-main');
   });
 
   // -- Calcul besoins (retourne aussi le détail ligne par ligne)
@@ -1812,6 +1884,68 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
               {l:'Croissance', f:`280 × ${g} kg/j (GMQ)`, v:pCro}];
         break;
       }
+      // ── Bovins viande (UFV) ─────────────────────────
+      case 'taurillon': {
+        // Jeune bovin mâle non castré — croissance maigre, GMQ élevé
+        const g=gmq||1.3;
+        const uEnt=0.041*pv075n, uCro=4.5*g;
+        const pEnt=2.5*pv075n, pCro=330*g;
+        bUFL=(uEnt+uCro)*coef; bPDI=(pEnt+pCro)*coef; cap=pv*0.022*coef;
+        dUFL=[{l:'Entretien (UFV)', f:`0.041 × ${pv075}`, v:uEnt},
+              {l:'Engraissement', f:`4.5 × ${g} kg/j`, v:uCro}];
+        dPDI=[{l:'Entretien', f:`2.5 × ${pv075}`, v:pEnt},
+              {l:'Engraissement', f:`330 × ${g} kg/j`, v:pCro}];
+        break;
+      }
+      case 'boeuf-engrais': {
+        // Bovin castré — dépôt lipidique plus important, coeff énergétique > JB
+        const g=gmq||0.9;
+        const uEnt=0.041*pv075n, uEng=5.0*g;
+        const pEnt=2.5*pv075n, pEng=260*g;
+        bUFL=(uEnt+uEng)*coef; bPDI=(pEnt+pEng)*coef; cap=pv*0.020*coef;
+        dUFL=[{l:'Entretien (UFV)', f:`0.041 × ${pv075}`, v:uEnt},
+              {l:'Engraissement', f:`5.0 × ${g} kg/j`, v:uEng}];
+        dPDI=[{l:'Entretien', f:`2.5 × ${pv075}`, v:pEnt},
+              {l:'Engraissement', f:`260 × ${g} kg/j`, v:pEng}];
+        break;
+      }
+      case 'vache-allaitante': {
+        // Vache nourrisse — lait riche pour veau, TB ~40 g/L, prod 6-10 kg/j
+        const laitAllait = prod || 8;
+        lait = laitAllait;
+        const uEnt=0.044*pv075n, uLact=0.42*laitAllait;
+        const pEnt=90+0.5*pv, pLact=laitAllait*45;
+        bUFL=(uEnt+uLact)*coef; bPDI=(pEnt+pLact)*coef; cap=pv*0.022*coef;
+        dUFL=[{l:'Entretien (UFV)', f:`0.044 × ${pv075}`, v:uEnt},
+              {l:'Lactation veau', f:`0.42 × ${laitAllait} kg/j`, v:uLact}];
+        dPDI=[{l:'Entretien', f:`90 + 0.5 × ${pv}`, v:pEnt},
+              {l:'Lactation veau', f:`${laitAllait} kg × 45 g/L`, v:pLact}];
+        break;
+      }
+      case 'genisse-viande': {
+        // Génisse de race à viande — croissance plus grasse que laitière
+        const g=gmq||0.85;
+        const uEnt=0.041*pv075n, uCro=4.5*g;
+        const pEnt=2.5*pv075n, pCro=310*g;
+        bUFL=(uEnt+uCro)*coef; bPDI=(pEnt+pCro)*coef; cap=pv*0.025*coef;
+        dUFL=[{l:'Entretien (UFV)', f:`0.041 × ${pv075}`, v:uEnt},
+              {l:'Croissance', f:`4.5 × ${g} kg/j`, v:uCro}];
+        dPDI=[{l:'Entretien', f:`2.5 × ${pv075}`, v:pEnt},
+              {l:'Croissance', f:`310 × ${g} kg/j`, v:pCro}];
+        break;
+      }
+      case 'broutard': {
+        // Jeune bovin issu d'élevage allaitant, 150-350 kg, forte croissance
+        const g=gmq||1.0;
+        const uEnt=0.041*pv075n, uCro=4.2*g;
+        const pEnt=2.5*pv075n, pCro=340*g;
+        bUFL=(uEnt+uCro)*coef; bPDI=(pEnt+pCro)*coef; cap=pv*0.028*coef;
+        dUFL=[{l:'Entretien (UFV)', f:`0.041 × ${pv075}`, v:uEnt},
+              {l:'Croissance', f:`4.2 × ${g} kg/j`, v:uCro}];
+        dPDI=[{l:'Entretien', f:`2.5 × ${pv075}`, v:pEnt},
+              {l:'Croissance', f:`340 × ${g} kg/j`, v:pCro}];
+        break;
+      }
       default: {
         const u=0.054*pv075n+3, p=95+0.5*pv+200;
         bUFL=u*coef; bPDI=p*coef; cap=pv*0.02*coef;
@@ -1829,7 +1963,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   // -- Rendu partagé des besoins
   function renderBesoinsResult(b, contId) {
     const cont = $(contId); if (!cont) return;
-    const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel) ? 'UFV' : 'UFL';
+    const eu = UFV_TYPES.includes(b.typeLabel) ? 'UFV' : 'UFL';
     const rows = (arr, isUFL) => arr.map(d => `
       <tr class="${d.coef ? 'dt-coef' : ''}">
         <td class="dt-label">${d.l}</td>
@@ -2048,7 +2182,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const rUFL = b.bUFL>0 ? a.totalUFL/b.bUFL : 0;
     const rPDI = b.bPDI>0 ? a.totalPDI/b.bPDI : 0;
     const ppu  = a.totalUFL>0 ? a.totalPDI/a.totalUFL : 0;
-    const eu   = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel) ? 'UFV' : 'UFL';
+    const eu   = UFV_TYPES.includes(b.typeLabel) ? 'UFV' : 'UFL';
     const badgeCls = r => r>=0.9&&r<=1.1?'rb-badge-green':r<0.9?'rb-badge-red':'rb-badge-orange';
     const badgeLbl = r => r>=0.9&&r<=1.1?'OK':r<0.9?'Déficit':'Excès';
     const barCls   = r => r>=0.9&&r<=1.1?'ok':r<0.9?'low':'high';
@@ -2142,7 +2276,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   }
 
   function renderIndicateurs(a, b) {
-    const eu   = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel) ? 'UFV' : 'UFL';
+    const eu   = UFV_TYPES.includes(b.typeLabel) ? 'UFV' : 'UFL';
     const pv   = getNum('poids-vif');
     const prod = getNum('production-lait');
 
@@ -2164,7 +2298,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const caApport = ca * a.totalMS, mgApport = mg * a.totalMS, naApport = na * a.totalMS;
     let caReq=50, mgReq=15, naReq=8;
     if (b.typeLabel==='vache-laitiere') { caReq=45+prod; mgReq=Math.max(20,0.02*pv+0.15*prod); naReq=Math.max(8,0.015*pv+0.1*prod); }
-    else if (['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)) { caReq=30; mgReq=10; naReq=6; }
+    else if (UFV_TYPES.includes(b.typeLabel)) { caReq=30; mgReq=10; naReq=6; }
 
     // Acides aminés
     const metApport = getNum('aa-met'), lysApport = getNum('aa-lys');
@@ -2410,8 +2544,12 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   const SESS_KEY = 'bovicalc-sessions';
   const ANIMAL_LABELS = {
     'vache-laitiere':'Vache laitière','vache-tarie':'Vache tarie',
-    'vache-prepa-velage':'Prépa vêlage','genisse':'Génisse',
-    'genisse-engrais':'Génisse engrais','vache-reforme':'Vache réforme','veau':'Veau'
+    'vache-prepa-velage':'Prépa vêlage',
+    'genisse':'Génisse laitière','genisse-engrais':'Génisse laitière (engrais)',
+    'vache-reforme':'Vache réforme','veau':'Veau de lait',
+    'taurillon':'Taurillon (JB)','boeuf-engrais':'Bœuf à l\'engrais',
+    'vache-allaitante':'Vache allaitante','genisse-viande':'Génisse viande',
+    'broutard':'Broutard'
   };
 
   function saveCurrentSession() {
@@ -2531,7 +2669,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if (!requirePro('Optimiseur de ration')) return;
     if (!lastB || !lastA?.items?.length) return;
     const a=lastA, b=lastB;
-    const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+    const eu = UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
     const rUFL = b.bUFL > 0 ? a.totalUFL/b.bUFL : 1;
     const rPDI = b.bPDI > 0 ? a.totalPDI/b.bPDI : 1;
     const ppu  = a.totalUFL > 0 ? a.totalPDI/a.totalUFL : 0;
@@ -2784,7 +2922,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if (!sA||!sB) return;
     const cont = $('compare-result'); if (!cont) return;
 
-    const eu = s => ['genisse','genisse-engrais','vache-reforme','veau'].includes(s.lastB?.typeLabel) ? 'UFV':'UFL';
+    const eu = s => UFV_TYPES.includes(s.lastB?.typeLabel) ? 'UFV':'UFL';
     const pct = (a,b) => b>0?(a/b*100).toFixed(0)+'%':'—';
     const diff = (a,b,dec=2) => {
       const d = (parseFloat(a)||0)-(parseFloat(b)||0);
@@ -2858,7 +2996,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   function buildRapportRationAZ(){
     if(!lastB||!lastA?.items?.length){showToast('Calculez d\'abord le bilan complet (étapes 1 → 3).','warn');return false;}
-    const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(lastB.typeLabel)?'UFV':'UFL';
+    const eu=UFV_TYPES.includes(lastB.typeLabel)?'UFV':'UFL';
     const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
     const rUFL=lastB.bUFL>0?lastA.totalUFL/lastB.bUFL:0;
     const rPDI=lastB.bPDI>0?lastA.totalPDI/lastB.bPDI:0;
@@ -2891,8 +3029,12 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
      +'<div class="rp-body">';
 
     // 1 Animal
+    const raceImgSrc = getRaceImgSrc(race);
+    const raceImgHtml = raceImgSrc
+      ? '<img src="'+raceImgSrc+'" alt="'+race+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:10px;border:1px solid #e2e8f0;">'
+      : '';
     h+='<div class="rp-section"><div class="rp-section-title">1 — Animal</div><div class="rp-two-col">'
-     +'<div class="rp-box"><div class="rp-box-title">Identification</div>'+kv('Type',animalLabel)+(race?kv('Race',race):'')+kv('Activit\xe9',acti)+'</div>'
+     +'<div class="rp-box"><div class="rp-box-title">Identification</div>'+kv('Type',animalLabel)+(race?kv('Race',race):'')+kv('Activit\xe9',acti)+raceImgHtml+'</div>'
      +'<div class="rp-box"><div class="rp-box-title">Param\xe8tres</div>'+kv('Poids vif',poids+' kg')+(prod?kv('Production',prod+' kg lait/j'):'')+((tb||tp)?kv('TB/TP',(tb||'—')+' / '+(tp||'—')+' g/L'):'')+(gmq?kv('GMQ',gmq+' kg/j'):'')+'</div>'
      +'</div></div>';
 
@@ -3518,12 +3660,11 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   // -- Besoins seuls (section indépendante)
   $('ba-type-animal')?.addEventListener('change', function() {
     const v = this.value;
-    const lait = ['vache-laitiere','vache-tarie','vache-prepa-velage'];
-    const via  = ['genisse','genisse-engrais','vache-reforme','veau'];
-    $('ba-prod-group') && ($('ba-prod-group').style.display = lait.includes(v) ? '' : 'none');
-    $('ba-tb-group')   && ($('ba-tb-group').style.display   = lait.includes(v) ? '' : 'none');
-    $('ba-tp-group')   && ($('ba-tp-group').style.display   = lait.includes(v) ? '' : 'none');
-    $('ba-gmq-group')  && ($('ba-gmq-group').style.display  = via.includes(v)  ? '' : 'none');
+    $('ba-prod-group') && ($('ba-prod-group').style.display = LAIT_TYPES.includes(v) ? '' : 'none');
+    $('ba-tb-group')   && ($('ba-tb-group').style.display   = LAIT_TYPES.includes(v) ? '' : 'none');
+    $('ba-tp-group')   && ($('ba-tp-group').style.display   = LAIT_TYPES.includes(v) ? '' : 'none');
+    $('ba-gmq-group')  && ($('ba-gmq-group').style.display  = GMQ_TYPES.includes(v)  ? '' : 'none');
+    updateUfBadge('ba-type-animal','uf-badge-ba');
   });
 
   $('btn-calc-besoins-seuls')?.addEventListener('click', () => {

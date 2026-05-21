@@ -388,18 +388,54 @@ function setTheme(t) {
                 <label>Type d'animal</label>
                 <select class="form-select" id="r-type-animal" onchange="onAnimalTypeChange()">
                   <option value="">Sélectionner…</option>
-                  <optgroup label="Lait">
+                  <optgroup label="Élevage laitier (UFL)">
                     <option value="vache-laitiere">Vache laitière</option>
                     <option value="vache-tarie">Vache tarie</option>
                     <option value="vache-prepa-velage">Prépa vêlage</option>
+                    <option value="genisse">Génisse laitière (renouvellement)</option>
+                    <option value="genisse-engrais">Génisse laitière (engraissement)</option>
+                    <option value="vache-reforme">Vache réforme / engraissement</option>
+                    <option value="veau">Veau de lait</option>
                   </optgroup>
-                  <optgroup label="Viande">
-                    <option value="genisse">Génisse (croissance)</option>
-                    <option value="genisse-engrais">Génisse à engraisser</option>
-                    <option value="vache-reforme">Vache réforme</option>
-                    <option value="veau">Veau</option>
+                  <optgroup label="Élevage viande (UFV)">
+                    <option value="taurillon">Taurillon à l'engrais (JB)</option>
+                    <option value="boeuf-engrais">Bœuf à l'engrais</option>
+                    <option value="vache-allaitante">Vache allaitante (nourrisse)</option>
+                    <option value="genisse-viande">Génisse viande à l'engrais</option>
+                    <option value="broutard">Broutard / Jeune bovin</option>
                   </optgroup>
                 </select>
+                <div id="uf-badge-cons" style="margin-top:6px;"></div>
+              </div>
+              <div class="form-group">
+                <label>Race (optionnel)</label>
+                <select class="form-select" id="r-race" onchange="showRaceImage('r-race','r-race-img')">
+                  <option value="">Non spécifiée</option>
+                  <optgroup label="Laitières">
+                    <option value="prim-holstein">Prim'Holstein</option>
+                    <option value="montbeliarde">Montbéliarde</option>
+                    <option value="normande">Normande</option>
+                    <option value="jersiaise">Jersiaise</option>
+                    <option value="brune">Brune</option>
+                    <option value="pie-rouge">Pie Rouge</option>
+                    <option value="tarentaise">Tarentaise</option>
+                    <option value="simmental">Simmental</option>
+                  </optgroup>
+                  <optgroup label="Viandes">
+                    <option value="charolaise">Charolaise</option>
+                    <option value="limousine">Limousine</option>
+                    <option value="blonde-aquitaine">Blonde d'Aquitaine</option>
+                    <option value="salers">Salers</option>
+                    <option value="aubrac">Aubrac</option>
+                    <option value="gasconne">Gasconne</option>
+                    <option value="herens">Hérens</option>
+                    <option value="highland">Highland</option>
+                    <option value="parthenaise">Parthenaise</option>
+                    <option value="bazadaise">Bazadaise</option>
+                    <option value="rouge-des-pres">Rouge des Prés</option>
+                  </optgroup>
+                </select>
+                <div id="r-race-img" style="margin-top:8px;"></div>
               </div>
               <div class="form-grid">
                 <div class="form-group">
@@ -799,11 +835,11 @@ function setTheme(t) {
 </div>
 
 <style>
-/* Bilan fourrager — segmented control */
-.bf-tabs-wrap { display:inline-flex;flex-wrap:wrap;gap:0;margin-bottom:20px;background:#f1f5f9;border-radius:10px;padding:4px;border:1.5px solid #e2e8f0; }
-.bf-btn { display:inline-flex;align-items:center;gap:6px;padding:0 18px;height:34px;border-radius:7px;border:none;background:transparent;color:#64748b;font-size:.83rem;font-weight:600;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s;white-space:nowrap;box-sizing:border-box; }
-.bf-btn:hover { color:#15803d;background:rgba(255,255,255,.7); }
-.bf-btn.active { background:#fff;color:#15803d;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.10),0 0 0 1px rgba(21,128,61,.15); }
+/* Bilan fourrager — onglets underline */
+.bf-tabs-wrap { display:flex;flex-wrap:wrap;gap:0;margin-bottom:24px;border-bottom:2px solid #e2e8f0; }
+.bf-btn { display:inline-flex;align-items:center;gap:7px;height:42px;padding:0 20px;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;background:transparent;color:#64748b;font-size:.875rem;font-weight:600;cursor:pointer;transition:color .15s,border-color .15s,background .15s;white-space:nowrap;box-sizing:border-box; }
+.bf-btn:hover { color:#15803d;background:#f0fdf4;border-bottom-color:#bbf7d0; }
+.bf-btn.active { color:#15803d;font-weight:700;border-bottom-color:#15803d;background:transparent; }
 /* Indicateurs */
 .rb-indicator { background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .18s;overflow:hidden; }
 .rb-indicator:hover { border-color:#15803d; }
@@ -1301,13 +1337,59 @@ async function deleteCurrentExp(id) {
 /* ══ CALCULATION ENGINE ══ */
 function gN(id) { const v=parseFloat(document.getElementById(id)?.value); return isFinite(v)?v:0; }
 
+const RACE_IMAGES = {
+  'prim-holstein':   'PrimHolstein.jpg',
+  'montbeliarde':    'Montbeliarde.jfif',
+  'normande':        'Normande.jpg',
+  'jersiaise':       'Jersiaise.jpg',
+  'brune':           'Brune.jpg',
+  'pie-rouge':       'Pie Rouge.jfif',
+  'tarentaise':      'Tarentaise.jpg',
+  'simmental':       'Simmental.webp',
+  'charolaise':      'Charolaise.jpg',
+  'limousine':       'Limousine.jpg',
+  'blonde-aquitaine':"Blonde d'Aquitaine.jfif",
+  'salers':          'Salers.jpg',
+  'aubrac':          'Aubrac.jpg',
+  'gasconne':        'Gasconne.jpg',
+  'herens':          'Herens.jpg',
+  'highland':        'Highland.jpg',
+  'parthenaise':     'Parthenaise.jpg',
+  'bazadaise':       'Bazardaise.jpg',
+  'rouge-des-pres':  'Rouge des prés.jfif',
+};
+function getRaceImgSrc(race) { return RACE_IMAGES[race] ? './'+RACE_IMAGES[race] : null; }
+function showRaceImage(selectId, previewId) {
+  const race = document.getElementById(selectId)?.value;
+  const wrap = document.getElementById(previewId); if (!wrap) return;
+  const src  = getRaceImgSrc(race);
+  wrap.innerHTML = src
+    ? '<img src="'+src+'" alt="'+race+'" style="width:100%;max-height:130px;object-fit:cover;border-radius:8px;border:1.5px solid #e2e8f0;" onerror="this.parentNode.innerHTML=\'\'">'
+    : '';
+}
+
+const UFV_TYPES = ['genisse','genisse-engrais','vache-reforme','veau',
+                   'taurillon','boeuf-engrais','vache-allaitante','genisse-viande','broutard'];
+const LAIT_TYPES = ['vache-laitiere','vache-tarie','vache-prepa-velage','vache-allaitante'];
+const GMQ_TYPES  = ['genisse','genisse-engrais','vache-reforme','veau',
+                    'taurillon','boeuf-engrais','genisse-viande','broutard'];
+
+function updateUfBadge(selectId, badgeId) {
+  const v = document.getElementById(selectId)?.value;
+  const el = document.getElementById(badgeId); if (!el) return;
+  if (!v) { el.innerHTML=''; return; }
+  const isUFV = UFV_TYPES.includes(v);
+  el.innerHTML = isUFV
+    ? `<span style="display:inline-flex;align-items:center;gap:6px;background:#fff7ed;border:1.5px solid #fed7aa;color:#c2410c;border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;">⚡ Énergie calculée en <strong>UFV</strong> — Bovin viande / croissance</span>`
+    : `<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1.5px solid #bbf7d0;color:#15803d;border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;">⚡ Énergie calculée en <strong>UFL</strong> — Vache laitière</span>`;
+}
+
 function onAnimalTypeChange() {
   const v = document.getElementById('r-type-animal').value;
-  const lait = ['vache-laitiere','vache-tarie','vache-prepa-velage'].includes(v);
-  const viande = ['genisse','genisse-engrais','vache-reforme','veau'].includes(v);
-  document.getElementById('rg-prod').style.display = lait?'':'none';
-  document.getElementById('rg-tb').style.display   = lait?'':'none';
-  document.getElementById('rg-gmq').style.display  = viande?'':'none';
+  document.getElementById('rg-prod').style.display = LAIT_TYPES.includes(v)?'':'none';
+  document.getElementById('rg-tb').style.display   = LAIT_TYPES.includes(v)?'':'none';
+  document.getElementById('rg-gmq').style.display  = GMQ_TYPES.includes(v)?'':'none';
+  updateUfBadge('r-type-animal','uf-badge-cons');
 }
 
 function computeBesoins(pv,prod,activite,tb,type,gmq) {
@@ -1337,6 +1419,26 @@ function computeBesoins(pv,prod,activite,tb,type,gmq) {
       const g=gmq||1.2;
       bUFL=(0.03*pv075n+3.5*g)*coef; bPDI=(1.8*pv075n+280*g)*coef; cap=pv*0.03*coef; break;
     }
+    case 'taurillon': {
+      const g=gmq||1.3;
+      bUFL=(0.041*pv075n+4.5*g)*coef; bPDI=(2.5*pv075n+330*g)*coef; cap=pv*0.022*coef; break;
+    }
+    case 'boeuf-engrais': {
+      const g=gmq||0.9;
+      bUFL=(0.041*pv075n+5.0*g)*coef; bPDI=(2.5*pv075n+260*g)*coef; cap=pv*0.020*coef; break;
+    }
+    case 'vache-allaitante': {
+      const la=prod||8; lait=la;
+      bUFL=(0.044*pv075n+0.42*la)*coef; bPDI=(90+0.5*pv+la*45)*coef; cap=pv*0.022*coef; break;
+    }
+    case 'genisse-viande': {
+      const g=gmq||0.85;
+      bUFL=(0.041*pv075n+4.5*g)*coef; bPDI=(2.5*pv075n+310*g)*coef; cap=pv*0.025*coef; break;
+    }
+    case 'broutard': {
+      const g=gmq||1.0;
+      bUFL=(0.041*pv075n+4.2*g)*coef; bPDI=(2.5*pv075n+340*g)*coef; cap=pv*0.028*coef; break;
+    }
     default:
       bUFL=(0.054*pv075n+3)*coef; bPDI=(95+0.5*pv+200)*coef; cap=pv*0.02*coef;
   }
@@ -1354,7 +1456,7 @@ function calcBesoins() {
   if (!type||!pv) { showToast('Sélectionnez le type d\'animal et le poids vif.', 'warn'); return; }
   lastBesoins = computeBesoins(pv,prod,act,tb,type,gmq);
 
-  const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(type)?'UFV':'UFL';
+  const eu = UFV_TYPES.includes(type)?'UFV':'UFL';
   const card = document.getElementById('card-besoins');
   const res = document.getElementById('besoins-result');
   res.innerHTML = `
@@ -1435,7 +1537,7 @@ function calcBilan() {
   const rUFL = b.bUFL>0?a.totalUFL/b.bUFL:0;
   const rPDI = b.bPDI>0?a.totalPDI/b.bPDI:0;
   const ppu  = a.totalUFL>0?a.totalPDI/a.totalUFL:0;
-  const eu   = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+  const eu   = UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
   const bcls = r=>r>=0.9&&r<=1.1?'badge-green':r<0.9?'badge-red':'badge-amber';
   const blbl = r=>r>=0.9&&r<=1.1?'OK':r<0.9?'Déficit':'Excès';
   const pbar = r=>`style="width:${Math.min(100,r*100)}%;background:${r>=0.9&&r<=1.1?'#16a34a':r<0.9?'#dc2626':'#d97706'};"`;
@@ -1784,8 +1886,10 @@ async function deleteSession(id) {
 /* ══ RAPPORT / PDF ══ */
 const ANIMAL_LABELS = {
   'vache-laitiere':'Vache laitière','vache-tarie':'Vache tarie','vache-prepa-velage':'Prépa vêlage',
-  'genisse':'Génisse (croissance)','genisse-engrais':'Génisse à engraisser',
-  'vache-reforme':'Vache réforme','veau':'Veau'
+  'genisse':'Génisse laitière','genisse-engrais':'Génisse laitière (engrais)',
+  'vache-reforme':'Vache réforme','veau':'Veau de lait',
+  'taurillon':'Taurillon (JB)','boeuf-engrais':'Bœuf à l\'engrais',
+  'vache-allaitante':'Vache allaitante','genisse-viande':'Génisse viande','broutard':'Broutard'
 };
 function scoreColor(g){return{A:'#15803d',B:'#0369a1',C:'#b45309',D:'#b91c1c'}[g]||'#64748b';}
 function rpStatus(r){return r>=0.9&&r<=1.1?'ok':r<0.9?'bad':'warn';}
@@ -1884,6 +1988,7 @@ function buildRapportBody() {
   const b = lastBesoins;
   const typeVal = document.getElementById('r-type-animal')?.value||'';
   const animalLabel = ANIMAL_LABELS[typeVal]||typeVal||'Animal';
+  const race  = document.getElementById('r-race')?.value||'';
   const poids = document.getElementById('r-pv')?.value||'';
   const prod  = document.getElementById('r-prod')?.value||'';
   const tb    = document.getElementById('r-tb')?.value||'';
@@ -1919,11 +2024,17 @@ function buildRapportBody() {
   h += '<div class="rp-body">';
 
   // ── 1. ANIMAL ─────────────────────────────────────────
+  const raceImgSrc = getRaceImgSrc(race);
+  const raceImgHtml = raceImgSrc
+    ? '<img src="'+raceImgSrc+'" alt="'+race+'" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:10px;border:1px solid #e2e8f0;">'
+    : '';
   h += '<div class="rp-section"><div class="rp-section-title">1 — Animal</div><div class="rp-two-col">'
     + '<div class="rp-box"><div class="rp-box-title">Identification</div>'
-    + kv('Type',animalLabel)+kv('Activité',acti)
+    + kv('Type',animalLabel)+(race?kv('Race',ANIMAL_LABELS[race]||race):'')
+    + kv('Activité',acti)
     + (exp.nom?kv('Exploitation',escHtml(exp.nom)):'')
     + (exp.contact_nom?kv('Éleveur',escHtml(exp.contact_nom)):'')
+    + raceImgHtml
     + '</div>'
     + '<div class="rp-box"><div class="rp-box-title">Paramètres</div>'
     + (poids?kv('Poids vif',poids+' kg'):'')
@@ -1940,7 +2051,7 @@ function buildRapportBody() {
     return h;
   }
 
-  const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+  const eu=UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
   const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:0;
   const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:0;
   const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
@@ -2173,7 +2284,7 @@ function toggleInd(id) {
 }
 
 function renderIndicateurs(a,b) {
-  const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+  const eu=UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
   const pv=gN('r-pv'), prod=gN('r-prod');
   const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:0;
   const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:0;
@@ -2189,7 +2300,7 @@ function renderIndicateurs(a,b) {
   const caApport=ca*a.totalMS,mgApport=mg*a.totalMS,naApport=na*a.totalMS;
   let caReq=50,mgReq=15,naReq=8;
   if(b.typeLabel==='vache-laitiere'){caReq=45+prod;mgReq=Math.max(20,0.02*pv+0.15*prod);naReq=Math.max(8,0.015*pv+0.1*prod);}
-  else if(['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)){caReq=30;mgReq=10;naReq=6;}
+  else if(UFV_TYPES.includes(b.typeLabel)){caReq=30;mgReq=10;naReq=6;}
   const metApport=gN('aa-met'),lysApport=gN('aa-lys');
   const metPct=a.totalPDI>0&&metApport>0?metApport/a.totalPDI*100:0;
   const lysPct=a.totalPDI>0&&lysApport>0?lysApport/a.totalPDI*100:0;
@@ -2266,7 +2377,7 @@ function renderIndicateurs(a,b) {
 function runOptimizer() {
   if(!lastApports||!lastBesoins){showToast('Calculez d\'abord le bilan.', 'warn');return;}
   const a=lastApports,b=lastBesoins;
-  const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
+  const eu=UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
   const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:1;
   const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:1;
   const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
