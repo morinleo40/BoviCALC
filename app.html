@@ -1046,12 +1046,12 @@ async function initAuth() {
       </div>
     </div>
 
-    <!-- Navigation onglets (même structure que conseiller) -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+    <!-- Navigation onglets — segmented control -->
+    <div class="bf-tabs-wrap">
       <button class="bf-btn active" id="bfbtn-stocks"   onclick="bfSwitch('stocks',this)">📦 Stocks</button>
       <button class="bf-btn"        id="bfbtn-troupeau" onclick="bfSwitch('troupeau',this)">🐄 Troupeau</button>
       <button class="bf-btn"        id="bfbtn-resultat" onclick="bfSwitch('resultat',this)">📊 Résultat</button>
-      <button class="bf-btn"        id="bfbtn-silo"     onclick="bfSwitch('silo',this)">📐 Calculateur silo</button>
+      <button class="bf-btn"        id="bfbtn-silo"     onclick="bfSwitch('silo',this)">📐 Silo</button>
     </div>
 
     <!-- Onglet Stocks -->
