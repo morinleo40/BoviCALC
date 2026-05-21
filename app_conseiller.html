@@ -2632,7 +2632,63 @@ function transferTmsToStock() {
   showToast(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`, 'success');
 }
 
+
+// ── Suggestions ─────────────────────────────────────
+function openSuggestModal() {
+  const m=document.getElementById('suggest-modal'); if(m) m.style.display='flex';
+  setTimeout(()=>document.getElementById('suggest-text')?.focus(),80);
+}
+function closeSuggestModal() {
+  const m=document.getElementById('suggest-modal'); if(m) m.style.display='none';
+}
+async function submitSuggestion() {
+  const txt   = document.getElementById('suggest-text')?.value?.trim();
+  const email = document.getElementById('suggest-email')?.value?.trim();
+  if (!txt) { showToast('Écrivez votre suggestion avant d\'envoyer.','warn'); return; }
+  const supa = getSupa();
+  if (supa) {
+    try {
+      await supa.from('suggestions').insert({
+        text: txt, email: email||null,
+        user_id: currentUser?.id||null,
+        page: 'conseiller', created_at: new Date().toISOString()
+      });
+      closeSuggestModal();
+      document.getElementById('suggest-text').value='';
+      if(document.getElementById('suggest-email')) document.getElementById('suggest-email').value='';
+      showToast('Merci pour votre suggestion !','success',5000);
+      return;
+    } catch(e) {}
+  }
+  const subject=encodeURIComponent('Suggestion Rumicore Conseiller');
+  const body=encodeURIComponent((email?'De : '+email+'\n\n':'')+txt);
+  window.open('mailto:rumicore1@gmail.com?subject='+subject+'&body='+body,'_blank');
+  closeSuggestModal();
+  showToast('Votre client mail va s\'ouvrir. Merci !','success');
+}
 </script>
+
+<!-- ── Bouton suggestion flottant ── -->
+<button onclick="openSuggestModal()" title="Envoyer une suggestion" style="position:fixed;bottom:24px;right:24px;z-index:9990;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:50px;padding:0 20px;height:44px;font-size:.83rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(21,128,61,.4);display:flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  Suggestion
+</button>
+
+<div id="suggest-modal" style="display:none;position:fixed;inset:0;z-index:99997;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeSuggestModal()">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div><h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#0f172a;">💡 Votre suggestion</h3>
+      <p style="margin:4px 0 0;font-size:.8rem;color:#64748b;">Aidez-nous à améliorer Rumicore</p></div>
+      <button onclick="closeSuggestModal()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.4rem;">×</button>
+    </div>
+    <textarea id="suggest-text" rows="4" placeholder="Une fonctionnalité manquante ? Un bug ? Une idée ?&#10;Décrivez-nous ça…" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:.875rem;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;margin-bottom:12px;" onfocus="this.style.borderColor='#15803d'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+    <input id="suggest-email" type="email" placeholder="Votre email (optionnel)" style="width:100%;height:38px;border:1.5px solid #e2e8f0;border-radius:8px;padding:0 12px;font-size:.875rem;outline:none;box-sizing:border-box;margin-bottom:20px;" onfocus="this.style.borderColor='#15803d'" onblur="this.style.borderColor='#e2e8f0'">
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeSuggestModal()" style="padding:10px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;">Annuler</button>
+      <button onclick="submitSuggestion()" style="padding:10px 20px;border-radius:8px;border:none;background:#15803d;color:#fff;font-size:.875rem;font-weight:700;cursor:pointer;">Envoyer →</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 
