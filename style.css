@@ -1958,38 +1958,42 @@ a.hdr-btn:hover {
 
 /* ── Bilan fourrager — onglets (segmented control) ── */
 .bf-tabs-wrap {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 20px;
+  gap: 0;
+  margin-bottom: 24px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 4px;
+  border: 1.5px solid #e2e8f0;
 }
 .bf-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 0 16px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: #fff;
-  color: var(--text-muted);
+  gap: 6px;
+  padding: 0 18px;
+  height: 34px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #64748b;
   font-size: .83rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background .15s, border-color .15s, color .15s;
+  transition: background .18s, color .18s, box-shadow .18s;
   white-space: nowrap;
   box-sizing: border-box;
+  position: relative;
 }
 .bf-btn:hover {
-  border-color: var(--green-600);
   color: var(--green-700);
-  background: var(--green-50);
+  background: rgba(255,255,255,.7);
 }
 .bf-btn.active {
-  background: var(--green-700);
-  border-color: var(--green-700);
-  color: #fff;
+  background: #fff;
+  color: var(--green-700);
   font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0,0,0,.10), 0 0 0 1px rgba(21,128,61,.15);
 }
 
 /* ── rb-panel-title ── */

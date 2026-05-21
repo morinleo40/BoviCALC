@@ -536,7 +536,7 @@ function setTheme(t) {
 
       <!-- TAB: BILAN FOURRAGER -->
       <div class="tab-content" id="tab-bf">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+        <div class="bf-tabs-wrap">
           <button class="bf-btn active" id="bfbtn-stocks" onclick="bfSwitch('stocks',this)">📦 Stocks</button>
           <button class="bf-btn" id="bfbtn-troupeau" onclick="bfSwitch('troupeau',this)">🐄 Troupeau</button>
           <button class="bf-btn" id="bfbtn-resultat" onclick="bfSwitch('resultat',this)">📊 Résultat</button>
@@ -799,10 +799,11 @@ function setTheme(t) {
 </div>
 
 <style>
-/* Bilan fourrager buttons */
-.bf-btn { padding:8px 16px;border-radius:8px;border:1.5px solid var(--border-md);background:var(--bg-card);color:var(--text-muted);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .18s; }
-.bf-btn:hover { border-color:#15803d;color:#15803d; }
-.bf-btn.active { background:#15803d;border-color:#15803d;color:#fff; }
+/* Bilan fourrager — segmented control */
+.bf-tabs-wrap { display:inline-flex;flex-wrap:wrap;gap:0;margin-bottom:20px;background:#f1f5f9;border-radius:10px;padding:4px;border:1.5px solid #e2e8f0; }
+.bf-btn { display:inline-flex;align-items:center;gap:6px;padding:0 18px;height:34px;border-radius:7px;border:none;background:transparent;color:#64748b;font-size:.83rem;font-weight:600;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s;white-space:nowrap;box-sizing:border-box; }
+.bf-btn:hover { color:#15803d;background:rgba(255,255,255,.7); }
+.bf-btn.active { background:#fff;color:#15803d;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.10),0 0 0 1px rgba(21,128,61,.15); }
 /* Indicateurs */
 .rb-indicator { background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .18s;overflow:hidden; }
 .rb-indicator:hover { border-color:#15803d; }
