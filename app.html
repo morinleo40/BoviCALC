@@ -3339,6 +3339,45 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     showToast(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`, 'success');
   }
 
+  // Exposition globale explicite (onclick inline → doit être sur window)
+  window.bfSwitch           = bfSwitch;
+  window.addBfStock         = addBfStock;
+  window.calcBilanFourrager = calcBilanFourrager;
+  window.onTmsCultureChange = onTmsCultureChange;
+  window.onTmsShapeChange   = onTmsShapeChange;
+  window.calcTmsLive        = calcTmsLive;
+  window.transferTmsToStock = transferTmsToStock;
+  window.showSection        = showSection;
+  window.backToHome         = backToHome;
+  window.goToStep           = goToStep;
+  window.wizardStepClick    = wizardStepClick;
+  window.calcBesoins        = calcBesoins;
+  window.calcBilan          = calcBilan;
+  window.toggleInd          = toggleInd;
+  window.saveCurrentSession = saveCurrentSession;
+  window.openSessionsModal  = openSessionsModal;
+  window.loadSessionById    = loadSessionById;
+  window.deleteSessionById  = deleteSessionById;
+  window.applyOpt           = applyOpt;
+  window.arToggle           = arToggle;
+  window.rtToggle           = rtToggle;
+  window.arRunOptimize      = arRunOptimize;
+  window.arCheckAll         = arCheckAll;
+  window.arFilterFeeds      = arFilterFeeds;
+  window.openCompareModal   = openCompareModal;
+  window.runComparison      = runComparison;
+  window.exportPDF          = exportPDF;
+  window.rbConfirmCancel    = rbConfirmCancel;
+  window.openFeedTable      = openFeedTable;
+  window.addFeedToRation    = addFeedToRation;
+  window.showTutorial       = showTutorial;
+  window.closeTutorial      = closeTutorial;
+  window.tutorialNav        = tutorialNav;
+  window.setTheme           = setTheme;
+  window.openCustomModal    = openCustomModal;
+  window.redeemPromo        = redeemPromo;
+  window.openPromoModal     = openPromoModal;
+
   // -- Profils ration
   function updateRationProfiles() {
     const sel=$('ration-profiles'); if(!sel) return;
