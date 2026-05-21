@@ -51,7 +51,7 @@ async function submitWall() {
       var prenom=(_$('wall-prenom')||{}).value||'';
       var r1=await supa.auth.signUp({email,password:pass,options:{data:{prenom}}});
       if(r1.error){showWallErr(r1.error.message);if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}}
-      else{alert('✅ Compte créé ! Vérifiez votre email.');if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}}
+      else{showToast('✅ Compte créé ! Vérifiez votre email.', 'success', 5000);if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}}
     } else {
       var r2=await supa.auth.signInWithPassword({email,password:pass});
       if(r2.error){showWallErr(r2.error.message);if(btn){btn.disabled=false;btn.textContent='Se connecter';}}
@@ -64,7 +64,7 @@ async function resetWallPwd() {
   if(!email){showWallErr('Entrez votre email.');return;}
   var supa=getSupa(); if(!supa)return;
   var res=await supa.auth.resetPasswordForEmail(email);
-  if(!res.error)alert('📧 Email envoyé à '+email); else showWallErr(res.error.message);
+  if(!res.error)showToast('📧 Email de réinitialisation envoyé à '+email, 'info', 5000); else showWallErr(res.error.message);
 }
 function showAccessWall() {
   var w=_$('access-wall'); if(w) w.style.display='flex';
@@ -946,6 +946,27 @@ let lastBesoins = null;
 let lastApports = null;
 let prevPage = 'dashboard';
 
+/* ══ Toast notifications ══ */
+function showToast(msg, type, duration) {
+  type=type||'info'; duration=duration||3500;
+  const colors={success:'#15803d',error:'#dc2626',warn:'#b45309',info:'#1d4ed8'};
+  const bgs={success:'#f0fdf4',error:'#fef2f2',warn:'#fffbeb',info:'#eff6ff'};
+  const borders={success:'#bbf7d0',error:'#fecaca',warn:'#fde68a',info:'#bfdbfe'};
+  let c=document.getElementById('rb-toast-container');
+  if(!c){c=document.createElement('div');c.id='rb-toast-container';
+    c.style.cssText='position:fixed;top:16px;right:16px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:320px;';
+    document.body.appendChild(c);}
+  const t=document.createElement('div');
+  t.style.cssText=`background:${bgs[type]};border:1.5px solid ${borders[type]};color:${colors[type]};`
+    +`padding:11px 15px;border-radius:9px;font-size:.85rem;font-weight:600;`
+    +`box-shadow:0 4px 16px rgba(0,0,0,.12);pointer-events:auto;opacity:0;`
+    +`transform:translateX(12px);transition:opacity .2s,transform .2s;line-height:1.4;`;
+  t.textContent=msg;
+  c.appendChild(t);
+  requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(0)';});
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(12px)';setTimeout(()=>t.remove(),220);},duration);
+}
+
 /* ══ INIT ══ */
 window.addEventListener('DOMContentLoaded', async () => {
   await initAuth();
@@ -1251,16 +1272,16 @@ async function saveExp() {
 function showExpErr(m) { const e=document.getElementById('exp-modal-err'); e.textContent=m; e.style.display='block'; }
 
 async function deleteCurrentExp(id) {
-  if (!id) { alert('Impossible de supprimer : identifiant manquant.'); return; }
+  if (!id) { showToast('Identifiant manquant.', 'error'); return; }
   const exp = exploitations.find(e=>e.id===id);
   const nom = exp?.nom || 'cette exploitation';
-  if (!confirm(`Supprimer "${nom}" et toutes ses sessions ?\nCette action est irréversible.`)) return;
+  if (!window.__rbConfirmResult) { rbConfirmSimple(`Supprimer "${nom}" et toutes ses sessions ? Cette action est irréversible.`, () => deleteExp(id)); return; } delete window.__rbConfirmResult;
 
   const btn = document.getElementById('btn-delete-exp');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Suppression…'; }
 
   const supa = getSupa();
-  if (!supa) { alert('Service indisponible.'); if (btn) { btn.disabled=false; btn.textContent='🗑 Supprimer'; } return; }
+  if (!supa) { showToast('Service indisponible. Réessayez.', 'error'); if (btn) { btn.disabled=false; btn.textContent='🗑 Supprimer'; } return; }
 
   try {
     const { error } = await supa.from('exploitations').delete().eq('id', id);
@@ -1271,7 +1292,7 @@ async function deleteCurrentExp(id) {
   } catch(e) {
     const msg = e.message || 'Erreur lors de la suppression.';
     showExpErr(msg);
-    alert('Erreur : ' + msg);
+    showToast('Erreur : ' + msg, 'error');
     if (btn) { btn.disabled = false; btn.textContent = '🗑 Supprimer'; }
   }
 }
@@ -1329,7 +1350,7 @@ function calcBesoins() {
   const gmq  = gN('r-gmq');
   const act  = document.getElementById('r-activite').value;
 
-  if (!type||!pv) { alert('Sélectionnez un type d\'animal et indiquez le poids vif.'); return; }
+  if (!type||!pv) { showToast('Sélectionnez le type d\'animal et le poids vif.', 'warn'); return; }
   lastBesoins = computeBesoins(pv,prod,act,tb,type,gmq);
 
   const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(type)?'UFV':'UFL';
@@ -1406,7 +1427,7 @@ function parseRation() {
 
 function calcBilan() {
   const a = parseRation();
-  if (!a.items.length) { alert('Ajoutez au moins un aliment.'); return; }
+  if (!a.items.length) { showToast('Ajoutez au moins un aliment.', 'warn'); return; }
   lastApports = a;
   if (!lastBesoins) { calcBesoins(); if(!lastBesoins) return; }
   const b = lastBesoins;
@@ -1637,8 +1658,8 @@ function renderSuggestions(a, b) {
 
 /* ══ SESSIONS ══ */
 function saveSession() {
-  if (!lastApports) { alert('Calculez d\'abord un bilan.'); return; }
-  if (!currentExp) { alert('Ouvrez d\'abord une exploitation.'); return; }
+  if (!lastApports) { showToast('Calculez d\'abord un bilan.', 'warn'); return; }
+  if (!currentExp) { showToast('Ouvrez d\'abord une exploitation.', 'warn'); return; }
   const now = new Date();
   document.getElementById('sm-name').value = `Session du ${now.toLocaleDateString('fr-FR')}`;
   document.getElementById('session-modal').classList.remove('hidden');
@@ -1672,8 +1693,8 @@ async function confirmSaveSession() {
     });
     if (error) throw error;
     closeSessionModal();
-    alert('✅ Session sauvegardée.');
-  } catch(e) { alert('Erreur : '+(e.message||e)); }
+    showToast('✅ Session sauvegardée.', 'success');
+  } catch(e) { showToast('Erreur : '+(e.message||e), 'error'); }
 }
 
 async function loadSessionsForCurrentExp() {
@@ -1745,17 +1766,18 @@ function restoreSession(id) {
     document.getElementById('card-besoins').style.display='';
     calcBilan();
   }
-  alert('Session restaurée.');
+  showToast('Session restaurée.', 'info');
 }
 
 async function deleteSession(id) {
-  if (!confirm('Supprimer cette session ?')) return;
-  const supa=getSupa();
-  try {
-    const {error}=await supa.from('exploitation_sessions').delete().eq('id',id);
-    if(error) throw error;
-    loadSessionsForCurrentExp();
-  } catch(e) { alert('Erreur : '+e.message); }
+  rbConfirm('Supprimer cette session ?', async function() {
+    const supa=getSupa();
+    try {
+      const {error}=await supa.from('exploitation_sessions').delete().eq('id',id);
+      if(error) throw error;
+      loadSessionsForCurrentExp();
+    } catch(e) { showToast('Erreur : '+(e.message||e), 'error'); }
+  }, 'Supprimer', true);
 }
 
 /* ══ RAPPORT / PDF ══ */
@@ -1840,7 +1862,7 @@ function previewRapport() {
 function printRapport() {
   const body = buildRapportBody();
   const w = window.open('', '_blank');
-  if (!w) { alert('Autorisez les popups pour générer le PDF.'); return; }
+  if (!w) { showToast('Autorisez les popups pour générer le PDF.', 'warn'); return; }
   w.document.write(`<!DOCTYPE html><html lang="fr"><head>
     <meta charset="UTF-8"><title>Rapport Rumicore Conseiller</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -2241,7 +2263,7 @@ function renderIndicateurs(a,b) {
 
 /* ══ OPTIMISEUR ══ */
 function runOptimizer() {
-  if(!lastApports||!lastBesoins){alert('Calculez d\'abord le bilan.');return;}
+  if(!lastApports||!lastBesoins){showToast('Calculez d\'abord le bilan.', 'warn');return;}
   const a=lastApports,b=lastBesoins;
   const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
   const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:1;
@@ -2302,7 +2324,7 @@ function applyOpt(i,feed,sign,qtyStr) {
 
 /* ══ COÛTS ══ */
 function chargerRationCouts() {
-  const a=parseRation(); if(!a.items.length){alert('Aucun aliment dans la ration.');return;}
+  const a=parseRation(); if(!a.items.length){showToast('Aucun aliment dans la ration.', 'warn');return;}
   const cont=document.getElementById('cout-prix-lines');
   cont.innerHTML=`<div style="display:grid;grid-template-columns:1fr 90px;gap:6px;margin-bottom:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);padding:0 4px;"><span>Aliment</span><span>€/t MS</span></div>`+
     a.items.map((it,i)=>`<div style="display:grid;grid-template-columns:1fr 90px;gap:6px;margin-bottom:6px;align-items:center;">
@@ -2314,7 +2336,7 @@ function chargerRationCouts() {
 
 function calcCouts() {
   const items=document.getElementById('cout-prix-lines')?._items;
-  if(!items||!items.length){alert('Chargez d\'abord la ration.');return;}
+  if(!items||!items.length){showToast('Chargez d\'abord la ration.','warn');return;}
   let totalCoutJour=0;
   const rows=[];
   let totalPrix=0;
@@ -2459,7 +2481,7 @@ function calcTmsLive() {
 function transferTmsToStock() {
   const rv=document.getElementById('tms-result-val')?.textContent;
   const tms=parseFloat(rv);
-  if(!tms||isNaN(tms)){alert('Calculez d\'abord la TMS du silo.');return;}
+  if(!tms||isNaN(tms)){showToast('Calculez d\'abord la TMS du silo.','warn');return;}
   const cult=document.getElementById('tms-culture')?.value||'mais';
   const c=TMS_CULTURES[cult];
   addBfStock();
@@ -2472,7 +2494,7 @@ function transferTmsToStock() {
     inputs[2].value=c.ms;
   }
   bfSwitch('stocks',document.getElementById('bfbtn-stocks'));
-  alert(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`);
+  showToast(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`, 'success');
 }
 
 </script>

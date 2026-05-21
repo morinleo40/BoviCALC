@@ -312,51 +312,75 @@ a:hover { color: var(--primary-dark); }
 }
 
 /* Boutons header */
-.header-actions { display: flex; gap: var(--space-2); align-items: center; flex-shrink: 0; }
+.header-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+/* Icônes SVG dans les boutons header */
+.hdr-btn svg { flex-shrink: 0; }
 
-.hdr-btn {
+/* ── Base commune : même hauteur, même padding, même font ── */
+.hdr-btn,
+a.hdr-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border-radius: var(--r-sm);
-  font-size: .82rem;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 13px;
+  height: 32px;
+  line-height: 32px;
+  border-radius: 7px;
+  font-size: .8rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: var(--t);
   white-space: nowrap;
-  border: none;
-  background: rgba(255,255,255,.16);
-  color: #fff;
-  height: 34px;
+  transition: background .15s, border-color .15s;
+  border: 1.5px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.9);
   box-sizing: border-box;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
-.hdr-btn:hover {
-  background: rgba(255,255,255,.3);
+.hdr-btn:hover,
+a.hdr-btn:hover {
+  background: rgba(255,255,255,.24);
+  border-color: rgba(255,255,255,.55);
   color: #fff;
-  transform: translateY(-1px);
 }
-.hdr-btn-outline {
-  background: transparent;
-  border: 1.5px solid rgba(255,255,255,.4);
-}
-.hdr-btn-outline:hover {
-  background: rgba(255,255,255,.1);
-  border-color: rgba(255,255,255,.7);
-}
+/* hdr-btn-outline : identique au défaut */
+.hdr-btn-outline { }
+/* Connexion / Compte — CTA blanc distinct */
 .hdr-btn-account {
   background: #fff;
-  color: #15803d;
-  border: none;
+  color: var(--green-800);
+  border: 1.5px solid #fff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
 .hdr-btn-account:hover {
   background: #f0fdf4;
-  color: #14532d;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  color: var(--green-900);
+  border-color: #f0fdf4;
+}
+/* Déconnexion — rouge discret */
+.hdr-btn-logout {
+  background: rgba(239,68,68,.14);
+  border-color: rgba(239,68,68,.38);
+  color: #fca5a5;
+}
+.hdr-btn-logout:hover {
+  background: rgba(239,68,68,.26);
+  border-color: rgba(239,68,68,.6);
+  color: #fecaca;
+}
+/* Connexion non-connectée */
+.hdr-btn-auth {
+  background: rgba(255,255,255,.2) !important;
+  border-color: rgba(255,255,255,.45) !important;
+  color: #fff !important;
 }
 
 /* =====================================================
@@ -1781,7 +1805,7 @@ a:hover { color: var(--primary-dark); }
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 40%, #a5d6a7 100%);
+  background: linear-gradient(150deg, #14532d 0%, #15803d 55%, #166534 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1789,30 +1813,30 @@ a:hover { color: var(--primary-dark); }
 }
 .auth-wall-card {
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.18);
-  padding: 40px 36px 32px;
+  border-radius: 18px;
+  box-shadow: 0 24px 72px rgba(0,0,0,.28);
+  padding: 36px 32px 28px;
   width: 100%;
-  max-width: 420px;
+  max-width: 410px;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 .auth-wall-logo {
   text-align: center;
-  padding-bottom: 24px;
+  padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 .auth-wall-form { flex: 1; }
 .auth-wall-footer {
   text-align: center;
-  margin-top: 24px;
-  padding-top: 16px;
+  margin-top: 20px;
+  padding-top: 14px;
   border-top: 1px solid var(--border);
 }
 @media (max-width: 480px) {
-  .auth-wall-card { padding: 28px 20px 24px; }
+  .auth-wall-card { padding: 24px 18px 22px; }
 }
 
 /* ── Ration automatique ── */
@@ -1932,36 +1956,40 @@ a:hover { color: var(--primary-dark); }
 
 .toolbar-btn-more { background: #f1f5f9; }
 
-/* ── Bilan fourrager — segmented control ── */
+/* ── Bilan fourrager — onglets (segmented control) ── */
 .bf-tabs-wrap {
-  display: inline-flex;
-  background: #edf1f7;
-  border-radius: 11px;
-  padding: 4px;
-  gap: 3px;
-  margin-bottom: 20px;
+  display: flex;
   flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
 }
 .bf-btn {
-  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 16px;
+  height: 36px;
   border-radius: 8px;
-  border: none;
-  background: transparent;
+  border: 1.5px solid var(--border);
+  background: #fff;
   color: var(--text-muted);
-  font-size: .84rem;
+  font-size: .83rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all .18s;
+  transition: background .15s, border-color .15s, color .15s;
   white-space: nowrap;
-  height: 36px;
   box-sizing: border-box;
 }
-.bf-btn:hover { background: rgba(255,255,255,.6); color: var(--green-800); }
+.bf-btn:hover {
+  border-color: var(--green-600);
+  color: var(--green-700);
+  background: var(--green-50);
+}
 .bf-btn.active {
-  background: #ffffff;
-  color: var(--green-900);
+  background: var(--green-700);
+  border-color: var(--green-700);
+  color: #fff;
   font-weight: 700;
-  box-shadow: 0 1px 4px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.04);
 }
 
 /* ── rb-panel-title ── */

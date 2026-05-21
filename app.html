@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rumicore - Rationnement bovin intelligent</title>
+  <title>Rumicore — Application de rationnement bovin en ligne</title>
+  <meta name="description" content="Calculez et optimisez les rations de vos bovins : UFL, PDI, bilan nutritionnel complet, bilan fourrager et export PDF. Basé sur les normes INRA 2018.">
+  <meta name="robots" content="noindex">
   <link rel="stylesheet" href="./style.css">
   <link rel="icon" type="image/png" href="./Logo RumiCORE.png">
+  <link rel="apple-touch-icon" href="./Logo RumiCORE.png">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -83,7 +86,7 @@ async function submitWall() {
         showWallError(r1.error.message);
         if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
       } else {
-        alert('✅ Compte créé ! Vérifiez votre email pour confirmer.');
+        showToast('✅ Compte créé ! Vérifiez votre email pour confirmer.', 'success', 5000);
         if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
       }
     } else {
@@ -106,7 +109,7 @@ async function resetWallPassword() {
   if (!email) { showWallError('Entrez votre email pour réinitialiser votre mot de passe.'); return; }
   var supa = getSupa(); if (!supa) return;
   var res = await supa.auth.resetPasswordForEmail(email);
-  if (!res.error) alert('📧 Email envoyé à ' + email);
+  if (!res.error) showToast('📧 Email de réinitialisation envoyé à ' + email, 'info', 5000);
   else showWallError(res.error.message);
 }
 function openAuthModal()  { var m = _$$('auth-modal');  if (m) m.classList.remove('hidden'); var e = _$$('auth-error'); if (e) e.style.display='none'; }
@@ -167,7 +170,7 @@ async function submitAuth() {
       if (pass.length < 6) { showAuthError('Mot de passe : 6 caractères minimum.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return; }
       var ra = await supa.auth.signUp({ email: email, password: pass });
       if (ra.error) { showAuthError(ra.error.message); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} }
-      else { alert('✅ Compte créé ! Vérifiez votre email.'); closeAuthModal(); }
+      else { showToast('✅ Compte créé ! Vérifiez votre email.', 'success', 5000); closeAuthModal(); }
     } else {
       var rb = await supa.auth.signInWithPassword({ email: email, password: pass });
       if (rb.error) { showAuthError(rb.error.message); if(btn){btn.disabled=false;btn.textContent='Se connecter';} }
@@ -180,7 +183,7 @@ async function resetPassword() {
   if (!email) { showAuthError('Entrez votre email.'); return; }
   var supa = getSupa(); if (!supa) return;
   var res = await supa.auth.resetPasswordForEmail(email);
-  if (!res.error) alert('📧 Email envoyé à ' + email);
+  if (!res.error) showToast('📧 Email de réinitialisation envoyé à ' + email, 'info', 5000);
   else showAuthError(res.error.message);
 }
 function openStripeCheckout() {
@@ -265,13 +268,13 @@ function updateAuthUI() {
 function requireAuth(feature) {
   if (currentUser) return true;
   var msg = feature ? 'Connectez-vous pour utiliser "' + feature + '".' : 'Connectez-vous pour continuer.';
-  if (confirm(msg + '\n\nOuvrir la page de connexion ?')) openAuthModal();
+  rbConfirm(msg + ' Ouvrir la connexion ?', openAuthModal, 'Se connecter', false);
   return false;
 }
 function requirePro(feature) {
   if (!currentUser) return requireAuth(feature);
   if (userPlan === 'pro') return true;
-  alert('⭐ Fonctionnalité Pro\n\n"' + feature + '" est disponible avec l\'abonnement Pro.\n\nContactez-nous pour souscrire.');
+  showToast('⭐ "' + feature + '" est réservé au plan Pro. Passez Pro pour y accéder.', 'warn', 4500);
   return false;
 }
 async function loadUserPlan() {
@@ -315,8 +318,8 @@ async function initAuth() {
   <div class="auth-wall-card">
     <div class="auth-wall-logo">
       <img src="Logo RumiCORE.png" alt="Rumicore" style="height:64px;width:auto;">
-      <h1 style="margin:12px 0 4px;font-size:2rem;color:var(--green-900);">Rumicore</h1>
-      <p style="margin:0;color:var(--text-muted);font-size:.95rem;">Optimisation des rations pour bovins</p>
+      <h1 style="margin:10px 0 3px;font-size:1.8rem;color:var(--green-900);font-weight:900;letter-spacing:-.02em;">Rumicore</h1>
+      <p style="margin:0;color:#15803d;font-size:.85rem;font-weight:600;">🥛 Mieux rationner, c'est plus de Lait !</p>
     </div>
 
     <div class="auth-wall-form">
@@ -376,26 +379,32 @@ async function initAuth() {
   <div class="rb-header-inner">
     <div class="logo-box" onclick="backToHome()" style="cursor:pointer;gap:10px;">
       <img src="Logo RumiCORE.png" alt="Rumicore Logo" class="logo">
-      <span style="color:#fff;font-weight:800;font-size:1.1rem;letter-spacing:-.02em;">Rumicore</span>
+      <div>
+        <div style="color:#fff;font-weight:800;font-size:1.05rem;letter-spacing:-.02em;line-height:1.2;">Rumicore</div>
+        <div style="color:rgba(255,255,255,.7);font-size:.68rem;font-weight:500;letter-spacing:.01em;line-height:1.2;">Mieux rationner, c'est plus de Lait&nbsp;!</div>
+      </div>
     </div>
     <div class="header-actions">
       <button onclick="backToHome()" class="hdr-btn" title="Menu principal">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         Menu
       </button>
-      <a href="index.html" class="hdr-btn hdr-btn-outline" title="Page d'accueil">
+      <a href="index.html" class="hdr-btn" title="Page d'accueil">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
         Accueil
       </a>
-      <button onclick="showTutorial()" class="hdr-btn hdr-btn-outline" title="Guide de démarrage">
+      <button onclick="showTutorial()" class="hdr-btn" title="Guide de démarrage">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Guide
       </button>
-      <button id="btn-logout" onclick="logoutUser()" class="hdr-btn" style="display:none;background:rgba(239,68,68,.18);color:#fca5a5;border:1px solid rgba(239,68,68,.3);" title="Se déconnecter">
+      <button id="btn-logout" onclick="logoutUser()" class="hdr-btn hdr-btn-logout" style="display:none;" title="Se déconnecter">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Déconnexion
       </button>
-      <button id="btn-header-auth" class="hdr-btn hdr-btn-account" onclick="onAuthBtnClick()">🔑 Connexion</button>
+      <button id="btn-header-auth" class="hdr-btn hdr-btn-account" onclick="onAuthBtnClick()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Connexion
+      </button>
     </div>
   </div>
 </header>
@@ -1257,6 +1266,20 @@ async function initAuth() {
   </div>
 </div>
 
+<!-- ── Toasts ── -->
+<div id="rb-toast-container" style="position:fixed;top:80px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:340px;"></div>
+
+<!-- ── Confirm dialog ── -->
+<div id="rb-confirm-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:24px 28px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:360px;width:90%;animation:fadeSlide .2s ease;">
+    <div id="rb-confirm-msg" style="font-size:.95rem;font-weight:600;color:#1e293b;margin-bottom:20px;line-height:1.5;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="rbConfirmCancel()" style="padding:9px 18px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;">Annuler</button>
+      <button id="rb-confirm-ok" style="padding:9px 18px;border-radius:8px;border:none;background:#dc2626;color:#fff;font-size:.875rem;font-weight:700;cursor:pointer;">Confirmer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Tooltip nutritionnel flottant -->
 <div id="feed-tooltip" class="feed-tooltip hidden">
   <div class="ft-name" id="ft-name"></div>
@@ -1587,6 +1610,52 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     return result;
   }
 
+  // ── Toast notifications ──────────────────────────────
+  function showToast(msg, type, duration) {
+    type = type || 'info';
+    duration = duration || 3500;
+    const colors = { success:'#15803d', error:'#dc2626', warn:'#b45309', info:'#1d4ed8' };
+    const bgs    = { success:'#f0fdf4', error:'#fef2f2', warn:'#fffbeb', info:'#eff6ff' };
+    const borders= { success:'#bbf7d0', error:'#fecaca', warn:'#fde68a', info:'#bfdbfe' };
+    const c = document.getElementById('rb-toast-container'); if (!c) return;
+    const t = document.createElement('div');
+    t.style.cssText = `background:${bgs[type]};border:1.5px solid ${borders[type]};color:${colors[type]};`
+      + `padding:12px 16px;border-radius:10px;font-size:.875rem;font-weight:600;`
+      + `box-shadow:0 4px 16px rgba(0,0,0,.12);pointer-events:auto;opacity:0;`
+      + `transform:translateX(16px);transition:opacity .2s,transform .2s;max-width:340px;line-height:1.4;`;
+    t.textContent = msg;
+    c.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(0)'; });
+    setTimeout(() => {
+      t.style.opacity = '0'; t.style.transform = 'translateX(16px)';
+      setTimeout(() => t.remove(), 220);
+    }, duration);
+  }
+
+  // ── Confirm dialog ───────────────────────────────────
+  var _rbConfirmCb = null;
+  function rbConfirm(msg, onOk, okLabel, danger) {
+    _rbConfirmCb = onOk;
+    const el = document.getElementById('rb-confirm-msg'); if (el) el.textContent = msg;
+    const okBtn = document.getElementById('rb-confirm-ok');
+    if (okBtn) {
+      okBtn.textContent = okLabel || 'Confirmer';
+      okBtn.style.background = danger !== false ? '#dc2626' : '#15803d';
+      okBtn.onclick = function() { rbConfirmCancel(); if (_rbConfirmCb) _rbConfirmCb(); };
+    }
+    const ov = document.getElementById('rb-confirm-overlay');
+    if (ov) { ov.style.display = 'flex'; }
+  }
+  function rbConfirmCancel() {
+    const ov = document.getElementById('rb-confirm-overlay');
+    if (ov) ov.style.display = 'none';
+    _rbConfirmCb = null;
+  }
+  // Fermer sur clic overlay
+  document.getElementById('rb-confirm-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) rbConfirmCancel();
+  });
+
   // -- Hydrate datalists
   function hydrate() {
     const all = [...customFoodsDb, ...alimentsDb];
@@ -1824,7 +1893,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   function calcBesoins() {
     const type = $('type-animal')?.value;
     const pv   = getNum('poids-vif');
-    if (!type || !pv) { alert('Sélectionnez le type d\'animal et renseignez le poids vif.'); return; }
+    if (!type || !pv) { showToast('Sélectionnez le type d\'animal et renseignez le poids vif.', 'warn'); return; }
     lastB = computeBesoins(pv, getNum('production-lait'), $('activite')?.value||'stabulation',
                            getNum('tb'), getNum('tp'), type, getNum('gmq'));
     lastB.typeLabel = type;
@@ -1973,7 +2042,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   // -- Calcul bilan
   function calcBilan() {
-    if (!lastB) { alert('Calculez d\'abord les besoins (étape 1).'); return; }
+    if (!lastB) { showToast('Calculez d\'abord les besoins — Étape 1.', 'warn'); return; }
     if (!lastA || !lastA.items.length) calcApports();
     const a=lastA, b=lastB;
     const rUFL = b.bUFL>0 ? a.totalUFL/b.bUFL : 0;
@@ -2050,7 +2119,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     renderIndicateurs(a, b);
   }
   $('btn-calc-bilan')?.addEventListener('click', calcBilan);
-  $('btn-goto-costs')?.addEventListener('click', () => { if(!lastA){alert('Calculez d\'abord le bilan.');return;} goToStep(4); });
+  $('btn-goto-costs')?.addEventListener('click', () => { if(!lastA){showToast('Calculez d\'abord le bilan nutritionnel.', 'warn');return;} goToStep(4); });
 
   // =====================================================
   // INDICATEURS CLIQUABLES
@@ -2348,7 +2417,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   function saveCurrentSession() {
     if (!requireAuth('Sauvegarder une session')) return;
     if (!lastB || !lastA?.items?.length) {
-      alert('Calculez d\'abord un bilan complet (étapes 1, 2, 3) avant de sauvegarder.'); return;
+      showToast('Calculez d\'abord un bilan complet avant de sauvegarder.', 'warn'); return;
     }
     const name = prompt('Nom de la session :', `Ration du ${new Date().toLocaleDateString('fr-FR')}`);
     if (!name?.trim()) return;
@@ -2379,7 +2448,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     });
     if (sessions.length > 30) sessions.pop();
     saveLS(SESS_KEY, sessions);
-    alert(`✅ Session "${name.trim()}" sauvegardée avec succès !`);
+    showToast(`✅ Session "${name.trim()}" sauvegardée !`, 'success');
     refreshCompareSelects();
     refreshDashboard();
   }
@@ -2442,11 +2511,11 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     showSection('ration-a-z');
     goToStep(1);
     if (lastB) { renderBesoinsResult(lastB,'resultat-besoins-content'); $('resultat-besoins')?.classList.remove('hidden'); }
-    alert(`✅ Session "${s.name}" chargée !`);
+    showToast(`Session "${s.name}" chargée.`, 'info');
   }
 
   function deleteSessionById(id) {
-    if (!confirm('Supprimer cette session définitivement ?')) return;
+    rbConfirm('Supprimer cette session définitivement ?', () => {
     const sessions = loadLS(SESS_KEY, []).filter(x => x.id !== id);
     saveLS(SESS_KEY, sessions);
     refreshSessionsList(); refreshCompareSelects();
@@ -2707,7 +2776,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   function runComparison() {
     const idA = parseInt($('compare-a')?.value);
     const idB = parseInt($('compare-b')?.value);
-    if (!idA || !idB || idA===idB) { alert('Sélectionnez deux sessions différentes.'); return; }
+    if (!idA || !idB || idA===idB) { showToast('Sélectionnez deux sessions différentes.', 'warn'); return; }
     const sessions = loadLS(SESS_KEY, []);
     const sA = sessions.find(s=>s.id===idA);
     const sB = sessions.find(s=>s.id===idB);
@@ -2787,7 +2856,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   function rpBadge(cls,txt){return '<span class="rp-ind-badge badge-'+cls+'">'+txt+'</span>';}
 
   function buildRapportRationAZ(){
-    if(!lastB||!lastA?.items?.length){alert('Calculez d\'abord le bilan complet (\xe9tapes 1 → 3).');return false;}
+    if(!lastB||!lastA?.items?.length){showToast('Calculez d\'abord le bilan complet (étapes 1 → 3).','warn');return false;}
     const eu=['genisse','genisse-engrais','vache-reforme','veau'].includes(lastB.typeLabel)?'UFV':'UFL';
     const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
     const rUFL=lastB.bUFL>0?lastA.totalUFL/lastB.bUFL:0;
@@ -2963,7 +3032,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   function buildRapportRationSeule(){
     const a=lastA;
-    if(!a?.items?.length){alert('Calculez d\'abord les apports.');return false;}
+    if(!a?.items?.length){showToast('Calculez d\'abord les apports.', 'warn');return false;}
     const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
     const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
     const rows=a.items.map(i=>'<tr><td>'+i.nom+'</td><td class="rp-num">'+i.qty.toFixed(1)+'</td><td class="rp-num">'+(a.totalMS>0?(i.qty/a.totalMS*100).toFixed(0)+'%':'')+'</td><td class="rp-num">'+i.ufl.toFixed(2)+'</td><td class="rp-num">'+i.pdi.toFixed(0)+'</td></tr>').join('');
@@ -2984,7 +3053,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const st=document.getElementById('bf-stock-total')?.textContent;
     const bs=document.getElementById('bf-besoin-total')?.textContent;
     const bv=document.getElementById('bf-bilan-value')?.textContent;
-    if(!st||st==='—'){alert('Calculez d\'abord le bilan fourrager.');return false;}
+    if(!st||st==='—'){showToast('Calculez d\'abord le bilan fourrager.', 'warn');return false;}
     const date=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
     const solde=parseFloat(bv)||0;
     return '<div class="rp-header"><div class="rp-logo">Rumicore</div><div class="rp-title-block"><div class="rp-title">Bilan fourrager</div><div class="rp-subtitle">'+date+'</div></div></div>'
@@ -3019,7 +3088,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
 
   // -- Couts
   $('btn-cout-charger-ration')?.addEventListener('click', () => {
-    if (!lastA?.items?.length) { alert('Calculez d\'abord une ration (étapes 1 et 2).'); return; }
+    if (!lastA?.items?.length) { showToast('Calculez d\'abord une ration (étapes 1 et 2).', 'warn'); return; }
     const div = $('cout-price-lines'); if (!div) return;
     div.innerHTML = '';
     lastA.items.forEach(item => {
@@ -3037,7 +3106,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   });
 
   $('btn-calc-cout')?.addEventListener('click', () => {
-    if (!lastA?.items?.length) { alert('Chargez d\'abord la ration.'); return; }
+    if (!lastA?.items?.length) { showToast('Chargez d\'abord la ration.', 'warn'); return; }
     let totalCost=0, totalMS=0;
     document.querySelectorAll('.cout-price-input').forEach(inp => { costsByFeed[inp.dataset.nom]=parseFloat(inp.value)||0; });
     saveLS(LS.costs, costsByFeed);
@@ -3252,7 +3321,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   function transferTmsToStock() {
     const rv = $('tms-result-val')?.textContent;
     const tms = parseFloat(rv);
-    if (!tms || isNaN(tms)) { alert('Calculez d\'abord la TMS du silo.'); return; }
+    if (!tms || isNaN(tms)) { showToast('Calculez d\'abord la TMS du silo.', 'warn'); return; }
     const cult = $('tms-culture')?.value || 'mais';
     const c = TMS_CULTURES[cult];
     addBfStock();
@@ -3266,7 +3335,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       inputs[2].value = msPct;
     }
     bfSwitch('stocks', $('bfbtn-stocks'));
-    alert(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`);
+    showToast(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`, 'success');
   }
 
   // -- Profils ration
@@ -3298,7 +3367,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     });
   });
   $('btn-delete-ration-profile')?.addEventListener('click',()=>{
-    const name=$('ration-profiles')?.value; if(!name||!confirm('Supprimer "'+name+'" ?')) return;
+    const name=$('ration-profiles')?.value; if(!name){showToast('Sélectionnez un profil.','warn');return;} rbConfirm('Supprimer le profil "'+name+'" ?', () => {
     const p=loadLS(LS.rationProfiles,{}); delete p[name];
     saveLS(LS.rationProfiles,p); updateRationProfiles();
   });
@@ -3330,7 +3399,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     if($('bf-duree'))    $('bf-duree').value=p.duree||'180';
   });
   $('btn-delete-herd-profile')?.addEventListener('click',()=>{
-    const name=$('herd-profiles')?.value; if(!name||!confirm('Supprimer "'+name+'" ?')) return;
+    const name=$('herd-profiles')?.value; if(!name){showToast('Sélectionnez un profil.','warn');return;} rbConfirm('Supprimer le profil "'+name+'" ?', () => {
     const p=loadLS(LS.herdProfiles,{}); delete p[name];
     saveLS(LS.herdProfiles,p); updateHerdProfiles();
   });
@@ -3366,7 +3435,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     const msPct=parseFloat($('custom-ms')?.value);
     const ufl=parseFloat($('custom-ufl')?.value);
     const pdi=parseFloat($('custom-pdi')?.value)||0;
-    if(!nom||!msPct||!ufl){alert('Nom, % MS et UFL sont obligatoires.');return;}
+    if(!nom||!msPct||!ufl){showToast('Nom, % MS et UFL sont obligatoires.', 'warn');return;}
     const item={nom,msPct,uflPerKgMS:ufl,pdiPerKgMS:pdi,
       na_gkgms:parseFloat($('custom-na')?.value)||undefined,
       k_gkgms: parseFloat($('custom-k')?.value) ||undefined,
@@ -3379,15 +3448,15 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     else customFoodsDb.push(item);
     saveLS(LS.customFoods,customFoodsDb); hydrate();
     $('custom-modal')?.classList.add('hidden'); editingFoodIndex=-1;
-    alert(nom+' sauvegardé');
+    showToast(nom + ' sauvegardé avec succès.', 'success');
   });
   $('btn-edit-custom-aliment')?.addEventListener('click',()=>{
     const idx=parseInt($('select-custom-aliment')?.value);
-    if(isNaN(idx)){alert('Sélectionnez un aliment.');return;} openCustomModal(idx);
+    if(isNaN(idx)){showToast('Sélectionnez un aliment dans la liste.', 'warn');return;} openCustomModal(idx);
   });
   $('btn-delete-custom-aliment')?.addEventListener('click',()=>{
     const idx=parseInt($('select-custom-aliment')?.value);
-    if(isNaN(idx)||!confirm('Supprimer ?')) return;
+    if(isNaN(idx)){return;} rbConfirm('Supprimer cet aliment personnalisé ?', () => {
     customFoodsDb.splice(idx,1); saveLS(LS.customFoods,customFoodsDb); hydrate();
   });
   ['custom-na','custom-k','custom-ca','custom-mg','custom-cl','custom-s'].forEach(id=>{
@@ -3414,7 +3483,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   $('btn-calc-besoins-seuls')?.addEventListener('click', () => {
     const type = $('ba-type-animal')?.value;
     const pv   = parseFloat($('ba-poids-vif')?.value);
-    if (!type || !pv) { alert('Sélectionnez le type d\'animal et renseignez le poids vif.'); return; }
+    if (!type || !pv) { showToast('Sélectionnez le type d\'animal et renseignez le poids vif.', 'warn'); return; }
     const b = computeBesoins(
       pv,
       parseFloat($('ba-production-lait')?.value)||0,
@@ -3481,7 +3550,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     updateAnimalProfileSelects();
     const selId = prefix ? 'ba-animal-profiles' : 'animal-profiles';
     if ($(selId)) $(selId).value = name.trim();
-    alert(`✅ Profil animal "${name.trim()}" sauvegardé !`);
+    showToast(`Profil "${name.trim()}" sauvegardé.`, 'success');
   }
   function loadAnimalProfile(selId, prefix='') {
     const name = $(selId)?.value; if (!name) return;
@@ -3489,7 +3558,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
     setAnimalFields(data, prefix);
   }
   function deleteAnimalProfile(selId) {
-    const name = $(selId)?.value; if (!name || !confirm(`Supprimer le profil "${name}" ?`)) return;
+    const name = $(selId)?.value; if (!name) return; rbConfirm(`Supprimer le profil "${name}" ?`, () => {
     const profiles = loadLS(AP_KEY, {}); delete profiles[name];
     saveLS(AP_KEY, profiles); updateAnimalProfileSelects();
   }
@@ -3734,7 +3803,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       var type0 = ($('type-animal')||{}).value;
       var pv0   = parseFloat(($('poids-vif')||{}).value);
       if (!type0 || !pv0) {
-        alert('Calculez d\'abord les besoins (Étape 1) avant de lancer l\'optimisation automatique.');
+        showToast('Calculez d\'abord les besoins — Étape 1.', 'warn');
         return;
       }
       arBesoins = computeBesoins(
@@ -3770,7 +3839,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       });
     });
 
-    if (selected.length < 2) { alert('Sélectionnez au moins 2 aliments.'); return; }
+    if (selected.length < 2) { showToast('Sélectionnez au moins 2 aliments.', 'warn'); return; }
 
     var status = $('ar-status');
     if (status) status.textContent = 'Calcul en cours…';
@@ -4009,7 +4078,7 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       const state = JSON.parse(raw);
       const ageMin = (Date.now() - state.ts) / 60000;
       if (ageMin > 120) return; // ignore si > 2h
-      if (!confirm(`Une saisie non terminée a été trouvée (il y a ${Math.round(ageMin)} min). Voulez-vous la restaurer ?`)) return;
+      rbConfirm(`Une saisie non terminée trouvée (il y a ${Math.round(ageMin)} min). Restaurer ?`, () => {
       // Restaurer step 1
       const s1 = state.step1 || {};
       if (s1.type && $('type-animal')) {
