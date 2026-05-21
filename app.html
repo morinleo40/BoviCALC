@@ -192,11 +192,8 @@ function openStripeCheckout() {
   if (email) url += '?prefilled_email=' + encodeURIComponent(email);
   window.open(url, '_blank');
 }
-async function logoutUser() {
-  var supa = getSupa();
-  try { if (supa) await supa.auth.signOut(); } catch(e) {}
-  currentUser = null; userPlan = 'free';
-  closeAccountModal();
+function logoutUser() {
+  try { var supa = getSupa(); if (supa) supa.auth.signOut(); } catch(e) {}
   window.location.href = 'index.html';
 }
 function togglePwd(id, btn) {
@@ -540,15 +537,15 @@ async function initAuth() {
                 <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
                 <option value="vache-prepa-velage">Vache prépa vêlage (4-8 sem.)</option>
                 <option value="genisse">Génisse laitière (renouvellement)</option>
-                <option value="genisse-engrais">Génisse laitière (engraissement)</option>
-                <option value="vache-reforme">Vache réforme / engraissement</option>
+                <option value="genisse-engrais">Génisse laitière (viande)</option>
+                <option value="vache-reforme">Vache réforme</option>
                 <option value="veau">Veau de lait</option>
               </optgroup>
               <optgroup label="Élevage viande (UFV)">
-                <option value="taurillon">Taurillon à l'engrais (JB)</option>
-                <option value="boeuf-engrais">Bœuf à l'engrais</option>
+                <option value="taurillon">Taurillon (JB)</option>
+                <option value="boeuf-engrais">Bœuf</option>
                 <option value="vache-allaitante">Vache allaitante (nourrisse)</option>
-                <option value="genisse-viande">Génisse viande à l'engrais</option>
+                <option value="genisse-viande">Génisse viande</option>
                 <option value="broutard">Broutard / Jeune bovin</option>
               </optgroup>
             </select>
@@ -961,15 +958,15 @@ async function initAuth() {
             <option value="vache-tarie">Vache tarie (0-4 sem.)</option>
             <option value="vache-prepa-velage">Vache prépa vêlage (4-8 sem.)</option>
             <option value="genisse">Génisse laitière (renouvellement)</option>
-            <option value="genisse-engrais">Génisse laitière (engraissement)</option>
-            <option value="vache-reforme">Vache réforme / engraissement</option>
+            <option value="genisse-engrais">Génisse laitière (viande)</option>
+            <option value="vache-reforme">Vache réforme</option>
             <option value="veau">Veau de lait</option>
           </optgroup>
           <optgroup label="Élevage viande (UFV)">
-            <option value="taurillon">Taurillon à l'engrais (JB)</option>
-            <option value="boeuf-engrais">Bœuf à l'engrais</option>
+            <option value="taurillon">Taurillon (JB)</option>
+            <option value="boeuf-engrais">Bœuf</option>
             <option value="vache-allaitante">Vache allaitante (nourrisse)</option>
-            <option value="genisse-viande">Génisse viande à l'engrais</option>
+            <option value="genisse-viande">Génisse viande</option>
             <option value="broutard">Broutard / Jeune bovin</option>
           </optgroup>
         </select>
@@ -1771,21 +1768,24 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
   };
 
   function getRaceImgSrc(race) {
-    return RACE_IMAGES[race] ? './' + RACE_IMAGES[race] : null;
+    const fn = RACE_IMAGES[race];
+    if (!fn) return null;
+    return './' + fn.split('').map(c => c === ' ' ? '%20' : c).join('');
   }
   function showRaceImage(selectId, previewId) {
     const race = $(selectId)?.value;
     const wrap = $(previewId); if (!wrap) return;
     const src  = getRaceImgSrc(race);
     if (src) {
-      wrap.innerHTML = `<img src="${src}" alt="${race}"
-        style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;border:2px solid var(--border);display:block;"
-        onerror="this.parentNode.innerHTML=''">`;
+      wrap.style.cssText = 'margin-top:8px;width:100%;height:160px;overflow:hidden;border-radius:10px;border:1.5px solid var(--border);background:#f8fafc;';
+      wrap.innerHTML = `<img src="${src}" alt="${race}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.style.display='none'">`;
     } else {
+      wrap.style.cssText = '';
       wrap.innerHTML = '';
     }
   }
   window.showRaceImage = showRaceImage;
+  window.getRaceImgSrc = getRaceImgSrc;
 
   const UFV_TYPES = ['genisse','genisse-engrais','vache-reforme','veau',
                      'taurillon','boeuf-engrais','vache-allaitante','genisse-viande','broutard'];
@@ -1970,7 +1970,13 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
         <td class="dt-formula">${d.f}</td>
         <td class="dt-value">${d.coef ? '+' : ''}${isUFL ? d.v.toFixed(2)+' '+eu : d.v.toFixed(0)+' g'}</td>
       </tr>`).join('');
-    cont.innerHTML = `
+    const raceVal = $('race-animal')?.value || '';
+    const imgSrc  = getRaceImgSrc(raceVal);
+    const imgHtml = imgSrc ? `
+      <div style="float:right;width:140px;height:105px;overflow:hidden;border-radius:10px;border:1.5px solid var(--border);margin:0 0 12px 16px;">
+        <img src="${imgSrc}" alt="${raceVal}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.remove()">
+      </div>` : '';
+    cont.innerHTML = imgHtml + `
       <div class="rb-metric-grid">
         <div class="rb-metric">
           <div class="rb-metric-head"><div class="rb-metric-title">Énergie (${eu}/j) <span class="tt-q" data-tt="${eu==='UFL'?'ufl':'ufv'}">?</span></div></div>

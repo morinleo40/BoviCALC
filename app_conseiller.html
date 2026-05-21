@@ -393,15 +393,15 @@ function setTheme(t) {
                     <option value="vache-tarie">Vache tarie</option>
                     <option value="vache-prepa-velage">Prépa vêlage</option>
                     <option value="genisse">Génisse laitière (renouvellement)</option>
-                    <option value="genisse-engrais">Génisse laitière (engraissement)</option>
-                    <option value="vache-reforme">Vache réforme / engraissement</option>
+                    <option value="genisse-engrais">Génisse laitière (viande)</option>
+                    <option value="vache-reforme">Vache réforme</option>
                     <option value="veau">Veau de lait</option>
                   </optgroup>
                   <optgroup label="Élevage viande (UFV)">
-                    <option value="taurillon">Taurillon à l'engrais (JB)</option>
-                    <option value="boeuf-engrais">Bœuf à l'engrais</option>
+                    <option value="taurillon">Taurillon (JB)</option>
+                    <option value="boeuf-engrais">Bœuf</option>
                     <option value="vache-allaitante">Vache allaitante (nourrisse)</option>
-                    <option value="genisse-viande">Génisse viande à l'engrais</option>
+                    <option value="genisse-viande">Génisse viande</option>
                     <option value="broutard">Broutard / Jeune bovin</option>
                   </optgroup>
                 </select>
@@ -1030,12 +1030,9 @@ async function onSignIn() {
   showPage('dashboard');
 }
 
-async function logoutUser() {
-  const supa = getSupa();
-  try { if(supa) await supa.auth.signOut(); } catch(e) {}
-  currentUser = null;
-  try { localStorage.clear(); } catch(e) {}
-  window.location.href = 'app_conseiller.html';
+function logoutUser() {
+  try { const supa = getSupa(); if(supa) supa.auth.signOut(); } catch(e) {}
+  window.location.href = 'index_conseiller.html';
 }
 
 function updateSidebarUser() {
@@ -1358,14 +1355,20 @@ const RACE_IMAGES = {
   'bazadaise':       'Bazardaise.jpg',
   'rouge-des-pres':  'Rouge des prés.jfif',
 };
-function getRaceImgSrc(race) { return RACE_IMAGES[race] ? './'+RACE_IMAGES[race] : null; }
+function getRaceImgSrc(race) {
+  const fn = RACE_IMAGES[race]; if (!fn) return null;
+  return './'+fn.split('').map(c=>c===' '?'%20':c).join('');
+}
 function showRaceImage(selectId, previewId) {
   const race = document.getElementById(selectId)?.value;
   const wrap = document.getElementById(previewId); if (!wrap) return;
   const src  = getRaceImgSrc(race);
-  wrap.innerHTML = src
-    ? '<img src="'+src+'" alt="'+race+'" style="width:100%;max-height:130px;object-fit:cover;border-radius:8px;border:1.5px solid #e2e8f0;" onerror="this.parentNode.innerHTML=\'\'">'
-    : '';
+  if (src) {
+    wrap.style.cssText='margin-top:8px;width:100%;height:150px;overflow:hidden;border-radius:10px;border:1.5px solid #e2e8f0;background:#f8fafc;';
+    wrap.innerHTML='<img src="'+src+'" alt="'+race+'" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.style.display=\'none\'">';
+  } else {
+    wrap.style.cssText=''; wrap.innerHTML='';
+  }
 }
 
 const UFV_TYPES = ['genisse','genisse-engrais','vache-reforme','veau',
