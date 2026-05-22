@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarifs — Rumicore, logiciel de rationnement bovin gratuit</title>
+  <meta name="description" content="Découvrez les tarifs de Rumicore : plan Gratuit pour démarrer et plan Pro à 15 €/mois pour un accès complet au rationnement bovin. Sans engagement, résiliable à tout moment.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://rumicore.com/tarifs.html">
+  <meta property="og:title" content="Tarifs — Rumicore, rationneur bovin gratuit">
+  <meta property="og:description" content="Plan Gratuit ou Pro à 15 €/mois. Accès complet au rationnement bovin, bilan fourrager, export PDF. Sans engagement.">
+  <meta property="og:url" content="https://rumicore.com/tarifs.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://rumicore.com/Logo%20RumiCORE.png">
+  <link rel="icon" type="image/png" href="Logo RumiCORE.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+
+    .section { padding: 80px 32px; }
+    .section.alt { background: #f8fafc; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 60px; }
+    .tag {
+      display: inline-block; background: #dcfce7; color: #15803d;
+      padding: 4px 14px; border-radius: 20px; font-size: .78rem; font-weight: 800;
+      letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-header h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 900; color: #0f172a; line-height: 1.2; letter-spacing: -.02em; }
+    .section-header p { margin-top: 16px; color: #64748b; font-size: 1.05rem; max-width: 620px; margin-left: auto; margin-right: auto; line-height: 1.75; }
+    .text-green { color: #15803d; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(150deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
+      padding: 72px 32px 64px; text-align: center;
+    }
+    .hero h1 { font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 900; color: #0f172a; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 18px; }
+    .hero h1 em { font-style: normal; color: #15803d; }
+    .hero p { font-size: 1.08rem; color: #475569; max-width: 560px; margin: 0 auto; line-height: 1.75; }
+
+    /* ── PLANS ── */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px; align-items: stretch; max-width: 900px; margin: 0 auto;
+    }
+    .plan {
+      background: #fff; border: 2px solid #e2e8f0; border-radius: 18px;
+      padding: 32px 28px; display: flex; flex-direction: column;
+      transition: box-shadow .2s; position: relative;
+    }
+    .plan:hover { box-shadow: 0 12px 32px rgba(0,0,0,.1); }
+    .plan.highlighted { border-color: #15803d; box-shadow: 0 8px 32px rgba(21,128,61,.18); transform: scale(1.02); }
+    .plan-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: #15803d; color: #fff; font-size: .78rem; font-weight: 700;
+      padding: 4px 16px; border-radius: 20px; white-space: nowrap; letter-spacing: .04em;
+    }
+    .plan-name { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .plan-desc { font-size: .88rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
+    .plan-price { margin-bottom: 28px; }
+    .plan-amount { font-size: 2.8rem; font-weight: 900; color: #0f172a; line-height: 1; }
+    .plan-period { font-size: .85rem; color: #94a3b8; margin-top: 4px; }
+    .plan-features { list-style: none; margin-bottom: 28px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: .9rem; color: #475569; }
+    .plan-features li.excluded { color: #94a3b8; text-decoration: line-through; }
+    .plan-btn {
+      display: block; width: 100%; padding: 13px 20px; border-radius: 10px;
+      font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center;
+      text-decoration: none; border: none; transition: all .2s;
+    }
+    .plan-btn.primary { background: #15803d; color: #fff; box-shadow: 0 3px 12px rgba(21,128,61,.3); }
+    .plan-btn.primary:hover { background: #166534; transform: translateY(-1px); }
+    .plan-btn.outline { background: #fff; color: #15803d; border: 2px solid #15803d; }
+    .plan-btn.outline:hover { background: #f0fdf4; }
+
+    /* ── COMPARATIF ── */
+    .compare-table { width: 100%; border-collapse: collapse; max-width: 860px; margin: 0 auto; }
+    .compare-table th {
+      padding: 14px 20px; text-align: left; font-size: .9rem; font-weight: 800;
+      background: #f8fafc; color: #0f172a; border-bottom: 2px solid #e2e8f0;
+    }
+    .compare-table th:nth-child(2), .compare-table th:nth-child(3) { text-align: center; }
+    .compare-table td {
+      padding: 13px 20px; font-size: .88rem; color: #475569;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .compare-table td:nth-child(2), .compare-table td:nth-child(3) { text-align: center; }
+    .compare-table tr:hover td { background: #f8fafc; }
+    .compare-table .pro-col { color: #15803d; font-weight: 700; }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    details {
+      border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 0; background: #fff; overflow: hidden;
+    }
+    summary {
+      font-weight: 700; font-size: .95rem; color: #0f172a; cursor: pointer;
+      padding: 18px 22px; list-style: none; display: flex; justify-content: space-between; align-items: center;
+    }
+    summary::after { content: '+'; font-size: 1.3rem; color: #15803d; font-weight: 400; transition: transform .2s; }
+    details[open] summary::after { content: '−'; }
+    details p { font-size: .88rem; color: #64748b; line-height: 1.75; padding: 0 22px 18px; }
+
+    /* ── CTA ── */
+    .cta-section { background: linear-gradient(135deg, #14532d, #15803d); padding: 80px 32px; text-align: center; }
+    .cta-section h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 900; color: #fff; margin-bottom: 18px; letter-spacing: -.02em; }
+    .cta-section p { color: #bbf7d0; font-size: 1.05rem; max-width: 520px; margin: 0 auto 36px; line-height: 1.75; }
+    .btn-primary {
+      padding: 13px 32px; background: #fff; color: #15803d; border: none;
+      border-radius: 10px; font-size: 1rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15); transition: all .2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: #f0fdf4; transform: translateY(-2px); }
+
+    /* ── TOGGLE ── */
+    .billing-toggle {
+      display: flex; justify-content: center; margin-bottom: 40px;
+    }
+    .toggle-inner {
+      display: inline-flex; align-items: center; gap: 0;
+      background: #f1f5f9; border-radius: 12px; padding: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    .toggle-btn {
+      padding: 9px 22px; border-radius: 9px; border: none; font-size: .9rem;
+      font-weight: 600; cursor: pointer; transition: all .2s; background: transparent; color: #64748b;
+    }
+    .toggle-btn.active {
+      background: #15803d; color: #fff; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(21,128,61,.25);
+    }
+    .saving-badge {
+      margin-left: 6px; background: #dcfce7; color: #15803d;
+      font-size: .72rem; font-weight: 800; padding: 2px 7px; border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <img src="Logo RumiCORE.png" alt="Rumicore" style="height:36px;">
+    <span style="font-size:1.15rem;font-weight:900;color:#15803d;">Rumicore</span>
+  </a>
+  <div style="display:flex;gap:4px;align-items:center;">
+    <a href="a-propos.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">À propos</a>
+    <a href="fonctionnalites.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Fonctionnalités</a>
+    <a href="tarifs.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:700;color:#15803d;text-decoration:none;background:#f0fdf4;">Tarifs</a>
+    <a href="articles.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Articles</a>
+    <a href="index_conseiller.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:600;color:#475569;text-decoration:none;border:1.5px solid #e2e8f0;">Conseillers</a>
+    <a href="app.html" style="padding:8px 18px;border-radius:8px;font-size:.83rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Accéder →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="tag">Tarifs</div>
+  <h1>Nos tarifs —&nbsp;<em>Rumicore</em></h1>
+  <p>Commencez gratuitement et passez au Pro quand vous en avez besoin. Sans engagement, résiliable à tout moment.</p>
+</div>
+
+<!-- PLANS -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Un plan pour <span class="text-green">chaque besoin</span></h2>
+      <p>Sans engagement, résiliable à tout moment.</p>
+    </div>
+
+    <!-- Toggle mensuel / annuel -->
+    <div class="billing-toggle">
+      <div class="toggle-inner">
+        <button class="toggle-btn active" id="btn-monthly" onclick="setBilling('monthly')">Mensuel</button>
+        <button class="toggle-btn" id="btn-annual" onclick="setBilling('annual')">
+          Annuel <span class="saving-badge">−10 %</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pricing-grid">
+
+      <!-- Plan Gratuit -->
+      <div class="plan">
+        <div class="plan-name">Gratuit</div>
+        <div class="plan-desc">Pour découvrir Rumicore, sans engagement.</div>
+        <div class="plan-price">
+          <div class="plan-amount">0 €</div>
+          <div class="plan-period">pour toujours</div>
+        </div>
+        <ul class="plan-features">
+          <li><span>✅</span><span>Analyser ma ration (apports seuls)</span></li>
+          <li><span>✅</span><span>Base de 115 aliments INRA 2018</span></li>
+          <li class="excluded"><span>❌</span><span>Créer ma ration de A à Z</span></li>
+          <li class="excluded"><span>❌</span><span>Calculer mes besoins animaux</span></li>
+          <li class="excluded"><span>❌</span><span>Bilan fourrager troupeau</span></li>
+          <li class="excluded"><span>❌</span><span>Sauvegarde des sessions</span></li>
+          <li class="excluded"><span>❌</span><span>Export PDF professionnel</span></li>
+          <li class="excluded"><span>❌</span><span>Optimiseur &amp; suggestions</span></li>
+        </ul>
+        <a href="app.html" class="plan-btn outline">Commencer gratuitement</a>
+      </div>
+
+      <!-- Plan Pro -->
+      <div class="plan highlighted">
+        <div class="plan-badge">⭐ Accès complet</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">Accès complet pour les éleveurs exigeants.</div>
+        <div class="plan-price">
+          <div class="plan-amount" id="pro-price">15 €</div>
+          <div class="plan-period" id="pro-period">/ mois TTC</div>
+          <div id="pro-saving" style="display:none;margin-top:8px;display:inline-block;background:#dcfce7;color:#15803d;font-size:.8rem;font-weight:800;padding:4px 12px;border-radius:20px;border:1px solid #bbf7d0;">Économie 20 € · −10 %</div>
+        </div>
+        <ul class="plan-features">
+          <li><span>✅</span><span>Ration de A à Z complète</span></li>
+          <li><span>✅</span><span>Calcul des besoins animaux</span></li>
+          <li><span>✅</span><span>Bilan fourrager troupeau</span></li>
+          <li><span>✅</span><span>Sauvegarde illimitée</span></li>
+          <li><span>✅</span><span>Export PDF professionnel</span></li>
+          <li><span>✅</span><span>Optimiseur &amp; suggestions</span></li>
+          <li><span>✅</span><span>Mes Aliments personnalisés</span></li>
+          <li><span>✅</span><span>Support prioritaire par email</span></li>
+        </ul>
+        <a href="https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00" class="plan-btn primary" id="pro-cta">Souscrire au Pro</a>
+      </div>
+
+    </div>
+
+    <p style="text-align:center;margin-top:32px;font-size:.88rem;color:#94a3b8;">
+      Des questions ? Contactez-nous à <a href="mailto:rumicore1@gmail.com" style="color:#15803d;font-weight:600;">rumicore1@gmail.com</a>
+    </p>
+  </div>
+</section>
+
+<!-- COMPARATIF -->
+<section class="section alt">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Comparatif</div>
+      <h2>Gratuit vs <span class="text-green">Pro</span> — en détail</h2>
+      <p>Voici toutes les fonctionnalités disponibles selon votre plan.</p>
+    </div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Fonctionnalité</th>
+          <th>Gratuit</th>
+          <th style="color:#15803d;">Pro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Base de 115 aliments INRA 2018</td><td>✅</td><td class="pro-col">✅</td></tr>
+        <tr><td>Analyse des apports nutritionnels</td><td>✅</td><td class="pro-col">✅</td></tr>
+        <tr><td>Ration de A à Z (besoins + ration + bilan)</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Calcul automatique des besoins UFL/PDI</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Score ABCD et indicateurs visuels</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Bilan fourrager troupeau</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Analyse des coûts de ration</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Export PDF professionnel</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Optimiseur et suggestions d'ajustements</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Aliments personnalisés</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Sauvegarde illimitée des sessions</td><td>—</td><td class="pro-col">✅</td></tr>
+        <tr><td>Support prioritaire par email</td><td>—</td><td class="pro-col">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">FAQ</div>
+      <h2>Questions fréquentes <span class="text-green">sur les tarifs</span></h2>
+    </div>
+    <div class="faq-list">
+
+      <details>
+        <summary>Est-ce vraiment gratuit ? Sans carte bancaire ?</summary>
+        <p>Oui, le plan Gratuit de Rumicore est réellement gratuit, sans limite de temps et sans carte bancaire requise. Vous pouvez analyser vos rations avec la base des 115 aliments INRA 2018 sans aucun frais. La version Pro débloque des fonctionnalités avancées (ration complète, bilan fourrager, PDF) pour les éleveurs qui souhaitent aller plus loin.</p>
+      </details>
+
+      <details>
+        <summary>Puis-je annuler mon abonnement Pro à tout moment ?</summary>
+        <p>Absolument. L'abonnement Pro est sans engagement de durée. Vous pouvez l'annuler à tout moment depuis votre espace client Stripe, en un clic. Votre accès Pro reste actif jusqu'à la fin de la période déjà payée, et aucun prélèvement supplémentaire n'est effectué après l'annulation.</p>
+      </details>
+
+      <details>
+        <summary>Mes données d'élevage sont-elles privées et sécurisées ?</summary>
+        <p>Vos données sont strictement confidentielles. Rumicore ne vend et ne partage aucune donnée à des tiers. Vos rations, vos animaux et vos informations d'élevage restent privées. Nous n'affichons aucune publicité et nous n'utilisons pas vos données à des fins commerciales.</p>
+      </details>
+
+      <details>
+        <summary>Puis-je utiliser Rumicore sur mon téléphone ou ma tablette ?</summary>
+        <p>Oui, Rumicore est entièrement responsive et fonctionne sur smartphone, tablette et ordinateur. Pas besoin d'application à télécharger : accédez simplement à rumicore.com depuis votre navigateur. L'application fonctionne également hors connexion une fois chargée, idéal pour les visites en étable.</p>
+      </details>
+
+      <details>
+        <summary>Quelle est la différence entre le plan éleveur et le plan conseiller ?</summary>
+        <p>Rumicore propose le même accès Pro pour les éleveurs et les conseillers agricoles. La version Conseiller (accessible via <a href="index_conseiller.html" style="color:#15803d;font-weight:600;">index_conseiller.html</a>) est spécifiquement pensée pour les techniciens qui gèrent plusieurs élevages : génération de rapports PDF à envoyer aux clients, outil d'analyse rapide en visite, et présentation adaptée au conseil agricole.</p>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Commencez gratuitement dès aujourd'hui</h2>
+  <p>Aucune carte bancaire requise pour le plan Gratuit. Passez au Pro en un clic quand vous êtes prêt.</p>
+  <a href="app.html" class="btn-primary">Accéder à Rumicore →</a>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#0f172a;padding:32px;text-align:center;color:#64748b;font-size:.83rem;margin-top:0;">
+  <p>© 2026 Rumicore · <a href="mailto:rumicore1@gmail.com" style="color:#94a3b8;text-decoration:none;">rumicore1@gmail.com</a> · <a href="https://rumicore.com" style="color:#94a3b8;text-decoration:none;">Rumicore.com</a></p>
+</footer>
+
+<script>
+let billing = 'monthly';
+
+function setBilling(mode) {
+  billing = mode;
+  document.getElementById('btn-monthly').classList.toggle('active', mode === 'monthly');
+  document.getElementById('btn-annual').classList.toggle('active', mode === 'annual');
+
+  if (mode === 'monthly') {
+    document.getElementById('pro-price').textContent = '15 €';
+    document.getElementById('pro-period').textContent = '/ mois TTC';
+    document.getElementById('pro-saving').style.display = 'none';
+    document.getElementById('pro-cta').href = 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00';
+    document.getElementById('pro-cta').textContent = 'Souscrire au Pro';
+  } else {
+    document.getElementById('pro-price').textContent = '160 €';
+    document.getElementById('pro-period').textContent = '/ an TTC';
+    document.getElementById('pro-saving').style.display = 'inline-block';
+    document.getElementById('pro-cta').href = 'https://buy.stripe.com/9B614faqs8iS9312TGbMQ01';
+    document.getElementById('pro-cta').textContent = 'Souscrire au Pro (annuel)';
+  }
+}
+</script>
+
+</body>
+</html>

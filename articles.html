@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles &amp; Guides — Rationnement bovin | Rumicore</title>
+  <meta name="description" content="Articles et guides pratiques sur le rationnement bovin : calcul de ration, UFL/UFV, normes INRA 2018, bovins viande, bilan fourrager. Rédigés pour les éleveurs et conseillers agricoles.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://rumicore.com/articles.html">
+  <meta property="og:title" content="Articles &amp; Guides Rationnement Bovin — Rumicore">
+  <meta property="og:description" content="Calcul de ration, UFL/UFV, normes INRA 2018, bovins viande, bilan fourrager : tous nos guides pratiques pour mieux nourrir votre troupeau.">
+  <meta property="og:url" content="https://rumicore.com/articles.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://rumicore.com/Logo%20RumiCORE.png">
+  <link rel="icon" type="image/png" href="Logo RumiCORE.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+
+    .section { padding: 80px 32px; }
+    .section.alt { background: #f8fafc; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .text-green { color: #15803d; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(150deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
+      padding: 72px 32px 56px; text-align: center;
+    }
+    .hero-tag {
+      display: inline-block; background: #fff; border: 1px solid #bbf7d0;
+      border-radius: 20px; padding: 5px 16px; font-size: .82rem; font-weight: 700;
+      color: #15803d; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .hero h1 { font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 900; color: #0f172a; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 18px; }
+    .hero h1 em { font-style: normal; color: #15803d; }
+    .hero p { font-size: 1.05rem; color: #475569; max-width: 600px; margin: 0 auto; line-height: 1.8; }
+
+    /* ── ARTICLES GRID ── */
+    .articles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; }
+
+    .article-card {
+      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px;
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: box-shadow .2s, transform .2s; text-decoration: none;
+    }
+    .article-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,.1); transform: translateY(-3px); }
+
+    .article-header {
+      padding: 28px 24px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .article-icon { font-size: 2.4rem; line-height: 1; }
+    .article-category {
+      display: inline-block; padding: 3px 12px; border-radius: 20px;
+      font-size: .72rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+      align-self: flex-start;
+    }
+    .article-header h2 { font-size: 1.05rem; font-weight: 800; color: #fff; line-height: 1.4; margin: 0; }
+
+    .article-body { padding: 20px 24px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .article-body p { font-size: .88rem; color: #475569; line-height: 1.7; flex: 1; }
+    .article-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .83rem; font-weight: 700; text-decoration: none;
+      transition: gap .15s;
+    }
+    .article-card:hover .article-link { gap: 10px; }
+
+    /* Couleurs par article */
+    .card-green .article-header { background: linear-gradient(135deg, #14532d, #15803d); }
+    .card-green .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-green .article-link { color: #15803d; }
+
+    .card-blue .article-header { background: linear-gradient(135deg, #1e40af, #2563eb); }
+    .card-blue .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-blue .article-link { color: #2563eb; }
+
+    .card-purple .article-header { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+    .card-purple .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-purple .article-link { color: #7c3aed; }
+
+    .card-amber .article-header { background: linear-gradient(135deg, #b45309, #d97706); }
+    .card-amber .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-amber .article-link { color: #d97706; }
+
+    .card-teal .article-header { background: linear-gradient(135deg, #0f766e, #14b8a6); }
+    .card-teal .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-teal .article-link { color: #0f766e; }
+
+    /* ── NEWSLETTER / CTA ── */
+    .cta-section { background: linear-gradient(135deg, #14532d, #15803d); padding: 80px 32px; text-align: center; }
+    .cta-section h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); font-weight: 900; color: #fff; margin-bottom: 18px; letter-spacing: -.02em; }
+    .cta-section p { color: #bbf7d0; font-size: 1.05rem; max-width: 520px; margin: 0 auto 36px; line-height: 1.75; }
+    .btn-primary {
+      padding: 13px 32px; background: #fff; color: #15803d; border: none;
+      border-radius: 10px; font-size: 1rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15); transition: all .2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: #f0fdf4; transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <img src="Logo RumiCORE.png" alt="Rumicore" style="height:36px;">
+    <span style="font-size:1.15rem;font-weight:900;color:#15803d;">Rumicore</span>
+  </a>
+  <div style="display:flex;gap:4px;align-items:center;">
+    <a href="a-propos.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">À propos</a>
+    <a href="fonctionnalites.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Fonctionnalités</a>
+    <a href="tarifs.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Tarifs</a>
+    <a href="articles.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:700;color:#15803d;text-decoration:none;background:#f0fdf4;">Articles</a>
+    <a href="index_conseiller.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:600;color:#475569;text-decoration:none;border:1.5px solid #e2e8f0;">Conseillers</a>
+    <a href="app.html" style="padding:8px 18px;border-radius:8px;font-size:.83rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Accéder →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">📚 Articles &amp; Guides</div>
+  <h1>Articles &amp; Guides —<br><em>Rationnement bovin</em></h1>
+  <p>Des articles pratiques sur le calcul de ration, les normes INRA 2018, les unités fourragères et la gestion des stocks fourragers — pour mieux nourrir votre troupeau au quotidien.</p>
+</div>
+
+<!-- GRILLE D'ARTICLES -->
+<section class="section">
+  <div class="container">
+    <div class="articles-grid">
+
+      <!-- Article 1 : Calcul de ration bovine -->
+      <a href="articles/calcul-ration-bovine.html" class="article-card card-green">
+        <div class="article-header">
+          <div class="article-icon">🧮</div>
+          <span class="article-category">Guide pratique</span>
+          <h2>Comment calculer une ration pour vache laitière ?</h2>
+        </div>
+        <div class="article-body">
+          <p>La méthode pas à pas pour calculer une ration bovine équilibrée : estimer les besoins UFL/PDI, choisir vos fourrages et ajuster avec des concentrés. Exemples chiffrés et formules INRA 2018 incluses.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 2 : UFL / UFV -->
+      <a href="articles/ufl-ufv.html" class="article-card card-blue">
+        <div class="article-header">
+          <div class="article-icon">⚡</div>
+          <span class="article-category">Concepts clés</span>
+          <h2>UFL et UFV : comprendre les unités fourragères</h2>
+        </div>
+        <div class="article-body">
+          <p>Quelle différence entre UFL (vaches laitières) et UFV (bovins viande) ? Comment interpréter ces unités dans le calcul de ration ? Tout comprendre sur les unités fourragères selon les normes INRA 2018.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 3 : Normes INRA 2018 -->
+      <a href="articles/normes-inra-2018.html" class="article-card card-purple">
+        <div class="article-header">
+          <div class="article-icon">📋</div>
+          <span class="article-category">Réglementation</span>
+          <h2>Normes INRA 2018 : ce qui a changé pour le rationnement bovin</h2>
+        </div>
+        <div class="article-body">
+          <p>Les normes INRA 2018 ont introduit des changements importants : nouvelles valeurs UFL/UFV, intégration des glucides fermentescibles, révision des besoins protéiques. Tour d'horizon de ces évolutions.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 4 : Bovins viande -->
+      <a href="articles/rationnement-bovins-viande.html" class="article-card card-amber">
+        <div class="article-header">
+          <div class="article-icon">🐂</div>
+          <span class="article-category">Bovins viande</span>
+          <h2>Rationner les bovins viande : taurillons, bœufs, vaches allaitantes</h2>
+        </div>
+        <div class="article-body">
+          <p>Le rationnement des bovins viande en UFV selon le GMQ cible. Méthode pratique pour les taurillons, bœufs, vaches allaitantes et broutards, avec tableau des besoins par catégorie.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 5 : Bilan fourrager -->
+      <a href="articles/bilan-fourrager.html" class="article-card card-teal">
+        <div class="article-header">
+          <div class="article-icon">📦</div>
+          <span class="article-category">Gestion des stocks</span>
+          <h2>Bilan fourrager : comment anticiper l'hiver ?</h2>
+        </div>
+        <div class="article-body">
+          <p>Vérifier que vos stocks de foin, ensilage et enrubannage couvrent les besoins hivernaux de votre troupeau. Formule simplifiée, exemple chiffré et conseils pour éviter les ruptures de stock.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Mettez la théorie en pratique</h2>
+  <p>Utilisez Rumicore pour appliquer ces méthodes directement sur vos rations — calculs automatiques selon les normes INRA 2018, bilan nutritionnel complet, export PDF.</p>
+  <a href="app.html" class="btn-primary">Accéder à Rumicore →</a>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#0f172a;padding:32px;text-align:center;color:#64748b;font-size:.83rem;margin-top:0;">
+  <p>© 2026 Rumicore · <a href="mailto:rumicore1@gmail.com" style="color:#94a3b8;text-decoration:none;">rumicore1@gmail.com</a> · <a href="https://rumicore.com" style="color:#94a3b8;text-decoration:none;">Rumicore.com</a></p>
+</footer>
+
+</body>
+</html>

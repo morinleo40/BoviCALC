@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>À propos — Rumicore, le rationneur bovin gratuit INRA 2018</title>
+  <meta name="description" content="Découvrez Rumicore : notre mission de rendre le rationnement bovin accessible à tous les éleveurs, notre approche basée sur les normes INRA 2018 et notre engagement pour un outil gratuit, simple et fiable.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://rumicore.com/a-propos.html">
+  <meta property="og:title" content="À propos de Rumicore — Rationneur bovin gratuit">
+  <meta property="og:description" content="Notre mission : rendre le rationnement bovin accessible à tous. Données INRA 2018, calculs transparents, outil gratuit sans publicité.">
+  <meta property="og:url" content="https://rumicore.com/a-propos.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://rumicore.com/Logo%20RumiCORE.png">
+  <link rel="icon" type="image/png" href="Logo RumiCORE.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+
+    .section { padding: 80px 32px; }
+    .section.alt { background: #f8fafc; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .container-narrow { max-width: 780px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 60px; }
+    .tag {
+      display: inline-block; background: #dcfce7; color: #15803d;
+      padding: 4px 14px; border-radius: 20px; font-size: .78rem; font-weight: 800;
+      letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-header h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 900; color: #0f172a; line-height: 1.2; letter-spacing: -.02em; }
+    .section-header p { margin-top: 16px; color: #64748b; font-size: 1.05rem; max-width: 620px; margin-left: auto; margin-right: auto; line-height: 1.75; }
+    .text-green { color: #15803d; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(150deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
+      padding: 80px 32px 64px; text-align: center;
+    }
+    .hero h1 { font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 900; color: #0f172a; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 18px; }
+    .hero h1 em { font-style: normal; color: #15803d; }
+    .hero p { font-size: 1.08rem; color: #475569; max-width: 600px; margin: 0 auto; line-height: 1.8; }
+
+    /* ── MISSION ── */
+    .story {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+    }
+    @media (max-width: 768px) { .story { grid-template-columns: 1fr; } }
+    .story-text h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 900; color: #0f172a; line-height: 1.25; margin-bottom: 20px; letter-spacing: -.02em; }
+    .story-text p { color: #475569; line-height: 1.8; margin-bottom: 16px; font-size: .98rem; }
+    .story-text p:last-child { margin-bottom: 0; }
+    .story-text strong { color: #15803d; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+    .pill {
+      padding: 6px 14px; border-radius: 20px; font-size: .82rem; font-weight: 600;
+      background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;
+    }
+    .cards { display: flex; flex-direction: column; gap: 14px; }
+    .card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: box-shadow .2s;
+    }
+    .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+    .card-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .card h3 { font-size: .95rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .card p { font-size: .85rem; color: #64748b; line-height: 1.6; }
+
+    /* ── VALEURS ── */
+    .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+    .value-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+      padding: 28px 24px; text-align: center; transition: box-shadow .2s, transform .2s;
+    }
+    .value-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .value-icon { font-size: 2.5rem; margin-bottom: 14px; }
+    .value-card h3 { font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; }
+    .value-card p { font-size: .875rem; color: #64748b; line-height: 1.65; }
+
+    /* ── APPROCHE ── */
+    .approche-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+    .approche-item {
+      background: #f8fafc; border-radius: 12px; padding: 24px 20px;
+      border-left: 4px solid #15803d;
+    }
+    .approche-item h3 { font-size: .95rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .approche-item p { font-size: .85rem; color: #64748b; line-height: 1.65; }
+
+    /* ── AUDIENCE ── */
+    .audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+    .audience-card {
+      background: #fff; border-radius: 14px; padding: 28px 24px;
+      border: 1px solid #e2e8f0; transition: box-shadow .2s, transform .2s;
+    }
+    .audience-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .audience-icon { font-size: 2.5rem; margin-bottom: 14px; }
+    .audience-card h3 { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .audience-card p { font-size: .88rem; color: #64748b; line-height: 1.65; }
+
+    /* ── CONTACT ── */
+    .contact-box {
+      background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 16px;
+      padding: 40px; text-align: center; max-width: 600px; margin: 0 auto;
+    }
+    .contact-box h2 { font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; }
+    .contact-box p { color: #475569; line-height: 1.75; margin-bottom: 24px; }
+    .contact-box a {
+      display: inline-block; padding: 12px 28px; background: #15803d; color: #fff;
+      border-radius: 10px; font-size: .95rem; font-weight: 700; text-decoration: none;
+      box-shadow: 0 3px 12px rgba(21,128,61,.3); transition: all .2s;
+    }
+    .contact-box a:hover { background: #166534; transform: translateY(-1px); }
+
+    /* ── CTA ── */
+    .cta-section { background: linear-gradient(135deg, #14532d, #15803d); padding: 80px 32px; text-align: center; }
+    .cta-section h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 900; color: #fff; margin-bottom: 18px; letter-spacing: -.02em; }
+    .cta-section p { color: #bbf7d0; font-size: 1.05rem; max-width: 520px; margin: 0 auto 36px; line-height: 1.75; }
+    .btn-primary {
+      padding: 13px 32px; background: #fff; color: #15803d; border: none;
+      border-radius: 10px; font-size: 1rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15); transition: all .2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: #f0fdf4; transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <img src="Logo RumiCORE.png" alt="Rumicore" style="height:36px;">
+    <span style="font-size:1.15rem;font-weight:900;color:#15803d;">Rumicore</span>
+  </a>
+  <div style="display:flex;gap:4px;align-items:center;">
+    <a href="a-propos.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:700;color:#15803d;text-decoration:none;background:#f0fdf4;">À propos</a>
+    <a href="fonctionnalites.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Fonctionnalités</a>
+    <a href="tarifs.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Tarifs</a>
+    <a href="articles.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Articles</a>
+    <a href="index_conseiller.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:600;color:#475569;text-decoration:none;border:1.5px solid #e2e8f0;">Conseillers</a>
+    <a href="app.html" style="padding:8px 18px;border-radius:8px;font-size:.83rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Accéder →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="tag">À propos</div>
+  <h1>À propos de <em>Rumicore</em></h1>
+  <p>Rumicore est né d'un constat simple : les éleveurs bovins méritent un outil de rationnement aussi rigoureux que les logiciels professionnels, mais accessible à tous — gratuitement, sans formation, depuis n'importe quel appareil.</p>
+</div>
+
+<!-- NOTRE MISSION -->
+<section class="section">
+  <div class="container">
+    <div class="story">
+      <div class="story-text">
+        <h2>Notre mission : rendre le rationnement bovin <strong>accessible à tous</strong></h2>
+        <p>Aujourd'hui, bien nourrir ses vaches est un enjeu économique et zootechnique majeur. Une ration déséquilibrée, c'est de la production laitière perdue, une fertilité dégradée, des risques sanitaires (acidose, hypocalcémie) et des coûts alimentaires inutilement élevés.</p>
+        <p>Pourtant, les <strong>logiciels de rationnement bovin</strong> restent trop souvent réservés aux conseillers, trop complexes à prendre en main ou trop coûteux pour un usage quotidien en élevage.</p>
+        <p><strong>Rumicore change ça.</strong> Notre mission est simple : mettre entre les mains de chaque éleveur bovin un outil de calcul de ration rigoureux, basé sur les normes de référence, simple à utiliser et entièrement gratuit dans sa version de base.</p>
+        <div class="pills">
+          <span class="pill">✓ Gratuit pour tous</span>
+          <span class="pill">✓ Sans installation</span>
+          <span class="pill">✓ Basé sur l'INRA 2018</span>
+          <span class="pill">✓ Aucune publicité</span>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">🐄</div>
+          <div>
+            <h3>Pour chaque éleveur, partout</h3>
+            <p>En étable, en visite ou au bureau, Rumicore s'adapte à votre usage. Fonctionne sur smartphone, tablette et ordinateur, sans connexion permanente requise.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧬</div>
+          <div>
+            <h3>Science sans compromis</h3>
+            <p>Toutes les formules sont issues des tables INRA 2018. UFL, UFV, PDI, BACA, méthionine, lysine, glucides fermentescibles — chaque calcul est documenté et vérifiable.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔓</div>
+          <div>
+            <h3>Aucune barrière d'entrée</h3>
+            <p>Pas d'inscription obligatoire, pas de formation nécessaire. En cinq minutes, n'importe quel éleveur peut calculer sa première ration et obtenir un bilan nutritionnel complet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POURQUOI RUMICORE EXISTE -->
+<section class="section alt">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Pourquoi Rumicore</div>
+      <h2>Le problème que nous <span class="text-green">résolvons</span></h2>
+      <p>Le rationnement bovin est une discipline technique bien maîtrisée — mais les outils disponibles n'étaient pas à la hauteur des besoins du terrain.</p>
+    </div>
+    <div class="approche-grid">
+      <div class="approche-item">
+        <h3>Le problème n°1 : des logiciels trop complexes</h3>
+        <p>Les outils professionnels de rationnement exigent des heures de formation, des interfaces archaïques et une expertise technique inaccessible à la plupart des éleveurs. Le calcul de ration reste réservé à quelques spécialistes.</p>
+      </div>
+      <div class="approche-item">
+        <h3>Le problème n°2 : des coûts prohibitifs</h3>
+        <p>Les logiciels commerciaux coûtent plusieurs centaines d'euros par an. Pour un éleveur indépendant ou un petit cabinet de conseil, c'est une barrière réelle à l'adoption d'outils de qualité.</p>
+      </div>
+      <div class="approche-item">
+        <h3>Notre réponse : simple, gratuit, rigoureux</h3>
+        <p>Rumicore propose une interface claire et guidée, un accès gratuit sans restriction de durée, et des calculs basés sur les mêmes normes INRA 2018 que les logiciels professionnels. La qualité sans le prix.</p>
+      </div>
+      <div class="approche-item">
+        <h3>Notre vision : le terrain d'abord</h3>
+        <p>Chaque fonctionnalité de Rumicore est conçue pour être utilisée en conditions réelles : en étable avec les mains sales, en visite chez un client, ou lors d'une réunion technique avec un groupe d'éleveurs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOTRE APPROCHE TECHNIQUE -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Notre approche</div>
+      <h2>Données vérifiées, <span class="text-green">calculs transparents</span></h2>
+      <p>Rumicore est entièrement basé sur les normes INRA 2018 — la référence française pour le rationnement des ruminants. Chaque valeur, chaque formule est documentée et traçable.</p>
+    </div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">📋</div>
+        <h3>Tables INRA 2018</h3>
+        <p>Les 115 aliments de la base de données Rumicore sont issus des tables officielles INRA 2018 : valeurs UFL, UFV, PDI, Ca, P, Mg, Na, glucides fermentescibles et BACA pour chaque aliment.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚡</div>
+        <h3>Formules certifiées</h3>
+        <p>Les besoins UFL et PDI sont calculés selon les formules INRA 2018 : lait corrigé (LCF), besoin d'entretien selon le poids vif, correction pour activité et stade physiologique. Pas d'approximation.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔍</div>
+        <h3>Calculs détaillés</h3>
+        <p>Chaque indicateur du bilan est accompagné d'une valeur chiffrée, d'un pourcentage de couverture et d'une interprétation. Vous savez exactement pourquoi votre ration est notée A, B, C ou D.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔄</div>
+        <h3>Mises à jour continues</h3>
+        <p>La base de données et les formules de calcul sont régulièrement vérifiées et mises à jour. Tout signalement d'erreur est traité rapidement pour garantir la fiabilité des résultats.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOS ENGAGEMENTS -->
+<section class="section alt">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Nos engagements</div>
+      <h2>Ce que nous <span class="text-green">promettons</span></h2>
+    </div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🆓</div>
+        <h3>Gratuit pour tous</h3>
+        <p>Le plan Gratuit de Rumicore sera toujours gratuit. L'analyse nutritionnelle de base reste accessible sans abonnement, sans carte bancaire, sans limite de temps.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔒</div>
+        <h3>Données confidentielles</h3>
+        <p>Vos données d'élevage vous appartiennent. Nous ne vendons et ne partageons aucune information à des tiers. Aucune utilisation de vos données à des fins publicitaires ou commerciales.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🚫</div>
+        <h3>Pas de publicité</h3>
+        <p>Rumicore ne diffuse aucune publicité et n'est affilié à aucune marque d'aliments, de concentrés ou de produits d'élevage. Nos recommandations sont basées uniquement sur les besoins nutritionnels.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📱</div>
+        <h3>Accessible partout</h3>
+        <p>Rumicore fonctionne sur tous les appareils modernes, sans installation. En étable, en voiture ou au bureau — votre outil de rationnement vous suit partout.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONÇU POUR LE TERRAIN -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Pour qui ?</div>
+      <h2>Conçu pour <span class="text-green">le terrain</span></h2>
+      <p>Que vous soyez éleveur, conseiller ou formateur, Rumicore s'adapte à vos besoins et à votre rythme de travail.</p>
+    </div>
+    <div class="audience-grid">
+      <div class="audience-card">
+        <div class="audience-icon">🐄</div>
+        <h3>Éleveurs bovins</h3>
+        <p>Composez et équilibrez la ration de votre troupeau, maîtrisez vos coûts alimentaires et anticipez vos stocks fourragers pour l'hiver.</p>
+      </div>
+      <div class="audience-card">
+        <div class="audience-icon">👨‍🔬</div>
+        <h3>Conseillers agricoles</h3>
+        <p>Un outil d'analyse rapide pour vos visites d'élevage. Générez des rapports PDF professionnels et partagez-les directement avec vos clients.</p>
+      </div>
+      <div class="audience-card">
+        <div class="audience-icon">🎓</div>
+        <h3>Étudiants &amp; Formateurs</h3>
+        <p>Support pédagogique complet pour comprendre les équilibres nutritionnels bovins, les normes INRA et l'interprétation des bilans.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section alt">
+  <div class="container">
+    <div class="contact-box">
+      <h2>Une question ? Contactez-nous</h2>
+      <p>L'équipe Rumicore est disponible pour répondre à vos questions sur l'outil, signaler une erreur dans la base de données, ou simplement nous partager vos retours d'utilisation.</p>
+      <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a>
+      <p style="margin-top:16px;font-size:.85rem;color:#64748b;">Nous répondons généralement dans les 24 à 48 heures en jours ouvrés.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Prêt à calculer votre première ration ?</h2>
+  <p>Accédez gratuitement à Rumicore — sans installation, sans engagement, basé sur les normes INRA 2018.</p>
+  <a href="app.html" class="btn-primary">Essayer Rumicore gratuitement →</a>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#0f172a;padding:32px;text-align:center;color:#64748b;font-size:.83rem;margin-top:0;">
+  <p>© 2026 Rumicore · <a href="mailto:rumicore1@gmail.com" style="color:#94a3b8;text-decoration:none;">rumicore1@gmail.com</a> · <a href="https://rumicore.com" style="color:#94a3b8;text-decoration:none;">Rumicore.com</a></p>
+</footer>
+
+</body>
+</html>
