@@ -902,133 +902,29 @@ const PRICING_CONFIG = {
 </div>
 
 <!-- FOOTER -->
-<!-- ── ARTICLES ── -->
-<section id="articles" style="padding:64px 32px;background:#fff;">
+<!-- ── ARTICLES teaser ── -->
+<section id="articles" style="padding:56px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
   <div style="max-width:1100px;margin:0 auto;">
-    <div style="text-align:center;margin-bottom:48px;">
-      <div style="display:inline-block;background:#f0fdf4;color:#15803d;border-radius:20px;padding:4px 16px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">📚 Articles & Guides</div>
-      <h2 style="font-size:2rem;font-weight:900;color:#0f172a;margin-bottom:12px;">Tout savoir sur le <span style="color:#15803d;">rationnement bovin</span></h2>
-      <p style="color:#64748b;font-size:1rem;max-width:580px;margin:0 auto;">Des articles pratiques rédigés par des spécialistes pour vous aider à mieux nourrir votre troupeau.</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px;">
+      <div>
+        <div style="display:inline-block;background:#f0fdf4;color:#15803d;border-radius:20px;padding:4px 14px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📚 Articles & Guides</div>
+        <h2 style="font-size:1.6rem;font-weight:900;color:#0f172a;margin:0;">Ressources pour l'éleveur bovin</h2>
+      </div>
+      <a href="articles.html" style="padding:10px 22px;border-radius:8px;background:#15803d;color:#fff;text-decoration:none;font-size:.875rem;font-weight:700;">Voir tous les articles →</a>
     </div>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;">
-
-      <!-- Article 1 -->
-      <article style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 8px 32px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-        <div style="background:linear-gradient(135deg,#14532d,#15803d);padding:24px;color:#fff;">
-          <div style="font-size:2rem;margin-bottom:8px;">🧮</div>
-          <h3 style="font-size:1.05rem;font-weight:800;margin:0;">Comment calculer une ration pour vache laitière ?</h3>
-        </div>
-        <div style="padding:20px;">
-          <p style="font-size:.875rem;color:#475569;line-height:1.7;margin-bottom:16px;">Le <strong>calcul de ration pour vache laitière</strong> repose sur l'équilibre entre les besoins de l'animal (énergie en UFL, protéines en PDI) et les apports de la ration. Voici la méthode en 4 étapes :</p>
-          <ol style="font-size:.85rem;color:#475569;line-height:1.8;padding-left:18px;margin-bottom:16px;">
-            <li><strong>Évaluez les besoins</strong> : UFL = 1,4 + 0,006 × PV + 0,44 × LC (lait corrigé)</li>
-            <li><strong>Listez vos fourrages</strong> : foin, ensilage de maïs, enrubannage…</li>
-            <li><strong>Calculez les apports</strong> : kg MS × valeur UFL/kg MS de chaque aliment</li>
-            <li><strong>Équilibrez</strong> : ajustez avec des concentrés pour combler les déficits</li>
-          </ol>
-          <p style="font-size:.85rem;color:#64748b;line-height:1.7;">Le rapport PDI/UFL cible est de <strong>90–105 g PDI/UFL</strong>. En dessous de 90, la vache manque de protéines ; au-dessus de 110, il y a gaspillage et risque rénal. Rumicore calcule tout cela automatiquement selon les normes INRA 2018.</p>
-        </div>
-      </article>
-
-      <!-- Article 2 -->
-      <article style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 8px 32px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-        <div style="background:linear-gradient(135deg,#1e40af,#2563eb);padding:24px;color:#fff;">
-          <div style="font-size:2rem;margin-bottom:8px;">⚡</div>
-          <h3 style="font-size:1.05rem;font-weight:800;margin:0;">UFL et UFV : comprendre les unités fourragères</h3>
-        </div>
-        <div style="padding:20px;">
-          <p style="font-size:.875rem;color:#475569;line-height:1.7;margin-bottom:14px;">Les <strong>unités fourragères</strong> sont la mesure de référence pour évaluer la valeur énergétique des aliments pour bovins en France (normes INRA 2018).</p>
-          <div style="background:#eff6ff;border-radius:8px;padding:14px;margin-bottom:14px;">
-            <p style="font-size:.85rem;color:#1e40af;font-weight:700;margin-bottom:6px;">UFL — Unité Fourragère Lait</p>
-            <p style="font-size:.83rem;color:#475569;line-height:1.6;">Utilisée pour les <strong>vaches laitières</strong>, vaches taries et génisses laitières. 1 UFL = valeur énergétique de 1 kg d'orge de référence pour la production laitière.</p>
-          </div>
-          <div style="background:#fff7ed;border-radius:8px;padding:14px;">
-            <p style="font-size:.85rem;color:#c2410c;font-weight:700;margin-bottom:6px;">UFV — Unité Fourragère Viande</p>
-            <p style="font-size:.83rem;color:#475569;line-height:1.6;">Utilisée pour les <strong>bovins viande</strong> : taurillons, bœufs, vaches allaitantes, génisses viande. La valeur UFV d'un aliment est légèrement différente de sa valeur UFL.</p>
-          </div>
-        </div>
-      </article>
-
-      <!-- Article 3 -->
-      <article style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 8px 32px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-        <div style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);padding:24px;color:#fff;">
-          <div style="font-size:2rem;margin-bottom:8px;">📋</div>
-          <h3 style="font-size:1.05rem;font-weight:800;margin:0;">Normes INRA 2018 : ce qui a changé</h3>
-        </div>
-        <div style="padding:20px;">
-          <p style="font-size:.875rem;color:#475569;line-height:1.7;margin-bottom:14px;">Les <strong>normes INRA 2018</strong> (Alimentation des ruminants, INRA Éditions) constituent la référence française pour le <strong>rationnement des ruminants</strong>. Elles remplacent les tables INRA 1988 avec des mises à jour importantes :</p>
-          <ul style="font-size:.85rem;color:#475569;line-height:1.8;padding-left:18px;margin-bottom:14px;">
-            <li>Révision des valeurs UFL/UFV de nombreux fourrages</li>
-            <li>Intégration des <strong>glucides fermentescibles</strong> (amidon lent/rapide, sucres solubles)</li>
-            <li>Nouvelles formules pour les besoins des vaches hautes productrices</li>
-            <li>Meilleures recommandations minérales (BACA, Ca, P, Mg)</li>
-            <li>Révision des besoins protéiques (PDI) selon le stade de lactation</li>
-          </ul>
-          <p style="font-size:.85rem;color:#64748b;line-height:1.7;">Rumicore est entièrement basé sur les tables et formules INRA 2018 pour garantir des calculs précis et à jour.</p>
-        </div>
-      </article>
-
-      <!-- Article 4 -->
-      <article style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 8px 32px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-        <div style="background:linear-gradient(135deg,#b45309,#d97706);padding:24px;color:#fff;">
-          <div style="font-size:2rem;margin-bottom:8px;">🐂</div>
-          <h3 style="font-size:1.05rem;font-weight:800;margin:0;">Rationner les bovins viande : taurillons, bœufs, vaches allaitantes</h3>
-        </div>
-        <div style="padding:20px;">
-          <p style="font-size:.875rem;color:#475569;line-height:1.7;margin-bottom:14px;">Le <strong>rationnement des bovins viande</strong> est différent du rationnement laitier : on raisonne en <strong>UFV</strong> et l'objectif est d'atteindre un GMQ (gain moyen quotidien) cible tout en maîtrisant les coûts.</p>
-          <table style="width:100%;border-collapse:collapse;font-size:.8rem;">
-            <thead><tr style="background:#fef3c7;"><th style="padding:8px;text-align:left;font-weight:700;color:#92400e;">Animal</th><th style="padding:8px;text-align:center;color:#92400e;">GMQ cible</th><th style="padding:8px;text-align:center;color:#92400e;">Besoins UFV</th></tr></thead>
-            <tbody>
-              <tr style="border-top:1px solid #e2e8f0;"><td style="padding:8px;">Taurillon JB</td><td style="padding:8px;text-align:center;">1,2–1,5 kg/j</td><td style="padding:8px;text-align:center;">6–9 UFV/j</td></tr>
-              <tr style="border-top:1px solid #e2e8f0;background:#fafafa;"><td style="padding:8px;">Bœuf</td><td style="padding:8px;text-align:center;">0,8–1,1 kg/j</td><td style="padding:8px;text-align:center;">5–8 UFV/j</td></tr>
-              <tr style="border-top:1px solid #e2e8f0;"><td style="padding:8px;">Vache allaitante</td><td style="padding:8px;text-align:center;">—</td><td style="padding:8px;text-align:center;">5–7 UFV/j</td></tr>
-              <tr style="border-top:1px solid #e2e8f0;background:#fafafa;"><td style="padding:8px;">Broutard</td><td style="padding:8px;text-align:center;">0,9–1,2 kg/j</td><td style="padding:8px;text-align:center;">4–6 UFV/j</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </article>
-
-      <!-- Article 5 -->
-      <article style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 8px 32px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-        <div style="background:linear-gradient(135deg,#0f766e,#14b8a6);padding:24px;color:#fff;">
-          <div style="font-size:2rem;margin-bottom:8px;">📦</div>
-          <h3 style="font-size:1.05rem;font-weight:800;margin:0;">Bilan fourrager : comment anticiper l'hiver ?</h3>
-        </div>
-        <div style="padding:20px;">
-          <p style="font-size:.875rem;color:#475569;line-height:1.7;margin-bottom:14px;">Le <strong>bilan fourrager</strong> consiste à vérifier que vos stocks de fourrages (foin, ensilage, enrubannage) couvrent bien les besoins de votre troupeau pour toute la période hivernale.</p>
-          <p style="font-size:.85rem;color:#475569;line-height:1.7;margin-bottom:14px;"><strong>Formule simplifiée :</strong><br>Besoin total (t MS) = (nb VL × conso VL + nb BV × conso BV) × durée hivernage / 1000</p>
-          <ul style="font-size:.85rem;color:#475569;line-height:1.8;padding-left:18px;">
-            <li>Consommation moyenne VL : <strong>18–22 kg MS/j</strong></li>
-            <li>Consommation bovins viande : <strong>10–15 kg MS/j</strong></li>
-            <li>Durée hivernage typique : <strong>150–200 jours</strong></li>
-            <li>Prévoir un <strong>excédent de 10–15 %</strong> pour les imprévus</li>
-          </ul>
-        </div>
-      </article>
-
-      <!-- Article 6 -->
-      <article style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 8px 32px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-        <div style="background:linear-gradient(135deg,#be185d,#ec4899);padding:24px;color:#fff;">
-          <div style="font-size:2rem;margin-bottom:8px;">🥛</div>
-          <h3 style="font-size:1.05rem;font-weight:800;margin:0;">Optimiser la production laitière par l'alimentation</h3>
-        </div>
-        <div style="padding:20px;">
-          <p style="font-size:.875rem;color:#475569;line-height:1.7;margin-bottom:14px;">L'alimentation représente <strong>60 à 70 % des coûts de production</strong> en élevage laitier. Une ration bien équilibrée peut augmenter la production de <strong>2 à 4 litres/vache/jour</strong> sans coût supplémentaire.</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-            <div style="background:#fdf2f8;border-radius:8px;padding:12px;text-align:center;">
-              <div style="font-size:1.4rem;font-weight:900;color:#be185d;">90–105</div>
-              <div style="font-size:.75rem;color:#9d174d;">g PDI/UFL optimal</div>
-            </div>
-            <div style="background:#f0fdf4;border-radius:8px;padding:12px;text-align:center;">
-              <div style="font-size:1.4rem;font-weight:900;color:#15803d;">&lt; 40%</div>
-              <div style="font-size:.75rem;color:#166534;">concentrés max</div>
-            </div>
-          </div>
-          <p style="font-size:.85rem;color:#64748b;line-height:1.7;">Les points clés : équilibre PDI/UFL, limitation des concentrés (acidose), apport minéral suffisant (prévention hypocalcémie, tétanie herbeuse) et transition alimentaire progressive en début de lactation.</p>
-        </div>
-      </article>
-
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+      <a href="articles/calcul-ration-bovine.html" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;text-decoration:none;transition:box-shadow .2s;display:block;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow=''">
+        <img src="articles/images/vache-laitiere.jpg" alt="Calcul ration vache laitière" style="width:100%;height:160px;object-fit:cover;display:block;">
+        <div style="padding:16px;"><span style="font-size:.72rem;font-weight:700;color:#15803d;text-transform:uppercase;">Rationnement</span><h3 style="font-size:.95rem;font-weight:700;color:#1e293b;margin:6px 0 8px;line-height:1.4;">Comment calculer une ration pour vache laitière ?</h3><p style="font-size:.82rem;color:#64748b;margin:0;">Méthode pas à pas INRA 2018, exemple chiffré, formules UFL/PDI.</p></div>
+      </a>
+      <a href="articles/acetonemie.html" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;text-decoration:none;transition:box-shadow .2s;display:block;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow=''">
+        <img src="articles/images/veterinaire-vache.jpg" alt="Acétonémie vache" style="width:100%;height:160px;object-fit:cover;display:block;">
+        <div style="padding:16px;"><span style="font-size:.72rem;font-weight:700;color:#dc2626;text-transform:uppercase;">Santé animale</span><h3 style="font-size:.95rem;font-weight:700;color:#1e293b;margin:6px 0 8px;line-height:1.4;">Acétonémie : reconnaître, traiter, prévenir</h3><p style="font-size:.82rem;color:#64748b;margin:0;">Cétose post-partum : diagnostic BHB, traitement, prévention NEC.</p></div>
+      </a>
+      <a href="articles/paturage-bovin.html" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;text-decoration:none;transition:box-shadow .2s;display:block;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow=''">
+        <img src="articles/images/paturage.jpg" alt="Pâturage bovin" style="width:100%;height:160px;object-fit:cover;display:block;">
+        <div style="padding:16px;"><span style="font-size:.72rem;font-weight:700;color:#0891b2;text-transform:uppercase;">Conduite d'élevage</span><h3 style="font-size:.95rem;font-weight:700;color:#1e293b;margin:6px 0 8px;line-height:1.4;">Gestion du pâturage bovin</h3><p style="font-size:.82rem;color:#64748b;margin:0;">Sortie, rotation, chargement et risques printaniers.</p></div>
+      </a>
     </div>
   </div>
 </section>

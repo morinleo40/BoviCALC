@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -1505,122 +1505,151 @@ async function initAuth() {
 <script>
   // Base d'aliments embarquée (fonctionne en local file://)
   // AL=amidon lent (g/kgMS), AR=amidon rapide (g/kgMS), SS=sucres solubles (g/kgMS)
-  window.RB_ALIMENTS_CSV = `Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS
-Avoine,87.6,0.87,88,1.1,3.3,0.2,1.4,4.5,1.7,3.7,220,170,15
-Avoine décortiquée,85.7,1.00,100,0.7,3.8,0.2,1.2,4.2,2.0,4.2,240,180,15
-Avoine floconnée,87.6,0.90,90,1.1,3.3,0.2,1.4,4.5,1.7,3.7,180,220,15
-Blé dur,87.8,1.06,105,0.5,3.8,0.2,1.2,4.0,1.8,3.0,30,610,25
-Blé tendre,86.9,1.04,90,0.5,3.4,0.1,1.3,4.2,1.7,2.8,30,580,25
-Blé aplati,87.0,1.06,95,0.5,3.5,0.1,1.3,4.2,1.7,2.9,20,600,25
-Maïs,86.3,1.11,82,0.4,2.9,0.1,1.1,3.5,2.0,2.7,650,0,15
-Maïs extrudé,86.3,1.15,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,350,300,15
-Maïs floconné,86.3,1.13,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,300,350,15
-Maïs humide,67.0,1.12,85,0.4,3.0,0.1,1.1,3.5,2.0,2.7,650,0,20
-Maïs aplati,86.3,1.11,85,0.4,2.9,0.1,1.1,3.5,2.0,2.7,550,100,15
-Mil,89.6,1.18,97,0.4,3.5,0.2,1.6,3.8,2.2,3.0,200,350,10
-Millet commun,90.6,1.10,90,0.4,3.2,0.2,1.6,4.0,2.0,2.8,180,330,10
-Orge,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,30,530,20
-Orge aplatie,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,20,540,20
-Riz cargo,88.0,1.06,71,0.3,3.5,0.2,1.2,2.5,2.5,3.8,600,20,5
-Riz paddy,88.0,0.76,59,0.4,2.8,0.2,1.1,2.8,1.8,3.2,550,10,5
-Seigle,87.0,1.04,88,0.8,3.4,0.2,1.2,5.0,1.7,3.0,20,570,40
-Sorgho grain,87.0,1.08,82,0.3,3.0,0.1,1.5,3.5,1.8,2.5,320,300,10
-Triticale,87.0,1.06,95,0.6,3.5,0.2,1.2,4.5,1.8,3.2,30,550,20
-Manioc,86.0,1.08,28,1.2,1.0,0.2,0.8,7.0,0.3,0.5,670,0,35
-Son de blé,87.0,0.78,115,1.4,11.0,0.3,4.8,13.0,1.8,4.5,20,130,50
-Remoulage de blé,87.0,0.90,110,1.5,9.0,0.3,4.0,10.0,1.8,4.0,30,200,45
-Issues de blé,87.0,0.83,105,1.4,9.5,0.3,4.5,12.0,1.8,4.2,25,165,48
-Farine de blé,87.0,1.10,90,0.2,2.8,0.1,0.5,1.5,1.8,3.0,10,650,20
-Son de maïs,88.0,0.90,80,0.3,3.5,0.2,2.0,5.0,1.8,3.0,50,10,25
-Farine de maïs,86.0,1.14,90,0.4,3.0,0.1,1.2,3.6,2.0,2.8,600,10,15
-Gluten de maïs,88.0,1.30,540,0.4,4.5,0.4,2.5,3.0,16.0,9.0,5,0,10
-DDGS maïs,89.0,1.03,240,0.5,4.8,0.7,2.5,4.5,5.5,7.5,15,0,25
-DDGS blé,88.0,1.00,230,1.5,8.0,0.8,3.5,10.0,5.0,7.0,10,20,30
-Drêches de maïs fraîches,35.0,1.00,215,0.8,3.5,0.4,2.0,4.0,5.0,6.5,10,0,20
-Drêches de brasserie fraîches,22.0,0.87,200,3.5,5.5,0.5,2.0,1.5,5.0,8.0,5,0,25
-Drêches de brasserie séchées,90.0,0.90,210,4.0,6.0,0.5,2.2,1.6,5.2,8.5,5,0,25
-Tourteau de colza,88.0,1.05,230,7.2,11.0,0.8,4.5,12.0,7.0,17.5,0,5,55
-Tourteau de colza décortiqué,88.0,1.12,260,8.0,11.5,0.8,4.5,12.5,7.5,19.0,0,5,55
-Tourteau de soja 44,88.0,1.17,285,3.3,6.5,0.5,3.0,20.0,6.1,27.2,0,25,75
-Tourteau de soja 48,89.0,1.23,315,3.3,7.0,0.5,3.0,22.0,6.5,29.0,0,25,80
-Tourteau de tournesol,90.0,0.82,215,3.5,10.0,0.5,4.0,11.0,6.0,12.0,0,5,40
-Tourteau de tournesol décortiqué,90.0,0.98,265,4.0,11.0,0.5,4.5,12.0,6.5,14.0,0,5,40
-Tourteau de lin,88.0,1.06,235,4.0,8.5,0.5,4.5,12.0,5.0,10.0,0,5,45
-Tourteau de palmiste,91.0,1.06,155,2.4,5.5,0.3,2.5,7.0,2.5,6.0,0,5,40
-Tourteau de coton,90.0,0.88,250,3.0,10.0,0.4,4.0,12.0,5.5,14.0,0,5,35
-Tourteau de coprah,91.0,1.06,150,1.5,5.0,0.3,2.5,6.0,2.0,5.5,0,5,40
-Pois protéagineux,86.0,1.17,160,1.2,4.0,0.1,1.5,10.0,2.2,14.0,150,200,45
-Féverole,86.0,1.17,175,1.2,4.5,0.1,1.5,11.0,1.8,14.5,160,190,40
-Lupin blanc,87.0,1.17,190,2.0,4.0,0.2,1.8,7.0,1.8,14.5,0,0,55
-Lupin jaune,87.0,1.08,210,1.5,4.5,0.2,2.0,7.5,1.8,14.0,0,0,50
-Luzerne déshydratée,90.0,0.75,120,17.0,2.8,0.5,3.5,22.0,3.5,11.0,0,0,30
-Pulpe de betterave,22.0,0.86,50,7.0,0.9,0.9,2.0,1.0,0.7,2.5,0,0,170
-Pulpe de betterave déshydratée,90.0,0.93,55,8.0,1.0,1.0,2.2,1.2,0.8,2.8,0,0,175
-Pulpe d'agrumes déshydratée,90.0,0.90,55,15.0,1.0,0.5,1.5,10.0,1.0,2.0,0,0,130
-Betterave fourragère,17.0,1.04,45,1.0,2.0,0.5,1.5,20.0,0.5,1.5,0,0,125
-Betterave sucrière,23.0,1.08,50,0.7,1.5,0.4,1.2,18.0,0.5,1.5,0,0,180
-Pomme de terre,22.0,1.08,65,0.7,2.0,0.2,1.0,15.0,1.5,3.5,650,0,35
-Pomme de terre déshydratée,87.0,1.14,70,0.8,2.2,0.2,1.2,18.0,1.5,3.5,680,0,40
-Mélasse de betterave,77.0,0.85,45,1.2,0.4,3.5,0.5,4.5,0.8,1.5,0,0,600
-Mélasse de canne,77.0,0.88,35,4.5,0.5,1.5,0.8,35.0,0.8,1.5,0,0,650
-Lactosérum,6.0,0.75,85,10.0,9.0,5.5,1.2,15.0,2.5,8.0,0,0,550
-Lactosérum en poudre,94.0,0.87,120,12.0,8.0,5.5,1.2,16.0,2.5,8.5,0,0,600
-Levure de brasserie,93.0,0.95,310,0.7,14.0,0.5,2.5,16.0,6.5,22.0,0,0,30
-Farine de sang,92.0,0.88,695,3.0,2.0,3.5,0.5,1.5,3.5,78.0,0,0,0
-Farine de poisson,92.0,1.10,590,45.0,28.0,8.5,2.0,10.0,16.0,38.0,0,0,0
-Urée 46,98.0,0.00,1443,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Foin de prairie,86.0,0.72,68,6.5,2.8,1.2,2.0,18.0,1.5,3.5,0,0,50
-Foin de prairie tardif,86.0,0.63,52,5.0,2.2,1.0,1.5,14.0,1.2,2.8,0,0,35
-Foin de prairie précoce,86.0,0.78,80,7.0,3.0,1.5,2.2,20.0,1.8,4.0,0,0,65
-Foin de luzerne,86.0,0.72,107,14.5,2.6,0.5,2.5,22.0,2.5,7.0,0,0,25
-Foin de luzerne 1ère coupe,87.0,0.74,112,15.0,2.7,0.5,2.6,23.0,2.6,7.5,0,0,25
-Foin de ray-grass,86.0,0.75,80,6.0,3.0,1.0,2.0,20.0,1.8,4.2,0,0,60
-Foin de trèfle,86.0,0.70,95,12.0,2.8,1.2,2.5,20.0,2.0,5.5,0,0,55
-Foin de dactyle,86.0,0.68,65,5.5,2.5,1.0,1.8,18.0,1.5,3.2,0,0,45
-Foin de fétuque,86.0,0.68,63,5.0,2.5,1.0,1.8,17.0,1.5,3.0,0,0,45
-Regain de prairie,86.0,0.68,70,7.0,2.8,1.2,2.0,19.0,1.5,3.5,0,0,40
-Ensilage maïs,33.0,0.87,62,2.0,2.2,0.2,1.8,12.0,1.8,2.5,290,0,25
-Ensilage maïs mûr,35.0,0.92,58,1.8,2.0,0.2,1.6,11.0,1.8,2.4,320,0,20
-Ensilage maïs plante entière,30.0,0.85,60,2.2,2.0,0.2,1.7,12.0,1.8,2.5,270,0,25
-Ensilage d'épi de maïs,55.0,1.05,80,1.2,2.8,0.2,1.5,8.0,2.0,2.8,500,0,20
-Ensilage herbe prairie,20.0,0.82,85,5.5,3.5,1.5,2.0,22.0,2.0,5.0,0,0,70
-Ensilage d'herbe précoce,18.0,0.88,95,6.0,3.8,1.5,2.2,25.0,2.2,5.5,0,0,90
-Ensilage d'herbe tardif,22.0,0.74,72,5.0,3.2,1.2,1.8,20.0,1.8,4.5,0,0,50
-Ensilage ray-grass,18.0,0.88,92,6.5,3.8,1.5,2.2,25.0,2.2,5.5,0,0,85
-Ensilage trèfle violet,20.0,0.82,100,12.0,3.0,1.0,2.5,22.0,2.0,6.0,0,0,65
-Ensilage luzerne,25.0,0.72,108,16.0,2.8,0.5,2.8,25.0,2.5,7.0,0,0,30
-Ensilage sorgho,25.0,0.78,55,2.5,2.0,0.2,1.8,12.0,1.5,2.0,100,30,35
-Ensilage seigle,22.0,0.85,80,4.5,3.2,1.2,2.0,22.0,2.0,4.5,0,80,55
-Herbe pâturée,18.0,0.95,100,6.0,3.5,1.5,2.0,28.0,2.2,6.0,0,0,120
-Herbe pâturée précoce,16.0,1.00,110,7.0,4.0,1.8,2.5,30.0,2.5,6.5,0,0,150
-Herbe pâturée mi-saison,18.0,0.90,95,6.0,3.5,1.5,2.0,27.0,2.0,5.8,0,0,110
-Luzerne fraîche,22.0,0.75,112,17.0,2.8,0.5,2.8,25.0,2.5,7.5,0,0,35
-Trèfle blanc pâturé,18.0,0.95,120,12.5,3.5,1.2,2.5,22.0,2.2,6.5,0,0,130
-Ray-grass anglais pâturé,18.0,0.92,105,6.5,3.8,1.5,2.2,28.0,2.2,6.0,0,0,140
-Paille de blé,87.0,0.37,27,3.8,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10
-Paille d'orge,87.0,0.40,27,3.8,0.9,0.8,0.9,12.0,0.8,1.5,0,0,12
-Paille de maïs,86.0,0.42,18,3.0,0.6,0.5,0.8,8.0,0.5,1.0,0,0,8
-Paille de triticale,87.0,0.38,27,3.5,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10
-Paille de seigle,87.0,0.35,22,3.0,0.6,0.5,0.7,9.0,0.6,1.2,0,0,8
-Paille de sorgho,86.0,0.38,20,3.5,0.7,0.5,0.8,9.0,0.5,1.0,0,0,8
-Huile de soja,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Huile de colza,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Graisse de palme,99.0,3.20,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Acides gras saturés protégés,97.0,3.00,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Carbonate de calcium,100.0,0.00,0,395.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Phosphate bicalcique,100.0,0.00,0,240.0,185.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Phosphate monocalcique,100.0,0.00,0,155.0,245.0,0.0,0.0,0.0,0.0,0.0,0,0,0
-Chlorure de sodium,100.0,0.00,0,0.0,0.0,390.0,0.0,0.0,0.0,0.0,0,0,0
-Bicarbonate de sodium,100.0,0.00,0,0.0,0.0,270.0,0.0,0.0,0.0,0.0,0,0,0
-Oxyde de magnésium,100.0,0.00,0,0.0,0.0,0.0,580.0,0.0,0.0,0.0,0,0,0
-Marc de raisin déshydraté,90.0,0.75,85,7.0,2.5,0.5,1.5,8.0,1.8,3.5,0,0,30
-Marc de pomme,25.0,0.72,45,2.5,1.2,0.3,0.8,5.0,1.0,2.0,0,0,50
-Pulpe de tomate déshydratée,92.0,0.78,120,4.5,3.5,0.3,2.5,28.0,1.5,3.5,0,0,35
-Tourteau de tournesol partiellement décortiqué,90.0,0.90,240,4.0,11.0,0.5,4.2,11.5,6.2,13.0,0,5,40
-Corn gluten feed,90.0,0.95,165,1.0,8.5,0.5,3.5,10.0,3.5,5.5,90,10,30
-Mélange céréalier,87.0,1.05,88,0.6,3.4,0.2,1.4,5.0,1.8,3.2,250,300,18
-Foin de sorgho,86.0,0.60,45,4.0,1.8,0.5,1.5,12.0,1.2,2.5,0,0,30
-Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`;
+  window.RB_ALIMENTS_CSV = `Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS,UFV,Categorie
+Avoine,87.6,0.87,88,1.1,3.3,0.2,1.4,4.5,1.7,3.7,220,170,15,0.82,Cereales et grains
+Avoine décortiquée,85.7,1.00,100,0.7,3.8,0.2,1.2,4.2,2.0,4.2,240,180,15,0.94,Cereales et grains
+Avoine floconnée,87.6,0.90,90,1.1,3.3,0.2,1.4,4.5,1.7,3.7,180,220,15,0.85,Cereales et grains
+Blé dur,87.8,1.06,105,0.5,3.8,0.2,1.2,4.0,1.8,3.0,30,610,25,0.99,Autres concentres
+Blé tendre,86.9,1.04,90,0.5,3.4,0.1,1.3,4.2,1.7,2.8,30,580,25,0.97,Autres concentres
+Blé aplati,87.0,1.06,95,0.5,3.5,0.1,1.3,4.2,1.7,2.9,20,600,25,0.99,Autres concentres
+Maïs,86.3,1.11,82,0.4,2.9,0.1,1.1,3.5,2.0,2.7,650,0,15,1.06,Autres concentres
+Maïs extrudé,86.3,1.15,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,350,300,15,1.09,Autres concentres
+Maïs floconné,86.3,1.13,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,300,350,15,1.07,Autres concentres
+Maïs humide,67.0,1.12,85,0.4,3.0,0.1,1.1,3.5,2.0,2.7,650,0,20,1.07,Autres concentres
+Maïs aplati,86.3,1.11,85,0.4,2.9,0.1,1.1,3.5,2.0,2.7,550,100,15,1.05,Autres concentres
+Mil,89.6,1.18,97,0.4,3.5,0.2,1.6,3.8,2.2,3.0,200,350,10,1.13,Autres concentres
+Millet commun,90.6,1.10,90,0.4,3.2,0.2,1.6,4.0,2.0,2.8,180,330,10,1.05,Cereales et grains
+Orge,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,30,530,20,1.01,Cereales et grains
+Orge aplatie,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,20,540,20,1.01,Cereales et grains
+Riz cargo,88.0,1.06,71,0.3,3.5,0.2,1.2,2.5,2.5,3.8,600,20,5,1.01,Cereales et grains
+Riz paddy,88.0,0.76,59,0.4,2.8,0.2,1.1,2.8,1.8,3.2,550,10,5,0.71,Cereales et grains
+Seigle,87.0,1.04,88,0.8,3.4,0.2,1.2,5.0,1.7,3.0,20,570,40,0.97,Cereales et grains
+Sorgho grain,87.0,1.08,82,0.3,3.0,0.1,1.5,3.5,1.8,2.5,320,300,10,1.02,Cereales et grains
+Triticale,87.0,1.06,95,0.6,3.5,0.2,1.2,4.5,1.8,3.2,30,550,20,0.99,Cereales et grains
+Manioc,86.0,1.08,28,1.2,1.0,0.2,0.8,7.0,0.3,0.5,670,0,35,1.03,Cereales et grains
+Son de blé,87.0,0.78,115,1.4,11.0,0.3,4.8,13.0,1.8,4.5,20,130,50,0.73,Sous-produits
+Remoulage de blé,87.0,0.90,110,1.5,9.0,0.3,4.0,10.0,1.8,4.0,30,200,45,0.85,Sous-produits
+Issues de blé,87.0,0.83,105,1.4,9.5,0.3,4.5,12.0,1.8,4.2,25,165,48,0.78,Sous-produits
+Farine de blé,87.0,1.10,90,0.2,2.8,0.1,0.5,1.5,1.8,3.0,10,650,20,1.05,Autres concentres
+Son de maïs,88.0,0.90,80,0.3,3.5,0.2,2.0,5.0,1.8,3.0,50,10,25,0.85,Sous-produits
+Farine de maïs,86.0,1.14,90,0.4,3.0,0.1,1.2,3.6,2.0,2.8,600,10,15,1.09,Autres concentres
+Gluten de maïs,88.0,1.30,540,0.4,4.5,0.4,2.5,3.0,16.0,9.0,5,0,10,1.25,Sous-produits
+DDGS maïs,89.0,1.03,240,0.5,4.8,0.7,2.5,4.5,5.5,7.5,15,0,25,0.98,Autres concentres
+DDGS blé,88.0,1.00,230,1.5,8.0,0.8,3.5,10.0,5.0,7.0,10,20,30,0.95,Autres concentres
+Drêches de maïs fraîches,35.0,1.00,215,0.8,3.5,0.4,2.0,4.0,5.0,6.5,10,0,20,0.95,Autres concentres
+Drêches de brasserie fraîches,22.0,0.87,200,3.5,5.5,0.5,2.0,1.5,5.0,8.0,5,0,25,0.82,Autres concentres
+Drêches de brasserie séchées,90.0,0.90,210,4.0,6.0,0.5,2.2,1.6,5.2,8.5,5,0,25,0.85,Autres concentres
+Tourteau de colza,88.0,1.05,230,7.2,11.0,0.8,4.5,12.0,7.0,17.5,0,5,55,1,Concentres proteiques
+Tourteau de colza décortiqué,88.0,1.12,260,8.0,11.5,0.8,4.5,12.5,7.5,19.0,0,5,55,1.07,Concentres proteiques
+Tourteau de soja 44,88.0,1.17,285,3.3,6.5,0.5,3.0,20.0,6.1,27.2,0,25,75,1.12,Concentres proteiques
+Tourteau de soja 48,89.0,1.23,315,3.3,7.0,0.5,3.0,22.0,6.5,29.0,0,25,80,1.18,Concentres proteiques
+Tourteau de tournesol,90.0,0.82,215,3.5,10.0,0.5,4.0,11.0,6.0,12.0,0,5,40,0.77,Concentres proteiques
+Tourteau de tournesol décortiqué,90.0,0.98,265,4.0,11.0,0.5,4.5,12.0,6.5,14.0,0,5,40,0.93,Concentres proteiques
+Tourteau de lin,88.0,1.06,235,4.0,8.5,0.5,4.5,12.0,5.0,10.0,0,5,45,1.01,Concentres proteiques
+Tourteau de palmiste,91.0,1.06,155,2.4,5.5,0.3,2.5,7.0,2.5,6.0,0,5,40,1.01,Concentres proteiques
+Tourteau de coton,90.0,0.88,250,3.0,10.0,0.4,4.0,12.0,5.5,14.0,0,5,35,0.83,Concentres proteiques
+Tourteau de coprah,91.0,1.06,150,1.5,5.0,0.3,2.5,6.0,2.0,5.5,0,5,40,1.01,Concentres proteiques
+Pois protéagineux,86.0,1.17,160,1.2,4.0,0.1,1.5,10.0,2.2,14.0,150,200,45,1.12,Legumineuses
+Féverole,86.0,1.17,175,1.2,4.5,0.1,1.5,11.0,1.8,14.5,160,190,40,1.12,Autres concentres
+Lupin blanc,87.0,1.17,190,2.0,4.0,0.2,1.8,7.0,1.8,14.5,0,0,55,1.12,Legumineuses
+Lupin jaune,87.0,1.08,210,1.5,4.5,0.2,2.0,7.5,1.8,14.0,0,0,50,1.03,Legumineuses
+Luzerne déshydratée,90.0,0.75,120,17.0,2.8,0.5,3.5,22.0,3.5,11.0,0,0,30,0.7,Autres concentres
+Pulpe de betterave,22.0,0.86,50,7.0,0.9,0.9,2.0,1.0,0.7,2.5,0,0,170,0.81,Racines et tubercules
+Pulpe de betterave déshydratée,90.0,0.93,55,8.0,1.0,1.0,2.2,1.2,0.8,2.8,0,0,175,0.88,Racines et tubercules
+Pulpe d'agrumes déshydratée,90.0,0.90,55,15.0,1.0,0.5,1.5,10.0,1.0,2.0,0,0,130,0.85,Sous-produits
+Betterave fourragère,17.0,1.04,45,1.0,2.0,0.5,1.5,20.0,0.5,1.5,0,0,125,0.99,Racines et tubercules
+Betterave sucrière,23.0,1.08,50,0.7,1.5,0.4,1.2,18.0,0.5,1.5,0,0,180,1.03,Racines et tubercules
+Pomme de terre,22.0,1.08,65,0.7,2.0,0.2,1.0,15.0,1.5,3.5,650,0,35,1.03,Racines et tubercules
+Pomme de terre déshydratée,87.0,1.14,70,0.8,2.2,0.2,1.2,18.0,1.5,3.5,680,0,40,1.09,Racines et tubercules
+Mélasse de betterave,77.0,0.85,45,1.2,0.4,3.5,0.5,4.5,0.8,1.5,0,0,600,0.8,Racines et tubercules
+Mélasse de canne,77.0,0.88,35,4.5,0.5,1.5,0.8,35.0,0.8,1.5,0,0,650,0.83,Autres concentres
+Lactosérum,6.0,0.75,85,10.0,9.0,5.5,1.2,15.0,2.5,8.0,0,0,550,0.7,Sous-produits
+Lactosérum en poudre,94.0,0.87,120,12.0,8.0,5.5,1.2,16.0,2.5,8.5,0,0,600,0.82,Sous-produits
+Levure de brasserie,93.0,0.95,310,0.7,14.0,0.5,2.5,16.0,6.5,22.0,0,0,30,0.9,Autres concentres
+Farine de sang,92.0,0.88,695,3.0,2.0,3.5,0.5,1.5,3.5,78.0,0,0,0,0.83,Autres concentres
+Farine de poisson,92.0,1.10,590,45.0,28.0,8.5,2.0,10.0,16.0,38.0,0,0,0,1.05,Legumineuses
+Urée 46,98.0,0.00,1443,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,Autres concentres
+Foin de prairie,86.0,0.72,68,6.5,2.8,1.2,2.0,18.0,1.5,3.5,0,0,50,0.64,Fourrages secs
+Foin de prairie tardif,86.0,0.63,52,5.0,2.2,1.0,1.5,14.0,1.2,2.8,0,0,35,0.55,Fourrages secs
+Foin de prairie précoce,86.0,0.78,80,7.0,3.0,1.5,2.2,20.0,1.8,4.0,0,0,65,0.7,Fourrages secs
+Foin de luzerne,86.0,0.72,107,14.5,2.6,0.5,2.5,22.0,2.5,7.0,0,0,25,0.64,Fourrages secs
+Foin de luzerne 1ère coupe,87.0,0.74,112,15.0,2.7,0.5,2.6,23.0,2.6,7.5,0,0,25,0.66,Fourrages secs
+Foin de ray-grass,86.0,0.75,80,6.0,3.0,1.0,2.0,20.0,1.8,4.2,0,0,60,0.67,Fourrages secs
+Foin de trèfle,86.0,0.70,95,12.0,2.8,1.2,2.5,20.0,2.0,5.5,0,0,55,0.62,Fourrages secs
+Foin de dactyle,86.0,0.68,65,5.5,2.5,1.0,1.8,18.0,1.5,3.2,0,0,45,0.6,Fourrages secs
+Foin de fétuque,86.0,0.68,63,5.0,2.5,1.0,1.8,17.0,1.5,3.0,0,0,45,0.6,Fourrages secs
+Regain de prairie,86.0,0.68,70,7.0,2.8,1.2,2.0,19.0,1.5,3.5,0,0,40,0.61,Fourrages patures
+Ensilage maïs,33.0,0.87,62,2.0,2.2,0.2,1.8,12.0,1.8,2.5,290,0,25,0.8,Fourrages ensiles
+Ensilage maïs mûr,35.0,0.92,58,1.8,2.0,0.2,1.6,11.0,1.8,2.4,320,0,20,0.85,Fourrages ensiles
+Ensilage maïs plante entière,30.0,0.85,60,2.2,2.0,0.2,1.7,12.0,1.8,2.5,270,0,25,0.78,Fourrages ensiles
+Ensilage d'épi de maïs,55.0,1.05,80,1.2,2.8,0.2,1.5,8.0,2.0,2.8,500,0,20,0.98,Fourrages ensiles
+Ensilage herbe prairie,20.0,0.82,85,5.5,3.5,1.5,2.0,22.0,2.0,5.0,0,0,70,0.75,Fourrages ensiles
+Ensilage d'herbe précoce,18.0,0.88,95,6.0,3.8,1.5,2.2,25.0,2.2,5.5,0,0,90,0.81,Fourrages ensiles
+Ensilage d'herbe tardif,22.0,0.74,72,5.0,3.2,1.2,1.8,20.0,1.8,4.5,0,0,50,0.67,Fourrages ensiles
+Ensilage ray-grass,18.0,0.88,92,6.5,3.8,1.5,2.2,25.0,2.2,5.5,0,0,85,0.81,Fourrages ensiles
+Ensilage trèfle violet,20.0,0.82,100,12.0,3.0,1.0,2.5,22.0,2.0,6.0,0,0,65,0.75,Fourrages ensiles
+Ensilage luzerne,25.0,0.72,108,16.0,2.8,0.5,2.8,25.0,2.5,7.0,0,0,30,0.65,Fourrages ensiles
+Ensilage sorgho,25.0,0.78,55,2.5,2.0,0.2,1.8,12.0,1.5,2.0,100,30,35,0.71,Fourrages ensiles
+Ensilage seigle,22.0,0.85,80,4.5,3.2,1.2,2.0,22.0,2.0,4.5,0,80,55,0.78,Fourrages ensiles
+Herbe pâturée,18.0,0.95,100,6.0,3.5,1.5,2.0,28.0,2.2,6.0,0,0,120,0.9,Autres concentres
+Herbe pâturée précoce,16.0,1.00,110,7.0,4.0,1.8,2.5,30.0,2.5,6.5,0,0,150,0.95,Autres concentres
+Herbe pâturée mi-saison,18.0,0.90,95,6.0,3.5,1.5,2.0,27.0,2.0,5.8,0,0,110,0.85,Autres concentres
+Luzerne fraîche,22.0,0.75,112,17.0,2.8,0.5,2.8,25.0,2.5,7.5,0,0,35,0.7,Autres concentres
+Trèfle blanc pâturé,18.0,0.95,120,12.5,3.5,1.2,2.5,22.0,2.2,6.5,0,0,130,0.9,Autres concentres
+Ray-grass anglais pâturé,18.0,0.92,105,6.5,3.8,1.5,2.2,28.0,2.2,6.0,0,0,140,0.85,Fourrages patures
+Paille de blé,87.0,0.37,27,3.8,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10,0.29,Fourrages secs
+Paille d'orge,87.0,0.40,27,3.8,0.9,0.8,0.9,12.0,0.8,1.5,0,0,12,0.32,Fourrages secs
+Paille de maïs,86.0,0.42,18,3.0,0.6,0.5,0.8,8.0,0.5,1.0,0,0,8,0.34,Fourrages secs
+Paille de triticale,87.0,0.38,27,3.5,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10,0.3,Fourrages secs
+Paille de seigle,87.0,0.35,22,3.0,0.6,0.5,0.7,9.0,0.6,1.2,0,0,8,0.27,Fourrages secs
+Paille de sorgho,86.0,0.38,20,3.5,0.7,0.5,0.8,9.0,0.5,1.0,0,0,8,0.3,Fourrages secs
+Huile de soja,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,3.3,Autres concentres
+Huile de colza,99.0,3.35,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,3.3,Autres concentres
+Graisse de palme,99.0,3.20,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,3.15,Autres concentres
+Acides gras saturés protégés,97.0,3.00,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,2.95,Autres concentres
+Carbonate de calcium,100.0,0.00,0,395.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,Autres concentres
+Phosphate bicalcique,100.0,0.00,0,240.0,185.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,Autres concentres
+Phosphate monocalcique,100.0,0.00,0,155.0,245.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,Autres concentres
+Chlorure de sodium,100.0,0.00,0,0.0,0.0,390.0,0.0,0.0,0.0,0.0,0,0,0,0,Autres concentres
+Bicarbonate de sodium,100.0,0.00,0,0.0,0.0,270.0,0.0,0.0,0.0,0.0,0,0,0,0,Autres concentres
+Oxyde de magnésium,100.0,0.00,0,0.0,0.0,0.0,580.0,0.0,0.0,0.0,0,0,0,0,Autres concentres
+Marc de raisin déshydraté,90.0,0.75,85,7.0,2.5,0.5,1.5,8.0,1.8,3.5,0,0,30,0.7,Sous-produits
+Marc de pomme,25.0,0.72,45,2.5,1.2,0.3,0.8,5.0,1.0,2.0,0,0,50,0.67,Sous-produits
+Pulpe de tomate déshydratée,92.0,0.78,120,4.5,3.5,0.3,2.5,28.0,1.5,3.5,0,0,35,0.73,Sous-produits
+Tourteau de tournesol partiellement décortiqué,90.0,0.90,240,4.0,11.0,0.5,4.2,11.5,6.2,13.0,0,5,40,0.85,Concentres proteiques
+Corn gluten feed,90.0,0.95,165,1.0,8.5,0.5,3.5,10.0,3.5,5.5,90,10,30,0.9,Sous-produits
+Mélange céréalier,87.0,1.05,88,0.6,3.4,0.2,1.4,5.0,1.8,3.2,250,300,18,1,Autres concentres
+Foin de sorgho,86.0,0.60,45,4.0,1.8,0.5,1.5,12.0,1.2,2.5,0,0,30,0.52,Fourrages secs
+Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30,0.69,Fourrages ensiles
+Prairie naturelle plaine - stade pature,85,0.96,109,7.0,4.0,0,0,0,0,0,0,0,0,0.92,Fourrages patures
+Prairie naturelle plaine - epiaison,85,0.84,77,6.0,3.0,0,0,0,0,0,0,0,0,0.78,Fourrages patures
+Prairie naturelle montagne - pature,85,1.00,107,8.0,4.5,0,0,0,0,0,0,0,0,0.97,Fourrages patures
+Dactyle 1er cycle epi a 10cm,16,0.93,142,4.0,4.0,0,0,0,0,0,0,0,0,0.89,Fourrages patures
+Dactyle 1er cycle debut epiaison,16,0.86,89,4.0,3.5,0,0,0,0,0,0,0,0,0.81,Fourrages patures
+Ray-grass anglais 1er cycle epi,17,1.00,107,5.5,4.0,0,0,0,0,0,0,0,0,0.97,Fourrages patures
+Fetuque elevee 1er cycle epi,19,0.82,106,4.0,3.5,0,0,0,0,0,0,0,0,0.77,Fourrages patures
+Luzerne paturee floraison,17,0.81,145,17.0,3.0,0,0,0,0,0,0,0,0,0.74,Fourrages patures
+Trefle blanc vegetatif,13,1.08,201,12.0,4.5,0,0,0,0,0,0,0,0,1.06,Fourrages patures
+Trefle violet floraison,18,0.76,134,13.0,2.5,0,0,0,0,0,0,0,0,0.69,Fourrages patures
+Foin de prairie debut epiaison,85,0.80,77,6.5,3.5,0,0,0,0,0,0,0,0,0.73,Fourrages secs
+Foin de prairie epiaison,85,0.75,71,5.0,3.0,0,0,0,0,0,0,0,0,0.67,Fourrages secs
+Foin de prairie pleine epiaison,85,0.70,64,5.0,2.5,0,0,0,0,0,0,0,0,0.62,Fourrages secs
+Foin de dactyle epiaison,85,0.75,78,3.0,2.5,0,0,0,0,0,0,0,0,0.67,Fourrages secs
+Foin de fetuque elevee epiaison,85,0.66,69,4.0,3.0,0,0,0,0,0,0,0,0,0.58,Fourrages secs
+Foin de ray-grass epiaison,85,0.73,50,4.5,2.5,0,0,0,0,0,0,0,0,0.66,Fourrages secs
+Foin de luzerne debut floraison,85,0.76,77,17.0,2.5,0,0,0,0,0,0,0,0,0.68,Fourrages secs
+Ensilage de prairie debut epiaison,21,0.89,90,7.0,3.5,0,0,0,0,0,0,0,0,0.83,Fourrages ensiles
+Ensilage de prairie epiaison,21,0.83,76,7.0,3.5,0,0,0,0,0,0,0,0,0.77,Fourrages ensiles
+Ensilage de dactyle debut epiaison,21,0.86,83,3.5,3.0,0,0,0,0,0,0,0,0,0.81,Fourrages ensiles
+Ensilage de ray-grass epiaison,21,0.88,68,5.5,3.0,0,0,0,0,0,0,0,0,0.84,Fourrages ensiles
+Ensilage de luzerne debut floraison,21,0.73,118,16.0,2.5,0,0,0,0,0,0,0,0,0.64,Fourrages ensiles
+Ensilage de mais laiteux,28,0.84,53,3.5,2.5,0,0,0,0,630,10,15,0,0.78,Fourrages ensiles
+Ensilage de mais pateux,36,0.85,51,3.5,2.5,0,0,0,0,680,10,12,0,0.79,Fourrages ensiles
+Pois proteagineux,86,1.06,178,1.2,4.0,0.3,1.2,10.0,1.8,4.2,30,120,40,0.99,Legumineuses
+Feverole graine,86,0.95,237,1.3,4.2,0.4,1.2,11.0,2.0,5.0,25,100,35,0.88,Legumineuses
+Lupin blanc,87,1.00,265,3.0,3.8,0.3,1.5,8.0,1.5,4.5,20,80,30,0.94,Legumineuses
+Betterave fourragere,13,0.92,66,0.6,1.5,0.2,0.8,5.5,0.3,0.5,0,0,0,0.92,Racines et tubercules
+Betterave sucriere,23,1.01,62,0.7,1.2,0.2,0.7,4.0,0.3,0.5,0,0,0,1.01,Racines et tubercules`;
 </script>
 <script>
   // =====================================================
@@ -1667,7 +1696,8 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       const nom = c[0]?.replace(/"/g,'').trim();
       const ms  = parseFloat(c[1]) || 0;
       if (!nom || !ms) continue;
-      // Colonnes: Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS (toutes par kg MS)
+      // Colonnes: Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS[,UFV,Categorie]
+      const ufvVal = parseFloat(c[14]);
       result.push({
         nom, ms,
         uflPerKgMS:  parseFloat(c[2]) || 0,
@@ -1682,6 +1712,8 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
         al_gkgms:    parseFloat(c[11]) || 0,
         ar_gkgms:    parseFloat(c[12]) || 0,
         ss_gkgms:    parseFloat(c[13]) || 0,
+        ufvPerKgMS:  isNaN(ufvVal) ? (parseFloat(c[2])*0.93 || 0) : ufvVal,
+        categorie:   c[15]?.trim() || 'Autres',
       });
     }
     return result;
@@ -2199,14 +2231,21 @@ Ensilage de sorgho fourrager,25.0,0.76,52,2.8,2.0,0.3,1.8,10.0,1.4,2.0,80,20,30`
       const qty = parseFloat(inp[1]?.value);
       if (!nom || !qty || qty <= 0) return;
       const f = findFood(nom);
-      if (f) items.push({
-        nom: f.nom, qty,
-        ufl: f.uflPerKgMS*qty,
-        pdi: f.pdiPerKgMS*qty,
-        al:  (f.al_gkgms||0)*qty,
-        ar:  (f.ar_gkgms||0)*qty,
-        ss:  (f.ss_gkgms||0)*qty,
-      });
+      if (f) {
+        const useUFV = lastB && UFV_TYPES.includes(lastB.typeLabel);
+        const energyVal = useUFV ? (f.ufvPerKgMS||f.uflPerKgMS) : f.uflPerKgMS;
+        items.push({
+          nom: f.nom, qty,
+          ufl: energyVal*qty,
+          uflRaw: f.uflPerKgMS*qty,
+          ufvRaw: (f.ufvPerKgMS||f.uflPerKgMS*0.93)*qty,
+          pdi: f.pdiPerKgMS*qty,
+          al:  (f.al_gkgms||0)*qty,
+          ar:  (f.ar_gkgms||0)*qty,
+          ss:  (f.ss_gkgms||0)*qty,
+          categorie: f.categorie||'',
+        });
+      }
     });
     return {
       items,
