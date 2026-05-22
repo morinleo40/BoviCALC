@@ -1,7 +1,443 @@
 <!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=/articles/">
-<link rel="canonical" href="https://rumicore.com/articles/">
-<title>Articles — Rumicore</title>
-</head><body><a href="/articles/">Voir les articles →</a></body></html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles &amp; Guides — Rationnement bovin | Rumicore</title>
+  <meta name="description" content="Articles et guides pratiques sur le rationnement bovin : calcul de ration, UFL/UFV, normes INRA 2018, bovins viande, bilan fourrager. Rédigés pour les éleveurs et conseillers agricoles.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://rumicore.com/articles.html">
+  <meta property="og:title" content="Articles &amp; Guides Rationnement Bovin — Rumicore">
+  <meta property="og:description" content="Calcul de ration, UFL/UFV, normes INRA 2018, bovins viande, bilan fourrager : tous nos guides pratiques pour mieux nourrir votre troupeau.">
+  <meta property="og:url" content="https://rumicore.com/articles.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://rumicore.com/Logo%20RumiCORE.png">
+  <link rel="icon" type="image/png" href="Logo RumiCORE.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+
+    .section { padding: 80px 32px; }
+    .section.alt { background: #f8fafc; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .text-green { color: #15803d; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(150deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
+      padding: 72px 32px 56px; text-align: center;
+    }
+    .hero-tag {
+      display: inline-block; background: #fff; border: 1px solid #bbf7d0;
+      border-radius: 20px; padding: 5px 16px; font-size: .82rem; font-weight: 700;
+      color: #15803d; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .hero h1 { font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 900; color: #0f172a; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 18px; }
+    .hero h1 em { font-style: normal; color: #15803d; }
+    .hero p { font-size: 1.05rem; color: #475569; max-width: 600px; margin: 0 auto; line-height: 1.8; }
+
+    /* ── ARTICLES GRID ── */
+    .articles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; }
+
+    .article-card {
+      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px;
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: box-shadow .2s, transform .2s; text-decoration: none;
+    }
+    .article-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,.1); transform: translateY(-3px); }
+
+    .article-header {
+      padding: 28px 24px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .article-icon { font-size: 2.4rem; line-height: 1; }
+    .article-category {
+      display: inline-block; padding: 3px 12px; border-radius: 20px;
+      font-size: .72rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+      align-self: flex-start;
+    }
+    .article-header h2 { font-size: 1.05rem; font-weight: 800; color: #fff; line-height: 1.4; margin: 0; }
+
+    .article-body { padding: 20px 24px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .article-body p { font-size: .88rem; color: #475569; line-height: 1.7; flex: 1; }
+    .article-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .83rem; font-weight: 700; text-decoration: none;
+      transition: gap .15s;
+    }
+    .article-card:hover .article-link { gap: 10px; }
+
+    /* Couleurs par article */
+    .card-green .article-header { background: linear-gradient(135deg, #14532d, #15803d); }
+    .card-green .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-green .article-link { color: #15803d; }
+
+    .card-blue .article-header { background: linear-gradient(135deg, #1e40af, #2563eb); }
+    .card-blue .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-blue .article-link { color: #2563eb; }
+
+    .card-purple .article-header { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+    .card-purple .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-purple .article-link { color: #7c3aed; }
+
+    .card-amber .article-header { background: linear-gradient(135deg, #b45309, #d97706); }
+    .card-amber .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-amber .article-link { color: #d97706; }
+
+    .card-teal .article-header { background: linear-gradient(135deg, #0f766e, #14b8a6); }
+    .card-teal .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-teal .article-link { color: #0f766e; }
+
+    .card-red .article-header { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+    .card-red .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-red .article-link { color: #dc2626; }
+
+    .card-rose .article-header { background: linear-gradient(135deg, #881337, #e11d48); }
+    .card-rose .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-rose .article-link { color: #e11d48; }
+
+    .card-indigo .article-header { background: linear-gradient(135deg, #1e1b4b, #3730a3); }
+    .card-indigo .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-indigo .article-link { color: #3730a3; }
+
+    .card-emerald .article-header { background: linear-gradient(135deg, #064e3b, #059669); }
+    .card-emerald .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-emerald .article-link { color: #059669; }
+
+    .card-pink .article-header { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+    .card-pink .article-category { background: rgba(255,255,255,.2); color: #fff; }
+    .card-pink .article-link { color: #7c3aed; }
+
+    .articles-section-title { font-size:1.35rem; font-weight:800; color:#0f172a; margin:48px 0 24px; padding-bottom:10px; border-bottom:2px solid #e2e8f0; }
+
+    /* ── NEWSLETTER / CTA ── */
+    .cta-section { background: linear-gradient(135deg, #14532d, #15803d); padding: 80px 32px; text-align: center; }
+    .cta-section h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); font-weight: 900; color: #fff; margin-bottom: 18px; letter-spacing: -.02em; }
+    .cta-section p { color: #bbf7d0; font-size: 1.05rem; max-width: 520px; margin: 0 auto 36px; line-height: 1.75; }
+    .btn-primary {
+      padding: 13px 32px; background: #fff; color: #15803d; border: none;
+      border-radius: 10px; font-size: 1rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15); transition: all .2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: #f0fdf4; transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <img src="/Logo RumiCORE.png" alt="Rumicore" style="height:36px;">
+    <span style="font-size:1.15rem;font-weight:900;color:#15803d;">Rumicore</span>
+  </a>
+  <div style="display:flex;gap:4px;align-items:center;">
+    <a href="/a-propos.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">À propos</a>
+    <a href="/fonctionnalites.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Fonctionnalités</a>
+    <a href="/tarifs.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:500;color:#475569;text-decoration:none;">Tarifs</a>
+    <a href="/articles/" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:700;color:#15803d;text-decoration:none;background:#f0fdf4;">Articles</a>
+    <a href="/index_conseiller.html" style="padding:7px 12px;border-radius:6px;font-size:.83rem;font-weight:600;color:#475569;text-decoration:none;border:1.5px solid #e2e8f0;">Conseillers</a>
+    <a href="/app.html" style="padding:8px 18px;border-radius:8px;font-size:.83rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Accéder →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">📚 Articles &amp; Guides</div>
+  <h1>Articles &amp; Guides —<br><em>Élevage bovin</em></h1>
+  <p>15 articles pratiques sur le rationnement bovin, la santé animale et la conduite d'élevage — rédigés par des spécialistes, pour les éleveurs et conseillers agricoles.</p>
+</div>
+
+<!-- GRILLE D'ARTICLES -->
+<section class="section">
+  <div class="container">
+    <div class="articles-grid">
+
+      <!-- Article 1 : Calcul de ration bovine -->
+      <a href="/articles/calcul-ration-bovine.html" class="article-card card-green">
+        <div class="article-header">
+          <div class="article-icon">🧮</div>
+          <span class="article-category">Guide pratique</span>
+          <h2>Comment calculer une ration pour vache laitière ?</h2>
+        </div>
+        <div class="article-body">
+          <p>La méthode pas à pas pour calculer une ration bovine équilibrée : estimer les besoins UFL/PDI, choisir vos fourrages et ajuster avec des concentrés. Exemples chiffrés et formules INRA 2018 incluses.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 2 : UFL / UFV -->
+      <a href="/articles/ufl-ufv.html" class="article-card card-blue">
+        <div class="article-header">
+          <div class="article-icon">⚡</div>
+          <span class="article-category">Concepts clés</span>
+          <h2>UFL et UFV : comprendre les unités fourragères</h2>
+        </div>
+        <div class="article-body">
+          <p>Quelle différence entre UFL (vaches laitières) et UFV (bovins viande) ? Comment interpréter ces unités dans le calcul de ration ? Tout comprendre sur les unités fourragères selon les normes INRA 2018.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 3 : Normes INRA 2018 -->
+      <a href="/articles/normes-inra-2018.html" class="article-card card-purple">
+        <div class="article-header">
+          <div class="article-icon">📋</div>
+          <span class="article-category">Réglementation</span>
+          <h2>Normes INRA 2018 : ce qui a changé pour le rationnement bovin</h2>
+        </div>
+        <div class="article-body">
+          <p>Les normes INRA 2018 ont introduit des changements importants : nouvelles valeurs UFL/UFV, intégration des glucides fermentescibles, révision des besoins protéiques. Tour d'horizon de ces évolutions.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 4 : Bovins viande -->
+      <a href="/articles/rationnement-bovins-viande.html" class="article-card card-amber">
+        <div class="article-header">
+          <div class="article-icon">🐂</div>
+          <span class="article-category">Bovins viande</span>
+          <h2>Rationner les bovins viande : taurillons, bœufs, vaches allaitantes</h2>
+        </div>
+        <div class="article-body">
+          <p>Le rationnement des bovins viande en UFV selon le GMQ cible. Méthode pratique pour les taurillons, bœufs, vaches allaitantes et broutards, avec tableau des besoins par catégorie.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+      <!-- Article 5 : Bilan fourrager -->
+      <a href="/articles/bilan-fourrager.html" class="article-card card-teal">
+        <div class="article-header">
+          <div class="article-icon">📦</div>
+          <span class="article-category">Gestion des stocks</span>
+          <h2>Bilan fourrager : comment anticiper l'hiver ?</h2>
+        </div>
+        <div class="article-body">
+          <p>Vérifier que vos stocks de foin, ensilage et enrubannage couvrent les besoins hivernaux de votre troupeau. Formule simplifiée, exemple chiffré et conseils pour éviter les ruptures de stock.</p>
+          <span class="article-link">Lire l'article →</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Santé animale -->
+    <h2 class="articles-section-title">🩺 Santé animale</h2>
+    <div class="articles-grid">
+
+      <a href="/articles/acetonemie.html" class="article-card card-red">
+        <div class="article-header"><div class="article-icon">🔴</div>
+          <span class="article-category">Santé animale</span>
+          <h2>Acétonémie (cétose) : reconnaître, traiter, prévenir</h2></div>
+        <div class="article-body"><p>Le bilan énergétique négatif post-partum, les corps cétoniques et la cétose : causes, diagnostic (BHB), traitement au propylène glycol et prévention par la gestion de la NEC.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/acidose-ruminale.html" class="article-card card-red">
+        <div class="article-header"><div class="article-icon">🌡️</div>
+          <span class="article-category">Santé ruminale</span>
+          <h2>Acidose ruminale : SARA et acidose aiguë</h2></div>
+        <div class="article-body"><p>Comprendre le pH ruminal, différencier l'acidose sub-aiguë chronique (SARA) de l'acidose aiguë, et prévenir ces troubles par la gestion des concentrés et des fibres.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/fievre-de-lait.html" class="article-card card-blue">
+        <div class="article-header"><div class="article-icon">💊</div>
+          <span class="article-category">Santé au vêlage</span>
+          <h2>Fièvre de lait (hypocalcémie) : prévention et traitement</h2></div>
+        <div class="article-body"><p>L'hypocalcémie péri-partum est évitable. Comprendre le rôle du BACA, des aliments anioniques et gérer la transition calcique pour protéger vos vaches au vêlage.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/mammites-prevention.html" class="article-card card-blue">
+        <div class="article-header"><div class="article-icon">🔬</div>
+          <span class="article-category">Santé mammaire</span>
+          <h2>Mammites : causes, prévention et cellules somatiques</h2></div>
+        <div class="article-body"><p>Les mammites coûtent cher : pertes de lait, traitements, pénalités tank. Comprendre les germes en cause, le protocole de traite en 5 points et le tarissement sélectif pour réduire l'incidence.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/tetanie-herbeuse.html" class="article-card card-teal">
+        <div class="article-header"><div class="article-icon">🌿</div>
+          <span class="article-category">Santé saisonnière</span>
+          <h2>Tétanie herbeuse (hypomagnésémie) au printemps</h2></div>
+        <div class="article-body"><p>Chaque printemps, des vaches meurent de tétanie herbeuse. Comprendre pourquoi l'herbe jeune est pauvre en Mg, comment supplémenter et quels signes surveiller.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+    </div>
+
+    <!-- Conduite d'élevage -->
+    <h2 class="articles-section-title">🐄 Conduite d'élevage</h2>
+    <div class="articles-grid">
+
+      <a href="/articles/paturage-bovin.html" class="article-card card-green">
+        <div class="article-header"><div class="article-icon">🌱</div>
+          <span class="article-category">Pâturage</span>
+          <h2>Gestion du pâturage bovin : maximiser la valorisation</h2></div>
+        <div class="article-body"><p>La sortie au pâturage, la rotation des parcelles, le chargement et la complémentation. Tout pour valoriser au mieux votre herbe pâturée et éviter les risques printaniers.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/transition-alimentaire.html" class="article-card card-emerald">
+        <div class="article-header"><div class="article-icon">⚖️</div>
+          <span class="article-category">Nutrition</span>
+          <h2>La période de transition : clé de la réussite de la lactation</h2></div>
+        <div class="article-body"><p>Les 6 semaines autour du vêlage conditionnent toute la lactation. Gérer la NEC, préparer la panse, monter progressivement les concentrés et surveiller le BHB.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/reproduction-bovine.html" class="article-card card-pink">
+        <div class="article-header"><div class="article-icon">🔄</div>
+          <span class="article-category">Reproduction</span>
+          <h2>Améliorer la reproduction en élevage laitier</h2></div>
+        <div class="article-body"><p>IVV, taux de conception, détection des chaleurs, synchronisation : les leviers pour améliorer les performances de reproduction et l'impact de l'alimentation sur la fertilité.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/bien-etre-animal-bovin.html" class="article-card card-indigo">
+        <div class="article-header"><div class="article-icon">💚</div>
+          <span class="article-category">Bien-être animal</span>
+          <h2>Bien-être animal bovin : les 5 libertés et indicateurs</h2></div>
+        <div class="article-body"><p>Les 5 libertés, les indicateurs IBA, la gestion des logettes et de l'espace. Le bien-être animal n'est pas qu'une contrainte réglementaire : c'est aussi un levier de production.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/gestion-velage.html" class="article-card card-emerald">
+        <div class="article-header"><div class="article-icon">🐮</div>
+          <span class="article-category">Reproduction</span>
+          <h2>Gestion des vêlages : préparation et soins au nouveau-né</h2></div>
+        <div class="article-body"><p>Les signes précurseurs, les stades du vêlage, quand intervenir, les soins au veau (colostrum impératif) et la surveillance post-partum pour limiter les complications.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+    </div>
+
+    <!-- Nouveaux articles -->
+    <h2 class="articles-section-title">🔬 Santé &amp; Gestion avancée</h2>
+    <div class="articles-grid">
+
+      <a href="/articles/tarissement-vache.html" class="article-card card-green">
+        <div class="article-header"><div class="article-icon">⏸️</div>
+          <span class="article-category">Conduite d'élevage</span>
+          <h2>Conduite du tarissement de la vache laitière</h2></div>
+        <div class="article-body"><p>Durée optimale, alimentation phase sèche, steaming up, antibiothérapie intra-mammaire et obturation. Tout pour préparer un vêlage sans complication.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/note-etat-corporel.html" class="article-card card-blue">
+        <div class="article-header"><div class="article-icon">📊</div>
+          <span class="article-category">Gestion du troupeau</span>
+          <h2>La note d'état corporel (NEC) : évaluer et piloter</h2></div>
+        <div class="article-body"><p>Comment noter la NEC sur une échelle de 0 à 5, interpréter les variations selon le stade, et corriger l'état corporel par la ration pour optimiser fertilité et production.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/boiteries-bovins.html" class="article-card card-red">
+        <div class="article-header"><div class="article-icon">🦶</div>
+          <span class="article-category">Santé animale</span>
+          <h2>Boiteries en élevage bovin : causes et prévention</h2></div>
+        <div class="article-body"><p>Fourbure, dermatite digitée, panaris : les affections podales coûtent cher. Comprendre les facteurs de risque et mettre en place le parage préventif et la pédiluve.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/mineraux-bovins.html" class="article-card card-purple">
+        <div class="article-header"><div class="article-icon">⚗️</div>
+          <span class="article-category">Nutrition</span>
+          <h2>Gestion des minéraux : Ca, P, Mg, Na et oligo-éléments</h2></div>
+        <div class="article-body"><p>Calcium pour la fièvre de lait, phosphore pour la fertilité, magnésium contre la tétanie : les besoins minéraux des bovins, les déficits fréquents et comment compléter la ration.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/parasitisme-bovin.html" class="article-card card-teal">
+        <div class="article-header"><div class="article-icon">🔬</div>
+          <span class="article-category">Santé animale</span>
+          <h2>Parasitisme interne : strongles, douves et coccidies</h2></div>
+        <div class="article-body"><p>Ostertagia, grande douve, Cryptosporidium : identifier les parasites internes, interpréter les coproscopies et définir une stratégie de traitement raisonné qui préserve l'efficacité des antiparasitaires.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/metrite-bovine.html" class="article-card card-rose">
+        <div class="article-header"><div class="article-icon">🩺</div>
+          <span class="article-category">Santé au vêlage</span>
+          <h2>Métrite post-partum : reconnaître, traiter, prévenir</h2></div>
+        <div class="article-body"><p>15 à 30 % des vaches développent une métrite après le vêlage. Formes cliniques, score Metricheck, antibiothérapie et prévention par la nutrition péri-partum.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/sevrage-veaux.html" class="article-card card-emerald">
+        <div class="article-header"><div class="article-icon">🐄</div>
+          <span class="article-category">Conduite d'élevage</span>
+          <h2>Sevrage et élevage des veaux laitiers</h2></div>
+        <div class="article-body"><p>De la naissance au sevrage : colostrum, lait de remplacement, starter, sevrage progressif. Les clés pour élever des veaux en bonne santé avec un bon GMQ.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/enrubannage-conservation.html" class="article-card card-amber">
+        <div class="article-header"><div class="article-icon">🌾</div>
+          <span class="article-category">Gestion des fourrages</span>
+          <h2>Enrubannage et conservation des fourrages</h2></div>
+        <div class="article-body"><p>Foin, ensilage, enrubannage : comment réussir la conservation, éviter les pertes et garantir une valeur nutritive optimale. Points critiques du bottelage-enrubannage et risques Listeria.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/insemination-bovine.html" class="article-card card-indigo">
+        <div class="article-header"><div class="article-icon">🧬</div>
+          <span class="article-category">Reproduction bovine</span>
+          <h2>Insémination artificielle bovine : technique et résultats</h2></div>
+        <div class="article-body"><p>Détection des chaleurs, synchronisation Ovsynch, technique de décongélation et d'insémination, facteurs influençant le taux de gestation. Guide complet pour l'IA bovine.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/stabulation-libre.html" class="article-card card-green">
+        <div class="article-header"><div class="article-icon">🏠</div>
+          <span class="article-category">Bâtiment d'élevage</span>
+          <h2>Stabulation libre : dimensions, logettes et ventilation</h2></div>
+        <div class="article-body"><p>Concevoir ou améliorer un bâtiment de stabulation libre : dimensions des logettes par race, revêtements de sol, couloirs, ventilation naturelle et forcée. Les critères qui réduisent boiteries et mammites.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/alimentation-vache-tarie.html" class="article-card card-teal">
+        <div class="article-header"><div class="article-icon">🥬</div>
+          <span class="article-category">Nutrition</span>
+          <h2>Alimentation de la vache tarie et de transition</h2></div>
+        <div class="article-body"><p>Les deux phases du tarissement, les besoins UFL/PDI, la gestion du BACA pour prévenir la fièvre de lait et la montée progressive des concentrés en pré-vêlage.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/stress-thermique-bovin.html" class="article-card card-amber">
+        <div class="article-header"><div class="article-icon">🌡️</div>
+          <span class="article-category">Conditions climatiques</span>
+          <h2>Stress thermique des bovins : effets et solutions</h2></div>
+        <div class="article-body"><p>L'ITH, les effets du stress thermique sur la production et la fertilité, et les solutions : ventilation-aspersion, adaptation de la ration, pâturage nocturne.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+      <a href="/articles/qualite-lait-tank.html" class="article-card card-blue">
+        <div class="article-header"><div class="article-icon">🥛</div>
+          <span class="article-category">Production laitière</span>
+          <h2>Qualité du lait en tank : TB, TP, cellules et germes</h2></div>
+        <div class="article-body"><p>Comprendre et améliorer la qualité du lait : causes d'un TB ou TP bas, cellules somatiques et mammites, germes totaux et spores butyriques. Leviers alimentaires et sanitaires.</p>
+          <span class="article-link">Lire l'article →</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Mettez la théorie en pratique</h2>
+  <p>Utilisez Rumicore pour appliquer ces méthodes directement sur vos rations — calculs automatiques selon les normes INRA 2018, bilan nutritionnel complet, export PDF.</p>
+  <a href="/app.html" class="btn-primary">Accéder à Rumicore →</a>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#0f172a;padding:32px;text-align:center;color:#64748b;font-size:.83rem;margin-top:0;">
+  <p>© 2026 Rumicore · <a href="mailto:rumicore1@gmail.com" style="color:#94a3b8;text-decoration:none;">rumicore1@gmail.com</a> · <a href="https://rumicore.com" style="color:#94a3b8;text-decoration:none;">Rumicore.com</a></p>
+</footer>
+
+</body>
+</html>

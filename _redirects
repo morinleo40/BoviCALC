@@ -1,0 +1,4 @@
+# Netlify redirects
+# Serve articles.html for /articles and /articles/ (force overrides folder index)
+/articles     /articles.html   200!
+/articles/    /articles.html   200!
