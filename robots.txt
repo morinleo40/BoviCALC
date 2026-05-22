@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /app.html
+Disallow: /app_conseiller.html
+Disallow: /conseiller/
+
+Sitemap: https://rumicore.com/sitemap.xml
