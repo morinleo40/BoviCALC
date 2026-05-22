@@ -1,1 +1,1 @@
-/articles /articles.html 301
+# No redirects needed - Cloudflare Pages handles .html stripping automatically
