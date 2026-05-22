@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comment calculer une ration pour vache laitière ? Méthode complète INRA 2018 — Rumicore</title>
+  <meta name="description" content="Méthode complète en 5 étapes pour calculer la ration d'une vache laitière : besoins UFL/PDI, inventaire fourrages, équilibre et vérification selon les normes INRA 2018.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+    .art-nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .art-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .art-nav-logo img { height:32px; }
+    .art-nav-logo span { font-size:1.1rem; font-weight:900; color:#15803d; }
+    .art-nav-links { display:flex; gap:6px; }
+    .art-nav-links a { text-decoration:none; color:#475569; font-size:.83rem; font-weight:500; padding:6px 12px; border-radius:6px; transition:all .15s; }
+    .art-nav-links a:hover { background:#f1f5f9; color:#15803d; }
+    .art-hero { background:linear-gradient(135deg,#14532d 0%,#15803d 60%,#166534 100%); padding:56px 32px 48px; color:#fff; }
+    .art-hero-inner { max-width:800px; margin:0 auto; }
+    .art-category { display:inline-block; background:rgba(255,255,255,.2); border-radius:20px; padding:4px 14px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .art-hero h1 { font-size:2.1rem; font-weight:900; line-height:1.25; margin-bottom:16px; }
+    .art-meta { font-size:.82rem; color:rgba(255,255,255,.75); }
+    .art-body { max-width:800px; margin:0 auto; padding:48px 32px; }
+    .art-body h2 { font-size:1.4rem; font-weight:800; color:#0f172a; margin:36px 0 14px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+    .art-body h3 { font-size:1.05rem; font-weight:700; color:#15803d; margin:24px 0 10px; }
+    .art-body p { font-size:.95rem; color:#374151; line-height:1.8; margin-bottom:16px; }
+    .art-body ul, .art-body ol { font-size:.93rem; color:#374151; line-height:1.8; padding-left:22px; margin-bottom:16px; }
+    .art-body li { margin-bottom:6px; }
+    .art-body strong { color:#0f172a; }
+    .art-infobox { background:#f0fdf4; border-left:4px solid #15803d; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-infobox p { margin:0; font-size:.88rem; color:#166534; }
+    .art-warning { background:#fff7ed; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-warning p { margin:0; font-size:.88rem; color:#c2410c; }
+    .art-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:.88rem; }
+    .art-table th { background:#f1f5f9; padding:10px 14px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; }
+    .art-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .art-table tr:hover td { background:#f8fafc; }
+    .art-cta { background:linear-gradient(135deg,#14532d,#15803d); border-radius:16px; padding:36px; text-align:center; margin:48px 0 0; color:#fff; }
+    .art-cta h3 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+    .art-cta p { font-size:.9rem; color:rgba(255,255,255,.85); margin-bottom:24px; }
+    .art-cta a { background:#fff; color:#15803d; font-weight:700; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:.9rem; }
+    .art-footer { background:#0f172a; padding:28px 32px; text-align:center; color:#64748b; font-size:.83rem; margin-top:64px; }
+    .art-footer a { color:#94a3b8; text-decoration:none; }
+    .art-related { border-top:2px solid #e2e8f0; padding-top:36px; margin-top:48px; }
+    .art-related h3 { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px; }
+    .art-related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .art-related-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; text-decoration:none; transition:box-shadow .2s; }
+    .art-related-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
+    .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
+    @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/articles.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#475569;font-size:.85rem;font-weight:600;">← Retour aux articles</a>
+  <a href="/app.html" style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Essayer Rumicore →</a>
+</nav>
+
+<header class="art-hero">
+  <div style="width:100%;max-height:380px;overflow:hidden;margin-bottom:0;"><img src="images/vache-laitiere.jpg" alt="calcul-ration-bovine" style="width:100%;max-height:380px;object-fit:cover;display:block;"></div><div class="art-hero-inner">
+    <span class="art-category">Rationnement laitier</span>
+    <h1>Comment calculer une ration pour vache laitière ?<br>Méthode complète INRA 2018</h1>
+    <p class="art-meta">Par l'équipe Rumicore &nbsp;&bull;&nbsp; Mis à jour le 22 mai 2026 &nbsp;&bull;&nbsp; Lecture : 8 min</p>
+  </div>
+</header>
+
+<main class="art-body">
+
+  <p>Calculer une ration pour vache laitière est un acte technique fondamental en élevage bovin. Mal réalisé, il peut conduire à des carences énergétiques, une chute de la production, des troubles métaboliques (acétonémie, acidose) et une dégradation de l'état corporel. Bien conduit, il permet d'exprimer le potentiel génétique de l'animal, de valoriser au mieux les fourrages produits à la ferme et de maîtriser le coût alimentaire. Ce guide vous présente la méthode complète en 5 étapes, fondée sur les normes INRA 2018.</p>
+
+  <div class="art-infobox">
+    <p><strong>Référentiel utilisé :</strong> Cet article s'appuie exclusivement sur les tables INRA 2018 (ouvrage "Alimentation des ruminants", Quae, 2018), le standard actuel en France pour l'alimentation des bovins laitiers.</p>
+  </div>
+
+  <h2>Etape 1 — Définir les besoins de la vache</h2>
+
+  <p>Avant de toucher un seul chiffre sur les fourrages, vous devez connaître précisément ce que la vache doit recevoir. Les besoins se décomposent en deux parties : les besoins d'<strong>entretien</strong> (faire fonctionner le corps sans produire) et les besoins de <strong>production</strong> (synthétiser le lait).</p>
+
+  <h3>Besoins d'entretien</h3>
+  <p>Pour une vache de <strong>650 kg de poids vif</strong>, les besoins d'entretien selon INRA 2018 sont :</p>
+  <ul>
+    <li>Energie : <strong>6,75 UFL/jour</strong> (formule : 0,041 × PV<sup>0,75</sup>, soit 0,041 × 650<sup>0,75</sup>)</li>
+    <li>Protéines PDI : <strong>420 g PDI/jour</strong> (environ 62 g/UFL à l'entretien)</li>
+    <li>Calcium : 28 g/jour ; Phosphore : 21 g/jour</li>
+  </ul>
+
+  <h3>Besoins de production laitière</h3>
+  <p>Pour chaque litre de lait produit, la vache mobilise une quantité d'énergie et de protéines qui dépend du taux butyreux (TB) et du taux protéique (TP). Pour un lait à <strong>TB 38 g/kg et TP 32 g/kg</strong>, les coefficients INRA 2018 donnent :</p>
+  <ul>
+    <li>Energie : <strong>0,44 UFL par litre de lait</strong> (coefficient pour TB 38, TP 32)</li>
+    <li>Protéines : <strong>52 g PDI par litre de lait</strong></li>
+  </ul>
+
+  <p><strong>Pour notre exemple (vache 650 kg, 30 L/j, TB 38) :</strong></p>
+  <ul>
+    <li>Besoins totaux énergie = 6,75 + (30 × 0,44) = 6,75 + 13,2 = <strong>19,95 UFL/jour</strong></li>
+    <li>Besoins totaux PDI = 420 + (30 × 52) = 420 + 1 560 = <strong>1 980 g PDI/jour</strong></li>
+  </ul>
+
+  <div class="art-infobox">
+    <p><strong>Rappel :</strong> Si la vache est en début de lactation (semaines 1 à 8), il faut intégrer une mobilisation des réserves corporelles. Une vache peut perdre jusqu'à 0,5 point de NEC sans pénalité si elle repart en gestation. Au-delà, les performances reproductrices se dégradent significativement.</p>
+  </div>
+
+  <h2>Etape 2 — Faire l'inventaire de vos fourrages</h2>
+
+  <p>Un rationnement de qualité repose sur une connaissance précise de la valeur nutritive des fourrages disponibles. Ne jamais utiliser des valeurs "moyennes de table" sans avoir réalisé au moins une analyse de fourrage par type de stock. Une ensilage de maïs peut varier de 0,82 à 0,96 UFL/kg MS selon la maturité à la récolte et les conditions climatiques.</p>
+
+  <h3>Comment exprimer les valeurs ?</h3>
+  <p>Toutes les valeurs nutritives s'expriment <strong>en matière sèche (MS)</strong>. Si votre analyse indique que votre ensilage de maïs titre 32 % de MS, alors pour 10 kg de produit brut distribué, vous apportez 3,2 kg de MS. C'est sur ces 3,2 kg que s'appliquent les coefficients UFL, PDI, etc.</p>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Aliment</th>
+        <th>MS (%)</th>
+        <th>UFL/kg MS</th>
+        <th>PDI (g/kg MS)</th>
+        <th>Remarque</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Ensilage de maïs (bon)</td><td>32–35</td><td>0,90–0,96</td><td>55–65</td><td>Pauvre en PDI, riche en amidon</td></tr>
+      <tr><td>Ensilage d'herbe (préfané)</td><td>35–45</td><td>0,80–0,88</td><td>85–110</td><td>Variable selon stade de coupe</td></tr>
+      <tr><td>Foin de prairie naturelle</td><td>85–88</td><td>0,70–0,78</td><td>70–85</td><td>Valeur dépend du stade et de la météo</td></tr>
+      <tr><td>Foin de luzerne</td><td>86–90</td><td>0,78–0,84</td><td>120–145</td><td>Excellente source de PDI</td></tr>
+      <tr><td>Tourteau de soja 48</td><td>87–89</td><td>1,05–1,10</td><td>290–310</td><td>Référence PDI bypass</td></tr>
+      <tr><td>Tourteau de colza</td><td>88–90</td><td>0,96–1,02</td><td>220–240</td><td>Bonne valeur PDI, moins lysine</td></tr>
+      <tr><td>Orge grain aplatie</td><td>86–88</td><td>1,10–1,14</td><td>90–100</td><td>Amidon rapide, risque acidose</td></tr>
+      <tr><td>Maïs grain broyé</td><td>87–89</td><td>1,18–1,22</td><td>80–92</td><td>Amidon lent, meilleur pour rumen</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Etape 3 — Calculer les apports de la ration de base</h2>
+
+  <p>La <strong>ration de base</strong> est constituée des fourrages (ensilages, foins, paille). Elle forme le socle de l'alimentation. On calcule ce qu'elle apporte, puis on complète avec des concentrés pour atteindre les besoins.</p>
+
+  <h3>Exemple chiffré : ration de base pour 30 L/j</h3>
+  <p>Supposons la ration de base suivante (quantités en kg MS/jour) :</p>
+  <ul>
+    <li>Ensilage de maïs : <strong>7 kg MS</strong> (soit environ 21 kg brut à 33 % MS)</li>
+    <li>Ensilage d'herbe préfané : <strong>3 kg MS</strong> (soit environ 8 kg brut à 38 % MS)</li>
+    <li>Foin de luzerne : <strong>1 kg MS</strong> (soit environ 1,15 kg brut)</li>
+  </ul>
+
+  <p>Apports de la ration de base :</p>
+  <ul>
+    <li>Energie = (7 × 0,93) + (3 × 0,84) + (1 × 0,81) = 6,51 + 2,52 + 0,81 = <strong>9,84 UFL</strong></li>
+    <li>PDI = (7 × 60) + (3 × 95) + (1 × 132) = 420 + 285 + 132 = <strong>837 g PDI</strong></li>
+  </ul>
+
+  <p><strong>Déficit à couvrir par les concentrés :</strong></p>
+  <ul>
+    <li>Energie : 19,95 - 9,84 = <strong>10,11 UFL</strong></li>
+    <li>PDI : 1 980 - 837 = <strong>1 143 g PDI</strong></li>
+  </ul>
+
+  <h2>Etape 4 — Equilbrer avec les concentrés</h2>
+
+  <p>Il faut maintenant choisir les concentrés pour couvrir le déficit en énergie ET en PDI, en respectant la capacité d'ingestion de la vache (généralement 3,5 à 4 % du poids vif en MS, soit 22 à 26 kg MS pour une vache de 650 kg).</p>
+
+  <div class="art-warning">
+    <p><strong>Attention à l'acidose :</strong> Ne pas dépasser 40 à 45 % de la MS totale de la ration en concentrés. Au-delà, le pH ruminal chute en dessous de 6,2 et la synthèse des matières grasses du lait s'effondre (dépression butyreuse). Fragmentez les apports : pas plus de 3 à 4 kg de concentrés par repas.</p>
+  </div>
+
+  <h3>Construction du concentré de production</h3>
+  <p>Pour couvrir 10,11 UFL et 1 143 g PDI avec maïs grain + tourteau de colza :</p>
+  <ul>
+    <li>Maïs grain broyé : 6 kg MS × 1,20 UFL = 7,2 UFL ; 6 × 86 g PDI = 516 g PDI</li>
+    <li>Tourteau de colza : 3 kg MS × 0,99 UFL = 2,97 UFL ; 3 × 230 g PDI = 690 g PDI</li>
+    <li>Total concentrés : <strong>10,17 UFL</strong> et <strong>1 206 g PDI</strong> — objectif atteint</li>
+  </ul>
+
+  <p>MS totale de la ration : 7 + 3 + 1 + 6 + 3 = <strong>20 kg MS/jour</strong>, soit 3,1 % du poids vif. La capacité d'ingestion est respectée.</p>
+
+  <h2>Etape 5 — Vérifier et valider la ration</h2>
+
+  <p>Le calcul brut ne suffit pas. Plusieurs indicateurs de qualité doivent être vérifiés avant de valider une ration :</p>
+
+  <h3>Le ratio PDI/UFL</h3>
+  <p>Ce ratio exprime l'équilibre énergie/protéines de la ration. Il doit se situer entre <strong>95 et 105 g PDI/UFL</strong> pour une vache laitière en pleine production. Dans notre exemple : (837 + 1 206) / (9,84 + 10,17) = 2 043 / 19,95 = <strong>102 g PDI/UFL</strong>. Excellent.</p>
+
+  <h3>La teneur en NDF et le mat premier</h3>
+  <p>La ration doit apporter un minimum de <strong>32 à 35 % de NDF</strong> (fibres détergent neutre) dans la MS totale pour maintenir un bon mat premier et stimuler la rumination. Un ensilage de maïs seul (NDF autour de 38 %) peut suffire à condition de ne pas être trop finement haché.</p>
+
+  <h3>Le BACA (Bilan Acido-Basique des Cations-Anions)</h3>
+  <p>En période de tarissement et en début de lactation, vérifiez le BACA. Il doit être légèrement négatif en pré-partum (entre -50 et -100 mEq/kg MS) pour prévenir la fièvre vitulaire, et positif (+200 à +300 mEq/kg MS) en lactation.</p>
+
+  <h3>Les minéraux</h3>
+  <p>Calcium, phosphore, magnésium et oligo-éléments complètent la vérification. Un correcteur minéral vitaminé adapté à la production couvre généralement ces besoins à raison de 150 à 200 g/vache/jour.</p>
+
+  <div class="art-infobox">
+    <p><strong>Conseil pratique :</strong> Après tout changement de ration, observez l'évolution du TB et du TP sur les contrôles laitiers suivants. Une chute du TB signale souvent un manque de fibres ou un excès d'amidon rapide. Une chute du TP indique un déficit PDI ou une mobilisation des réserves corporelles excessive.</p>
+  </div>
+
+  <h2>Récapitulatif de la ration exemple</h2>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Aliment</th>
+        <th>kg MS/j</th>
+        <th>UFL apportés</th>
+        <th>PDI apportés (g)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Ensilage de maïs</td><td>7,0</td><td>6,51</td><td>420</td></tr>
+      <tr><td>Ensilage d'herbe préfané</td><td>3,0</td><td>2,52</td><td>285</td></tr>
+      <tr><td>Foin de luzerne</td><td>1,0</td><td>0,81</td><td>132</td></tr>
+      <tr><td>Maïs grain broyé</td><td>6,0</td><td>7,20</td><td>516</td></tr>
+      <tr><td>Tourteau de colza</td><td>3,0</td><td>2,97</td><td>690</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>20,0</strong></td><td><strong>20,01</strong></td><td><strong>2 043</strong></td></tr>
+      <tr><td><strong>Besoins</strong></td><td>—</td><td><strong>19,95</strong></td><td><strong>1 980</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Les erreurs les plus fréquentes à éviter</h2>
+
+  <ul>
+    <li><strong>Utiliser des valeurs de tables sans analyse :</strong> les écarts peuvent dépasser 15 % sur l'UFL d'un foin selon les conditions de récolte.</li>
+    <li><strong>Négliger la capacité d'ingestion :</strong> une ration théoriquement parfaite mais impossible à ingérer est inutile.</li>
+    <li><strong>Distribuer tout le concentré en une seule fois :</strong> risque majeur d'acidose ruminale aiguë.</li>
+    <li><strong>Oublier l'eau :</strong> une vache produisant 30 L de lait boit 100 à 120 L d'eau par jour. Un abreuvoir insuffisant plafonne la production.</li>
+    <li><strong>Ne pas réévaluer la ration en cours de lactation :</strong> les besoins évoluent avec le stade de lactation et le niveau de production.</li>
+  </ul>
+
+  <div class="art-cta">
+    <h3>Calculez vos rations automatiquement avec Rumicore</h3>
+    <p>Rumicore intègre les normes INRA 2018 complètes. Saisissez vos fourrages, vos animaux et obtenez un bilan ration en quelques secondes. Gratuit pour les éleveurs.</p>
+    <a href="/app.html" style="display:inline-block;background:#fff;color:#15803d;font-weight:700;padding:13px 30px;border-radius:8px;text-decoration:none;font-size:.95rem;box-shadow:0 2px 8px rgba(0,0,0,.15);">Accéder à Rumicore →</a>
+  </div>
+
+  <section class="art-related">
+    <h3>Articles liés</h3>
+    <div class="art-related-grid">
+      <a href="ufl-ufv.html" class="art-related-card">
+        <div class="tag">Bases du rationnement</div>
+        <h4>UFL et UFV : comprendre les unités fourragères bovines</h4>
+      </a>
+      <a href="normes-inra-2018.html" class="art-related-card">
+        <div class="tag">Référentiels</div>
+        <h4>Normes INRA 2018 : guide complet pour l'éleveur bovin</h4>
+      </a>
+      <a href="bilan-fourrager.html" class="art-related-card">
+        <div class="tag">Gestion du troupeau</div>
+        <h4>Bilan fourrager hivernal : méthode complète pour ne jamais manquer de fourrage</h4>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="art-footer"><p>&copy; 2026 Rumicore &nbsp;&middot;&nbsp; <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a> &nbsp;&middot;&nbsp; <a href="/index.html">Rumicore.com</a></p></footer>
+</body>
+</html>

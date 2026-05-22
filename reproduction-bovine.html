@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Améliorer la reproduction en élevage laitier : fertilité, détection des chaleurs, IA — Rumicore</title>
+  <meta name="description" content="Reproduction bovine laitière : IVV, taux de conception, détection des chaleurs, synchronisation Ovsynch, rôle du NEC et de la nutrition sur la fertilité. Guide complet.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+    .art-nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .art-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .art-nav-logo img { height:32px; }
+    .art-nav-logo span { font-size:1.1rem; font-weight:900; color:#15803d; }
+    .art-nav-links { display:flex; gap:6px; }
+    .art-nav-links a { text-decoration:none; color:#475569; font-size:.83rem; font-weight:500; padding:6px 12px; border-radius:6px; transition:all .15s; }
+    .art-nav-links a:hover { background:#f1f5f9; color:#15803d; }
+    .art-hero { background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 60%,#a855f7 100%); padding:56px 32px 48px; color:#fff; }
+    .art-hero-inner { max-width:800px; margin:0 auto; }
+    .art-category { display:inline-block; background:rgba(255,255,255,.2); border-radius:20px; padding:4px 14px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .art-hero h1 { font-size:2.1rem; font-weight:900; line-height:1.25; margin-bottom:16px; }
+    .art-meta { font-size:.82rem; color:rgba(255,255,255,.75); }
+    .art-body { max-width:800px; margin:0 auto; padding:48px 32px; }
+    .art-body h2 { font-size:1.4rem; font-weight:800; color:#0f172a; margin:36px 0 14px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+    .art-body h3 { font-size:1.05rem; font-weight:700; color:#15803d; margin:24px 0 10px; }
+    .art-body p { font-size:.95rem; color:#374151; line-height:1.8; margin-bottom:16px; }
+    .art-body ul, .art-body ol { font-size:.93rem; color:#374151; line-height:1.8; padding-left:22px; margin-bottom:16px; }
+    .art-body li { margin-bottom:6px; }
+    .art-body strong { color:#0f172a; }
+    .art-infobox { background:#f0fdf4; border-left:4px solid #15803d; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-infobox p { margin:0; font-size:.88rem; color:#166534; }
+    .art-warning { background:#fff7ed; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-warning p { margin:0; font-size:.88rem; color:#c2410c; }
+    .art-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:.88rem; }
+    .art-table th { background:#f1f5f9; padding:10px 14px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; }
+    .art-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .art-table tr:hover td { background:#f8fafc; }
+    .art-cta { background:linear-gradient(135deg,#14532d,#15803d); border-radius:16px; padding:36px; text-align:center; margin:48px 0 0; color:#fff; }
+    .art-cta h3 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+    .art-cta p { font-size:.9rem; color:rgba(255,255,255,.85); margin-bottom:24px; }
+    .art-cta a { background:#fff; color:#15803d; font-weight:700; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:.9rem; }
+    .art-footer { background:#0f172a; padding:28px 32px; text-align:center; color:#64748b; font-size:.83rem; margin-top:64px; }
+    .art-footer a { color:#94a3b8; text-decoration:none; }
+    .art-related { border-top:2px solid #e2e8f0; padding-top:36px; margin-top:48px; }
+    .art-related h3 { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px; }
+    .art-related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .art-related-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; text-decoration:none; transition:box-shadow .2s; }
+    .art-related-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
+    .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
+    @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/articles.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#475569;font-size:.85rem;font-weight:600;">← Retour aux articles</a>
+  <a href="/app.html" style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Essayer Rumicore →</a>
+</nav>
+
+<header class="art-hero">
+  <div style="width:100%;max-height:380px;overflow:hidden;margin-bottom:0;"><img src="images/troupeau-holstein.jpg" alt="reproduction-bovine" style="width:100%;max-height:380px;object-fit:cover;display:block;"></div><div class="art-hero-inner">
+    <span class="art-category">Reproduction</span>
+    <h1>Améliorer la reproduction en élevage laitier :<br>fertilité, détection des chaleurs, IA</h1>
+    <p class="art-meta">Par l'équipe Rumicore &nbsp;&bull;&nbsp; Mis à jour le 22 mai 2026 &nbsp;&bull;&nbsp; Lecture : 10 min</p>
+  </div>
+</header>
+
+<main class="art-body">
+
+  <p>La reproduction est le pilier économique de l'élevage laitier. Sans vêlage, pas de lait. Et chaque jour de délai dans la fécondation d'une vache représente 3 à 5 € de manque à gagner — une somme qui s'accumule vite sur un troupeau. Pourtant, dans beaucoup d'élevages, les performances reproductives se dégradent progressivement, parfois sans que l'éleveur s'en aperçoive clairement. Ce guide présente les indicateurs clés à surveiller, les facteurs limitants les plus fréquents et les leviers concrets pour améliorer les résultats.</p>
+
+  <h2>Les indicateurs de performance reproductive</h2>
+
+  <p>Avant de corriger quoi que ce soit, il faut mesurer. Voici les indicateurs standards et leurs valeurs cibles en élevage laitier intensif :</p>
+  <ul>
+    <li><strong>Intervalle Vêlage-Vêlage (IVV) :</strong> objectif &lt; 380 jours (soit un veau par vache par an). Au-delà de 400 jours, chaque jour supplémentaire représente une perte directe.</li>
+    <li><strong>Taux de conception à la 1re IA :</strong> objectif &gt; 50 % (60 % en élevage performant). En pratique, la moyenne nationale française est autour de 45 %.</li>
+    <li><strong>Intervalle Vêlage–1re IA fécondante (IVF) :</strong> objectif &lt; 120 jours. Comprend le délai de reprise de cyclicité, le délai de mise à la reproduction et le nombre d'IA nécessaires.</li>
+    <li><strong>Taux de réussite global (vaches gestantes / vaches inséminées) :</strong> objectif &gt; 65 %</li>
+    <li><strong>Taux de vaches non gestantes à 150 jours post-partum :</strong> devrait être &lt; 15 %</li>
+  </ul>
+
+  <div class="art-infobox">
+    <p><strong>Calcul rapide :</strong> Multipliez les vaches en lactation par 5 €/j de dépassement au-delà de 380 jours d'IVV. Pour un troupeau de 80 vaches avec un IVV moyen de 410 jours, la perte est : 80 × 30 jours × 4 € = <strong>9 600 €/an</strong> de manque à gagner sur la production et la vente de veaux.</p>
+  </div>
+
+  <h2>Détecter les chaleurs avec fiabilité</h2>
+
+  <h3>Durée et signes des chaleurs</h3>
+  <p>Chez la vache Holstein, la chaleur dure en moyenne <strong>12 à 18 heures</strong>, parfois moins de 8 heures chez les vaches hautes productrices stressées. Cette courte fenêtre, combinée à des signes parfois discrets, explique que <strong>30 à 50 % des chaleurs sont manquées</strong> en élevage conventionnel sans système d'aide à la détection.</p>
+
+  <p>Les signes primaires (certains) :</p>
+  <ul>
+    <li><strong>Immobilité au chevauchement :</strong> la vache accepte d'être montée sans bouger. C'est le seul signe absolument fiable, appelé "standing heat".</li>
+    <li>Mucus filant, transparent, étirant au moins 20 cm, visible à la vulve ou sur la queue</li>
+  </ul>
+  <p>Les signes secondaires (indicateurs, non certains) :</p>
+  <ul>
+    <li>Agitation, mugissements, chevauchement d'autres vaches (mais sans se laisser chevaucher)</li>
+    <li>Vulve légèrement oedémateuse, légère rougeur</li>
+    <li>Baisse de production du jour (–5 à –10 %)</li>
+    <li>Variation de la rumination et de l'activité locomotrice</li>
+  </ul>
+
+  <h3>Outils d'aide à la détection</h3>
+  <ul>
+    <li><strong>Podomètres et accéléromètres :</strong> détectent l'augmentation d'activité pendant les chaleurs. Sensibilité 80–90 % selon les systèmes.</li>
+    <li><strong>Détecteurs de chevauchement (Kamars, patches) :</strong> peu coûteux, visibles à l'œil. Limites : sol glissant fausse les résultats.</li>
+    <li><strong>Capteurs de rumination (bolus ou colliers) :</strong> la chute de rumination associée à un pic d'activité est très prédictive d'une chaleur.</li>
+    <li><strong>Observation deux fois par jour minimum :</strong> 20 minutes matin et soir restent indispensables même avec des outils automatiques.</li>
+  </ul>
+
+  <h2>Moment optimal pour l'insémination artificielle</h2>
+
+  <p>La règle AM-PM s'applique : une vache détectée en chaleur le matin doit être inséminée l'après-midi du même jour ; une vache détectée en chaleur l'après-midi doit être inséminée le lendemain matin. L'ovulation survient <strong>24 à 32 heures après le début des chaleurs</strong>, et les spermatozoïdes doivent être présents dans les voies génitales au moins 6 heures avant pour capacitation.</p>
+
+  <p>Une insémination trop précoce (avant le début des chaleurs) ou trop tardive (plus de 18 heures après la fin des signes) réduit le taux de conception de 15 à 25 %.</p>
+
+  <h2>Principaux facteurs d'infertilité</h2>
+
+  <h3>Bilan énergétique négatif (BEN) prolongé</h3>
+  <p>Le BEN en début de lactation retarde la reprise de cyclicité ovarienne en supprimant la pulsatilité de la LH (hormone lutéinisante). Une vache avec un BEN sévère peut ne pas avoir de cycle pendant 60 à 90 jours post-partum. L'objectif est de sortir du BEN avant le 40e jour.</p>
+
+  <h3>Kyste ovarien</h3>
+  <p>Un follicule de &gt; 2,5 cm présent depuis plus de 10 jours sans corps jaune. Deux types : kystique folliculaire (pas d'ovulation) et kystique lutéal (corps jaune kystique). Diagnostic par échographie. Traitement : GnRH + prostaglandine (Ovsynch) ou PRID.</p>
+
+  <h3>Endométrite subclinique</h3>
+  <p>Inflammation utérine sans signe extérieur. Détectée par cytobrosse ou lavage utérin (seuil &gt; 5 % de neutrophiles entre J30 et J60 post-partum). Prévalence de 15 à 30 % dans les troupeaux non surveillés. Réduit le taux de conception de 20 à 35 %.</p>
+
+  <h3>Boiteries</h3>
+  <p>Une vache boiteuse présente un taux de conception réduit de 15 à 30 % (douleur chronique = stress = cortisol élevé = suppression ovaire). Les boiteries sont donc aussi un problème reproductif, pas seulement locomoteur.</p>
+
+  <h2>Score corporel (NEC) et fertilité : la relation directe</h2>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>NEC au vêlage</th>
+        <th>IVV moyen observé</th>
+        <th>Taux de conception 1re IA</th>
+        <th>Commentaire</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>&lt; 2,5 (maigre)</td><td>420–450 j</td><td>35–42 %</td><td>BEN prolongé, cyclicité tardive</td></tr>
+      <tr><td>2,75–3,0 (bon)</td><td>385–400 j</td><td>48–54 %</td><td>Situation correcte</td></tr>
+      <tr><td>3,0–3,25 (optimal)</td><td>370–385 j</td><td>55–62 %</td><td>Objectif à atteindre</td></tr>
+      <tr><td>3,5–3,75 (légère surcharge)</td><td>395–415 j</td><td>45–52 %</td><td>Mobilisation excessive, stéatose</td></tr>
+      <tr><td>&gt; 4,0 (obèse)</td><td>&gt; 430 j</td><td>30–40 %</td><td>Cétose type 2, infertilité marquée</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Synchronisation des chaleurs et des ovulations</h2>
+
+  <h3>Protocole Ovsynch</h3>
+  <p>L'Ovsynch synchronise les ovulations pour permettre une IA à temps fixe, sans détection des chaleurs. Protocole classique :</p>
+  <ul>
+    <li>J0 : injection GnRH (100 µg buséréline)</li>
+    <li>J7 : injection prostaglandine F2α (25 mg dinoprost)</li>
+    <li>J9 : injection GnRH</li>
+    <li>J10 : IA à temps fixe (16–20 heures après la 2e GnRH)</li>
+  </ul>
+  <p>Taux de conception attendu : 45 à 55 % si utilisé à bon escient. Intérêt : permet de gérer les vaches non cyclées et d'organiser le travail.</p>
+
+  <h3>PRID (Progesterone Releasing Intravaginal Device)</h3>
+  <p>Spirale vaginale libérant de la progestérone pendant 7 à 12 jours. Combinée à une injection de GnRH à la pose et de prostaglandine au retrait, elle synchronise efficacement même les vaches en anœstrus.</p>
+
+  <div class="art-infobox">
+    <p><strong>Nutrition et fertilité :</strong> Zinc (50 mg/kg MS), sélénium (0,3–0,5 mg/kg MS) et vitamine E (1 000 UI/j) jouent un rôle direct sur la qualité ovocytaire et la résistance utérine aux infections. En période de transition, une carence en ces micronutriments double le risque d'endométrite post-partum.</p>
+  </div>
+
+  <div class="art-warning">
+    <p><strong>Délai de mise à la reproduction :</strong> L'involition utérine est complète à J35–J45 post-partum. Ne jamais inséminer avant J45 même si une chaleur est détectée précocement. Une IA sur utérus non involuté aboutit quasi systématiquement à un échec et peut aggraver l'endométrite.</p>
+  </div>
+
+  <div class="art-cta">
+    <h3>Suivez les performances reproductives de votre troupeau avec Rumicore</h3>
+    <p>Rumicore calcule automatiquement l'IVV, le taux de conception et alerte sur les vaches à risque d'infertilité. Pilotez la reproduction comme un professionnel.</p>
+    <a href="/app.html" style="display:inline-block;background:#fff;color:#15803d;font-weight:700;padding:13px 30px;border-radius:8px;text-decoration:none;font-size:.95rem;box-shadow:0 2px 8px rgba(0,0,0,.15);">Accéder à Rumicore →</a>
+  </div>
+
+  <section class="art-related">
+    <h3>Articles liés</h3>
+    <div class="art-related-grid">
+      <a href="gestion-velage.html" class="art-related-card">
+        <div class="tag">Reproduction</div>
+        <h4>Gestion des vêlages : préparation, surveillance et soins au nouveau-né</h4>
+      </a>
+      <a href="acetonemie.html" class="art-related-card">
+        <div class="tag">Santé animale</div>
+        <h4>Acétonémie (cétose) chez la vache laitière : reconnaître, traiter, prévenir</h4>
+      </a>
+      <a href="transition-alimentaire.html" class="art-related-card">
+        <div class="tag">Nutrition</div>
+        <h4>La période de transition chez la vache laitière : clé de la réussite de la lactation</h4>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="art-footer"><p>&copy; 2026 Rumicore &nbsp;&middot;&nbsp; <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a> &nbsp;&middot;&nbsp; <a href="/index.html">Rumicore.com</a></p></footer>
+</body>
+</html>

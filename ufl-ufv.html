@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UFL et UFV : comprendre les unités fourragères bovines — Rumicore</title>
+  <meta name="description" content="Tout comprendre sur les unités fourragères UFL et UFV : définitions, historique, différences, quand utiliser l'une ou l'autre, tableau comparatif des aliments et formules pratiques.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+    .art-nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .art-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .art-nav-logo img { height:32px; }
+    .art-nav-logo span { font-size:1.1rem; font-weight:900; color:#15803d; }
+    .art-nav-links { display:flex; gap:6px; }
+    .art-nav-links a { text-decoration:none; color:#475569; font-size:.83rem; font-weight:500; padding:6px 12px; border-radius:6px; transition:all .15s; }
+    .art-nav-links a:hover { background:#f1f5f9; color:#15803d; }
+    .art-hero { background:linear-gradient(135deg,#14532d 0%,#15803d 60%,#166534 100%); padding:56px 32px 48px; color:#fff; }
+    .art-hero-inner { max-width:800px; margin:0 auto; }
+    .art-category { display:inline-block; background:rgba(255,255,255,.2); border-radius:20px; padding:4px 14px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .art-hero h1 { font-size:2.1rem; font-weight:900; line-height:1.25; margin-bottom:16px; }
+    .art-meta { font-size:.82rem; color:rgba(255,255,255,.75); }
+    .art-body { max-width:800px; margin:0 auto; padding:48px 32px; }
+    .art-body h2 { font-size:1.4rem; font-weight:800; color:#0f172a; margin:36px 0 14px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+    .art-body h3 { font-size:1.05rem; font-weight:700; color:#15803d; margin:24px 0 10px; }
+    .art-body p { font-size:.95rem; color:#374151; line-height:1.8; margin-bottom:16px; }
+    .art-body ul, .art-body ol { font-size:.93rem; color:#374151; line-height:1.8; padding-left:22px; margin-bottom:16px; }
+    .art-body li { margin-bottom:6px; }
+    .art-body strong { color:#0f172a; }
+    .art-infobox { background:#f0fdf4; border-left:4px solid #15803d; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-infobox p { margin:0; font-size:.88rem; color:#166534; }
+    .art-warning { background:#fff7ed; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-warning p { margin:0; font-size:.88rem; color:#c2410c; }
+    .art-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:.88rem; }
+    .art-table th { background:#f1f5f9; padding:10px 14px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; }
+    .art-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .art-table tr:hover td { background:#f8fafc; }
+    .art-cta { background:linear-gradient(135deg,#14532d,#15803d); border-radius:16px; padding:36px; text-align:center; margin:48px 0 0; color:#fff; }
+    .art-cta h3 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+    .art-cta p { font-size:.9rem; color:rgba(255,255,255,.85); margin-bottom:24px; }
+    .art-cta a { background:#fff; color:#15803d; font-weight:700; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:.9rem; }
+    .art-footer { background:#0f172a; padding:28px 32px; text-align:center; color:#64748b; font-size:.83rem; margin-top:64px; }
+    .art-footer a { color:#94a3b8; text-decoration:none; }
+    .art-related { border-top:2px solid #e2e8f0; padding-top:36px; margin-top:48px; }
+    .art-related h3 { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px; }
+    .art-related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .art-related-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; text-decoration:none; transition:box-shadow .2s; }
+    .art-related-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
+    .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
+    @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/articles.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#475569;font-size:.85rem;font-weight:600;">← Retour aux articles</a>
+  <a href="/app.html" style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Essayer Rumicore →</a>
+</nav>
+
+<header class="art-hero">
+  <div style="width:100%;max-height:380px;overflow:hidden;margin-bottom:0;"><img src="images/ration-fourrage.jpg" alt="ufl-ufv" style="width:100%;max-height:380px;object-fit:cover;display:block;"></div><div class="art-hero-inner">
+    <span class="art-category">Bases du rationnement</span>
+    <h1>UFL et UFV : comprendre les unités fourragères bovines</h1>
+    <p class="art-meta">Par l'équipe Rumicore &nbsp;&bull;&nbsp; Mis à jour le 22 mai 2026 &nbsp;&bull;&nbsp; Lecture : 7 min</p>
+  </div>
+</header>
+
+<main class="art-body">
+
+  <p>L'UFL et l'UFV sont les deux piliers du système énergétique français pour l'alimentation des ruminants. Comprendre leur signification, leur mode de calcul et leurs différences est indispensable pour tout éleveur ou conseiller qui souhaite raisonner rigoureusement ses rations bovines. Pourtant, ces deux unités sont souvent confondues ou mal appliquées dans la pratique. Cet article vous donne une vision claire et opérationnelle.</p>
+
+  <h2>Historique : d'où viennent les unités fourragères ?</h2>
+
+  <p>L'idée d'une unité d'énergie alimentaire commune remonte aux travaux de <strong>Niels Kellner</strong> au début du XXe siècle. Il propose l'Unité Fourragère Scandinavique (UF), équivalente à 1 kg d'orge de référence. Ce système, pratique mais imprécis, sera utilisé en France jusqu'aux années 1960.</p>
+
+  <p>C'est l'<strong>INRA</strong> (Institut National de la Recherche Agronomique) qui révolutionne le système à partir des années 1970 avec les travaux de Jarrige et al. Le nouveau système distingue deux usages physiologiques de l'énergie chez le ruminant : la production laitière et la production de viande (croissance musculaire). De cette distinction naissent l'UFL et l'UFV, officialisées dans les normes INRA 1988 puis révisées en 2018.</p>
+
+  <div class="art-infobox">
+    <p><strong>Définition de référence :</strong> 1 UFL = énergie nette pour la lactation apportée par 1 kg d'orge de référence = <strong>1 700 kcal d'énergie nette lait</strong>. 1 UFV = énergie nette pour la croissance = <strong>1 820 kcal d'énergie nette viande</strong>.</p>
+  </div>
+
+  <h2>UFL — Unité Fourragère Lait</h2>
+
+  <h3>Définition et usage</h3>
+  <p>L'<strong>UFL (Unité Fourragère Lait)</strong> mesure l'énergie nette disponible pour la <strong>production laitière</strong>. Elle s'applique à toutes les femelles productrices de lait : vaches laitières, chèvres, brebis laitières. Par extension, elle est également utilisée pour les vaches allaitantes, car leur bilan énergétique est fortement influencé par la lactation.</p>
+
+  <p>L'UFL intègre les pertes liées à la digestion (énergie fécale et urinaire) et aux fermentations ruminales (méthane), pour ne retenir que l'énergie réellement utilisable par la glande mammaire. Elle est calculée à partir de l'énergie métabolisable (EM) selon la formule :</p>
+
+  <p><strong>UFL = EM × km</strong>, où km est le coefficient d'utilisation de l'EM pour la lactation (km ≈ 0,60 à 0,65 selon la concentration énergétique de la ration).</p>
+
+  <h3>Quand utiliser l'UFL ?</h3>
+  <ul>
+    <li>Rations de vaches laitières (toutes races)</li>
+    <li>Rations de vaches allaitantes en lactation</li>
+    <li>Rations de génisses laitières en croissance (par convention INRA)</li>
+    <li>Alimentation des petits ruminants laitiers (avec tables spécifiques)</li>
+  </ul>
+
+  <h2>UFV — Unité Fourragère Viande</h2>
+
+  <h3>Définition et usage</h3>
+  <p>L'<strong>UFV (Unité Fourragère Viande)</strong> mesure l'énergie nette disponible pour la <strong>croissance musculaire et le dépôt de lipides corporels</strong>. Elle s'applique aux bovins allotés pour la production de viande : taurillons, bœufs, génisses à l'engraissement, vaches de réforme en finition.</p>
+
+  <p>L'UFV est calculée différemment de l'UFL car l'efficacité d'utilisation de l'énergie métabolisable pour la croissance (coefficient kf) est plus faible que pour la lactation :</p>
+
+  <p><strong>UFV = EM × kf</strong>, où kf ≈ 0,40 à 0,48 selon la concentration énergétique de la ration.</p>
+
+  <div class="art-warning">
+    <p><strong>Erreur fréquente :</strong> Ne jamais utiliser des valeurs UFL pour raisonner la ration d'un taurillon en croissance. Les besoins et les apports doivent tous deux être exprimés en UFV. Mélanger les deux unités fausse complètement le bilan énergétique.</p>
+  </div>
+
+  <h3>Pourquoi UFV &gt; UFL pour le même aliment ?</h3>
+  <p>Pour un même aliment, la valeur UFV est toujours <strong>supérieure à la valeur UFL</strong>. Cela semble paradoxal mais s'explique par la biochimie : l'énergie de référence (1 kg d'orge) vaut 1 700 kcal pour la lait mais 1 820 kcal pour la viande. Le dénominateur étant plus grand pour l'UFV, la valeur relative d'un aliment en UFV est numériquement plus élevée. Exemple : un ensilage de maïs à 0,92 UFL/kg MS vaut environ 0,99 UFV/kg MS.</p>
+
+  <h2>Tableau comparatif UFL / UFV des aliments courants</h2>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Aliment</th>
+        <th>MS (%)</th>
+        <th>UFL/kg MS</th>
+        <th>UFV/kg MS</th>
+        <th>PDI (g/kg MS)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Ensilage de maïs (bon)</td><td>33</td><td>0,92</td><td>0,99</td><td>60</td></tr>
+      <tr><td>Ensilage d'herbe (préfané)</td><td>40</td><td>0,84</td><td>0,88</td><td>95</td></tr>
+      <tr><td>Foin prairie naturelle</td><td>86</td><td>0,74</td><td>0,77</td><td>78</td></tr>
+      <tr><td>Foin de luzerne 1re coupe</td><td>88</td><td>0,81</td><td>0,85</td><td>135</td></tr>
+      <tr><td>Paille de blé</td><td>87</td><td>0,40</td><td>0,40</td><td>31</td></tr>
+      <tr><td>Maïs grain broyé</td><td>88</td><td>1,19</td><td>1,28</td><td>86</td></tr>
+      <tr><td>Orge grain aplatie</td><td>87</td><td>1,12</td><td>1,20</td><td>95</td></tr>
+      <tr><td>Tourteau de soja 48</td><td>88</td><td>1,08</td><td>1,12</td><td>302</td></tr>
+      <tr><td>Tourteau de colza</td><td>89</td><td>0,99</td><td>1,03</td><td>232</td></tr>
+      <tr><td>Betterave fourragère (brute)</td><td>17</td><td>0,95</td><td>1,01</td><td>58</td></tr>
+      <tr><td>Pulpe de betterave déshydratée</td><td>88</td><td>0,92</td><td>0,97</td><td>80</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Les protéines PDI : la troisième dimension du rationnement</h2>
+
+  <h3>Qu'est-ce que les PDI ?</h3>
+  <p>Les <strong>PDI (Protéines Digestibles dans l'Intestin)</strong> représentent l'azote disponible pour l'animal au niveau intestinal, après les transformations ruminales. Ce concept, également développé par l'INRA, complète obligatoirement les unités fourragères : une ration peut être équilibrée en UFL mais déficitaire en PDI, ce qui limite toujours les performances.</p>
+
+  <p>Les PDI se décomposent en deux flux :</p>
+  <ul>
+    <li><strong>PDIN</strong> : PDI limitées par l'azote fermentescible (cas des rations riches en amidon et pauvres en protéines)</li>
+    <li><strong>PDIE</strong> : PDI limitées par l'énergie fermentescible (cas des rations riches en protéines dégradables)</li>
+  </ul>
+  <p>La valeur PDI retenue est le minimum entre PDIN et PDIE.</p>
+
+  <h3>Ratio PDI/UFL : le repère clé</h3>
+  <p>Pour vérifier l'équilibre énergie-protéine d'une ration, calculez le ratio PDI/UFL. Les valeurs cibles sont :</p>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Catégorie animale</th>
+        <th>Ratio PDI/UFL cible</th>
+        <th>Interprétation si hors cible</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Vache laitière haute production</td><td>95 – 105 g/UFL</td><td>&lt; 95 : manque de PDI ; &gt; 105 : gaspillage azoté</td></tr>
+      <tr><td>Vache laitière faible production</td><td>88 – 98 g/UFL</td><td>Tolérance légèrement plus large</td></tr>
+      <tr><td>Taurillon à l'engraissement</td><td>85 – 100 g/UFV</td><td>Besoins protéiques moindres en finition</td></tr>
+      <tr><td>Génisse en croissance</td><td>95 – 110 g/UFL</td><td>Besoins élevés pour la croissance musculaire</td></tr>
+      <tr><td>Vache allaitante en lactation</td><td>90 – 100 g/UFL</td><td>Equivalent à la vache laitière</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Exemples pratiques de calcul</h2>
+
+  <h3>Exemple 1 : ration de taurillon charolais (450 kg, GMQ 1,3 kg/j)</h3>
+  <p>Besoins : entretien + croissance = 3,4 UFV/j (entretien) + (1,3 × 4,5) = 3,4 + 5,85 = <strong>9,25 UFV/jour</strong></p>
+  <p>Ration type : 6 kg MS ensilage maïs (6 × 0,99 = 5,94 UFV) + 3 kg MS maïs grain (3 × 1,28 = 3,84 UFV) = <strong>9,78 UFV</strong>. Objectif atteint.</p>
+
+  <h3>Exemple 2 : vache allaitante charolaise (750 kg, 15 L/j de lait)</h3>
+  <p>Utilisation des <strong>UFL</strong> (car lactation dominante). Besoins = entretien (7,4 UFL) + production lait (15 × 0,44 = 6,6 UFL) = <strong>14 UFL/jour</strong>.</p>
+
+  <div class="art-infobox">
+    <p><strong>Règle mémo-technique :</strong> UFL pour les "L" comme Lait. UFV pour les "V" comme Viande. En cas de doute sur la catégorie, la vache allaitante est raisonnée en UFL pendant la lactation et en UFV lors du tarissement ou de la finition.</p>
+  </div>
+
+  <h2>UFL, UFV et logiciels de rationnement</h2>
+
+  <p>Les outils modernes de rationnement (dont Rumicore) gèrent automatiquement le choix UFL/UFV selon la catégorie d'animal que vous sélectionnez. Cela évite les erreurs de système, qui sont malheureusement courantes lorsque le travail est réalisé manuellement sur tableur. L'important est de comprendre les concepts pour interpréter les résultats et détecter une anomalie éventuelle dans les calculs.</p>
+
+  <p>Les valeurs des aliments dans les bases de données INRA 2018 sont toutes exprimées en UFL et UFV simultanément. Vous pouvez donc à tout moment basculer d'un système à l'autre pour une même liste d'aliments, ce qui facilite la transition entre lots (par exemple, des génisses qui passent de la phase élevage en UFL à la phase d'engraissement en UFV).</p>
+
+  <div class="art-cta">
+    <h3>Rumicore calcule automatiquement en UFL ou UFV</h3>
+    <p>Sélectionnez votre catégorie d'animal et Rumicore applique le bon système énergétique. Accédez à la base INRA 2018 complète, directement dans votre navigateur.</p>
+    <a href="/app.html" style="display:inline-block;background:#fff;color:#15803d;font-weight:700;padding:13px 30px;border-radius:8px;text-decoration:none;font-size:.95rem;box-shadow:0 2px 8px rgba(0,0,0,.15);">Accéder à Rumicore →</a>
+  </div>
+
+  <section class="art-related">
+    <h3>Articles liés</h3>
+    <div class="art-related-grid">
+      <a href="calcul-ration-bovine.html" class="art-related-card">
+        <div class="tag">Rationnement laitier</div>
+        <h4>Comment calculer une ration pour vache laitière ? Méthode complète INRA 2018</h4>
+      </a>
+      <a href="normes-inra-2018.html" class="art-related-card">
+        <div class="tag">Référentiels</div>
+        <h4>Normes INRA 2018 : guide complet pour l'éleveur bovin</h4>
+      </a>
+      <a href="rationnement-bovins-viande.html" class="art-related-card">
+        <div class="tag">Bovins viande</div>
+        <h4>Rationner les bovins viande : taurillons, bœufs et vaches allaitantes</h4>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="art-footer"><p>&copy; 2026 Rumicore &nbsp;&middot;&nbsp; <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a> &nbsp;&middot;&nbsp; <a href="/index.html">Rumicore.com</a></p></footer>
+</body>
+</html>

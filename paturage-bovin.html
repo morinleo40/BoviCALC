@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion du pâturage bovin : maximiser la production d'herbe et la valorisation — Rumicore</title>
+  <meta name="description" content="Gestion du pâturage bovin : valeur alimentaire de l'herbe, rotation, chargement, hauteurs d'entrée/sortie, risques printaniers et complémentation. Guide complet éleveur.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+    .art-nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .art-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .art-nav-logo img { height:32px; }
+    .art-nav-logo span { font-size:1.1rem; font-weight:900; color:#15803d; }
+    .art-nav-links { display:flex; gap:6px; }
+    .art-nav-links a { text-decoration:none; color:#475569; font-size:.83rem; font-weight:500; padding:6px 12px; border-radius:6px; transition:all .15s; }
+    .art-nav-links a:hover { background:#f1f5f9; color:#15803d; }
+    .art-hero { background:linear-gradient(135deg,#14532d 0%,#4ade80 60%,#86efac 100%); padding:56px 32px 48px; color:#fff; }
+    .art-hero-inner { max-width:800px; margin:0 auto; }
+    .art-category { display:inline-block; background:rgba(255,255,255,.2); border-radius:20px; padding:4px 14px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .art-hero h1 { font-size:2.1rem; font-weight:900; line-height:1.25; margin-bottom:16px; }
+    .art-meta { font-size:.82rem; color:rgba(255,255,255,.75); }
+    .art-body { max-width:800px; margin:0 auto; padding:48px 32px; }
+    .art-body h2 { font-size:1.4rem; font-weight:800; color:#0f172a; margin:36px 0 14px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+    .art-body h3 { font-size:1.05rem; font-weight:700; color:#15803d; margin:24px 0 10px; }
+    .art-body p { font-size:.95rem; color:#374151; line-height:1.8; margin-bottom:16px; }
+    .art-body ul, .art-body ol { font-size:.93rem; color:#374151; line-height:1.8; padding-left:22px; margin-bottom:16px; }
+    .art-body li { margin-bottom:6px; }
+    .art-body strong { color:#0f172a; }
+    .art-infobox { background:#f0fdf4; border-left:4px solid #15803d; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-infobox p { margin:0; font-size:.88rem; color:#166534; }
+    .art-warning { background:#fff7ed; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-warning p { margin:0; font-size:.88rem; color:#c2410c; }
+    .art-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:.88rem; }
+    .art-table th { background:#f1f5f9; padding:10px 14px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; }
+    .art-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .art-table tr:hover td { background:#f8fafc; }
+    .art-cta { background:linear-gradient(135deg,#14532d,#15803d); border-radius:16px; padding:36px; text-align:center; margin:48px 0 0; color:#fff; }
+    .art-cta h3 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+    .art-cta p { font-size:.9rem; color:rgba(255,255,255,.85); margin-bottom:24px; }
+    .art-cta a { background:#fff; color:#15803d; font-weight:700; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:.9rem; }
+    .art-footer { background:#0f172a; padding:28px 32px; text-align:center; color:#64748b; font-size:.83rem; margin-top:64px; }
+    .art-footer a { color:#94a3b8; text-decoration:none; }
+    .art-related { border-top:2px solid #e2e8f0; padding-top:36px; margin-top:48px; }
+    .art-related h3 { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px; }
+    .art-related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .art-related-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; text-decoration:none; transition:box-shadow .2s; }
+    .art-related-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
+    .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
+    @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/articles.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#475569;font-size:.85rem;font-weight:600;">← Retour aux articles</a>
+  <a href="/app.html" style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Essayer Rumicore →</a>
+</nav>
+
+<header class="art-hero">
+  <div style="width:100%;max-height:380px;overflow:hidden;margin-bottom:0;"><img src="images/paturage.jpg" alt="paturage-bovin" style="width:100%;max-height:380px;object-fit:cover;display:block;"></div><div class="art-hero-inner">
+    <span class="art-category">Conduite d'élevage</span>
+    <h1>Gestion du pâturage bovin :<br>maximiser la production d'herbe et la valorisation</h1>
+    <p class="art-meta">Par l'équipe Rumicore &nbsp;&bull;&nbsp; Mis à jour le 22 mai 2026 &nbsp;&bull;&nbsp; Lecture : 9 min</p>
+  </div>
+</header>
+
+<main class="art-body">
+
+  <p>Le pâturage est la ressource alimentaire la moins chère disponible pour un éleveur bovin — quand il est bien géré. Mal conduit, il peut au contraire coûter cher : herbe gaspillée, sol dégradé, parasitisme renforcé, carences en magnésium ou météorisation fatale. Une gestion rigoureuse du pâturage, fondée sur la surveillance des hauteurs d'herbe et du chargement, peut réduire le coût alimentaire de 20 à 40 % par rapport à un système tout-foin. Ce guide présente les principes agronomiques et pratiques pour valoriser au mieux chaque hectare de prairie.</p>
+
+  <h2>Valeur alimentaire de l'herbe pâturée</h2>
+
+  <p>L'herbe pâturée au stade feuillu est l'un des aliments les plus riches disponibles pour les bovins. Sa valeur est cependant extrêmement variable selon le stade végétatif, l'espèce dominante et la saison. C'est pourquoi il est impossible de raisonner à l'aveugle : la surveillance visuelle de l'herbe est indispensable.</p>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Stade de l'herbe</th>
+        <th>UFL/kg MS</th>
+        <th>PDI (g/kg MS)</th>
+        <th>NDF (%MS)</th>
+        <th>Remarque</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Feuillu (printemps, repousse)</td><td>0,92–1,00</td><td>100–130</td><td>38–42</td><td>Très digestible, riche en azote</td></tr>
+      <tr><td>Début épiaison</td><td>0,85–0,92</td><td>90–110</td><td>44–50</td><td>Qualité optimale production laitière</td></tr>
+      <tr><td>Pleine épiaison</td><td>0,78–0,85</td><td>80–95</td><td>52–58</td><td>Fibres en hausse, valeur correcte</td></tr>
+      <tr><td>Floraison / fenaison</td><td>0,68–0,78</td><td>65–82</td><td>60–68</td><td>Valeur foin, convient au troupeau allaitant</td></tr>
+      <tr><td>Estival desséché</td><td>0,55–0,65</td><td>50–65</td><td>68–75</td><td>Complémentation indispensable</td></tr>
+    </tbody>
+  </table>
+
+  <div class="art-infobox">
+    <p><strong>Règle d'or :</strong> Pour une vache produisant 25 litres/jour, l'herbe pâturée au stade feuillu peut couvrir à elle seule 70 à 80 % des besoins énergétiques. Au-delà de 30 litres, une complémentation en concentrés est nécessaire même avec la meilleure herbe.</p>
+  </div>
+
+  <h2>Les conditions de sortie au pâturage</h2>
+
+  <h3>Critères météorologiques et agronomiques</h3>
+  <p>La sortie au pâturage au printemps est soumise à des conditions précises qu'il ne faut pas négliger sous peine de dégrader les prairies et de retarder la saison de pâturage :</p>
+  <ul>
+    <li><strong>Température :</strong> au moins 6 à 8 °C sur 10 jours consécutifs pour que l'herbe pousse assez vite pour compenser le prélèvement</li>
+    <li><strong>Hauteur d'herbe :</strong> minimum 8 cm (idéalement 10 cm) mesurée au herbomètre ou à la règle graduée avant d'entrer sur la parcelle</li>
+    <li><strong>Portance :</strong> le sol doit supporter le passage des animaux sans s'effondrer. Enfoncement de la chaussure de plus de 5 cm = sol trop humide, risque de dégradation du couvert et de la structure du sol</li>
+  </ul>
+
+  <h3>Pâturage hivernal : attention aux dégâts</h3>
+  <p>Le pâturage en hiver ou en conditions de sol détrempé est une pratique à risque. Les piétinements tassent le sol, détruisent les racines de graminées et créent des zones de boue permanentes qui servent de réservoirs à agents pathogènes (salmonellose, mammites environnementales). Si la sortie est inévitable, restreindre l'accès à quelques heures par jour et utiliser des couloirs de déplacement stabilisés.</p>
+
+  <h2>Pâturage tournant vs pâturage continu</h2>
+
+  <h3>Pâturage continu : les limites</h3>
+  <p>En pâturage continu, les animaux ont accès permanent à l'ensemble de la surface. Ils sélectionnent les espèces et zones les plus appétentes, sur-pâturent certains spots et sous-utilisent d'autres. Résultat : envahissement par les espèces refusées, hétérogénéité du couvert, mauvaise valorisation. Ce système est surtout adapté aux petites surfaces avec faible chargement (extensif) ou aux troupeaux de vaches allaitantes avec grands espaces.</p>
+
+  <h3>Pâturage tournant rationné : le système de référence</h3>
+  <p>Le pâturage tournant divise la surface en plusieurs parcelles (ou paddocks) utilisées successivement, avec un temps de séjour court (1 à 4 jours) et un temps de repos suffisant pour la repousse (20 à 35 jours selon la saison). Ce système :</p>
+  <ul>
+    <li>Améliore l'utilisation de l'herbe de <strong>15 à 25 %</strong> par rapport au pâturage continu</li>
+    <li>Homogénéise l'état de la prairie grâce à un pâturage ras et régulier</li>
+    <li>Réduit le parasitisme par la rupture du cycle (les larves meurent sur les parcelles au repos)</li>
+    <li>Facilite l'anticipation et la gestion des excédents (fauche des paddocks en avance)</li>
+  </ul>
+
+  <div class="art-infobox">
+    <p><strong>Nombre de paddocks recommandé :</strong> Divisez votre surface en au moins 8 à 12 paddocks pour un système laitier. Avec 12 paddocks et un temps de séjour de 2 jours, vous obtenez un temps de repos de 22 jours — idéal au printemps. En été, quand la pousse ralentit, réduisez le nombre de paddocks en service pour allonger le repos à 35–40 jours.</p>
+  </div>
+
+  <h2>Hauteurs d'entrée et de sortie : les repères clés</h2>
+
+  <p>La gestion par les hauteurs est la méthode la plus simple et la plus fiable pour piloter le pâturage tournant :</p>
+  <ul>
+    <li><strong>Hauteur d'entrée :</strong> 10 à 12 cm (mesure herbomètre). En dessous, l'herbe est trop jeune, riche en azote soluble (risque météorisation) et la quantité ingérée par bouchée est insuffisante. Au-dessus de 15 cm, risque de refus et de tiges montées, qualité en baisse.</li>
+    <li><strong>Hauteur de sortie :</strong> 4 à 5 cm. En dessous, la vache rase le sol et compromet la repousse. Au-dessus de 6 cm, on laisse de l'herbe gaspillée et on favorise les refus lors du prochain passage.</li>
+  </ul>
+
+  <h2>Chargement et dimensionnement de la surface</h2>
+
+  <p>Le chargement instantané (nombre d'animaux sur la surface en herbe à un moment donné) et le chargement annuel (UGB/ha/an) sont deux indicateurs complémentaires. En élevage laitier intensif, on vise un chargement annuel de <strong>1,5 à 2 UGB/ha de SAU fourragère</strong> selon la pluviométrie et la fertilisation.</p>
+
+  <p>Pour calculer la surface nécessaire :</p>
+  <ul>
+    <li>Besoins en MS pâturée par vache et par jour : <strong>12 à 18 kg MS/j</strong> selon production et complémentation</li>
+    <li>Croissance de l'herbe : 40 à 80 kg MS/ha/jour au printemps, 20 à 40 en été, 10 à 20 en automne</li>
+    <li>Pour 50 vaches laitières pâturant 200 jours : surface minimale = (50 × 15 kg × 200) / 30 000 kg MS/ha = <strong>5 ha minimum</strong> (avec une pousse moyenne de 30 t MS/ha/an)</li>
+  </ul>
+
+  <h2>Complémentation au pâturage</h2>
+
+  <h3>Concentrés de production</h3>
+  <p>En dessous de 25 litres, une vache bien adaptée au pâturage peut se passer de concentrés si l'herbe est abondante et de qualité. Au-delà, la complémentation est justifiée économiquement. La règle pratique : distribuer <strong>250 g de concentré par litre au-dessus de 25 L</strong> (soit 2,5 kg pour une vache à 35 L). En dessous de 10 cm d'herbe disponible, complémentez dès 20 litres.</p>
+
+  <h3>Minéraux au pâturage</h3>
+  <p>L'herbe de printemps est souvent pauvre en magnésium et riche en potassium et azote, deux éléments qui réduisent l'absorption du Mg. Distribuez des minéraux à lécher contenant au minimum <strong>10 % de Mg</strong> dès la mise à l'herbe.</p>
+
+  <h2>Risques printaniers spécifiques</h2>
+
+  <h3>Tétanie herbeuse</h3>
+  <p>La tétanie (hypomagnésémie) est un risque réel sur herbe jeune fertilisée, surtout par temps frais humide de mars à mai. Elle peut tuer en quelques heures. La prévention passe par la supplémentation en magnésium avant et pendant la saison de pâturage.</p>
+
+  <h3>Météorisation mousseuse</h3>
+  <p>L'herbe très jeune, riche en protéines solubles, peut provoquer une météorisation mousseuse sur des prairies de légumineuses pures (trèfle blanc) ou des repousses très tendres. Le risque est maximum à la mise à l'herbe de printemps sur estomac vide. Règle : <strong>ne jamais sortir les vaches affamées sur une herbe jeune</strong>. Leur donner du foin ou de la paille avant la sortie, ou attendre la rosée dissipée.</p>
+
+  <div class="art-warning">
+    <p><strong>Météorisation aiguë :</strong> C'est une urgence vitale. Un bovin qui ne peut pas évacuer le gaz ruminal peut mourir en moins d'une heure. Signes : flanc gauche gonflé, détresse respiratoire, animal debout puis couché. Intervention : libérer le gaz (sonde ruminale ou trocard en dernier recours), appeler le vétérinaire immédiatement.</p>
+  </div>
+
+  <div class="art-cta">
+    <h3>Intégrez la valeur de l'herbe pâturée dans vos rations avec Rumicore</h3>
+    <p>Rumicore permet de saisir l'herbe pâturée comme aliment avec sa valeur réelle selon le stade, et calcule la complémentation optimale pour chaque vache de votre troupeau.</p>
+    <a href="/app.html" style="display:inline-block;background:#fff;color:#15803d;font-weight:700;padding:13px 30px;border-radius:8px;text-decoration:none;font-size:.95rem;box-shadow:0 2px 8px rgba(0,0,0,.15);">Accéder à Rumicore →</a>
+  </div>
+
+  <section class="art-related">
+    <h3>Articles liés</h3>
+    <div class="art-related-grid">
+      <a href="tetanie-herbeuse.html" class="art-related-card">
+        <div class="tag">Santé saisonnière</div>
+        <h4>Tétanie herbeuse (hypomagnésémie) : prévenir le risque au printemps</h4>
+      </a>
+      <a href="calcul-ration-bovine.html" class="art-related-card">
+        <div class="tag">Rationnement laitier</div>
+        <h4>Comment calculer une ration pour vache laitière ? Méthode complète INRA 2018</h4>
+      </a>
+      <a href="bilan-fourrager.html" class="art-related-card">
+        <div class="tag">Gestion du troupeau</div>
+        <h4>Bilan fourrager hivernal : méthode complète pour ne jamais manquer de fourrage</h4>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="art-footer"><p>&copy; 2026 Rumicore &nbsp;&middot;&nbsp; <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a> &nbsp;&middot;&nbsp; <a href="/index.html">Rumicore.com</a></p></footer>
+</body>
+</html>

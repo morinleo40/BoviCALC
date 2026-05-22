@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fièvre de lait (hypocalcémie) : prévention et conduite à tenir au vêlage — Rumicore</title>
+  <meta name="description" content="Fièvre vitulaire bovine : mécanisme calcique, grades 1-2-3, traitement par perfusion, prévention BACA et aliments anioniques. Guide pratique pour l'éleveur laitier.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+    .art-nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .art-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .art-nav-logo img { height:32px; }
+    .art-nav-logo span { font-size:1.1rem; font-weight:900; color:#15803d; }
+    .art-nav-links { display:flex; gap:6px; }
+    .art-nav-links a { text-decoration:none; color:#475569; font-size:.83rem; font-weight:500; padding:6px 12px; border-radius:6px; transition:all .15s; }
+    .art-nav-links a:hover { background:#f1f5f9; color:#15803d; }
+    .art-hero { background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 60%,#2563eb 100%); padding:56px 32px 48px; color:#fff; }
+    .art-hero-inner { max-width:800px; margin:0 auto; }
+    .art-category { display:inline-block; background:rgba(255,255,255,.2); border-radius:20px; padding:4px 14px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .art-hero h1 { font-size:2.1rem; font-weight:900; line-height:1.25; margin-bottom:16px; }
+    .art-meta { font-size:.82rem; color:rgba(255,255,255,.75); }
+    .art-body { max-width:800px; margin:0 auto; padding:48px 32px; }
+    .art-body h2 { font-size:1.4rem; font-weight:800; color:#0f172a; margin:36px 0 14px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+    .art-body h3 { font-size:1.05rem; font-weight:700; color:#15803d; margin:24px 0 10px; }
+    .art-body p { font-size:.95rem; color:#374151; line-height:1.8; margin-bottom:16px; }
+    .art-body ul, .art-body ol { font-size:.93rem; color:#374151; line-height:1.8; padding-left:22px; margin-bottom:16px; }
+    .art-body li { margin-bottom:6px; }
+    .art-body strong { color:#0f172a; }
+    .art-infobox { background:#f0fdf4; border-left:4px solid #15803d; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-infobox p { margin:0; font-size:.88rem; color:#166534; }
+    .art-warning { background:#fff7ed; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-warning p { margin:0; font-size:.88rem; color:#c2410c; }
+    .art-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:.88rem; }
+    .art-table th { background:#f1f5f9; padding:10px 14px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; }
+    .art-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .art-table tr:hover td { background:#f8fafc; }
+    .art-cta { background:linear-gradient(135deg,#14532d,#15803d); border-radius:16px; padding:36px; text-align:center; margin:48px 0 0; color:#fff; }
+    .art-cta h3 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+    .art-cta p { font-size:.9rem; color:rgba(255,255,255,.85); margin-bottom:24px; }
+    .art-cta a { background:#fff; color:#15803d; font-weight:700; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:.9rem; }
+    .art-footer { background:#0f172a; padding:28px 32px; text-align:center; color:#64748b; font-size:.83rem; margin-top:64px; }
+    .art-footer a { color:#94a3b8; text-decoration:none; }
+    .art-related { border-top:2px solid #e2e8f0; padding-top:36px; margin-top:48px; }
+    .art-related h3 { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px; }
+    .art-related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .art-related-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; text-decoration:none; transition:box-shadow .2s; }
+    .art-related-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
+    .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
+    @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/articles.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#475569;font-size:.85rem;font-weight:600;">← Retour aux articles</a>
+  <a href="/app.html" style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Essayer Rumicore →</a>
+</nav>
+
+<header class="art-hero">
+  <div style="width:100%;max-height:380px;overflow:hidden;margin-bottom:0;"><img src="images/velage-veau.jpg" alt="fievre-de-lait" style="width:100%;max-height:380px;object-fit:cover;display:block;"></div><div class="art-hero-inner">
+    <span class="art-category">Santé au vêlage</span>
+    <h1>Fièvre de lait (hypocalcémie) :<br>prévention et conduite à tenir au vêlage</h1>
+    <p class="art-meta">Par l'équipe Rumicore &nbsp;&bull;&nbsp; Mis à jour le 22 mai 2026 &nbsp;&bull;&nbsp; Lecture : 9 min</p>
+  </div>
+</header>
+
+<main class="art-body">
+
+  <p>La fièvre vitulaire — ou fièvre de lait — est une hypocalcémie aiguë survenant dans les 72 heures autour du vêlage. Malgré son nom, il n'y a pas de fièvre : la température est normale ou basse. L'animal est paralysé par un manque de calcium sanguin. C'est l'une des maladies métaboliques les plus fréquentes en élevage laitier intensif, avec un taux d'incidence de 5 à 10 % dans les troupeaux non préparés, et des répercussions économiques et sanitaires importantes bien au-delà du cas clinique visible.</p>
+
+  <h2>Mécanisme physiologique</h2>
+
+  <p>À la naissance du veau, puis lors de la montée laiteuse, les besoins en calcium de la vache explosent brutalement. Le colostrum seul contient <strong>2 à 3 g de calcium par litre</strong>, et la montée laiteuse peut mobiliser 30 g de Ca par jour au pic — soit une demande trois fois supérieure aux besoins d'entretien.</p>
+
+  <p>L'organisme dispose de deux mécanismes pour maintenir la calcémie :</p>
+  <ul>
+    <li><strong>La résorption osseuse</strong> (ostéoclastes stimulés par la PTH — parathormone)</li>
+    <li><strong>L'absorption digestive accrue</strong> via la synthèse de vitamine D active (1,25-dihydroxycholécalciférol)</li>
+  </ul>
+
+  <p>Ces mécanismes prennent <strong>12 à 48 heures</strong> à s'activer. Si, pendant cette fenêtre, les sorties de calcium (colostrum + lait) dépassent les entrées, la calcémie chute. En dessous de <strong>1,5 mmol/L</strong> (seuil clinique, normale &gt; 2,2 mmol/L), les symptômes apparaissent.</p>
+
+  <h2>Facteurs de risque</h2>
+
+  <p>Tous les élevages ne sont pas égaux face à la fièvre de lait. Les principaux facteurs de risque sont :</p>
+  <ul>
+    <li><strong>Rang de lactation :</strong> rare chez les primipares, incidence croissante à partir de la 3e lactation (os moins mobilisables, récepteurs PTH moins réactifs)</li>
+    <li><strong>Races :</strong> jersiaises et normandes plus sensibles, holsteins à haut potentiel également</li>
+    <li><strong>Ration trop riche en calcium en période sèche :</strong> une vache qui reçoit beaucoup de Ca en fin de gestation n'active pas ses mécanismes de mobilisation — elle est dépendante des apports alimentaires. Au vêlage, quand les apports ne suivent plus, elle décompense.</li>
+    <li><strong>Excès de potassium :</strong> le potassium alimentaire interfère avec les récepteurs de la PTH et réduit la réponse osseuse</li>
+    <li><strong>Obésité :</strong> les vaches en excès d'état corporel au vêlage ont une appétence réduite et une réponse métabolique moins rapide</li>
+  </ul>
+
+  <h2>Les trois grades cliniques</h2>
+
+  <h3>Grade 1 — Hypocalcémie subclinique</h3>
+  <p>La vache tient debout mais présente des signes discrets : <strong>légers tremblements musculaires</strong>, excitabilité, démarche légèrement raide, appétit légèrement réduit. Le rumen est ralenti. Calcémie entre 1,5 et 2,0 mmol/L. Ce stade est souvent sous-diagnostiqué mais est associé à un risque multiplié par 4 de rétention placentaire et par 3 de déplacement de caillette.</p>
+
+  <h3>Grade 2 — Décubitus sternal</h3>
+  <p>La vache ne peut plus se lever. Elle reste en <strong>décubitus sternal</strong>, tête renversée sur le flanc (position "en S"). Muscles flasques, pupilles dilatées, absence de réflexe anal. Tympanisme possible par atonie ruminale. C'est le tableau clinique classique de la fièvre de lait — calcémie entre 1,0 et 1,5 mmol/L. Intervention nécessaire dans les 2 à 4 heures.</p>
+
+  <h3>Grade 3 — Coma</h3>
+  <p>Stade ultime : la vache est en <strong>décubitus latéral</strong>, inconsciente, hypotherme (température &lt; 37 °C). Calcémie inférieure à 1,0 mmol/L. Le pronostic est sombre si le traitement n'est pas institué dans l'heure. Des complications cardiaques (arythmies) peuvent survenir lors de la perfusion.</p>
+
+  <div class="art-warning">
+    <p><strong>Urgence :</strong> Une vache en grade 3 (coma, décubitus latéral) doit recevoir le calcium IV lentement, en écoutant les bruits cardiaques. Une perfusion trop rapide peut provoquer un arrêt cardiaque. La dose doit être fractionnée et le vétérinaire doit être contacté en priorité pour les grades 2 et 3 sévères.</p>
+  </div>
+
+  <h2>Traitement</h2>
+
+  <h3>Calcium oral (grade 1)</h3>
+  <p>Pour les formes légères détectées précocement (grade 1, vache debout), des bolus calciques oraux (propionate ou chlorure de calcium, 50 g de Ca par prise) peuvent suffire. À renouveler 8 à 12 heures plus tard. Cette voie est aussi utilisée en préventif sur les vaches à risque (3e+ lactation).</p>
+
+  <h3>Perfusion IV de calcium (grades 2 et 3)</h3>
+  <p>La voie intraveineuse est le traitement de référence. On utilise des solutions de <strong>borogluconates de calcium</strong> (forme la mieux tolérée) :</p>
+  <ul>
+    <li>Dose : <strong>2 à 3 g de calcium par 100 kg de poids vif</strong>, soit 3 à 4 flacons de 400 mL de solution à 40 % pour une vache de 650 kg</li>
+    <li>Vitesse : lente (20 à 30 minutes minimum par flacon), auscultation cardiaque pendant toute la perfusion</li>
+    <li>Voie : veine jugulaire ou veine caudale (sous-cutanée possible en parallèle pour dépôt retard)</li>
+    <li>En cas de rechute dans les 12 à 24h : compléter par une voie sous-cutanée et rechercher une autre cause (hypomagnésémie associée fréquente)</li>
+  </ul>
+
+  <h2>Prévention : le BACA préparto</h2>
+
+  <p>La prévention est beaucoup plus efficace et économique que le traitement. Elle repose sur le concept du <strong>BACA (Bilan Acido-Basique des Cations-Anions)</strong> de la ration des vaches taries.</p>
+
+  <p>Le BACA se calcule ainsi : BACA (meq/kg MS) = (Na + K) – (Cl + S) × 100 / MS</p>
+
+  <p>Une ration préparto avec <strong>BACA entre –200 et –100 meq/kg MS</strong> crée une légère acidose métabolique qui :</p>
+  <ul>
+    <li>Sensibilise les récepteurs de la PTH dans les os et les reins</li>
+    <li>Active l'hydroxylation de la vitamine D</li>
+    <li>Stimule l'absorption intestinale du calcium dès avant le vêlage</li>
+  </ul>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Aliment</th>
+        <th>BACA (meq/kg MS)</th>
+        <th>Effet sur la ration</th>
+        <th>Utilisation préparto</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Luzerne déshydratée</td><td>+350 à +500</td><td>Très alcalinisant</td><td>À éviter en ration sèche</td></tr>
+      <tr><td>Betterave sucrière</td><td>+250 à +350</td><td>Alcalinisant</td><td>À éviter ou limiter</td></tr>
+      <tr><td>Ensilage d'herbe</td><td>+150 à +250</td><td>Alcalinisant</td><td>Limiter &lt; 3 kg MS/j</td></tr>
+      <tr><td>Ensilage de maïs</td><td>+10 à +30</td><td>Neutre</td><td>Bien adapté à la ration sèche</td></tr>
+      <tr><td>Paille de blé</td><td>+20 à +50</td><td>Quasi neutre</td><td>Base idéale de la ration sèche</td></tr>
+      <tr><td>Sulfate d'ammonium</td><td>–500 à –700</td><td>Très acidifiant</td><td>Correcteur anionique efficace</td></tr>
+      <tr><td>Chlorure de magnésium</td><td>–400 à –550</td><td>Acidifiant</td><td>Apporte aussi du Mg</td></tr>
+    </tbody>
+  </table>
+
+  <div class="art-infobox">
+    <p><strong>Suivi urinaire :</strong> Pour vérifier que votre ration anionique fonctionne, mesurez le pH urinaire des vaches taries en fin de tarissement (J–7 à J–3). Un pH urinaire entre <strong>6,0 et 6,8</strong> confirme que la légère acidose métabolique est atteinte. Un pH &gt; 7,5 indique que le BACA est insuffisamment négatif et que le risque de fièvre de lait reste élevé.</p>
+  </div>
+
+  <h2>Autres mesures préventives</h2>
+
+  <h3>Limiter les apports en calcium en période sèche</h3>
+  <p>La ration sèche doit apporter <strong>moins de 50 g de Ca/j</strong> pour ne pas "endormir" les mécanismes de mobilisation. La paille (1 à 2 g Ca/kg MS) et l'ensilage de maïs (&lt; 3 g Ca/kg MS) sont idéaux. La luzerne (15 à 18 g Ca/kg MS) et les betteraves (&gt; 8 g Ca/kg MS) sont à proscrire ou à limiter strictement.</p>
+
+  <h3>Supplémentation en vitamine D3</h3>
+  <p>Une injection unique de <strong>10 millions d'UI de vitamine D3</strong> dans les 5 à 2 jours avant le vêlage peut réduire l'incidence de la fièvre de lait. Cette pratique est plus adaptée à des vaches à risque individuel élevé qu'à la prévention collective.</p>
+
+  <h2>Impact économique</h2>
+
+  <p>L'impact d'un cas de fièvre de lait clinique ne se limite pas au coût de traitement (environ 35 à 60 €). Les complications associées coûtent bien plus :</p>
+  <ul>
+    <li>Rétention placentaire : risque x4 (coût 50–150 € traitement + perte de fertilité)</li>
+    <li>Déplacement de caillette : risque x5 (coût chirurgical 300–500 €)</li>
+    <li>Endométrite : risque x3 (perte fertilité, +30 à 60 jours IVV)</li>
+    <li>Mammite dans les premiers jours de lactation : risque x2</li>
+    <li>Pertes laitières : –200 à –400 kg sur la lactation</li>
+  </ul>
+  <p>Le coût total estimé par cas clinique (directs + indirects) dépasse souvent <strong>300 à 500 €</strong>. Pour un élevage de 100 vaches avec 8 % d'incidence, cela représente 2 400 à 4 000 € de perte annuelle évitable.</p>
+
+  <div class="art-cta">
+    <h3>Calculez le BACA de votre ration préparto avec Rumicore</h3>
+    <p>Rumicore intègre le calcul du BACA pour toutes vos rations. Vérifiez en quelques secondes si votre ration de tarissement prévient efficacement la fièvre de lait.</p>
+    <a href="/app.html" style="display:inline-block;background:#fff;color:#15803d;font-weight:700;padding:13px 30px;border-radius:8px;text-decoration:none;font-size:.95rem;box-shadow:0 2px 8px rgba(0,0,0,.15);">Accéder à Rumicore →</a>
+  </div>
+
+  <section class="art-related">
+    <h3>Articles liés</h3>
+    <div class="art-related-grid">
+      <a href="acetonemie.html" class="art-related-card">
+        <div class="tag">Santé animale</div>
+        <h4>Acétonémie (cétose) chez la vache laitière : reconnaître, traiter, prévenir</h4>
+      </a>
+      <a href="transition-alimentaire.html" class="art-related-card">
+        <div class="tag">Nutrition</div>
+        <h4>La période de transition chez la vache laitière : clé de la réussite de la lactation</h4>
+      </a>
+      <a href="gestion-velage.html" class="art-related-card">
+        <div class="tag">Reproduction</div>
+        <h4>Gestion des vêlages : préparation, surveillance et soins au nouveau-né</h4>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="art-footer"><p>&copy; 2026 Rumicore &nbsp;&middot;&nbsp; <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a> &nbsp;&middot;&nbsp; <a href="/index.html">Rumicore.com</a></p></footer>
+</body>
+</html>

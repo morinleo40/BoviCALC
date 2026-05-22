@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acétonémie (cétose) chez la vache laitière : reconnaître, traiter, prévenir — Rumicore</title>
+  <meta name="description" content="Acétonémie bovine : bilan énergétique négatif, corps cétoniques, types 1 et 2, diagnostic BHB, traitement propylène glycol et prévention par la transition alimentaire.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+    .art-nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .art-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .art-nav-logo img { height:32px; }
+    .art-nav-logo span { font-size:1.1rem; font-weight:900; color:#15803d; }
+    .art-nav-links { display:flex; gap:6px; }
+    .art-nav-links a { text-decoration:none; color:#475569; font-size:.83rem; font-weight:500; padding:6px 12px; border-radius:6px; transition:all .15s; }
+    .art-nav-links a:hover { background:#f1f5f9; color:#15803d; }
+    .art-hero { background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 60%,#ea580c 100%); padding:56px 32px 48px; color:#fff; }
+    .art-hero-inner { max-width:800px; margin:0 auto; }
+    .art-category { display:inline-block; background:rgba(255,255,255,.2); border-radius:20px; padding:4px 14px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .art-hero h1 { font-size:2.1rem; font-weight:900; line-height:1.25; margin-bottom:16px; }
+    .art-meta { font-size:.82rem; color:rgba(255,255,255,.75); }
+    .art-body { max-width:800px; margin:0 auto; padding:48px 32px; }
+    .art-body h2 { font-size:1.4rem; font-weight:800; color:#0f172a; margin:36px 0 14px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+    .art-body h3 { font-size:1.05rem; font-weight:700; color:#15803d; margin:24px 0 10px; }
+    .art-body p { font-size:.95rem; color:#374151; line-height:1.8; margin-bottom:16px; }
+    .art-body ul, .art-body ol { font-size:.93rem; color:#374151; line-height:1.8; padding-left:22px; margin-bottom:16px; }
+    .art-body li { margin-bottom:6px; }
+    .art-body strong { color:#0f172a; }
+    .art-infobox { background:#f0fdf4; border-left:4px solid #15803d; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-infobox p { margin:0; font-size:.88rem; color:#166534; }
+    .art-warning { background:#fff7ed; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-warning p { margin:0; font-size:.88rem; color:#c2410c; }
+    .art-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:.88rem; }
+    .art-table th { background:#f1f5f9; padding:10px 14px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; }
+    .art-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .art-table tr:hover td { background:#f8fafc; }
+    .art-cta { background:linear-gradient(135deg,#14532d,#15803d); border-radius:16px; padding:36px; text-align:center; margin:48px 0 0; color:#fff; }
+    .art-cta h3 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+    .art-cta p { font-size:.9rem; color:rgba(255,255,255,.85); margin-bottom:24px; }
+    .art-cta a { background:#fff; color:#15803d; font-weight:700; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:.9rem; }
+    .art-footer { background:#0f172a; padding:28px 32px; text-align:center; color:#64748b; font-size:.83rem; margin-top:64px; }
+    .art-footer a { color:#94a3b8; text-decoration:none; }
+    .art-related { border-top:2px solid #e2e8f0; padding-top:36px; margin-top:48px; }
+    .art-related h3 { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px; }
+    .art-related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .art-related-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; text-decoration:none; transition:box-shadow .2s; }
+    .art-related-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
+    .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
+    @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/articles.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#475569;font-size:.85rem;font-weight:600;">← Retour aux articles</a>
+  <a href="/app.html" style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Essayer Rumicore →</a>
+</nav>
+
+<header class="art-hero">
+  <div style="width:100%;max-height:380px;overflow:hidden;margin-bottom:0;"><img src="images/veterinaire-vache.jpg" alt="acetonemie" style="width:100%;max-height:380px;object-fit:cover;display:block;"></div><div class="art-hero-inner">
+    <span class="art-category">Santé animale</span>
+    <h1>Acétonémie (cétose) chez la vache laitière :<br>reconnaître, traiter, prévenir</h1>
+    <p class="art-meta">Par l'équipe Rumicore &nbsp;&bull;&nbsp; Mis à jour le 22 mai 2026 &nbsp;&bull;&nbsp; Lecture : 9 min</p>
+  </div>
+</header>
+
+<main class="art-body">
+
+  <p>L'acétonémie, également appelée cétose bovine, est l'un des troubles métaboliques les plus fréquents et les plus coûteux en élevage laitier. Elle survient lorsque la vache ne parvient pas à couvrir ses besoins énergétiques par l'alimentation seule et mobilise massivement ses réserves lipidiques. Ce déséquilibre produit des corps cétoniques en excès qui perturbent l'ensemble du métabolisme. Comprendre ce mécanisme est indispensable pour prévenir efficacement et réagir à temps.</p>
+
+  <h2>Mécanisme : le bilan énergétique négatif</h2>
+
+  <p>Au moment du vêlage, les besoins énergétiques de la vache explosent : montée en lait, réparation utérine, reprise de la cyclicité. Mais l'appétit, lui, met plusieurs semaines à suivre. Cette période de <strong>bilan énergétique négatif (BEN)</strong> est physiologique, mais doit rester dans des limites raisonnables.</p>
+
+  <p>Pour combler ce déficit, l'organisme mobilise les triglycérides stockés dans le tissu adipeux. Les acides gras non estérifiés (AGNE) libérés dans le sang arrivent au foie, où ils sont soit oxydés en énergie, soit reconvertis en corps cétoniques : le <strong>bêta-hydroxybutyrate (BHB)</strong>, l'acétone et l'acétoacétate. Quand la production de corps cétoniques dépasse la capacité d'élimination, on parle d'hypercétonémie — c'est la cétose.</p>
+
+  <div class="art-infobox">
+    <p><strong>Chiffre clé :</strong> Environ 40 à 60 % des vaches laitières présentent une hypercétonémie subclinique (BHB &gt; 1,2 mmol/L) au cours des 3 premières semaines post-partum. La forme clinique touche 5 à 15 % des vaches selon l'élevage.</p>
+  </div>
+
+  <h2>Les deux types de cétose bovine</h2>
+
+  <h3>Cétose de type 1 — sous-clinique ou clinique précoce</h3>
+  <p>C'est la forme la plus fréquente. Elle apparaît entre la <strong>2e et la 6e semaine post-partum</strong>, au pic de production. La vache est en bon état corporel au vêlage (NEC 3,0–3,25) mais sa ration post-partum ne couvre pas des besoins qui atteignent alors leur maximum. Le BHB monte progressivement, souvent sans signe clinique visible au début.</p>
+
+  <h3>Cétose de type 2 — associée à la stéatose hépatique</h3>
+  <p>Plus grave, cette forme touche les <strong>vaches obèses au vêlage (NEC > 3,75)</strong>. La mobilisation des réserves est massive, le foie est rapidement infiltré de graisses (stéatose hépatique). Le foie fonctionnant mal, la néoglucogenèse est perturbée et la cétose s'installe dès les premiers jours post-partum. La réponse au traitement est souvent décevante si la stéatose est avancée.</p>
+
+  <div class="art-warning">
+    <p><strong>Point d'attention :</strong> La cétose de type 2 est souvent la conséquence d'une gestion insuffisante de l'état corporel en fin de lactation et au tarissement. Une vache tarie avec NEC &gt; 3,75 présente un risque élevé de stéatose hépatique et de complications multiples au vêlage (fièvre de lait, déplacement de caillette, rétention placentaire).</p>
+  </div>
+
+  <h2>Reconnaître les symptômes</h2>
+
+  <h3>Forme subclinique (BHB 1,2 à 2,9 mmol/L)</h3>
+  <p>Aucun signe clinique évident, mais des conséquences économiques réelles : chute de production de <strong>300 à 400 kg de lait sur la lactation</strong>, allongement de l'intervalle vêlage–1re insémination de 20 à 30 jours, risque multiplié par 3 de déplacement de caillette et d'endométrite. C'est pourquoi le dépistage systématique en semaine 1 et 2 post-partum est recommandé.</p>
+
+  <h3>Forme clinique (BHB > 3,0 mmol/L)</h3>
+  <ul>
+    <li><strong>Baisse brutale de production</strong> laitière (–10 à –30 % en quelques jours)</li>
+    <li><strong>Perte d'appétit</strong> progressive, refus des concentrés en premier, puis des fourrages</li>
+    <li><strong>Odeur d'acétone</strong> caractéristique sur l'haleine, le lait et les urines (odeur de pomme ou de vernis à ongles)</li>
+    <li><strong>Perte de poids</strong> accélérée, amaigrissement visible en 1 à 2 semaines</li>
+    <li>Selles sèches, réduction du transit intestinal</li>
+  </ul>
+
+  <h3>Forme nerveuse (rare)</h3>
+  <p>Certaines vaches présentent des troubles nerveux : excitation, mugissements, léchage compulsif, démarche ébrieuse, hyperesthésie. Cette forme peut faire penser à une listériose ou une hypomagnésémie — un diagnostic différentiel s'impose.</p>
+
+  <h2>Diagnostic : mesurer le BHB</h2>
+
+  <p>Le dosage du <strong>bêta-hydroxybutyrate (BHB)</strong> dans le sang est l'examen de référence. Des bandelettes adaptées (type Keto-Test ou FreeStyle Precision Neo) permettent une mesure en élevage en moins de 30 secondes. Le lait peut aussi être testé avec des bandelettes colorées (seuil moins précis).</p>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>BHB sanguin (mmol/L)</th>
+        <th>Statut</th>
+        <th>Risque associé</th>
+        <th>Conduite recommandée</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>&lt; 1,0</td><td>Normal</td><td>Aucun</td><td>Surveillance routine</td></tr>
+      <tr><td>1,0 – 1,2</td><td>Zone limite</td><td>Faible</td><td>Réévaluer la ration</td></tr>
+      <tr><td>1,2 – 2,9</td><td>Hypercétonémie subclinique</td><td>Modéré à élevé</td><td>Traitement préventif, propylène glycol</td></tr>
+      <tr><td>3,0 – 5,9</td><td>Cétose clinique</td><td>Élevé</td><td>Traitement curatif immédiat</td></tr>
+      <tr><td>&ge; 6,0</td><td>Cétose sévère / stéatose</td><td>Très élevé</td><td>Glucose IV + traitement de soutien</td></tr>
+    </tbody>
+  </table>
+
+  <div class="art-infobox">
+    <p><strong>Protocole de dépistage :</strong> Testez systématiquement toutes les vaches entre J3 et J7 post-partum, puis entre J10 et J14. Ce dépistage précoce permet d'intervenir avant que les pertes économiques ne s'accumulent. Sur un troupeau de 80 vaches, cela représente environ 160 tests par an pour un coût de 80 à 120 € — bien inférieur au coût d'une cétose clinique non traitée.</p>
+  </div>
+
+  <h2>Traitement</h2>
+
+  <h3>Traitement de première intention : propylène glycol</h3>
+  <p>Le <strong>propylène glycol (PDG)</strong> est le traitement de référence. Précurseur du glucose dans le foie, il stimule la néoglucogenèse et réduit la mobilisation des réserves lipidiques. Protocole standard :</p>
+  <ul>
+    <li><strong>300 mL de propylène glycol pur</strong>, 2 fois par jour par drenche</li>
+    <li>Durée : <strong>5 jours</strong> pour une cétose clinique, 3 jours pour une forme subclinique</li>
+    <li>Contrôle BHB à J5 pour vérifier la réponse au traitement</li>
+  </ul>
+
+  <h3>Cas graves : perfusion de glucose</h3>
+  <p>En cas de cétose sévère (BHB > 6 mmol/L, anorexie totale, décubitus), une <strong>perfusion IV de solution glucosée à 50 %</strong> (500 mL, soit 250 g de glucose) permet une récupération rapide mais temporaire. Elle doit être associée au propylène glycol oral pour assurer un effet durable.</p>
+
+  <h3>Traitements complémentaires</h3>
+  <p>Le vétérinaire peut prescrire des <strong>corticoïdes</strong> (dexaméthasone, fluméthasone) pour stimuler la néoglucogenèse et relancer l'appétit. La vitamine B12 (cyanocobalamine) est parfois utilisée pour soutenir le métabolisme énergétique. En cas de stéatose hépatique avérée, la récupération est longue et le pronostic reste réservé si le foie est sévèrement atteint.</p>
+
+  <h2>Prévention : agir avant le vêlage</h2>
+
+  <h3>Maîtrise de l'état corporel</h3>
+  <p>L'outil le plus puissant reste la gestion de la <strong>Note d'État Corporel (NEC)</strong> tout au long de la lactation. L'objectif est d'arriver au vêlage avec une NEC de <strong>3,0 à 3,25</strong> (échelle de 1 à 5). Ni trop maigre (risque de BEN intense), ni trop grasse (risque de type 2). Le trop-plein doit se corriger en milieu de lactation, pas en fin de gestation où la restriction est difficile à maîtriser sans créer d'autres déséquilibres.</p>
+
+  <h3>Transition alimentaire soignée</h3>
+  <p>Les 3 semaines avant le vêlage sont cruciales. La ration doit introduire progressivement les concentrés pour adapter les bactéries ruminales et favoriser les papilles ruminales. Commencer à <strong>1 kg de concentré/jour à –21 jours</strong> et monter progressivement à 3–4 kg/jour au vêlage. La ration post-partum doit ensuite progresser de 300 g de concentré par jour pour atteindre la ration de production en 2 à 3 semaines.</p>
+
+  <h3>Le BACA en préparto</h3>
+  <p>Le <strong>Bilan Acido-Basique des Cations-Anions (BACA)</strong> de la ration préparto influe sur le statut calcique et indirectement sur la cétose. Une ration préparto avec BACA entre <strong>–100 et +150 mmol/kg MS</strong> est recommandée. Un BACA trop positif (excès de cations) favorise l'hypocalcémie, qui elle-même réduit la motricité ruminale et aggrave l'anorexie post-partum.</p>
+
+  <div class="art-infobox">
+    <p><strong>Complémentation préventive :</strong> En élevages à forte prévalence de cétose (test BHB systématique révélant &gt; 25 % de vaches positives), une distribution préventive de propylène glycol (150–200 mL/j) aux vaches de J0 à J14 post-partum peut réduire l'incidence de cétose subclinique de plus de 50 %. Discutez du protocole avec votre vétérinaire.</p>
+  </div>
+
+  <h2>Impact économique : ce que coûte une cétose</h2>
+
+  <p>L'impact économique de l'acétonémie est souvent sous-estimé parce que la forme subclinique est invisible à l'oeil nu. Des études récentes estiment les pertes suivantes pour une cétose clinique :</p>
+  <ul>
+    <li><strong>Perte laitière :</strong> 400 à 600 kg de lait sur la lactation entière</li>
+    <li><strong>Coût de traitement :</strong> 30 à 80 € selon protocole et intervention vétérinaire</li>
+    <li><strong>Risque de déplacement de caillette :</strong> multiplié par 4 à 5 (coût chirurgical 300–500 €)</li>
+    <li><strong>Allongement IVV :</strong> +20 à 40 jours (coût 3–5 €/jour de vache improductive)</li>
+    <li><strong>Réforme prématurée :</strong> risque x2 dans la lactation suivante</li>
+  </ul>
+  <p>En cumulant ces postes, le coût total d'un cas de cétose clinique est estimé entre <strong>400 et 700 € par vache atteinte</strong>. Pour un élevage de 80 vaches avec 10 % d'incidence, cela représente 3 200 à 5 600 € de perte annuelle.</p>
+
+  <div class="art-cta">
+    <h3>Surveillez le bilan énergétique de votre troupeau avec Rumicore</h3>
+    <p>Rumicore calcule automatiquement le bilan énergétique de chaque vache et signale les animaux à risque de cétose avant que les symptômes apparaissent. Agissez avant les pertes.</p>
+    <a href="/app.html" style="display:inline-block;background:#fff;color:#15803d;font-weight:700;padding:13px 30px;border-radius:8px;text-decoration:none;font-size:.95rem;box-shadow:0 2px 8px rgba(0,0,0,.15);">Accéder à Rumicore →</a>
+  </div>
+
+  <section class="art-related">
+    <h3>Articles liés</h3>
+    <div class="art-related-grid">
+      <a href="transition-alimentaire.html" class="art-related-card">
+        <div class="tag">Nutrition</div>
+        <h4>La période de transition chez la vache laitière : clé de la réussite de la lactation</h4>
+      </a>
+      <a href="fievre-de-lait.html" class="art-related-card">
+        <div class="tag">Santé au vêlage</div>
+        <h4>Fièvre de lait (hypocalcémie) : prévention et conduite à tenir au vêlage</h4>
+      </a>
+      <a href="calcul-ration-bovine.html" class="art-related-card">
+        <div class="tag">Rationnement laitier</div>
+        <h4>Comment calculer une ration pour vache laitière ? Méthode complète INRA 2018</h4>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="art-footer"><p>&copy; 2026 Rumicore &nbsp;&middot;&nbsp; <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a> &nbsp;&middot;&nbsp; <a href="/index.html">Rumicore.com</a></p></footer>
+</body>
+</html>

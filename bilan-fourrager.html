@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilan fourrager hivernal : méthode complète pour ne jamais manquer de fourrage — Rumicore</title>
+  <meta name="description" content="Comment réaliser un bilan fourrager hivernal : calcul des stocks en TMS, estimation des besoins du troupeau, formule du solde, exemple chiffré pour 60 vaches laitières et gestion des déficits.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+    .art-nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .art-nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .art-nav-logo img { height:32px; }
+    .art-nav-logo span { font-size:1.1rem; font-weight:900; color:#15803d; }
+    .art-nav-links { display:flex; gap:6px; }
+    .art-nav-links a { text-decoration:none; color:#475569; font-size:.83rem; font-weight:500; padding:6px 12px; border-radius:6px; transition:all .15s; }
+    .art-nav-links a:hover { background:#f1f5f9; color:#15803d; }
+    .art-hero { background:linear-gradient(135deg,#14532d 0%,#15803d 60%,#166534 100%); padding:56px 32px 48px; color:#fff; }
+    .art-hero-inner { max-width:800px; margin:0 auto; }
+    .art-category { display:inline-block; background:rgba(255,255,255,.2); border-radius:20px; padding:4px 14px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .art-hero h1 { font-size:2.1rem; font-weight:900; line-height:1.25; margin-bottom:16px; }
+    .art-meta { font-size:.82rem; color:rgba(255,255,255,.75); }
+    .art-body { max-width:800px; margin:0 auto; padding:48px 32px; }
+    .art-body h2 { font-size:1.4rem; font-weight:800; color:#0f172a; margin:36px 0 14px; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+    .art-body h3 { font-size:1.05rem; font-weight:700; color:#15803d; margin:24px 0 10px; }
+    .art-body p { font-size:.95rem; color:#374151; line-height:1.8; margin-bottom:16px; }
+    .art-body ul, .art-body ol { font-size:.93rem; color:#374151; line-height:1.8; padding-left:22px; margin-bottom:16px; }
+    .art-body li { margin-bottom:6px; }
+    .art-body strong { color:#0f172a; }
+    .art-infobox { background:#f0fdf4; border-left:4px solid #15803d; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-infobox p { margin:0; font-size:.88rem; color:#166534; }
+    .art-warning { background:#fff7ed; border-left:4px solid #f97316; border-radius:0 8px 8px 0; padding:16px 20px; margin:24px 0; }
+    .art-warning p { margin:0; font-size:.88rem; color:#c2410c; }
+    .art-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:.88rem; }
+    .art-table th { background:#f1f5f9; padding:10px 14px; text-align:left; font-weight:700; color:#374151; border-bottom:2px solid #e2e8f0; }
+    .art-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .art-table tr:hover td { background:#f8fafc; }
+    .art-cta { background:linear-gradient(135deg,#14532d,#15803d); border-radius:16px; padding:36px; text-align:center; margin:48px 0 0; color:#fff; }
+    .art-cta h3 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+    .art-cta p { font-size:.9rem; color:rgba(255,255,255,.85); margin-bottom:24px; }
+    .art-cta a { background:#fff; color:#15803d; font-weight:700; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:.9rem; }
+    .art-footer { background:#0f172a; padding:28px 32px; text-align:center; color:#64748b; font-size:.83rem; margin-top:64px; }
+    .art-footer a { color:#94a3b8; text-decoration:none; }
+    .art-related { border-top:2px solid #e2e8f0; padding-top:36px; margin-top:48px; }
+    .art-related h3 { font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:20px; }
+    .art-related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .art-related-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; text-decoration:none; transition:box-shadow .2s; }
+    .art-related-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
+    .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
+    @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/articles.html" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#475569;font-size:.85rem;font-weight:600;">← Retour aux articles</a>
+  <a href="/app.html" style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;background:#15803d;">Essayer Rumicore →</a>
+</nav>
+
+<header class="art-hero">
+  <div style="width:100%;max-height:380px;overflow:hidden;margin-bottom:0;"><img src="images/silo-fourrage.jpg" alt="bilan-fourrager" style="width:100%;max-height:380px;object-fit:cover;display:block;"></div><div class="art-hero-inner">
+    <span class="art-category">Gestion du troupeau</span>
+    <h1>Bilan fourrager hivernal : méthode complète pour ne jamais manquer de fourrage</h1>
+    <p class="art-meta">Par l'équipe Rumicore &nbsp;&bull;&nbsp; Mis à jour le 22 mai 2026 &nbsp;&bull;&nbsp; Lecture : 8 min</p>
+  </div>
+</header>
+
+<main class="art-body">
+
+  <p>Manquer de fourrage en plein hiver est l'une des situations les plus stressantes et les plus coûteuses pour un éleveur. Acheter de l'ensilage ou du foin en urgence en janvier ou février se fait toujours à un prix premium, souvent 30 à 50 % au-dessus des prix d'automne, sans garantie de trouver les volumes nécessaires dans un rayon raisonnable. La seule protection efficace contre cette situation est de réaliser un <strong>bilan fourrager rigoureux avant l'entrée en hivernage</strong>, idéalement en septembre-octobre.</p>
+
+  <p>Ce guide vous explique la méthode complète, étape par étape, avec un exemple chiffré sur 60 vaches laitières.</p>
+
+  <h2>Pourquoi réaliser un bilan fourrager ?</h2>
+
+  <p>Au-delà de la sécurité d'approvisionnement, le bilan fourrager est un outil de pilotage économique puissant. Il vous permet de :</p>
+  <ul>
+    <li><strong>Connaître votre autonomie fourragère réelle</strong> en nombre de jours d'hivernage couverts</li>
+    <li><strong>Identifier les excédents</strong> pouvant être vendus ou stockés pour l'année suivante</li>
+    <li><strong>Anticiper les achats</strong> dans de bonnes conditions de prix et de qualité</li>
+    <li><strong>Ajuster la ration</strong> si nécessaire avant que la situation ne devienne critique</li>
+    <li><strong>Documenter votre stratégie</strong> pour un rendez-vous bancaire ou une demande d'aide PAC</li>
+  </ul>
+
+  <h2>Etape 1 — Inventaire des stocks de fourrages disponibles</h2>
+
+  <p>La première étape consiste à recenser <strong>tous les stocks disponibles</strong> à la date du bilan (en général début octobre), en les exprimant en tonnes de matière sèche (TMS). Toutes les comparaisons se font en MS car les fourrages ont des teneurs en eau très variables.</p>
+
+  <h3>Silos d'ensilage de maïs</h3>
+  <p>Pour un silo de type taupinière ou silo couloir, le calcul du volume est :</p>
+  <ul>
+    <li>Silo couloir : <strong>Longueur × largeur × hauteur moyenne × densité</strong></li>
+    <li>Densité ensilage maïs tassé : 200 à 230 kg MS/m³ (utiliser 210 comme valeur standard)</li>
+    <li>Exemple : silo 40 m × 8 m × 2,5 m = 800 m³ × 210 kg MS/m³ = <strong>168 TMS</strong></li>
+  </ul>
+
+  <div class="art-infobox">
+    <p><strong>Méthode alternative :</strong> Si vous connaissez le tonnage de maïs ensilé (à partir des relevés de peseuse ou de la surface récoltée), appliquez un rendement moyen de 6 à 8 TMS/ha selon le potentiel agronomique, puis corrigez par le % de MS mesuré à l'analyse.</p>
+  </div>
+
+  <h3>Balles rondes d'ensilage d'herbe (BREZ)</h3>
+  <p>Le contenu en MS d'une balle ronde enrubannée varie selon le taux d'humidité à la récolte :</p>
+  <ul>
+    <li>Balle préfanée (MS 40-50 %) : <strong>200 à 280 kg MS/balle</strong> (poids balle 500-600 kg)</li>
+    <li>Balle ensilage direct (MS 20-25 %) : <strong>100 à 130 kg MS/balle</strong> (poids balle 500 kg)</li>
+    <li>Si vous avez réalisé des analyses, utilisez le % MS réel. Sinon, prenez 220 kg MS/balle pour du préfané standard.</li>
+  </ul>
+
+  <h3>Foins (balles rondes ou carrées)</h3>
+  <p>Le foin bien sec contient 85 à 88 % de MS. Les normes de poids sont :</p>
+  <ul>
+    <li>Balle ronde (1,20 m) : <strong>280 à 330 kg</strong>, soit 240 à 290 kg MS</li>
+    <li>Balle rectangulaire haute densité (120×80×240 cm) : <strong>380 à 450 kg</strong>, soit 325 à 390 kg MS</li>
+    <li>Balle conventionnelle (40×40×80 cm) : <strong>12 à 18 kg</strong> — peu utilisé en bovin adulte</li>
+  </ul>
+
+  <h3>Tableau récapitulatif des stocks (exemple 60 VL)</h3>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Fourrage</th>
+        <th>Quantité</th>
+        <th>MS unitaire</th>
+        <th>Total TMS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Ensilage maïs (silo)</td><td>800 m³</td><td>210 kg/m³</td><td>168,0 TMS</td></tr>
+      <tr><td>BREZ préfané (balles)</td><td>120 balles</td><td>220 kg/balle</td><td>26,4 TMS</td></tr>
+      <tr><td>Foin prairie (balles rondes)</td><td>80 balles</td><td>260 kg/balle</td><td>20,8 TMS</td></tr>
+      <tr><td>Paille (balles rondes)</td><td>40 balles</td><td>260 kg/balle</td><td>10,4 TMS</td></tr>
+      <tr><td><strong>Total stocks</strong></td><td colspan="2">—</td><td><strong>225,6 TMS</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Etape 2 — Calcul des besoins fourragers du troupeau</h2>
+
+  <p>L'inventaire du troupeau est indispensable. Il faut recenser <strong>toutes les catégories d'animaux</strong> présents ou prévus pendant la période d'hivernage, en intégrant les entrées (achats, naissances) et les sorties (ventes, réformes) prévues.</p>
+
+  <h3>Définir la période d'hivernage</h3>
+  <p>La durée de stabulation varie selon la région et le système :</p>
+  <ul>
+    <li>Grand Ouest, bocage : 150 à 170 jours (mi-novembre à fin avril)</li>
+    <li>Massif Central, Vosges : 180 à 210 jours</li>
+    <li>Plaine céréalière : 120 à 140 jours</li>
+  </ul>
+  <p>Prenez toujours une marge de sécurité de <strong>10 à 15 jours supplémentaires</strong> par rapport à la durée habituelle pour absorber un printemps tardif ou une fin d'hiver difficile.</p>
+
+  <h3>Besoins journaliers en MS par catégorie</h3>
+
+  <table class="art-table">
+    <thead>
+      <tr>
+        <th>Catégorie</th>
+        <th>Poids moyen</th>
+        <th>MS fourrage/j (kg)</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Vache laitière 25–30 L/j</td><td>650 kg</td><td>16–20 kg MS</td><td>Fourrages seuls (hors concentrés)</td></tr>
+      <tr><td>Vache laitière 35–40 L/j</td><td>680 kg</td><td>18–22 kg MS</td><td>Ration plus fourragère avec maïs ensilage</td></tr>
+      <tr><td>Vache allaitante</td><td>750 kg</td><td>12–16 kg MS</td><td>Varie selon stade gestation/lactation</td></tr>
+      <tr><td>Génisse 18-24 mois</td><td>400–500 kg</td><td>7–10 kg MS</td><td>Croissance modérée</td></tr>
+      <tr><td>Taurillon engraissement</td><td>400–600 kg</td><td>8–12 kg MS</td><td>Part concentrés élevée</td></tr>
+      <tr><td>Veau sous la mère</td><td>50–200 kg</td><td>0,5–3 kg MS</td><td>Complément solide après 3 semaines</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Calcul des besoins totaux (exemple 60 VL)</h3>
+  <p>Troupeau : 60 vaches laitières (650 kg, 28 L/j moy.) + 20 génisses 18 mois + 10 génisses 12 mois. Période d'hivernage : 180 jours.</p>
+  <ul>
+    <li>60 VL × 20 kg MS/j × 180 j = <strong>216 TMS</strong></li>
+    <li>20 génisses 18 mois × 8 kg MS/j × 180 j = <strong>28,8 TMS</strong></li>
+    <li>10 génisses 12 mois × 5 kg MS/j × 150 j = <strong>7,5 TMS</strong></li>
+    <li><strong>Besoins totaux bruts : 252,3 TMS</strong></li>
+  </ul>
+
+  <h2>Etape 3 — Calculer le solde et ajouter la marge de sécurité</h2>
+
+  <h3>Formule du bilan fourrager</h3>
+  <p>La formule est simple :</p>
+  <p style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px 18px; font-family:monospace; font-size:.92rem; color:#0f172a; margin-bottom:20px;">
+    <strong>SOLDE = Stocks disponibles – (Besoins × (1 + marge sécurité))</strong>
+  </p>
+
+  <p>La marge de sécurité recommandée est de <strong>+15 %</strong> pour couvrir :</p>
+  <ul>
+    <li>Les pertes à l'ouverture des silos (ensilage dégradé en surface : 3 à 8 % selon la conservation)</li>
+    <li>Un hiver plus long que prévu (+10 à 15 jours)</li>
+    <li>Une variation de l'effectif troupeau (génisses gardées, vaches malades)</li>
+    <li>Les imprécisions d'estimation des stocks</li>
+  </ul>
+
+  <h3>Application à notre exemple</h3>
+  <ul>
+    <li>Stocks disponibles : <strong>225,6 TMS</strong></li>
+    <li>Besoins avec marge +15 % : 252,3 × 1,15 = <strong>290,1 TMS</strong></li>
+    <li><strong>Solde = 225,6 – 290,1 = –64,5 TMS</strong></li>
+  </ul>
+
+  <div class="art-warning">
+    <p><strong>Déficit de 64,5 TMS :</strong> Ce solde négatif signifie qu'il manque l'équivalent de 64,5 tonnes de matière sèche pour passer l'hiver sereinement. Il faut agir avant la mi-novembre pour trouver ce complément dans de bonnes conditions économiques.</p>
+  </div>
+
+  <h2>Comment corriger un déficit fourrager ?</h2>
+
+  <p>Un solde négatif n'est pas une catastrophe s'il est identifié suffisamment tôt. Plusieurs leviers peuvent être actionnés, souvent en combinaison :</p>
+
+  <h3>Levier 1 : Acheter du fourrage avant l'hiver</h3>
+  <p>C'est la solution la plus directe. En septembre-octobre, les prix des ensilages et des foins sont au plus bas. Contactez les coopératives de votre secteur, consultez les plateformes d'échange de fourrages (Agrifourrages, Foin.fr) et les voisins en excédent. Un ensilage de maïs acheté en octobre coûte typiquement 35 à 45 €/TMS, contre 55 à 70 €/TMS en janvier si vous cherchez en urgence.</p>
+
+  <h3>Levier 2 : Réduire la durée de stabulation</h3>
+  <p>Si la météo le permet, chaque jour de pâturage économise en moyenne 15 à 20 kg MS de fourrages stockés par vache laitière. Mettre les animaux à l'herbe dès que la portance du sol le permet au printemps (règle des 1 200 kg MS/ha disponible) peut économiser 10 à 15 jours d'hivernage.</p>
+
+  <h3>Levier 3 : Réduire les besoins par ajustement du troupeau</h3>
+  <p>Anticipez les réformes. Une vache réformable prévue en mars peut être vendue début novembre et économiser 4 à 5 mois de ration. En cas de déficit important, avancer les réformes non productives est souvent la solution la plus rentable.</p>
+
+  <h3>Levier 4 : Substituer avec des aliments grossiers alternatifs</h3>
+  <p>La pulpe de betterave déshydratée, les drèches de brasserie, la vinasse ou les coproduits céréaliers peuvent remplacer une partie des fourrages dans la ration à condition d'être intégrés progressivement et que la ration reste équilibrée. Consultez les valeurs INRA 2018 pour ces produits avant de les intégrer.</p>
+
+  <h3>Levier 5 : Rationner plus précisément</h3>
+  <p>Un rationnement plus précis réduit le gaspillage. Des études montrent que distribuer à l'aide d'une mélangeuse ou d'un désileuse pesée réduit les pertes au bâtiment de 5 à 10 % par rapport à une distribution "à l'œil". Sur 60 vaches à 20 kg MS/j, 5 % d'économie représente 3,6 TMS/semaine ou environ 100 TMS sur tout l'hiver.</p>
+
+  <div class="art-infobox">
+    <p><strong>Conseil calendaire :</strong> Réalisez votre bilan fourrager en deux temps. Une première estimation fin août (avant la fin des récoltes) pour anticiper d'éventuels achats. Puis une version définitive en octobre une fois tous les stocks constitués. C'est ce bilan final qui sert de référence pour l'hivernage.</p>
+  </div>
+
+  <h2>Récapitulatif de la méthode en 5 points</h2>
+
+  <ol>
+    <li><strong>Inventorier les stocks</strong> en TMS (silos + balles + foins) avec mesures ou pesées</li>
+    <li><strong>Recenser le troupeau</strong> par catégorie et par poids moyen</li>
+    <li><strong>Estimer la durée d'hivernage</strong> réaliste pour votre région + 10-15 jours de marge</li>
+    <li><strong>Calculer les besoins totaux</strong> (catégorie × kg MS/j × jours) puis appliquer +15 % de sécurité</li>
+    <li><strong>Calculer le solde</strong> et agir immédiatement si déficit : achat, réforme anticipée ou réduction de ration</li>
+  </ol>
+
+  <div class="art-cta">
+    <h3>Rumicore intègre le bilan fourrager automatique</h3>
+    <p>Saisissez vos stocks et votre troupeau, Rumicore calcule votre autonomie en jours et vous alerte si un déficit est détecté. Disponible gratuitement pour tous les éleveurs.</p>
+    <a href="/app.html" style="display:inline-block;background:#fff;color:#15803d;font-weight:700;padding:13px 30px;border-radius:8px;text-decoration:none;font-size:.95rem;box-shadow:0 2px 8px rgba(0,0,0,.15);">Accéder à Rumicore →</a>
+  </div>
+
+  <section class="art-related">
+    <h3>Articles liés</h3>
+    <div class="art-related-grid">
+      <a href="calcul-ration-bovine.html" class="art-related-card">
+        <div class="tag">Rationnement laitier</div>
+        <h4>Comment calculer une ration pour vache laitière ? Méthode complète INRA 2018</h4>
+      </a>
+      <a href="rationnement-bovins-viande.html" class="art-related-card">
+        <div class="tag">Bovins viande</div>
+        <h4>Rationner les bovins viande : taurillons, bœufs et vaches allaitantes</h4>
+      </a>
+      <a href="ufl-ufv.html" class="art-related-card">
+        <div class="tag">Bases du rationnement</div>
+        <h4>UFL et UFV : comprendre les unités fourragères bovines</h4>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="art-footer"><p>&copy; 2026 Rumicore &nbsp;&middot;&nbsp; <a href="mailto:rumicore1@gmail.com">rumicore1@gmail.com</a> &nbsp;&middot;&nbsp; <a href="/index.html">Rumicore.com</a></p></footer>
+</body>
+</html>
