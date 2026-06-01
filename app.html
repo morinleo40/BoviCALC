@@ -165,6 +165,8 @@ function openAccountModal() {
   if (bd) bd.innerHTML = userPlan === 'pro'
     ? '<span class="plan-badge-pro">⭐ Pro</span>'
     : '<span class="plan-badge-free">Gratuit</span>';
+  var rumiCoeur = _$$('rumi-coeur-modal');
+  if (rumiCoeur) rumiCoeur.style.display = userPlan === 'pro' ? 'flex' : 'none';
   var dt = _$$('acct-plan-details');
   if (dt) dt.innerHTML = userPlan === 'pro'
     ? '<p style="margin:0;font-size:.85rem;color:var(--green-900);">✅ Accès complet.</p>'
@@ -219,11 +221,32 @@ async function resetPassword() {
   if (!res.error) showToast('📧 Email de réinitialisation envoyé à ' + email, 'info', 5000);
   else showAuthError(res.error.message);
 }
+var STRIPE_MONTHLY = 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00';
+var STRIPE_ANNUAL  = 'REMPLACER_PAR_LIEN_STRIPE_ANNUEL';
+
 function openStripeCheckout() {
+  var m = _$$('billing-modal'); if (m) m.classList.remove('hidden');
+}
+function stripeCheckout(period) {
   var email = currentUser ? (currentUser.email || '') : '';
-  var url = 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00';
-  if (email) url += '?prefilled_email=' + encodeURIComponent(email);
+  var url = period === 'annual' ? STRIPE_ANNUAL : STRIPE_MONTHLY;
+  if (email && url.indexOf('?') === -1) url += '?prefilled_email=' + encodeURIComponent(email);
+  else if (email) url += '&prefilled_email=' + encodeURIComponent(email);
   window.open(url, '_blank');
+}
+async function deleteAccount() {
+  rbConfirm(
+    'Supprimer définitivement votre compte ? Toutes vos données seront effacées et cette action est irréversible.',
+    async function() {
+      var supa = getSupa(); if (!supa) return;
+      var res = await supa.rpc('delete_user');
+      if (res.error) { showToast && showToast('Erreur : ' + res.error.message, 'error', 4000); return; }
+      try { localStorage.clear(); } catch(e) {}
+      window.location.href = 'index.html';
+    },
+    'Supprimer mon compte',
+    true
+  );
 }
 async function logoutUser() {
   closeAccountModal();
@@ -339,7 +362,7 @@ async function initAuth() {
         await loadUserPlan(); hideAuthWall();
         if (evt === 'SIGNED_IN') {
           try { localStorage.setItem('bovicalc-last-login', Date.now().toString()); } catch(e) {}
-          setTimeout(restoreAutoSave, 500); setTimeout(maybeShowTutorial, 800);
+          setTimeout(restoreAutoSave, 500); setTimeout(maybeShowTutorial, 800); setTimeout(showRumiTip, 1200);
         }
       }
       else { userPlan = 'free'; updateAuthUI(); showAuthWall(); }
@@ -347,6 +370,30 @@ async function initAuth() {
   } catch(e) { console.warn('Auth init failed:', e); }
 }
 </script>
+<style>
+/* ===== RUMI VIGNETTES ===== */
+.rumi-vignette { display:flex; align-items:flex-start; gap:14px; border-radius:14px; padding:16px 18px; margin-bottom:16px; }
+.rumi-avatar-wrap { position:relative; flex-shrink:0; }
+.rumi-avatar-wrap img { width:48px; height:48px; border-radius:50%; object-fit:contain; background:#fff; padding:4px; box-shadow:0 4px 12px rgba(0,0,0,.12); }
+.rumi-emoji-badge { position:absolute; bottom:-2px; right:-4px; font-size:1rem; line-height:1; }
+.rumi-bubble { flex:1; border-radius:0 12px 12px 12px; padding:12px 14px; position:relative; font-size:.88rem; line-height:1.6; }
+.rumi-bubble strong { display:block; font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; opacity:.7; }
+.rumi-bubble p { margin:0; }
+
+/* Variantes couleurs */
+.rumi-parle  .rumi-bubble { background:#f0fdf4; border:1.5px solid #86efac; color:#166534; }
+.rumi-parle  .rumi-avatar-wrap img { border:2px solid #22c55e; }
+.rumi-coeur  .rumi-bubble { background:#fff1f2; border:1.5px solid #fecdd3; color:#881337; }
+.rumi-coeur  .rumi-avatar-wrap img { border:2px solid #f43f5e; }
+.rumi-fete   .rumi-bubble { background:#fffbeb; border:1.5px solid #fde68a; color:#713f12; }
+.rumi-fete   .rumi-avatar-wrap img { border:2px solid #fbbf24; }
+.rumi-alerte .rumi-bubble { background:#fff7ed; border:1.5px solid #fed7aa; color:#7c2d12; }
+.rumi-alerte .rumi-avatar-wrap img { border:2px solid #f97316; }
+.rumi-guide  .rumi-bubble { background:#f5f3ff; border:1.5px solid #ddd6fe; color:#3b0764; }
+.rumi-guide  .rumi-avatar-wrap img { border:2px solid #8b5cf6; }
+.rumi-curieux .rumi-bubble { background:#ecfeff; border:1.5px solid #a5f3fc; color:#164e63; }
+.rumi-curieux .rumi-avatar-wrap img { border:2px solid #06b6d4; }
+</style>
 </head>
 
 <body>
@@ -509,6 +556,18 @@ async function initAuth() {
       <div id="home-last-login" style="font-size:.82rem;color:#4b7c5f;margin-top:3px;"></div>
     </div>
     <div id="home-plan-pill" style=""></div>
+  </div>
+
+  <!-- Rumi parle — conseil du jour -->
+  <div id="rumi-tip-home" class="rumi-vignette rumi-parle" style="margin-bottom:20px;display:none;">
+    <div class="rumi-avatar-wrap">
+      <img src="Logo RumiCORE.png" alt="Rumi">
+      <span class="rumi-emoji-badge">💬</span>
+    </div>
+    <div class="rumi-bubble">
+      <strong>Rumi vous conseille</strong>
+      <p id="rumi-tip-text"></p>
+    </div>
   </div>
 
   <!-- Dashboard dernières sessions -->
@@ -1463,6 +1522,31 @@ async function initAuth() {
 <div id="tt-popup"></div>
 
 <!-- ====== MODAL CODE PROMO ====== -->
+<!-- ========== BILLING MODAL ========== -->
+<div id="billing-modal" class="rb-modal hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="rb-modal-card" style="max-width:400px;">
+    <div class="rb-modal-header">
+      <h3>⭐ Passer au plan Pro</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('billing-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <p style="font-size:.88rem;color:var(--text-muted);margin:0 0 20px;">Accès complet : export PDF, optimiseur, comparaison de rations.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <button onclick="stripeCheckout('monthly')" style="display:block;padding:18px 20px;border:2px solid var(--border);border-radius:12px;background:var(--bg-card);cursor:pointer;text-align:left;width:100%;transition:border-color .15s;" onmouseover="this.style.borderColor='#15803d'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-weight:700;font-size:1rem;color:var(--text);margin-bottom:4px;">Mensuel</div>
+        <div style="font-size:.85rem;color:var(--text-muted);">Flexible, sans engagement</div>
+      </button>
+      <button onclick="stripeCheckout('annual')" style="display:block;padding:18px 20px;border:2px solid #15803d;border-radius:12px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);cursor:pointer;text-align:left;width:100%;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:1rem;color:#14532d;">Annuel</span>
+          <span style="background:#15803d;color:#fff;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;">ÉCONOMIES</span>
+        </div>
+        <div style="font-size:.85rem;color:#15803d;">Le meilleur rapport qualité/prix</div>
+      </button>
+    </div>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:14px;text-align:center;">Paiement sécurisé via Stripe</p>
+  </div>
+</div>
+
 <div id="promo-modal" class="rb-modal hidden">
   <div class="rb-modal-card" style="max-width:420px;">
     <div class="rb-modal-header">
@@ -4844,7 +4928,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       updateAuthUI();
       if (okEl) {
         const untilStr = until.toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
-        okEl.innerHTML = `✅ Plan Pro activé jusqu'au ${untilStr} !`;
+        okEl.innerHTML = `<div class="rumi-vignette rumi-fete" style="margin:0;padding:12px 14px;border-radius:10px;"><div class="rumi-avatar-wrap"><img src="Logo RumiCORE.png" alt="Rumi" style="width:40px;height:40px;border-radius:50%;padding:3px;background:#fff;border:2px solid #fbbf24;"><span class="rumi-emoji-badge">🎉</span></div><div class="rumi-bubble" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:0 10px 10px 10px;padding:10px 12px;"><strong style="font-size:.75rem;font-weight:700;color:#92400e;display:block;margin-bottom:3px;">RUMI FÊTE</strong><p style="margin:0;font-size:.85rem;color:#713f12;">Plan Pro activé jusqu'au ${untilStr} ! Vos vaches méritent le meilleur. 🎉</p></div></div>`;
         okEl.style.display = 'block';
       }
       if (btn) { btn.textContent = '✅ Activé !'; btn.disabled = true; }
@@ -4861,6 +4945,33 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   function updatePromoBtn() {
     const btn = $('btn-promo');
     if (btn && currentUser) btn.style.display = userPlan === 'free' ? '' : 'none';
+  }
+
+  // =====================================================
+  // RUMI — vignettes mascotte
+  // =====================================================
+  var RUMI_TIPS = [
+    "La transition alimentaire doit durer au moins 3 semaines pour éviter l'acidose ruminale.",
+    "Une NEC (note d'état corporel) idéale au vêlage se situe entre 3 et 3,5 — ni trop maigre, ni trop grasse.",
+    "L'UFL mesure l'énergie disponible pour la production laitière. 1 UFL ≈ 7 litres de lait supplémentaires.",
+    "Le ratio calcium/phosphore dans la ration doit être compris entre 1,5:1 et 2:1 pour une bonne assimilation.",
+    "Une vache laitière en pleine lactation boit entre 80 et 150 litres d'eau par jour. L'eau, c'est le premier aliment !",
+    "Les fourrages ensilés perdent une partie de leurs valeurs nutritives à l'ouverture du silo — analysez régulièrement.",
+    "Le magnésium est essentiel pour prévenir la tétanie d'herbage au printemps, surtout sur herbe jeune.",
+    "Les PDI (protéines digestibles dans l'intestin) couvrent les besoins en acides aminés essentiels de la vache.",
+    "Un déficit énergétique en début de lactation favorise l'acétonémie — surveillez le BHB dans le lait.",
+    "L'enrubannage conserve mieux les valeurs alimentaires que le foin quand la météo est incertaine.",
+    "Une bonne gestion du tarissement (60 jours) réduit fortement les risques de fièvre de lait et de métrite.",
+    "Le maïs ensilage est riche en énergie mais pauvre en protéines — pensez à le compléter en PDI.",
+  ];
+
+  function showRumiTip() {
+    var tipEl = $('rumi-tip-text');
+    var tipWrap = $('rumi-tip-home');
+    if (!tipEl || !tipWrap) return;
+    var idx = Math.floor(Math.random() * RUMI_TIPS.length);
+    tipEl.textContent = RUMI_TIPS[idx];
+    tipWrap.style.display = 'flex';
   }
 
   // =====================================================
@@ -4964,11 +5075,47 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const listEl = $('admin-codes-list');
     if (!listEl) return;
     if (error || !data || !data.length) {
-      listEl.innerHTML = '<p style="font-size:.82rem;color:#64748b;margin:0;">Aucun code généré.</p>';
+      listEl.innerHTML = '<p style="color:#64748b;margin:0;">Aucun code.</p>';
       return;
     }
     listEl.innerHTML = data.map(c =>
-      '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.8rem;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);">' +
+        '<code style="font-family:monospace;font-weight:700;letter-spacing:.06em;' + (c.used ? 'color:#94a3b8;text-decoration:line-through;' : 'color:#15803d;') + '">' + c.code + '</code>' +
+        '<span style="color:#94a3b8;">' + (c.used ? '✓ utilisé' : '◯ libre') + '</span>' +
+      '</div>'
+    ).join('');
+    // Charger aussi les codes promo
+    loadPromoCodesAdmin();
+  }
+
+  async function generatePromoCode() {
+    if (!currentUser || currentUser.email !== 'bovicalc@gmail.com') return;
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    const supa = getSupa(); if (!supa) return;
+    const { error } = await supa.from('promo_codes').insert({ code, plan: 'pro', duration_days: 365 });
+    if (error) { showToast('Erreur : ' + error.message, 'error', 4000); return; }
+    showToast('Code promo créé : ' + code, 'success', 8000);
+    loadPromoCodesAdmin();
+  }
+
+  async function loadPromoCodesAdmin() {
+    if (!currentUser || currentUser.email !== 'bovicalc@gmail.com') return;
+    const supa = getSupa(); if (!supa) return;
+    const { data, error } = await supa
+      .from('promo_codes')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    const listEl = $('admin-promo-list');
+    if (!listEl) return;
+    if (error || !data || !data.length) {
+      listEl.innerHTML = '<p style="color:#64748b;margin:0;">Aucun code.</p>';
+      return;
+    }
+    listEl.innerHTML = data.map(c =>
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);">' +
         '<code style="font-family:monospace;font-weight:700;letter-spacing:.06em;' + (c.used ? 'color:#94a3b8;text-decoration:line-through;' : 'color:#15803d;') + '">' + c.code + '</code>' +
         '<span style="color:#94a3b8;">' + (c.used ? '✓ utilisé' : '◯ libre') + '</span>' +
       '</div>'
@@ -5039,6 +5186,18 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     <!-- Détails plan -->
     <div style="background:var(--green-50);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;border:1px solid #bbf7d0;">
       <div id="acct-plan-details" style="font-size:.88rem;color:var(--text-muted);line-height:1.6;"></div>
+    </div>
+
+    <!-- Rumi coeur — message Pro -->
+    <div id="rumi-coeur-modal" class="rumi-vignette rumi-coeur" style="display:none;margin-bottom:14px;">
+      <div class="rumi-avatar-wrap">
+        <img src="Logo RumiCORE.png" alt="Rumi">
+        <span class="rumi-emoji-badge">❤️</span>
+      </div>
+      <div class="rumi-bubble">
+        <strong>Rumi vous remercie</strong>
+        <p>Merci de soutenir Rumicore ! Grâce à vous, vos vaches et tous les troupeaux de France sont mieux nourris. ❤️</p>
+      </div>
     </div>
 
     <!-- Thème clair / sombre -->
@@ -5125,8 +5284,12 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
           ⚙️ Gérer les codes pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
         </summary>
         <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
-          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:12px;" onclick="generateProCode()">➕ Générer un nouveau code</button>
-          <div id="admin-codes-list" style="max-height:200px;overflow-y:auto;font-size:.82rem;"></div>
+          <p style="font-size:.8rem;font-weight:700;color:var(--text);margin:0 0 8px;">Codes pro (personnalisation compte)</p>
+          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:8px;" onclick="generateProCode()">➕ Générer un code pro</button>
+          <div id="admin-codes-list" style="max-height:150px;overflow-y:auto;font-size:.8rem;margin-bottom:16px;"></div>
+          <p style="font-size:.8rem;font-weight:700;color:var(--text);margin:0 0 8px;">Codes promo (upgrade plan Pro)</p>
+          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:8px;" onclick="generatePromoCode()">➕ Générer un code promo</button>
+          <div id="admin-promo-list" style="max-height:150px;overflow-y:auto;font-size:.8rem;"></div>
         </div>
       </details>
     </div>
@@ -5142,6 +5305,9 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       </a>
       <button class="rb-btn rb-btn-ghost" style="width:100%;color:var(--danger);border-color:var(--danger);" onclick="logoutUser()">
         🚪 Se déconnecter
+      </button>
+      <button class="rb-btn rb-btn-ghost" style="width:100%;color:#94a3b8;border-color:#e2e8f0;font-size:.8rem;" onclick="deleteAccount()">
+        🗑️ Supprimer mon compte
       </button>
     </div>
   </div>

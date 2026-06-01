@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qui est Rumi ? La mascotte de Rumicore — Rumicore</title>
+  <meta name="description" content="Rencontrez Rumi, la vache mascotte de Rumicore ! Experte INRA 2018, guide bienveillante et compagne des éleveurs au quotidien.">
+  <link rel="canonical" href="https://rumicore.com/qui-est-rumi.html">
+  <meta property="og:title" content="Qui est Rumi ? La mascotte de Rumicore">
+  <meta property="og:description" content="Rencontrez Rumi, la vache mascotte de Rumicore — experte nutrition bovine et guide des éleveurs.">
+  <meta property="og:url" content="https://rumicore.com/qui-est-rumi.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://rumicore.com/Logo%20RumiCORE.png">
+  <link rel="icon" type="image/png" href="/Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+
+    /* NAV */
+    .nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { height: 32px; }
+    .nav-logo span { font-size: 1.1rem; font-weight: 900; color: #15803d; }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a { text-decoration: none; color: #475569; font-size: .83rem; font-weight: 500; padding: 6px 14px; border-radius: 6px; transition: all .15s; }
+    .nav-links a:hover { background: #f1f5f9; color: #15803d; }
+    .nav-links a.primary { background: #15803d; color: #fff; }
+    .nav-links a.primary:hover { background: #14532d; }
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg, #052e16 0%, #14532d 40%, #15803d 80%, #22c55e 100%); padding: 72px 32px 80px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: '🐄'; font-size: 180px; opacity: .06; position: absolute; top: -20px; right: -20px; transform: rotate(-15deg); }
+    .hero::after { content: '🐄'; font-size: 120px; opacity: .05; position: absolute; bottom: -10px; left: -10px; transform: rotate(10deg); }
+    .hero-avatar { width: 130px; height: 130px; border-radius: 50%; background: #fff; padding: 10px; box-shadow: 0 0 0 6px rgba(255,255,255,.2), 0 20px 60px rgba(0,0,0,.3); margin: 0 auto 28px; display: flex; align-items: center; justify-content: center; position: relative; animation: float 3s ease-in-out infinite; }
+    .hero-avatar img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+    .hero-badge { position: absolute; bottom: 4px; right: 4px; background: #fbbf24; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 3px solid #fff; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .hero h1 { font-size: 2.8rem; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 16px; }
+    .hero h1 span { color: #86efac; }
+    .hero p { font-size: 1.1rem; color: rgba(255,255,255,.85); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+    .hero-tag { display: inline-block; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); border-radius: 20px; padding: 5px 16px; font-size: .78rem; font-weight: 700; color: #bbf7d0; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 20px; }
+
+    /* SECTIONS */
+    .section { max-width: 860px; margin: 0 auto; padding: 64px 32px; }
+    .section-title { font-size: 1.7rem; font-weight: 900; color: #0f172a; margin-bottom: 8px; }
+    .section-subtitle { font-size: 1rem; color: #64748b; margin-bottom: 40px; }
+    .section-title span { color: #15803d; }
+
+    /* FICHE IDENTITE */
+    .id-card { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #86efac; border-radius: 20px; padding: 36px; display: grid; grid-template-columns: 160px 1fr; gap: 36px; align-items: center; }
+    .id-card-img { text-align: center; }
+    .id-card-img img { width: 120px; height: 120px; object-fit: contain; border-radius: 50%; background: #fff; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .id-card-name { font-size: 2rem; font-weight: 900; color: #14532d; margin-bottom: 4px; }
+    .id-card-breed { font-size: .88rem; color: #15803d; font-weight: 600; margin-bottom: 20px; }
+    .id-card-rows { display: flex; flex-direction: column; gap: 10px; }
+    .id-row { display: flex; gap: 12px; align-items: flex-start; font-size: .9rem; }
+    .id-row-label { font-weight: 700; color: #166534; min-width: 110px; }
+    .id-row-val { color: #374151; line-height: 1.5; }
+
+    /* TRAITS */
+    .traits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .trait-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 20px; text-align: center; transition: box-shadow .2s; }
+    .trait-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+    .trait-emoji { font-size: 2rem; margin-bottom: 10px; }
+    .trait-name { font-weight: 800; font-size: .95rem; color: #0f172a; margin-bottom: 6px; }
+    .trait-desc { font-size: .82rem; color: #64748b; line-height: 1.5; }
+
+    /* 6 VIGNETTES */
+    .vignettes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .vignette-card { border-radius: 18px; padding: 28px 24px; position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s; cursor: default; }
+    .vignette-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.12); }
+    .vignette-card::before { content: attr(data-emoji); font-size: 80px; position: absolute; right: -8px; top: -10px; opacity: .12; line-height: 1; }
+    .vignette-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .vignette-avatar { width: 52px; height: 52px; border-radius: 50%; background: #fff; padding: 5px; box-shadow: 0 4px 12px rgba(0,0,0,.15); flex-shrink: 0; }
+    .vignette-avatar img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+    .vignette-title { font-size: 1.05rem; font-weight: 900; }
+    .vignette-badge { display: inline-block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 2px 8px; border-radius: 10px; margin-top: 3px; }
+    .vignette-desc { font-size: .85rem; line-height: 1.6; margin-bottom: 16px; }
+    .vignette-example { background: rgba(255,255,255,.5); border-radius: 12px; padding: 12px 14px; font-size: .82rem; font-style: italic; line-height: 1.5; position: relative; }
+    .vignette-example::before { content: '"'; font-size: 1.8rem; font-style: normal; opacity: .3; line-height: 0; vertical-align: -.4em; margin-right: 2px; }
+
+    /* Couleurs des 6 vignettes */
+    .v-parle   { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #14532d; }
+    .v-parle .vignette-title { color: #14532d; }
+    .v-parle .vignette-badge { background: #14532d; color: #fff; }
+
+    .v-coeur   { background: linear-gradient(135deg, #ffe4e6, #fecdd3); color: #881337; }
+    .v-coeur .vignette-title { color: #881337; }
+    .v-coeur .vignette-badge { background: #e11d48; color: #fff; }
+
+    .v-fete    { background: linear-gradient(135deg, #fef9c3, #fde68a); color: #713f12; }
+    .v-fete .vignette-title { color: #713f12; }
+    .v-fete .vignette-badge { background: #d97706; color: #fff; }
+
+    .v-alerte  { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: #7c2d12; }
+    .v-alerte .vignette-title { color: #7c2d12; }
+    .v-alerte .vignette-badge { background: #ea580c; color: #fff; }
+
+    .v-guide   { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #3b0764; }
+    .v-guide .vignette-title { color: #3b0764; }
+    .v-guide .vignette-badge { background: #7c3aed; color: #fff; }
+
+    .v-curieux { background: linear-gradient(135deg, #cffafe, #a5f3fc); color: #164e63; }
+    .v-curieux .vignette-title { color: #164e63; }
+    .v-curieux .vignette-badge { background: #0891b2; color: #fff; }
+
+    /* CTA */
+    .cta { background: linear-gradient(135deg, #052e16, #15803d); border-radius: 20px; padding: 52px 36px; text-align: center; margin: 0 32px 64px; }
+    .cta h2 { font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 12px; }
+    .cta p { font-size: 1rem; color: rgba(255,255,255,.8); max-width: 460px; margin: 0 auto 28px; line-height: 1.6; }
+    .cta-btn { display: inline-block; background: #fff; color: #15803d; font-weight: 800; font-size: .95rem; padding: 14px 32px; border-radius: 10px; text-decoration: none; transition: transform .15s; }
+    .cta-btn:hover { transform: scale(1.03); }
+
+    /* FOOTER */
+    footer { background: #0f172a; padding: 28px 32px; text-align: center; color: #64748b; font-size: .83rem; }
+    footer a { color: #94a3b8; text-decoration: none; }
+    footer a:hover { color: #fff; }
+
+    /* DIVIDER */
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); margin: 0 32px; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.9rem; }
+      .id-card { grid-template-columns: 1fr; text-align: center; }
+      .id-row { flex-direction: column; gap: 2px; }
+      .id-row-label { min-width: unset; }
+      .nav-links .hide-mobile { display: none; }
+      .cta { margin: 0 16px 48px; padding: 36px 20px; }
+      .section { padding: 48px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/index.html" class="nav-logo">
+    <img src="/Logo RumiCORE.png" alt="Rumicore">
+    <span>Rumicore</span>
+  </a>
+  <div class="nav-links">
+    <a href="/index.html" class="hide-mobile">← Accueil</a>
+    <a href="/articles.html" class="hide-mobile">Articles</a>
+    <a href="/app.html" class="primary">Essayer l'app →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Mascotte officielle Rumicore</div>
+  <div class="hero-avatar">
+    <img src="/Logo RumiCORE.png" alt="Rumi, la mascotte de Rumicore">
+    <div class="hero-badge">⭐</div>
+  </div>
+  <h1>Bonjour, je suis <span>Rumi</span> !</h1>
+  <p>Vache laitière Prim'Holstein, experte INRA 2018 et guide bienveillante de tous les éleveurs qui utilisent Rumicore.</p>
+</section>
+
+<!-- FICHE IDENTITÉ -->
+<section class="section">
+  <div class="id-card">
+    <div class="id-card-img">
+      <img src="/Logo RumiCORE.png" alt="Rumi">
+    </div>
+    <div>
+      <div class="id-card-name">Rumi</div>
+      <div class="id-card-breed">Prim'Holstein · Mascotte officielle Rumicore</div>
+      <div class="id-card-rows">
+        <div class="id-row"><span class="id-row-label">🐄 Race</span><span class="id-row-val">Prim'Holstein, la grande dame de la laiterie française</span></div>
+        <div class="id-row"><span class="id-row-label">🌿 Région</span><span class="id-row-val">Normandie — berceau de la vache laitière d'excellence</span></div>
+        <div class="id-row"><span class="id-row-label">📚 Passion</span><span class="id-row-val">Les rapports INRA 2018, les rations équilibrées, et les éleveurs passionnés</span></div>
+        <div class="id-row"><span class="id-row-label">🎯 Mission</span><span class="id-row-val">Que chaque vache de France soit correctement rationnée</span></div>
+        <div class="id-row"><span class="id-row-label">💡 Super-pouvoir</span><span class="id-row-val">Calculer les UFL et les PDI de tête en quelques secondes</span></div>
+        <div class="id-row"><span class="id-row-label">💬 Citation</span><span class="id-row-val"><em>« Un troupeau bien rationné, c'est un troupeau épanoui ! »</em></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PERSONNALITÉ -->
+<section class="section">
+  <div class="section-title">La personnalité de <span>Rumi</span></div>
+  <div class="section-subtitle">Ce qui la rend unique parmi toutes les vaches de Normandie</div>
+  <div class="traits-grid">
+    <div class="trait-card">
+      <div class="trait-emoji">🧠</div>
+      <div class="trait-name">Experte</div>
+      <div class="trait-desc">Rumi connaît les normes INRA 2018 sur le bout des sabots. UFL, PDI, calcium, phosphore — elle n'a aucun secret pour elle.</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-emoji">💚</div>
+      <div class="trait-name">Bienveillante</div>
+      <div class="trait-desc">Elle ne juge jamais une ration déséquilibrée — elle guide toujours avec douceur vers la solution.</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-emoji">🔍</div>
+      <div class="trait-name">Curieuse</div>
+      <div class="trait-desc">Toujours en quête des dernières avancées en nutrition bovine. Si un aliment sort de l'ordinaire, c'est Rumi qui le découvre en première.</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-emoji">🎉</div>
+      <div class="trait-name">Enthousiaste</div>
+      <div class="trait-desc">Rien ne lui fait plus plaisir qu'une ration parfaitement équilibrée. Elle fête chaque victoire avec vous !</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-emoji">🛡️</div>
+      <div class="trait-name">Protectrice</div>
+      <div class="trait-desc">Elle veille sur la santé de tout le troupeau. Quand il y a un risque d'acidose ou de carence, Rumi vous alerte immédiatement.</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-emoji">🤝</div>
+      <div class="trait-name">Fidèle</div>
+      <div class="trait-desc">Présente à chaque étape dans Rumicore — du calcul de ration au bilan fourrager. Elle ne vous laisse jamais seul.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 6 VIGNETTES -->
+<section class="section">
+  <div class="section-title">Les 6 visages de <span>Rumi</span></div>
+  <div class="section-subtitle">Rumi s'adapte à chaque situation dans l'application</div>
+  <div class="vignettes-grid">
+
+    <div class="vignette-card v-parle" data-emoji="💬">
+      <div class="vignette-header">
+        <div class="vignette-avatar"><img src="/Logo RumiCORE.png" alt="Rumi parle"></div>
+        <div>
+          <div class="vignette-title">Rumi parle</div>
+          <span class="vignette-badge">Conseils & astuces</span>
+        </div>
+      </div>
+      <p class="vignette-desc">Rumi prend la parole pour partager des conseils nutritionnels, des rappels INRA et des astuces pour optimiser vos rations au quotidien.</p>
+      <div class="vignette-example">La transition alimentaire doit durer au minimum 3 semaines pour éviter l'acidose ruminale.</div>
+    </div>
+
+    <div class="vignette-card v-coeur" data-emoji="❤️">
+      <div class="vignette-header">
+        <div class="vignette-avatar"><img src="/Logo RumiCORE.png" alt="Rumi coeur"></div>
+        <div>
+          <div class="vignette-title">Rumi coeur</div>
+          <span class="vignette-badge">Remerciements</span>
+        </div>
+      </div>
+      <p class="vignette-desc">Quand vous franchissez un cap — abonnement Pro, premier calcul de ration, fidélité — Rumi vous remercie avec tout son cœur.</p>
+      <div class="vignette-example">Merci de faire confiance à Rumicore ! Vos vaches ont de la chance de vous avoir. ❤️</div>
+    </div>
+
+    <div class="vignette-card v-fete" data-emoji="🎉">
+      <div class="vignette-header">
+        <div class="vignette-avatar"><img src="/Logo RumiCORE.png" alt="Rumi fête"></div>
+        <div>
+          <div class="vignette-title">Rumi fête</div>
+          <span class="vignette-badge">Célébrations</span>
+        </div>
+      </div>
+      <p class="vignette-desc">Ration parfaitement équilibrée, objectif de production atteint, premier rapport exporté — Rumi célèbre chaque réussite avec vous !</p>
+      <div class="vignette-example">Ration équilibrée à 100% ! Vos vaches vont être aux anges. 🎉</div>
+    </div>
+
+    <div class="vignette-card v-alerte" data-emoji="⚠️">
+      <div class="vignette-header">
+        <div class="vignette-avatar"><img src="/Logo RumiCORE.png" alt="Rumi alerte"></div>
+        <div>
+          <div class="vignette-title">Rumi alerte</div>
+          <span class="vignette-badge">Points d'attention</span>
+        </div>
+      </div>
+      <p class="vignette-desc">Quand la ration présente un déséquilibre important ou qu'un risque sanitaire est détecté, Rumi vous prévient avant qu'il soit trop tard.</p>
+      <div class="vignette-example">Attention ! Le ratio calcium/phosphore est en dehors des normes INRA recommandées.</div>
+    </div>
+
+    <div class="vignette-card v-guide" data-emoji="🧭">
+      <div class="vignette-header">
+        <div class="vignette-avatar"><img src="/Logo RumiCORE.png" alt="Rumi guide"></div>
+        <div>
+          <div class="vignette-title">Rumi guide</div>
+          <span class="vignette-badge">Tutoriel & aide</span>
+        </div>
+      </div>
+      <p class="vignette-desc">Pour les nouveaux utilisateurs ou les nouvelles fonctionnalités, Rumi vous prend par la main et vous guide pas à pas dans l'application.</p>
+      <div class="vignette-example">Commencez par choisir le type de vos animaux, puis ajoutez les aliments disponibles sur votre exploitation.</div>
+    </div>
+
+    <div class="vignette-card v-curieux" data-emoji="🔍">
+      <div class="vignette-header">
+        <div class="vignette-avatar"><img src="/Logo RumiCORE.png" alt="Rumi curieux"></div>
+        <div>
+          <div class="vignette-title">Rumi curieux</div>
+          <span class="vignette-badge">Nouveautés</span>
+        </div>
+      </div>
+      <p class="vignette-desc">Nouvelle fonctionnalité, aliment inédit, mise à jour des normes — Rumi est toujours la première à découvrir et à vous en parler.</p>
+      <div class="vignette-example">Nouvelle fonctionnalité : le bilan fourrager annuel est maintenant disponible ! Découvrez-le.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Retrouvez Rumi dans l'application</h2>
+  <p>Elle vous accompagne à chaque calcul de ration, chaque bilan fourrager, chaque réussite sur votre exploitation.</p>
+  <a href="/app.html" class="cta-btn">Ouvrir Rumicore →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p><a href="/index.html">Rumicore</a> · <a href="/articles.html">Articles</a> · <a href="/qui-est-rumi.html">Qui est Rumi ?</a> · <a href="/app.html">Application</a></p>
+  <p style="margin-top:8px;">© 2025 Rumicore. Basé sur les normes INRA 2018.</p>
+</footer>
+
+</body>
+</html>
