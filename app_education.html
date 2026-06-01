@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RumiCORE Éducation</title>
+  <link rel="icon" type="image/png" href="Logo RumiCORE.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',system-ui,sans-serif;color:#1e293b;background:#f8fafc;height:100vh;overflow:hidden;}
+    :root{--blue:#1d4ed8;--green:#15803d;--red:#dc2626;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;--card:#fff;}
+
+    /* ── AUTH WALL ── */
+    #auth-wall{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0f2044,#1d4ed8 60%,#0ea5e9);display:flex;align-items:center;justify-content:center;}
+    .aw-card{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.25);}
+    .aw-logo{text-align:center;margin-bottom:28px;}
+    .aw-logo img{height:52px;}
+    .aw-logo h1{font-size:1.4rem;font-weight:900;color:#15803d;margin-top:10px;}
+    .aw-logo .edu-tag{display:inline-block;background:#1d4ed8;color:#fff;font-size:.65rem;font-weight:800;padding:2px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.07em;margin-left:6px;vertical-align:middle;}
+    .aw-tabs{display:flex;gap:0;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px;}
+    .aw-tab{flex:1;padding:9px;font-size:.85rem;font-weight:700;border:none;background:#f8fafc;color:var(--muted);cursor:pointer;transition:all .15s;}
+    .aw-tab.active{background:var(--blue);color:#fff;}
+    .aw-role{display:flex;gap:10px;margin-bottom:20px;}
+    .aw-role-btn{flex:1;padding:12px 8px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;text-align:center;font-size:.82rem;font-weight:700;color:var(--muted);transition:all .15s;}
+    .aw-role-btn.prof.active{border-color:var(--green);color:var(--green);background:#f0fdf4;}
+    .aw-role-btn.eleve.active{border-color:var(--blue);color:var(--blue);background:#eff6ff;}
+    .aw-field{margin-bottom:14px;}
+    .aw-field label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:5px;}
+    .aw-input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border .15s;}
+    .aw-input:focus{border-color:var(--blue);}
+    .aw-btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:.9rem;font-weight:800;color:#fff;background:var(--blue);cursor:pointer;margin-top:6px;transition:opacity .15s;}
+    .aw-btn:hover{opacity:.9;}
+    .aw-err{display:none;background:#fee2e2;color:#dc2626;font-size:.82rem;padding:8px 12px;border-radius:7px;margin-top:10px;}
+
+    /* ── LAYOUT ── */
+    #app-layout{display:none;height:100vh;flex-direction:row;}
+    .sidebar{width:240px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+    .sb-logo{padding:20px 16px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+    .sb-logo img{height:28px;}
+    .sb-logo-text{font-size:.95rem;font-weight:900;color:#15803d;}
+    .sb-logo-badge{font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--blue);margin-left:2px;}
+    .sb-nav{flex:1;padding:10px 8px;}
+    .sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all .15s;}
+    .sb-item:hover{background:#f1f5f9;color:var(--text);}
+    .sb-item.active{background:#eff6ff;color:var(--blue);font-weight:700;}
+    .sb-item.prof-active{background:#f0fdf4;color:var(--green);}
+    .sb-item .si{font-size:1rem;width:20px;text-align:center;}
+    .sb-class-item{padding:7px 10px 7px 36px;border-radius:8px;font-size:.82rem;color:var(--muted);cursor:pointer;border:none;background:none;width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:all .15s;}
+    .sb-class-item:hover{background:#f1f5f9;color:var(--text);}
+    .sb-class-item.active{background:#f0fdf4;color:var(--green);font-weight:700;}
+    .sb-count{background:#e2e8f0;color:#475569;font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:10px;}
+    .sb-footer{padding:12px 8px;border-top:1px solid var(--border);}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:8px;}
+    .sb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;font-weight:800;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sb-avatar.prof-av{background:linear-gradient(135deg,#15803d,#22c55e);}
+    .sb-avatar.eleve-av{background:linear-gradient(135deg,#1d4ed8,#60a5fa);}
+    .sb-uinfo{flex:1;min-width:0;}
+    .sb-uname{font-size:.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sb-urole{font-size:.72rem;color:var(--muted);}
+    .sb-logout{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:4px;flex-shrink:0;}
+
+    /* ── MAIN ── */
+    .main{flex:1;overflow-y:auto;background:#f8fafc;}
+    .page{display:none;padding:28px 32px;max-width:1000px;margin:0 auto;}
+    .page.active{display:block;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-size:1.3rem;font-weight:900;color:var(--text);}
+    .page-sub{font-size:.87rem;color:var(--muted);margin-top:3px;}
+
+    /* ── BUTTONS ── */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-size:.85rem;font-weight:700;border:none;cursor:pointer;transition:all .15s;text-decoration:none;}
+    .btn-primary{background:var(--blue);color:#fff;}
+    .btn-primary:hover{background:#1e40af;}
+    .btn-green{background:var(--green);color:#fff;}
+    .btn-green:hover{background:#14532d;}
+    .btn-ghost{background:#fff;color:var(--text);border:1.5px solid var(--border);}
+    .btn-ghost:hover{background:#f1f5f9;}
+    .btn-danger{background:#fff;color:var(--red);border:1.5px solid #fecaca;}
+    .btn-danger:hover{background:#fee2e2;}
+    .btn-sm{padding:6px 12px;font-size:.78rem;}
+
+    /* ── CARDS ── */
+    .card{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:22px;}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+    .class-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .2s;position:relative;}
+    .class-card:hover{border-color:#93c5fd;box-shadow:0 4px 20px rgba(29,78,216,.08);}
+    .class-card h3{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px;}
+    .class-code{display:inline-block;background:#eff6ff;color:var(--blue);font-family:monospace;font-size:.95rem;font-weight:800;letter-spacing:.12em;padding:4px 12px;border-radius:7px;margin-bottom:10px;}
+    .class-meta{font-size:.78rem;color:var(--muted);display:flex;gap:14px;}
+    .class-actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;}
+
+    /* ── STUDENT TABLE ── */
+    .stud-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+    .stud-table th{background:#f8fafc;padding:10px 14px;text-align:left;font-weight:700;color:var(--muted);border-bottom:2px solid var(--border);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;}
+    .stud-table td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);}
+    .stud-table tr:hover td{background:#f8fafc;}
+    .stud-table .score-badge{display:inline-block;width:26px;height:26px;border-radius:50%;font-size:.78rem;font-weight:800;color:#fff;display:inline-flex;align-items:center;justify-content:center;}
+    .score-A{background:#15803d;} .score-B{background:#0369a1;} .score-C{background:#b45309;} .score-D{background:#dc2626;} .score-?{background:#94a3b8;}
+    .status-live{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;font-weight:700;color:#15803d;background:#f0fdf4;padding:3px 9px;border-radius:20px;}
+    .status-live::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.5s infinite;}
+    .status-sub{font-size:.75rem;font-weight:700;color:#1d4ed8;background:#eff6ff;padding:3px 9px;border-radius:20px;}
+    .status-none{font-size:.75rem;color:var(--muted);}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+    /* ── JOIN PAGE ── */
+    .join-hero{text-align:center;padding:48px 32px;}
+    .join-hero .big-icon{font-size:4rem;margin-bottom:20px;display:block;}
+    .join-hero h2{font-size:1.6rem;font-weight:900;margin-bottom:10px;}
+    .join-hero p{font-size:.95rem;color:var(--muted);max-width:380px;margin:0 auto 32px;}
+    .code-input-wrap{display:flex;gap:10px;max-width:340px;margin:0 auto;}
+    .code-input{flex:1;padding:14px 16px;border:2px solid var(--border);border-radius:10px;font-size:1.1rem;font-family:monospace;font-weight:800;letter-spacing:.14em;text-transform:uppercase;text-align:center;outline:none;transition:border .15s;}
+    .code-input:focus{border-color:var(--blue);}
+    .join-err{color:var(--red);font-size:.85rem;margin-top:12px;text-align:center;display:none;}
+    .join-ok{color:var(--green);font-size:.85rem;margin-top:12px;text-align:center;display:none;}
+
+    /* ── CLASS CARD (student) ── */
+    .my-class-card{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;border-radius:16px;padding:28px;margin-bottom:24px;}
+    .my-class-card h2{font-size:1.2rem;font-weight:900;margin-bottom:4px;}
+    .my-class-card .mc-meta{font-size:.82rem;opacity:.8;margin-bottom:20px;}
+    .mc-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .mc-actions a,.mc-actions button{padding:10px 20px;border-radius:9px;font-size:.85rem;font-weight:800;cursor:pointer;text-decoration:none;border:none;}
+    .mc-btn-calc{background:#fff;color:var(--blue);}
+    .mc-btn-leave{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);}
+
+    /* ── WORK LIST ── */
+    .work-item{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:10px;}
+    .wi-score{width:42px;height:42px;border-radius:50%;font-size:1.1rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .wi-info{flex:1;min-width:0;}
+    .wi-titre{font-size:.92rem;font-weight:700;color:var(--text);}
+    .wi-meta{font-size:.78rem;color:var(--muted);margin-top:2px;}
+    .wi-bilan{font-size:.8rem;color:var(--muted);margin-top:4px;}
+
+    /* ── SETTINGS ── */
+    .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+    .form-field{margin-bottom:14px;}
+    .form-field label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:5px;}
+    .form-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;font-family:inherit;outline:none;}
+    .form-input:focus{border-color:var(--blue);}
+
+    /* ── RATION DETAIL MODAL ── */
+    .modal-overlay{display:none;position:fixed;inset:0;z-index:9990;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal-box{background:#fff;border-radius:16px;padding:28px;max-width:600px;width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .modal-header h3{font-size:1.05rem;font-weight:800;}
+    .modal-close{background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--muted);line-height:1;}
+    .ration-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+    .ration-row:last-child{border:none;}
+    .score-big{text-align:center;margin:20px 0;}
+    .score-big .score-letter{font-size:3rem;font-weight:900;display:block;}
+    .bilan-bar{display:flex;gap:10px;margin:14px 0;}
+    .bilan-item{flex:1;background:#f8fafc;border-radius:10px;padding:12px;text-align:center;}
+    .bilan-item .val{font-size:1.1rem;font-weight:800;color:var(--text);}
+    .bilan-item .lbl{font-size:.72rem;color:var(--muted);margin-top:3px;}
+
+    /* ── CONFIRM ── */
+    #rb-confirm{display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+    #rb-confirm.open{display:flex;}
+    .rbc-box{background:#fff;border-radius:14px;padding:24px 28px;max-width:360px;width:90%;}
+    .rbc-msg{font-size:.95rem;font-weight:600;color:#1e293b;margin-bottom:20px;line-height:1.5;}
+    .rbc-btns{display:flex;gap:10px;justify-content:flex-end;}
+
+    /* ── TOAST ── */
+    #toast-container{position:fixed;top:16px;right:16px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:320px;}
+
+    /* ── EMPTY STATE ── */
+    .empty{text-align:center;padding:48px 24px;color:var(--muted);}
+    .empty .ei{font-size:3rem;margin-bottom:14px;display:block;}
+    .empty p{font-size:.9rem;}
+
+    /* ── BADGE ── */
+    .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:700;}
+    .badge-blue{background:#eff6ff;color:#1d4ed8;}
+    .badge-green{background:#f0fdf4;color:#15803d;}
+    .badge-red{background:#fee2e2;color:#dc2626;}
+
+    @media(max-width:768px){
+      .sidebar{display:none;}
+      .page{padding:16px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ AUTH WALL ════════ -->
+<div id="auth-wall">
+  <div class="aw-card">
+    <div class="aw-logo">
+      <img src="Logo RumiCORE.png" alt="RumiCORE">
+      <h1>RumiCORE <span class="edu-tag">Éducation</span></h1>
+    </div>
+    <!-- Sélection rôle (register only) -->
+    <div id="aw-role-section" style="display:none;">
+      <p style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Vous êtes :</p>
+      <div class="aw-role">
+        <button class="aw-role-btn prof" id="role-prof-btn" onclick="selectRole('teacher')">👨‍🏫 Professeur</button>
+        <button class="aw-role-btn eleve" id="role-eleve-btn" onclick="selectRole('student')">👨‍🎓 Élève</button>
+      </div>
+    </div>
+    <div class="aw-tabs">
+      <button class="aw-tab active" id="tab-login" onclick="switchTab('login')">Connexion</button>
+      <button class="aw-tab" id="tab-register" onclick="switchTab('register')">Créer un compte</button>
+    </div>
+    <div id="aw-prenom-field" class="aw-field" style="display:none;">
+      <label>Prénom</label>
+      <input type="text" id="aw-prenom" class="aw-input" placeholder="Votre prénom" maxlength="40">
+    </div>
+    <div class="aw-field">
+      <label>Email</label>
+      <input type="email" id="aw-email" class="aw-input" placeholder="vous@exemple.fr">
+    </div>
+    <div class="aw-field">
+      <label>Mot de passe</label>
+      <input type="password" id="aw-password" class="aw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+    <button class="aw-btn" onclick="submitAuth()">Continuer →</button>
+    <div class="aw-err" id="aw-err"></div>
+  </div>
+</div>
+
+<!-- ════════ APP LAYOUT ════════ -->
+<div id="app-layout" style="display:none;flex;height:100vh;">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sb-logo">
+      <img src="Logo RumiCORE.png" alt="">
+      <span class="sb-logo-text">RumiCORE</span>
+      <span class="sb-logo-badge">Édu</span>
+    </div>
+    <div class="sb-nav" id="sb-nav"><!-- Dynamic --></div>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar" id="sb-av">?</div>
+        <div class="sb-uinfo">
+          <div class="sb-uname" id="sb-name">—</div>
+          <div class="sb-urole" id="sb-role-lbl">—</div>
+        </div>
+        <button class="sb-logout" onclick="logoutUser()" title="Déconnexion">⏻</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="main" id="main-content">
+
+    <!-- ── PROF: Dashboard ── -->
+    <div class="page" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Mes classes</div>
+          <div class="page-sub" id="dash-sub">—</div>
+        </div>
+        <button class="btn btn-green" onclick="openCreateClass()">+ Nouvelle classe</button>
+      </div>
+      <div class="card-grid" id="classes-grid">
+        <div class="empty"><span class="ei">🏫</span><p>Aucune classe.<br>Créez-en une pour commencer.</p></div>
+      </div>
+    </div>
+
+    <!-- ── PROF: Class view ── -->
+    <div class="page" id="page-class">
+      <div class="page-header">
+        <div>
+          <button onclick="showPage('dashboard')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:600;margin-bottom:6px;">← Mes classes</button>
+          <div class="page-title" id="cv-nom">—</div>
+          <div class="page-sub" id="cv-sub">—</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div id="cv-code-badge" class="class-code" style="font-size:1.1rem;letter-spacing:.15em;"></div>
+          <button class="btn btn-ghost btn-sm" onclick="copyClassCode()" title="Copier le code">📋</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCurrentClass()">🗑️ Supprimer</button>
+        </div>
+      </div>
+
+      <!-- Tabs: élèves / soumissions -->
+      <div style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;width:fit-content;">
+        <button id="cv-tab-students" onclick="setCvTab('students')" style="padding:9px 20px;border:none;background:var(--blue);color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;">👥 Élèves en direct</button>
+        <button id="cv-tab-subs" onclick="setCvTab('subs')" style="padding:9px 20px;border:none;background:#f8fafc;color:var(--muted);font-size:.85rem;font-weight:700;cursor:pointer;">📤 Soumissions</button>
+      </div>
+
+      <!-- Élèves live -->
+      <div id="cv-students-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <span style="font-size:.82rem;color:var(--muted);" id="cv-refresh-lbl">Actualisation auto toutes les 30s</span>
+          <button class="btn btn-ghost btn-sm" onclick="refreshLive()">🔄 Actualiser</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="stud-table" id="students-table">
+            <thead><tr>
+              <th>Élève</th><th>Statut</th><th>Animal</th><th>Score</th><th>UFL</th><th>PDI</th><th>Dernière activité</th><th></th>
+            </tr></thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Soumissions -->
+      <div id="cv-subs-panel" style="display:none;">
+        <div id="subs-list"></div>
+      </div>
+    </div>
+
+    <!-- ── PROF: Settings ── -->
+    <div class="page" id="page-prof-settings">
+      <div class="page-header"><div class="page-title">Paramètres</div></div>
+      <div class="settings-grid">
+        <div class="card">
+          <h3 style="font-size:.95rem;font-weight:800;margin-bottom:16px;">👤 Mon profil</h3>
+          <div class="form-field"><label>Prénom</label><input type="text" id="s-prenom" class="form-input" placeholder="Votre prénom"></div>
+          <div class="form-field"><label>Email</label><input type="text" id="s-email" class="form-input" readonly style="background:#f8fafc;color:var(--muted);"></div>
+          <div id="s-msg" style="display:none;padding:7px 10px;border-radius:7px;font-size:.82rem;margin-bottom:10px;"></div>
+          <button class="btn btn-green btn-sm" onclick="updatePrenom()">Enregistrer</button>
+        </div>
+        <div class="card">
+          <h3 style="font-size:.95rem;font-weight:800;margin-bottom:16px;">🎨 Thème</h3>
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button class="btn btn-ghost btn-sm" onclick="setTheme('light')">☀️ Clair</button>
+            <button class="btn btn-ghost btn-sm" onclick="setTheme('dark')">🌙 Sombre</button>
+          </div>
+          <h3 style="font-size:.95rem;font-weight:800;margin-bottom:12px;">🔗 Liens</h3>
+          <a href="app.html" class="btn btn-ghost btn-sm" style="display:block;margin-bottom:8px;text-align:center;">🐄 Outil éleveur</a>
+          <a href="index_education.html" class="btn btn-ghost btn-sm" style="display:block;margin-bottom:8px;text-align:center;">🎓 Accueil éducation</a>
+          <button class="btn btn-danger btn-sm" style="width:100%;margin-top:4px;" onclick="deleteAccount()">🗑️ Supprimer mon compte</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ÉLÈVE: Join class ── -->
+    <div class="page" id="page-join">
+      <div class="join-hero">
+        <span class="big-icon">🏫</span>
+        <h2>Rejoindre une classe</h2>
+        <p>Demandez le code de classe à votre professeur et saisissez-le ici.</p>
+        <div class="code-input-wrap">
+          <input type="text" id="join-code" class="code-input" placeholder="ABC123" maxlength="8" onkeydown="if(event.key==='Enter')joinClass()">
+          <button class="btn btn-primary" onclick="joinClass()">Rejoindre</button>
+        </div>
+        <div class="join-err" id="join-err"></div>
+        <div class="join-ok" id="join-ok"></div>
+      </div>
+    </div>
+
+    <!-- ── ÉLÈVE: Ma classe ── -->
+    <div class="page" id="page-student-home">
+      <div id="student-class-card" class="my-class-card">
+        <h2 id="sc-nom">—</h2>
+        <div class="mc-meta" id="sc-meta">—</div>
+        <div class="mc-actions">
+          <a href="app.html" class="mc-btn-calc">🧮 Ouvrir le calculateur →</a>
+          <button class="mc-btn-leave" onclick="leaveClass()">↩ Quitter la classe</button>
+        </div>
+      </div>
+      <h3 style="font-size:.95rem;font-weight:800;margin-bottom:14px;">📤 Mes soumissions</h3>
+      <div id="student-subs-list">
+        <div class="empty"><span class="ei">📋</span><p>Pas encore de travaux soumis.<br>Calculez une ration et soumettez-la depuis l'outil.</p></div>
+      </div>
+    </div>
+
+    <!-- ── ÉLÈVE: Settings ── -->
+    <div class="page" id="page-student-settings">
+      <div class="page-header"><div class="page-title">Paramètres</div></div>
+      <div class="settings-grid">
+        <div class="card">
+          <h3 style="font-size:.95rem;font-weight:800;margin-bottom:16px;">👤 Mon profil</h3>
+          <div class="form-field"><label>Prénom</label><input type="text" id="es-prenom" class="form-input" placeholder="Votre prénom"></div>
+          <div class="form-field"><label>Email</label><input type="text" id="es-email" class="form-input" readonly style="background:#f8fafc;color:var(--muted);"></div>
+          <div id="es-msg" style="display:none;padding:7px 10px;border-radius:7px;font-size:.82rem;margin-bottom:10px;"></div>
+          <button class="btn btn-primary btn-sm" onclick="updateElevePrenom()">Enregistrer</button>
+        </div>
+        <div class="card">
+          <a href="index_education.html" class="btn btn-ghost btn-sm" style="display:block;margin-bottom:8px;text-align:center;">← Accueil éducation</a>
+          <button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px;" onclick="deleteAccount()">🗑️ Supprimer mon compte</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app-layout -->
+
+<!-- ════════ MODALS ════════ -->
+
+<!-- Create class -->
+<div class="modal-overlay" id="create-class-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <h3>🏫 Nouvelle classe</h3>
+      <button class="modal-close" onclick="document.getElementById('create-class-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="form-field"><label>Nom de la classe <span style="color:var(--red);">*</span></label>
+      <input type="text" id="cc-nom" class="form-input" placeholder="Ex: BTS PA 1ère année – Groupe A" maxlength="60"></div>
+    <div class="form-field"><label>Description (optionnelle)</label>
+      <input type="text" id="cc-desc" class="form-input" placeholder="Ex: Cours de zootechnie bovine" maxlength="100"></div>
+    <div class="form-field"><label>Capacité maximale</label>
+      <input type="number" id="cc-cap" class="form-input" value="30" min="2" max="200"></div>
+    <div id="cc-err" style="display:none;color:var(--red);font-size:.82rem;margin-bottom:10px;padding:7px 10px;background:#fee2e2;border-radius:7px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('create-class-modal').classList.remove('open')">Annuler</button>
+      <button class="btn btn-green" id="cc-btn" onclick="createClass()">Créer la classe</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ration detail -->
+<div class="modal-overlay" id="ration-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="rm-title">Détail de la ration</h3>
+      <button class="modal-close" onclick="document.getElementById('ration-modal').classList.remove('open')">×</button>
+    </div>
+    <div id="rm-body"></div>
+  </div>
+</div>
+
+<!-- Confirm dialog -->
+<div id="rb-confirm">
+  <div class="rbc-box">
+    <div class="rbc-msg" id="rbc-msg"></div>
+    <div class="rbc-btns">
+      <button class="btn btn-ghost" onclick="rbConfirmCancel()">Annuler</button>
+      <button class="btn btn-danger" id="rbc-ok" style="background:var(--red);color:#fff;border:none;">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast-container"></div>
+
+<!-- ════════ SCRIPTS ════════ -->
+<script>
+const SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
+const SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
+let _supa = null;
+let currentUser = null;
+let userRole = null; // 'teacher' | 'student'
+let myClasses = [];
+let currentClassId = null;
+let currentClassData = null;
+let myMembership = null; // student: {class_id, class: {nom, ...}}
+let currentCvTab = 'students';
+let liveRefreshInterval = null;
+let _rbCb = null;
+
+function getSupa() {
+  if (!_supa && window.supabase) _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  return _supa;
+}
+function $(id) { return document.getElementById(id); }
+
+// ── Role from URL ──
+const _urlRole = new URLSearchParams(location.search).get('role'); // 'teacher' | 'student'
+
+// ── Auth ──
+let _authMode = 'login';
+let _selectedRole = _urlRole || 'student';
+
+function switchTab(t) {
+  _authMode = t;
+  $('tab-login').classList.toggle('active', t === 'login');
+  $('tab-register').classList.toggle('active', t === 'register');
+  $('aw-role-section').style.display = t === 'register' ? '' : 'none';
+  $('aw-prenom-field').style.display = t === 'register' ? '' : 'none';
+  if (t === 'register') selectRole(_selectedRole);
+}
+
+function selectRole(r) {
+  _selectedRole = r;
+  $('role-prof-btn').classList.toggle('active', r === 'teacher');
+  $('role-eleve-btn').classList.toggle('active', r === 'student');
+}
+
+async function submitAuth() {
+  const email = $('aw-email').value.trim();
+  const pwd   = $('aw-password').value;
+  const errEl = $('aw-err');
+  errEl.style.display = 'none';
+  if (!email || !pwd) { errEl.textContent = 'Email et mot de passe requis.'; errEl.style.display = 'block'; return; }
+  const supa = getSupa();
+  if (_authMode === 'login') {
+    const { data, error } = await supa.auth.signInWithPassword({ email, password: pwd });
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+    currentUser = data.user;
+    onAuthenticated();
+  } else {
+    const prenom = $('aw-prenom').value.trim();
+    if (!prenom) { errEl.textContent = 'Votre prénom est requis.'; errEl.style.display = 'block'; return; }
+    const { data, error } = await supa.auth.signUp({
+      email, password: pwd,
+      options: { data: { prenom, role: _selectedRole } }
+    });
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+    currentUser = data.user;
+    onAuthenticated();
+  }
+}
+
+async function onAuthenticated() {
+  if (!currentUser) return;
+  userRole = currentUser.user_metadata?.role || 'student';
+  $('auth-wall').style.display = 'none';
+  $('app-layout').style.display = 'flex';
+  updateSidebar();
+  if (userRole === 'teacher') {
+    await loadTeacherClasses();
+    showPage('dashboard');
+  } else {
+    await loadStudentMembership();
+  }
+}
+
+// ── Sidebar ──
+function updateSidebar() {
+  const prenom = currentUser?.user_metadata?.prenom || currentUser?.email?.split('@')[0] || '?';
+  const initiale = prenom.charAt(0).toUpperCase();
+  $('sb-av').textContent = initiale;
+  $('sb-av').className = 'sb-avatar ' + (userRole === 'teacher' ? 'prof-av' : 'eleve-av');
+  $('sb-name').textContent = prenom;
+  $('sb-role-lbl').textContent = userRole === 'teacher' ? 'Professeur' : 'Élève';
+  renderSidebar();
+}
+
+function renderSidebar() {
+  const nav = $('sb-nav');
+  if (userRole === 'teacher') {
+    let html = `<button class="sb-item" onclick="showPage('dashboard')"><span class="si">🏠</span> Tableau de bord</button>`;
+    html += `<div style="font-size:.7rem;font-weight:700;color:var(--muted);padding:12px 12px 4px;text-transform:uppercase;letter-spacing:.05em;">Mes classes</div>`;
+    myClasses.forEach(c => {
+      const active = c.id === currentClassId ? ' active prof-active' : '';
+      html += `<button class="sb-class-item${active}" onclick="openClassView('${c.id}')">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.nom}</span>
+        <span class="sb-count">${c._members || 0}</span>
+      </button>`;
+    });
+    html += `<button class="sb-item" onclick="showPage('prof-settings')" style="margin-top:8px;"><span class="si">⚙️</span> Paramètres</button>`;
+    nav.innerHTML = html;
+  } else {
+    nav.innerHTML = `
+      <button class="sb-item" onclick="showPage(myMembership ? 'student-home' : 'join')"><span class="si">🏠</span> Ma classe</button>
+      <button class="sb-item" onclick="window.location='app.html'"><span class="si">🧮</span> Calculateur</button>
+      <button class="sb-item" onclick="showPage('student-settings')"><span class="si">⚙️</span> Paramètres</button>`;
+  }
+}
+
+// ── Pages ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('page-' + id)?.classList.add('active');
+  if (liveRefreshInterval) { clearInterval(liveRefreshInterval); liveRefreshInterval = null; }
+  if (id === 'class') {
+    liveRefreshInterval = setInterval(() => refreshLive(), 30000);
+  }
+}
+
+// ══════════════ TEACHER ══════════════
+
+async function loadTeacherClasses() {
+  const supa = getSupa();
+  const { data } = await supa.from('edu_classes').select('*, edu_members(count)').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+  myClasses = (data || []).map(c => ({ ...c, _members: c.edu_members?.[0]?.count || 0 }));
+  renderClassGrid();
+  renderSidebar();
+}
+
+function renderClassGrid() {
+  const grid = $('classes-grid');
+  if (!myClasses.length) {
+    grid.innerHTML = '<div class="empty"><span class="ei">🏫</span><p>Aucune classe.<br>Créez-en une pour commencer.</p></div>';
+    $('dash-sub').textContent = 'Aucune classe créée.';
+    return;
+  }
+  const total = myClasses.reduce((s, c) => s + (c._members || 0), 0);
+  $('dash-sub').textContent = `${myClasses.length} classe${myClasses.length > 1 ? 's' : ''} · ${total} élève${total > 1 ? 's' : ''}`;
+  grid.innerHTML = myClasses.map(c => `
+    <div class="class-card" onclick="openClassView('${c.id}')">
+      <h3>${c.nom}</h3>
+      <div class="class-code">${c.code}</div>
+      ${c.description ? `<div style="font-size:.8rem;color:var(--muted);margin-bottom:8px;">${c.description}</div>` : ''}
+      <div class="class-meta">
+        <span>👥 ${c._members} / ${c.capacite} élèves</span>
+        <span>📅 ${new Date(c.created_at).toLocaleDateString('fr-FR')}</span>
+      </div>
+      <div class="class-actions">
+        <button class="btn btn-green btn-sm" onclick="event.stopPropagation();openClassView('${c.id}')">Voir les élèves →</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();copyCode('${c.code}')">📋 ${c.code}</button>
+      </div>
+    </div>`).join('');
+}
+
+function openCreateClass() {
+  $('cc-nom').value = ''; $('cc-desc').value = ''; $('cc-cap').value = 30;
+  $('cc-err').style.display = 'none';
+  $('cc-btn').textContent = 'Créer la classe'; $('cc-btn').disabled = false;
+  $('create-class-modal').classList.add('open');
+  setTimeout(() => $('cc-nom').focus(), 100);
+}
+
+async function createClass() {
+  const nom = $('cc-nom').value.trim();
+  const desc = $('cc-desc').value.trim();
+  const cap = parseInt($('cc-cap').value) || 30;
+  const errEl = $('cc-err');
+  if (!nom) { errEl.textContent = 'Le nom est requis.'; errEl.style.display = 'block'; return; }
+  $('cc-btn').textContent = 'Création…'; $('cc-btn').disabled = true;
+  const code = await generateUniqueCode();
+  const supa = getSupa();
+  const { data, error } = await supa.from('edu_classes').insert({
+    teacher_id: currentUser.id, nom, description: desc, capacite: cap, code
+  }).select().single();
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; $('cc-btn').textContent = 'Créer la classe'; $('cc-btn').disabled = false; return; }
+  $('create-class-modal').classList.remove('open');
+  showToast(`Classe "${nom}" créée ! Code : ${code}`, 'success');
+  await loadTeacherClasses();
+  openClassView(data.id);
+}
+
+async function generateUniqueCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const supa = getSupa();
+  let code, exists = true;
+  while (exists) {
+    code = Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    const { data } = await supa.from('edu_classes').select('id').eq('code', code).maybeSingle();
+    exists = !!data;
+  }
+  return code;
+}
+
+async function openClassView(classId) {
+  currentClassId = classId;
+  currentClassData = myClasses.find(c => c.id === classId);
+  if (!currentClassData) return;
+  $('cv-nom').textContent = currentClassData.nom;
+  $('cv-code-badge').textContent = currentClassData.code;
+  setCvTab('students');
+  showPage('class');
+  renderSidebar();
+  await refreshLive();
+}
+
+function setCvTab(tab) {
+  currentCvTab = tab;
+  $('cv-students-panel').style.display = tab === 'students' ? '' : 'none';
+  $('cv-subs-panel').style.display = tab === 'subs' ? '' : 'none';
+  $('cv-tab-students').style.background = tab === 'students' ? 'var(--blue)' : '#f8fafc';
+  $('cv-tab-students').style.color = tab === 'students' ? '#fff' : 'var(--muted)';
+  $('cv-tab-subs').style.background = tab === 'subs' ? 'var(--blue)' : '#f8fafc';
+  $('cv-tab-subs').style.color = tab === 'subs' ? '#fff' : 'var(--muted)';
+  if (tab === 'subs') loadSubmissions();
+}
+
+async function refreshLive() {
+  if (!currentClassId) return;
+  const supa = getSupa();
+  // Get members with their current work
+  const { data: members } = await supa.from('edu_members')
+    .select('student_id, student_name, student_email, joined_at')
+    .eq('class_id', currentClassId);
+  const { data: works } = await supa.from('edu_current_work')
+    .select('*').eq('class_id', currentClassId);
+  const memberCount = members?.length || 0;
+  $('cv-sub').textContent = `${memberCount} élève${memberCount > 1 ? 's' : ''} · Code : ${currentClassData?.code}`;
+  $('cv-refresh-lbl').textContent = `Actualisé à ${new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
+  if (!currentClassData) return;
+  currentClassData._members = memberCount;
+  // Render table
+  const tbody = $('students-tbody');
+  if (!members?.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">Aucun élève dans cette classe. Partagez le code <strong>' + (currentClassData?.code || '') + '</strong>.</td></tr>';
+    return;
+  }
+  const workMap = {};
+  (works || []).forEach(w => { workMap[w.student_id] = w; });
+  tbody.innerHTML = members.map(m => {
+    const w = workMap[m.student_id];
+    const score = w?.score || '?';
+    const scoreCls = 'score-badge score-' + (score || '?');
+    const hasWork = !!w;
+    const lastUp = w ? new Date(w.updated_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}) : '—';
+    const bilanUFL = w ? (w.bilan_ufl !== null ? (w.bilan_ufl >= 0 ? '+' : '') + w.bilan_ufl.toFixed(1) + ' UFL' : '—') : '—';
+    const bilanPDI = w ? (w.bilan_pdi !== null ? (w.bilan_pdi >= 0 ? '+' : '') + Math.round(w.bilan_pdi) + ' g PDI' : '—') : '—';
+    return `<tr>
+      <td><strong>${m.student_name || 'Élève'}</strong><br><span style="font-size:.75rem;color:var(--muted);">${m.student_email || ''}</span></td>
+      <td>${hasWork ? '<span class="status-live">En cours</span>' : '<span class="status-none">—</span>'}</td>
+      <td><span style="font-size:.82rem;">${w?.animal_type || '—'}</span></td>
+      <td><span class="${scoreCls}">${score}</span></td>
+      <td style="font-size:.82rem;">${bilanUFL}</td>
+      <td style="font-size:.82rem;">${bilanPDI}</td>
+      <td style="font-size:.78rem;color:var(--muted);">${lastUp}</td>
+      <td>
+        ${hasWork ? `<button class="btn btn-ghost btn-sm" onclick='showRationDetail(${JSON.stringify(w)}, ${JSON.stringify(m.student_name || "Élève")})'>Voir →</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="kickStudent('${m.student_id}','${(m.student_name||'').replace(/'/g,'')}')" style="margin-left:4px;">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadSubmissions() {
+  if (!currentClassId) return;
+  const supa = getSupa();
+  const { data } = await supa.from('edu_submissions')
+    .select('*').eq('class_id', currentClassId).order('submitted_at', { ascending: false });
+  const subsList = $('subs-list');
+  if (!data?.length) {
+    subsList.innerHTML = '<div class="empty"><span class="ei">📤</span><p>Aucune soumission pour l\'instant.</p></div>';
+    return;
+  }
+  subsList.innerHTML = data.map(s => {
+    const score = s.score || '?';
+    const bg = {A:'#15803d',B:'#0369a1',C:'#b45309',D:'#dc2626','?':'#94a3b8'}[score] || '#94a3b8';
+    const date = new Date(s.submitted_at).toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const bilanUFL = s.bilan_ufl !== null ? (s.bilan_ufl >= 0 ? '+' : '') + Number(s.bilan_ufl).toFixed(1) + ' UFL' : '—';
+    const bilanPDI = s.bilan_pdi !== null ? (s.bilan_pdi >= 0 ? '+' : '') + Math.round(s.bilan_pdi) + ' g PDI' : '—';
+    return `<div class="work-item">
+      <div class="wi-score" style="background:${bg}">${score}</div>
+      <div class="wi-info">
+        <div class="wi-titre">${s.titre || 'Sans titre'} <span class="badge badge-blue">${s.student_name || 'Élève'}</span></div>
+        <div class="wi-meta">${s.animal_type || '—'} · ${date}</div>
+        <div class="wi-bilan">${bilanUFL} · ${bilanPDI}</div>
+        ${s.commentaire ? `<div style="font-size:.78rem;color:var(--muted);font-style:italic;margin-top:4px;">"${s.commentaire}"</div>` : ''}
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick='showRationDetail(${JSON.stringify(s)}, ${JSON.stringify(s.student_name || "Élève")})'>Voir →</button>
+    </div>`;
+  }).join('');
+}
+
+function showRationDetail(work, studentName) {
+  $('rm-title').textContent = `Ration de ${studentName}`;
+  const score = work.score || '?';
+  const bg = {A:'#15803d',B:'#0369a1',C:'#b45309',D:'#dc2626','?':'#94a3b8'}[score] || '#94a3b8';
+  const bilanUFL = work.bilan_ufl !== null ? (work.bilan_ufl >= 0 ? '+' : '') + Number(work.bilan_ufl).toFixed(2) : '—';
+  const bilanPDI = work.bilan_pdi !== null ? (work.bilan_pdi >= 0 ? '+' : '') + Math.round(work.bilan_pdi) : '—';
+  const ration = work.ration_data || [];
+  const params = work.params_data || {};
+  let html = `
+    <div class="score-big">
+      <span class="score-letter" style="color:${bg}">${score}</span>
+      <span style="font-size:.85rem;color:var(--muted);">Score global INRA 2018</span>
+    </div>
+    <div class="bilan-bar">
+      <div class="bilan-item"><div class="val" style="color:${work.bilan_ufl >= 0 ? '#15803d' : '#dc2626'}">${bilanUFL} UFL</div><div class="lbl">Bilan énergétique</div></div>
+      <div class="bilan-item"><div class="val" style="color:${work.bilan_pdi >= 0 ? '#15803d' : '#dc2626'}">${bilanPDI} g</div><div class="lbl">Bilan azoté (PDI)</div></div>
+    </div>
+    <h4 style="font-size:.85rem;font-weight:800;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Composition de la ration</h4>`;
+  if (ration.length) {
+    html += ration.map(r => `<div class="ration-row"><span>${r.nom}</span><span style="font-weight:700;">${r.qty} kg</span></div>`).join('');
+  } else {
+    html += '<p style="color:var(--muted);font-size:.85rem;">Aucune donnée de ration.</p>';
+  }
+  if (work.commentaire) html += `<div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:.85rem;color:var(--muted);font-style:italic;">"${work.commentaire}"</div>`;
+  $('rm-body').innerHTML = html;
+  $('ration-modal').classList.add('open');
+}
+
+async function kickStudent(studentId, studentName) {
+  rbConfirm(`Retirer ${studentName} de la classe ?`, async () => {
+    const supa = getSupa();
+    await supa.from('edu_members').delete().eq('student_id', studentId).eq('class_id', currentClassId);
+    await supa.from('edu_current_work').delete().eq('student_id', studentId).eq('class_id', currentClassId);
+    showToast(`${studentName} retiré de la classe.`, 'info');
+    await refreshLive();
+    await loadTeacherClasses();
+    renderSidebar();
+  }, 'Retirer', true);
+}
+
+async function deleteCurrentClass() {
+  if (!currentClassData) return;
+  rbConfirm(`Supprimer la classe "${currentClassData.nom}" et tous ses élèves / travaux ? Action irréversible.`, async () => {
+    const supa = getSupa();
+    const { error } = await supa.from('edu_classes').delete().eq('id', currentClassId);
+    if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+    showToast(`Classe supprimée.`, 'info');
+    currentClassId = null; currentClassData = null;
+    await loadTeacherClasses();
+    showPage('dashboard');
+  }, 'Supprimer', true);
+}
+
+function copyClassCode() { if (currentClassData) copyCode(currentClassData.code); }
+function copyCode(code) {
+  navigator.clipboard?.writeText(code).then(() => showToast(`Code ${code} copié !`, 'success')).catch(() => showToast(`Code : ${code}`, 'info'));
+}
+
+// ══════════════ STUDENT ══════════════
+
+async function loadStudentMembership() {
+  const supa = getSupa();
+  const { data } = await supa.from('edu_members').select('*, edu_classes(*)').eq('student_id', currentUser.id).maybeSingle();
+  myMembership = data;
+  renderSidebar();
+  if (myMembership) {
+    showStudentHome();
+    showPage('student-home');
+  } else {
+    showPage('join');
+  }
+}
+
+function showStudentHome() {
+  const cls = myMembership?.edu_classes;
+  if (!cls) return;
+  $('sc-nom').textContent = cls.nom;
+  $('sc-meta').textContent = `Code : ${cls.code} · Capacité : ${cls.capacite} élèves · Rejoint le ${new Date(myMembership.joined_at).toLocaleDateString('fr-FR')}`;
+  loadMySubmissions();
+}
+
+async function joinClass() {
+  const code = ($('join-code').value || '').trim().toUpperCase();
+  const errEl = $('join-err'), okEl = $('join-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  if (!code) { errEl.textContent = 'Entrez un code de classe.'; errEl.style.display = 'block'; return; }
+  const supa = getSupa();
+  // Find class
+  const { data: cls, error: clsErr } = await supa.from('edu_classes').select('*').eq('code', code).maybeSingle();
+  if (clsErr || !cls) { errEl.textContent = 'Code invalide ou classe introuvable.'; errEl.style.display = 'block'; return; }
+  // Check capacity
+  const { count } = await supa.from('edu_members').select('*', { count: 'exact', head: true }).eq('class_id', cls.id);
+  if (count >= cls.capacite) { errEl.textContent = 'Cette classe est complète.'; errEl.style.display = 'block'; return; }
+  // Join
+  const prenom = currentUser.user_metadata?.prenom || currentUser.email?.split('@')[0] || 'Élève';
+  const { error } = await supa.from('edu_members').insert({
+    class_id: cls.id, student_id: currentUser.id, student_name: prenom, student_email: currentUser.email
+  });
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+  okEl.textContent = `✅ Bienvenue dans la classe "${cls.nom}" !`; okEl.style.display = 'block';
+  await loadStudentMembership();
+}
+
+async function leaveClass() {
+  if (!myMembership) return;
+  rbConfirm('Quitter cette classe ? Vos travaux soumis seront conservés.', async () => {
+    const supa = getSupa();
+    await supa.from('edu_members').delete().eq('student_id', currentUser.id);
+    await supa.from('edu_current_work').delete().eq('student_id', currentUser.id);
+    myMembership = null;
+    renderSidebar();
+    showPage('join');
+    showToast('Vous avez quitté la classe.', 'info');
+  }, 'Quitter', true);
+}
+
+async function loadMySubmissions() {
+  const supa = getSupa();
+  const { data } = await supa.from('edu_submissions').select('*').eq('student_id', currentUser.id).order('submitted_at', { ascending: false });
+  const list = $('student-subs-list');
+  if (!data?.length) {
+    list.innerHTML = '<div class="empty"><span class="ei">📋</span><p>Pas encore de travaux soumis.<br>Calculez une ration et soumettez-la depuis l\'outil.</p></div>';
+    return;
+  }
+  list.innerHTML = data.map(s => {
+    const score = s.score || '?';
+    const bg = {A:'#15803d',B:'#0369a1',C:'#b45309',D:'#dc2626','?':'#94a3b8'}[score] || '#94a3b8';
+    const date = new Date(s.submitted_at).toLocaleDateString('fr-FR', {day:'numeric',month:'short',year:'numeric'});
+    const bilanUFL = s.bilan_ufl !== null ? (s.bilan_ufl >= 0 ? '+' : '') + Number(s.bilan_ufl).toFixed(2) + ' UFL' : '—';
+    const bilanPDI = s.bilan_pdi !== null ? (s.bilan_pdi >= 0 ? '+' : '') + Math.round(s.bilan_pdi) + ' g PDI' : '—';
+    return `<div class="work-item">
+      <div class="wi-score" style="background:${bg}">${score}</div>
+      <div class="wi-info">
+        <div class="wi-titre">${s.titre || 'Sans titre'}</div>
+        <div class="wi-meta">${s.animal_type || '—'} · ${date}</div>
+        <div class="wi-bilan">${bilanUFL} · ${bilanPDI}</div>
+        ${s.commentaire ? `<div style="font-size:.78rem;color:var(--muted);font-style:italic;margin-top:4px;">"${s.commentaire}"</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Settings ──
+async function updatePrenom() {
+  const prenom = $('s-prenom').value.trim();
+  if (!prenom) return;
+  const supa = getSupa();
+  const { error } = await supa.auth.updateUser({ data: { prenom } });
+  const msg = $('s-msg');
+  if (error) { msg.textContent = 'Erreur : ' + error.message; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; }
+  else { msg.textContent = '✅ Prénom mis à jour.'; msg.style.background = '#f0fdf4'; msg.style.color = '#15803d'; updateSidebar(); }
+  msg.style.display = 'block';
+}
+async function updateElevePrenom() {
+  const prenom = $('es-prenom').value.trim();
+  if (!prenom) return;
+  const supa = getSupa();
+  const { error } = await supa.auth.updateUser({ data: { prenom } });
+  const msg = $('es-msg');
+  if (error) { msg.textContent = 'Erreur : ' + error.message; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; }
+  else { msg.textContent = '✅ Prénom mis à jour.'; msg.style.background = '#f0fdf4'; msg.style.color = '#15803d'; updateSidebar(); }
+  msg.style.display = 'block';
+}
+
+function loadSettingsForm(prefix) {
+  const prenom = currentUser?.user_metadata?.prenom || '';
+  const email = currentUser?.email || '';
+  $(prefix + 'prenom').value = prenom;
+  $(prefix + 'email').value = email;
+}
+
+// ── Auth utils ──
+function logoutUser() {
+  try { getSupa()?.auth.signOut(); } catch(e) {}
+  location.reload();
+}
+
+async function deleteAccount() {
+  rbConfirm('Supprimer définitivement votre compte ? Toutes vos données seront effacées.', async () => {
+    const supa = getSupa();
+    const res = await supa.rpc('delete_user');
+    if (res.error) { showToast('Erreur : ' + res.error.message, 'error', 6000); return; }
+    try { localStorage.clear(); } catch(e) {}
+    location.href = 'index_education.html';
+  }, 'Supprimer mon compte', true);
+}
+
+// ── Confirm dialog ──
+function rbConfirm(msg, onOk, okLabel, danger) {
+  _rbCb = onOk;
+  $('rbc-msg').textContent = msg;
+  const btn = $('rbc-ok');
+  btn.textContent = okLabel || 'Confirmer';
+  btn.style.background = danger ? '#dc2626' : '#15803d';
+  btn.onclick = function() { const cb = _rbCb; rbConfirmCancel(); if (cb) cb(); };
+  $('rb-confirm').classList.add('open');
+}
+function rbConfirmCancel() { $('rb-confirm').classList.remove('open'); _rbCb = null; }
+
+// ── Toast ──
+function showToast(msg, type, duration) {
+  type = type || 'info'; duration = duration || 3500;
+  const colors = { success:'#15803d', error:'#dc2626', warn:'#b45309', info:'#1d4ed8' };
+  const bgs = { success:'#f0fdf4', error:'#fef2f2', warn:'#fffbeb', info:'#eff6ff' };
+  const c = $('toast-container');
+  const t = document.createElement('div');
+  t.style.cssText = `background:${bgs[type]};border:1.5px solid;border-color:${colors[type]}40;color:${colors[type]};padding:11px 15px;border-radius:9px;font-size:.85rem;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.1);pointer-events:auto;opacity:0;transform:translateX(12px);transition:all .2s;`;
+  t.textContent = msg; c.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(0)'; });
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(12px)'; setTimeout(() => t.remove(), 220); }, duration);
+}
+
+function setTheme(t) { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('edu-theme', t); } catch(e) {} }
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', async () => {
+  // Pre-select role from URL
+  if (_urlRole === 'teacher') selectRole('teacher');
+  // Try theme
+  try { const th = localStorage.getItem('edu-theme'); if (th) setTheme(th); } catch(e) {}
+  const supa = getSupa();
+  if (!supa) { $('aw-err').textContent = 'Erreur de connexion.'; $('aw-err').style.display = 'block'; return; }
+  const { data: { session } } = await supa.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    onAuthenticated();
+  } else {
+    // Show register tab if role pre-selected from URL
+    if (_urlRole) switchTab('register');
+  }
+  // Settings forms pre-fill when nav
+  document.querySelectorAll('[onclick*="settings"]').forEach(el => {
+    el.addEventListener('click', () => {
+      setTimeout(() => { loadSettingsForm('s-'); loadSettingsForm('es-'); }, 50);
+    });
+  });
+});
+</script>
+</body>
+</html>

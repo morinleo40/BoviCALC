@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RumiCORE Éducation — Rationnement bovin pour les classes agricoles</title>
+  <meta name="description" content="Plateforme pédagogique de rationnement bovin INRA 2018. Professeurs et élèves travaillent ensemble sur le calcul de ration.">
+  <link rel="icon" type="image/png" href="Logo RumiCORE.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; background: #fff; }
+
+    nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo img { height: 36px; }
+    .logo-name { font-size: 1.1rem; font-weight: 900; color: #15803d; }
+    .logo-badge { background: #1d4ed8; color: #fff; font-size: .6rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: .08em; margin-left: 4px; }
+    .nav-links { display: flex; gap: 6px; align-items: center; }
+    .nav-links a { text-decoration: none; color: #475569; font-size: .84rem; font-weight: 500; padding: 7px 14px; border-radius: 8px; }
+    .nav-links a:hover { background: #f1f5f9; color: #1d4ed8; }
+    .nav-cta { background: #1d4ed8 !important; color: #fff !important; font-weight: 700 !important; border-radius: 8px; }
+
+    .hero { background: linear-gradient(135deg, #0f2044 0%, #1d4ed8 55%, #2563eb 80%, #0ea5e9 100%); padding: 80px 32px 72px; color: #fff; text-align: center; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); border-radius: 20px; padding: 6px 18px; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 28px; }
+    .hero h1 { font-size: 2.9rem; font-weight: 900; line-height: 1.13; max-width: 720px; margin: 0 auto 20px; }
+    .hero p { font-size: 1.1rem; color: rgba(255,255,255,.82); max-width: 560px; margin: 0 auto 48px; line-height: 1.7; }
+    .role-cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+    .role-card { background: #fff; border-radius: 20px; padding: 36px 28px; width: 290px; text-align: center; text-decoration: none; transition: transform .2s, box-shadow .2s; box-shadow: 0 8px 40px rgba(0,0,0,.15); }
+    .role-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,.22); }
+    .role-icon { font-size: 3.2rem; display: block; margin-bottom: 16px; }
+    .role-card h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+    .role-card.prof h2 { color: #15803d; }
+    .role-card.eleve h2 { color: #1d4ed8; }
+    .role-card p { font-size: .87rem; color: #64748b; line-height: 1.6; margin-bottom: 22px; }
+    .role-btn { display: inline-block; padding: 11px 26px; border-radius: 10px; font-size: .88rem; font-weight: 800; color: #fff; cursor: pointer; }
+    .role-card.prof .role-btn { background: #15803d; }
+    .role-card.eleve .role-btn { background: #1d4ed8; }
+
+    .features { padding: 72px 32px; max-width: 1100px; margin: 0 auto; }
+    .features-header { text-align: center; margin-bottom: 48px; }
+    .features-header h2 { font-size: 1.85rem; font-weight: 900; color: #0f172a; margin-bottom: 10px; }
+    .features-header p { font-size: .95rem; color: #64748b; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .feat { padding: 28px; border: 1.5px solid #e2e8f0; border-radius: 16px; transition: box-shadow .2s; }
+    .feat:hover { box-shadow: 0 6px 24px rgba(0,0,0,.07); border-color: #bfdbfe; }
+    .feat-icon { font-size: 2rem; margin-bottom: 14px; display: block; }
+    .feat h3 { font-size: .97rem; font-weight: 800; color: #0f172a; margin-bottom: 7px; }
+    .feat p { font-size: .87rem; color: #64748b; line-height: 1.65; }
+
+    .flow { background: #f8fafc; padding: 72px 32px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+    .flow-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+    .flow-inner h2 { font-size: 1.7rem; font-weight: 900; margin-bottom: 48px; color: #0f172a; }
+    .flow-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; }
+    .flow-step { text-align: center; }
+    .step-num { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 900; margin: 0 auto 14px; }
+    .step-num.prof { background: #dcfce7; color: #15803d; }
+    .step-num.eleve { background: #dbeafe; color: #1d4ed8; }
+    .flow-step h4 { font-size: .92rem; font-weight: 700; margin-bottom: 6px; color: #0f172a; }
+    .flow-step p { font-size: .82rem; color: #64748b; line-height: 1.6; }
+
+    .cta { padding: 72px 32px; text-align: center; background: linear-gradient(135deg, #14532d, #15803d); color: #fff; }
+    .cta h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 14px; }
+    .cta p { font-size: .95rem; color: rgba(255,255,255,.8); margin-bottom: 32px; }
+    .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .cta-btns a { padding: 13px 30px; border-radius: 10px; font-weight: 800; font-size: .9rem; text-decoration: none; transition: transform .15s; }
+    .cta-btns a:hover { transform: translateY(-2px); }
+    .cta-btns .btn-white { background: #fff; color: #15803d; }
+    .cta-btns .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.5); }
+
+    footer { background: #0f172a; padding: 28px 32px; text-align: center; color: #64748b; font-size: .83rem; }
+    footer a { color: #94a3b8; text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.9rem; }
+      .role-cards { flex-direction: column; align-items: center; }
+      .role-card { width: 100%; max-width: 340px; }
+      nav { padding: 0 16px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <img src="Logo RumiCORE.png" alt="RumiCORE">
+    <span class="logo-name">RumiCORE</span>
+    <span class="logo-badge">Éducation</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Accueil</a>
+    <a href="articles.html">Articles</a>
+    <a href="app.html">Outil éleveur</a>
+    <a href="app_education.html" class="nav-cta">Accéder →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">🎓 Pédagogie &nbsp;·&nbsp; INRA 2018 &nbsp;·&nbsp; Bovins</div>
+  <h1>Le rationnement bovin,<br>ça s'apprend aussi en classe</h1>
+  <p>RumiCORE Éducation réunit professeurs et élèves autour du calcul de ration. Les profs créent leurs classes, les élèves calculent et soumettent leurs rations.</p>
+  <div class="role-cards">
+    <a href="app_education.html?role=teacher" class="role-card prof">
+      <span class="role-icon">👨‍🏫</span>
+      <h2>Je suis professeur</h2>
+      <p>Créez vos classes, définissez la capacité, générez un code d'accès et suivez les travaux de vos élèves en temps réel.</p>
+      <span class="role-btn">Espace professeur →</span>
+    </a>
+    <a href="app_education.html?role=student" class="role-card eleve">
+      <span class="role-icon">👨‍🎓</span>
+      <h2>Je suis élève</h2>
+      <p>Rejoignez la classe de votre prof avec son code, utilisez l'outil de rationnement et soumettez vos travaux.</p>
+      <span class="role-btn">Espace élève →</span>
+    </a>
+  </div>
+</section>
+
+<section class="features">
+  <div class="features-header">
+    <h2>Tout ce qu'il faut pour enseigner le rationnement</h2>
+    <p>Conçu pour les BTS PA, BTSA ACSE, Bac Pro CGEA et toute formation bovine.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat">
+      <span class="feat-icon">🏫</span>
+      <h3>Classes à capacité adaptable</h3>
+      <p>Définissez la taille de chaque classe selon vos groupes. De 5 à 100 élèves.</p>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">🔑</span>
+      <h3>Accès par code en 10 secondes</h3>
+      <p>L'élève saisit le code de sa classe et rejoint instantanément — aucune validation manuelle.</p>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">🧮</span>
+      <h3>Même outil que les pros</h3>
+      <p>UFL, PDI, minéraux, score de ration — le calculateur INRA 2018 complet, pas une version appauvrie.</p>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">📡</span>
+      <h3>Suivi en temps réel</h3>
+      <p>Voyez ce que calcule chaque élève en direct. Les rations se synchronisent automatiquement.</p>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">📤</span>
+      <h3>Soumission de travaux</h3>
+      <p>L'élève soumet sa ration finalisée. Le prof reçoit score, bilan UFL/PDI et composition complète.</p>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">📱</span>
+      <h3>PC, tablette, mobile</h3>
+      <p>Accessible en salle de cours, à la ferme ou à la maison. Aucune installation requise.</p>
+    </div>
+  </div>
+</section>
+
+<section class="flow">
+  <div class="flow-inner">
+    <h2>Comment ça marche ?</h2>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num prof">1</div>
+        <h4>Le prof crée une classe</h4>
+        <p>Il donne un nom, fixe la capacité et reçoit un code unique à partager.</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-num eleve">2</div>
+        <h4>Les élèves rejoignent</h4>
+        <p>Ils entrent le code dans leur espace élève. Accès immédiat.</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-num eleve">3</div>
+        <h4>Ils calculent leurs rations</h4>
+        <p>Le même outil RumiCORE, avec une barre de classe pour soumettre.</p>
+      </div>
+      <div class="flow-step">
+        <div class="step-num prof">4</div>
+        <h4>Le prof suit en direct</h4>
+        <p>Il voit chaque ration en cours et les travaux soumis avec leur score.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Prêt à l'utiliser avec vos élèves ?</h2>
+  <p>Inscription gratuite — aucune carte bancaire requise.</p>
+  <div class="cta-btns">
+    <a href="app_education.html?role=teacher" class="btn-white">Je suis professeur →</a>
+    <a href="app_education.html?role=student" class="btn-outline">Je suis élève</a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 RumiCORE &mdash; <a href="index.html">Accueil</a> &nbsp;·&nbsp; <a href="articles.html">Articles</a> &nbsp;·&nbsp; <a href="app.html">Outil éleveur</a> &nbsp;·&nbsp; <a href="index_conseiller.html">Espace conseiller</a></p>
+</footer>
+
+</body>
+</html>

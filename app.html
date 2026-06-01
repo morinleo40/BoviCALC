@@ -356,6 +356,7 @@ async function initAuth() {
       currentUser = sd.data.session.user;
       await loadUserPlan();
       hideAuthWall();
+      setTimeout(function(){ if(typeof initEduBar==='function') initEduBar(); }, 1500);
     }
     supa.auth.onAuthStateChange(async function(evt, session) {
       currentUser = session ? session.user : null;
@@ -364,6 +365,7 @@ async function initAuth() {
         if (evt === 'SIGNED_IN') {
           try { localStorage.setItem('bovicalc-last-login', Date.now().toString()); } catch(e) {}
           setTimeout(restoreAutoSave, 500); setTimeout(maybeShowTutorial, 800); setTimeout(showRumiTip, 1200);
+          setTimeout(function(){ if(typeof initEduBar==='function') initEduBar(); }, 1500);
         }
       }
       else { userPlan = 'free'; updateAuthUI(); showAuthWall(); }
@@ -5287,6 +5289,153 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     </div>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════
+     BARRE ÉDUCATION — s'active uniquement si l'élève est dans une classe
+     ═══════════════════════════════════════════════════════ -->
+<div id="edu-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:8000;background:#1d4ed8;color:#fff;padding:10px 20px;align-items:center;justify-content:space-between;box-shadow:0 -4px 20px rgba(29,78,216,.3);gap:12px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:1.4rem;">🎓</span>
+    <div>
+      <div style="font-size:.82rem;font-weight:800;letter-spacing:.01em;">Classe : <span id="edu-bar-class-name">—</span></div>
+      <div style="font-size:.71rem;opacity:.7;" id="edu-bar-save-status">Non sauvegardé</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <button onclick="eduAutoSave(true)" style="padding:7px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;">💾 Sauvegarder</button>
+    <button onclick="openEduSubmitModal()" style="padding:7px 18px;border-radius:8px;border:none;background:#fff;color:#1d4ed8;font-size:.85rem;font-weight:800;cursor:pointer;">📤 Soumettre →</button>
+  </div>
+</div>
+
+<!-- Modal soumission -->
+<div id="edu-submit-modal" style="display:none;position:fixed;inset:0;z-index:9995;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:420px;width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <h3 style="font-size:1rem;font-weight:800;color:#1e293b;">📤 Soumettre ma ration</h3>
+      <button onclick="document.getElementById('edu-submit-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:#64748b;line-height:1;">×</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:4px;">Titre du travail <span style="color:#dc2626;">*</span></label>
+      <input type="text" id="edu-sub-titre" placeholder="Ex: Ration vache laitière 30L" maxlength="80" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border .15s;" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='#e2e8f0'">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:4px;">Commentaire (optionnel)</label>
+      <textarea id="edu-sub-comment" placeholder="Vos choix d'aliments, vos remarques..." rows="3" maxlength="300" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;resize:vertical;" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+    </div>
+    <div id="edu-sub-err" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:10px;padding:7px 10px;background:#fee2e2;border-radius:7px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="document.getElementById('edu-submit-modal').style.display='none'" style="padding:9px 16px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;font-size:.85rem;font-weight:600;cursor:pointer;color:#64748b;">Annuler</button>
+      <button onclick="submitEduWork()" id="edu-sub-btn" style="padding:9px 20px;border-radius:8px;border:none;background:#1d4ed8;color:#fff;font-size:.85rem;font-weight:800;cursor:pointer;">Soumettre →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// BARRE ÉDUCATION
+// ═══════════════════════════════════════════════════════
+var _eduMembership = null;
+var _eduAutoSaveTimer = null;
+
+async function initEduBar() {
+  var supa = getSupa();
+  if (!supa || !currentUser) return;
+  var res = await supa.from('edu_members')
+    .select('class_id, student_name, edu_classes(nom, code)')
+    .eq('student_id', currentUser.id)
+    .maybeSingle();
+  if (!res.data) return;
+  _eduMembership = res.data;
+  var bar = document.getElementById('edu-bar');
+  if (!bar) return;
+  bar.style.display = 'flex';
+  document.getElementById('edu-bar-class-name').textContent = res.data.edu_classes?.nom || '—';
+  document.body.style.paddingBottom = '58px';
+  if (_eduAutoSaveTimer) clearInterval(_eduAutoSaveTimer);
+  _eduAutoSaveTimer = setInterval(function(){ eduAutoSave(false); }, 60000);
+}
+
+function _getEduPayload() {
+  if (!_eduMembership || !lastB) return null;
+  var a = lastA;
+  var b = lastB;
+  var score = (a && a.items && a.items.length > 0) ? computeQualityScore(a, b) : null;
+  var ration = (a && a.items) ? a.items.map(function(i){ return { nom: i.nom, qty: parseFloat(i.qty.toFixed(2)) }; }) : [];
+  var bilanUFL = (a && b) ? parseFloat((a.totalUFL - b.bUFL).toFixed(2)) : null;
+  var bilanPDI = (a && b) ? parseFloat((a.totalPDI - b.bPDI).toFixed(0)) : null;
+  return {
+    class_id: _eduMembership.class_id,
+    student_id: currentUser.id,
+    student_name: _eduMembership.student_name || (currentUser.user_metadata && currentUser.user_metadata.prenom) || 'Élève',
+    student_email: currentUser.email || '',
+    score: score ? score.grade : null,
+    bilan_ufl: bilanUFL,
+    bilan_pdi: bilanPDI,
+    animal_type: (lastB && lastB.typeLabel) || '',
+    ration_data: ration,
+    params_data: {}
+  };
+}
+
+async function eduAutoSave(manual) {
+  if (!_eduMembership) return;
+  var payload = _getEduPayload();
+  if (!payload) return;
+  payload.updated_at = new Date().toISOString();
+  var supa = getSupa();
+  var res = await supa.from('edu_current_work').upsert(payload, { onConflict: 'student_id,class_id' });
+  var statusEl = document.getElementById('edu-bar-save-status');
+  if (statusEl) {
+    if (res.error) {
+      statusEl.textContent = 'Erreur de sauvegarde';
+    } else {
+      var now = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      statusEl.textContent = 'Sauvegardé à ' + now;
+    }
+  }
+  if (manual && !res.error && typeof showToast === 'function') showToast('Ration sauvegardée dans votre classe.', 'success');
+}
+
+function openEduSubmitModal() {
+  if (!lastB || !lastA || !lastA.items || !lastA.items.length) {
+    if (typeof showToast === 'function') showToast('Calculez d\'abord la ration avant de soumettre.', 'warn');
+    return;
+  }
+  document.getElementById('edu-sub-titre').value = '';
+  document.getElementById('edu-sub-comment').value = '';
+  document.getElementById('edu-sub-err').style.display = 'none';
+  var btn = document.getElementById('edu-sub-btn');
+  btn.textContent = 'Soumettre →'; btn.disabled = false;
+  document.getElementById('edu-submit-modal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('edu-sub-titre').focus(); }, 100);
+}
+
+async function submitEduWork() {
+  var titre = document.getElementById('edu-sub-titre').value.trim();
+  var commentaire = document.getElementById('edu-sub-comment').value.trim();
+  var errEl = document.getElementById('edu-sub-err');
+  errEl.style.display = 'none';
+  if (!titre) { errEl.textContent = 'Un titre est requis.'; errEl.style.display = 'block'; return; }
+  var payload = _getEduPayload();
+  if (!payload) { errEl.textContent = 'Aucune ration calculée.'; errEl.style.display = 'block'; return; }
+  var btn = document.getElementById('edu-sub-btn');
+  btn.textContent = 'Envoi…'; btn.disabled = true;
+  var supa = getSupa();
+  var res = await supa.from('edu_submissions').insert(Object.assign({}, payload, {
+    titre: titre,
+    commentaire: commentaire,
+    submitted_at: new Date().toISOString()
+  }));
+  if (res.error) {
+    errEl.textContent = res.error.message; errEl.style.display = 'block';
+    btn.textContent = 'Soumettre →'; btn.disabled = false;
+    return;
+  }
+  document.getElementById('edu-submit-modal').style.display = 'none';
+  if (typeof showToast === 'function') showToast('✅ Ration soumise à votre professeur !', 'success', 5000);
+  eduAutoSave(false);
+}
+</script>
 
 </body>
 </html>
