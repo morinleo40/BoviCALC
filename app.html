@@ -54,6 +54,8 @@ function switchWallTab(tab) {
   if (pg) pg.classList.toggle('hidden', tab !== 'register');
   var fg = _$$('wall-forgot');
   if (fg) fg.classList.toggle('hidden', tab === 'register');
+  var ug = _$$('wall-username-group');
+  if (ug) ug.classList.toggle('hidden', tab !== 'register');
   var err = _$$('wall-error'); if (err) err.style.display = 'none';
 }
 function showWallError(msg) {
@@ -81,7 +83,8 @@ async function submitWall() {
         if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
       }
       var prenom = ((_$$('wall-prenom') || {}).value || '').trim();
-      var r1 = await supa.auth.signUp({ email: email, password: pass, options: { data: { prenom: prenom } } });
+      var username = ((_$$('wall-username') || {}).value || '').trim();
+      var r1 = await supa.auth.signUp({ email: email, password: pass, options: { data: { prenom: prenom, username: username } } });
       if (r1.error) {
         showWallError(r1.error.message);
         if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; }
@@ -118,12 +121,39 @@ function openAccountModal() {
   var m = _$$('account-modal'); if (!m) return;
   // Email
   var em = _$$('acct-email'); if (em) em.textContent = currentUser ? currentUser.email || '' : '';
+  // Username display
+  var un = _$$('acct-username-display');
+  if (un && currentUser) {
+    var usernameA = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
+    un.textContent = usernameA ? '@' + usernameA : '';
+    un.style.display = usernameA ? '' : 'none';
+  }
   // Avatar initiale
   var av = _$$('acct-avatar');
   if (av && currentUser) {
+    var usernameAv = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
     var prenom3 = (currentUser.user_metadata && currentUser.user_metadata.prenom) || '';
-    var initiale = (prenom3 || (currentUser.email || 'U')).charAt(0).toUpperCase();
+    var initiale = (usernameAv || prenom3 || (currentUser.email || 'U')).charAt(0).toUpperCase();
     av.textContent = initiale;
+  }
+  // Pro code sections
+  var hasCode = currentUser && currentUser.user_metadata && currentUser.user_metadata.pro_code_activated;
+  var isOwner = currentUser && currentUser.email === 'morinleo40@gmail.com';
+  var proActivateSection = _$$('acct-pro-activate-section');
+  if (proActivateSection) proActivateSection.style.display = (!hasCode && !isOwner) ? '' : 'none';
+  var proEditSection = _$$('acct-pro-edit-section');
+  if (proEditSection) proEditSection.style.display = hasCode ? '' : 'none';
+  // Pre-fill username input in edit section
+  if (hasCode) {
+    var uInput = _$$('acct-username-input');
+    if (uInput) uInput.value = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
+    var eInput = _$$('acct-email-input');
+    if (eInput) eInput.value = currentUser.email || '';
+  }
+  var adminSection = _$$('acct-admin-section');
+  if (adminSection) {
+    adminSection.style.display = isOwner ? '' : 'none';
+    if (isOwner) loadProCodes();
   }
   // Bouton upgrade
   var upBtn = _$$('acct-upgrade-btn');
@@ -152,6 +182,7 @@ function switchAuthTab(tab) {
   var sb = _$$('btn-auth-submit');
   if (sb) sb.textContent = tab === 'login' ? 'Se connecter' : 'Créer mon compte';
   var cg = _$$('auth-confirm-group'); if (cg) cg.classList.toggle('hidden', tab !== 'register');
+  var ug = _$$('auth-username-group'); if (ug) ug.classList.toggle('hidden', tab !== 'register');
   var fg = _$$('auth-forgot');        if (fg) fg.classList.toggle('hidden', tab === 'register');
   var er = _$$('auth-error');         if (er) er.style.display = 'none';
 }
@@ -168,7 +199,8 @@ async function submitAuth() {
       var conf = (_$$('auth-pass-confirm') || {}).value || '';
       if (pass !== conf) { showAuthError('Les mots de passe ne correspondent pas.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return; }
       if (pass.length < 6) { showAuthError('Mot de passe : 6 caractères minimum.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return; }
-      var ra = await supa.auth.signUp({ email: email, password: pass });
+      var authUsername = ((_$$('auth-username') || {}).value || '').trim();
+      var ra = await supa.auth.signUp({ email: email, password: pass, options: { data: { username: authUsername } } });
       if (ra.error) { showAuthError(ra.error.message); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} }
       else { showToast('✅ Compte créé ! Vérifiez votre email.', 'success', 5000); closeAuthModal(); }
     } else {
@@ -205,8 +237,9 @@ function togglePwd(id, btn) {
 function updateAuthUI() {
   var btn = _$$('btn-header-auth'); if (!btn) return;
   if (currentUser) {
+    var username2 = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
     var prenom2 = (currentUser.user_metadata && currentUser.user_metadata.prenom) || '';
-    var name = prenom2 || (currentUser.email ? currentUser.email.split('@')[0] : 'Mon compte');
+    var name = username2 || prenom2 || (currentUser.email ? currentUser.email.split('@')[0] : 'Mon compte');
     name = name.charAt(0).toUpperCase() + name.slice(1);
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> ' + name;
     btn.classList.add('hdr-btn-account');
@@ -224,8 +257,9 @@ function updateAuthUI() {
   if (welcome) {
     if (currentUser) {
       welcome.style.display = 'flex';
+      var usernameG = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
       var prenom = (currentUser.user_metadata && currentUser.user_metadata.prenom) || '';
-      var name = prenom || (currentUser.email ? currentUser.email.split('@')[0] : '');
+      var name = usernameG || prenom || (currentUser.email ? currentUser.email.split('@')[0] : '');
       var greeting = _$$('home-greeting');
       if (greeting) {
         var h = new Date().getHours();
@@ -343,6 +377,10 @@ async function initAuth() {
       <div id="wall-prenom-group" class="rb-form-group hidden" style="margin-top:12px;">
         <label>Prénom</label>
         <input type="text" id="wall-prenom" class="rb-input" placeholder="Votre prénom" autocomplete="given-name">
+      </div>
+      <div id="wall-username-group" class="rb-form-group hidden" style="margin-top:12px;">
+        <label>Identifiant <span style="font-size:.75rem;color:#64748b;font-weight:400;">(optionnel)</span></label>
+        <input type="text" id="wall-username" class="rb-input" placeholder="ex: jean-dupont" autocomplete="username" maxlength="30">
       </div>
       <div id="wall-confirm-group" class="rb-form-group hidden" style="margin-top:12px;">
         <label>Confirmer le mot de passe</label>
@@ -4802,6 +4840,116 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     if (btn && currentUser) btn.style.display = userPlan === 'free' ? '' : 'none';
   }
 
+  // =====================================================
+  // CODES PRO — personnalisation de compte
+  // =====================================================
+  async function activateProCode() {
+    const code = ($('acct-pro-code-input')?.value || '').trim().toUpperCase();
+    const errEl = $('acct-pro-code-error');
+    const okEl  = $('acct-pro-code-ok');
+    const btn   = $('acct-pro-code-btn');
+    if (errEl) errEl.style.display = 'none';
+    if (okEl)  okEl.style.display  = 'none';
+    if (!code) { if (errEl) { errEl.textContent = 'Entrez un code.'; errEl.style.display = 'block'; } return; }
+    if (!currentUser) return;
+    const supa = getSupa(); if (!supa) return;
+    if (btn) { btn.disabled = true; btn.textContent = 'Vérification…'; }
+    try {
+      const { data, error } = await supa
+        .from('pro_codes')
+        .select('*')
+        .eq('code', code)
+        .eq('used', false)
+        .maybeSingle();
+      if (error || !data) {
+        if (errEl) { errEl.textContent = 'Code invalide ou déjà utilisé.'; errEl.style.display = 'block'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Activer'; }
+        return;
+      }
+      const { error: upErr } = await supa
+        .from('pro_codes')
+        .update({ used: true, used_by: currentUser.id, used_at: new Date().toISOString() })
+        .eq('code', code)
+        .eq('used', false);
+      if (upErr) {
+        if (errEl) { errEl.textContent = 'Erreur : ' + upErr.message; errEl.style.display = 'block'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Activer'; }
+        return;
+      }
+      await supa.auth.updateUser({ data: { pro_code_activated: code } });
+      if (currentUser.user_metadata) currentUser.user_metadata.pro_code_activated = code;
+      if (okEl) { okEl.textContent = '✅ Code activé ! Vous pouvez maintenant modifier votre profil.'; okEl.style.display = 'block'; }
+      setTimeout(() => { closeAccountModal(); openAccountModal(); }, 1800);
+    } catch(e) {
+      if (errEl) { errEl.textContent = 'Erreur réseau.'; errEl.style.display = 'block'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Activer'; }
+    }
+  }
+
+  async function updateUsername() {
+    const val = ($('acct-username-input')?.value || '').trim();
+    const msgEl = $('acct-profile-msg');
+    if (!val) { if (msgEl) { msgEl.textContent = 'Identifiant vide.'; msgEl.style.color='#dc2626'; msgEl.style.display='block'; } return; }
+    const supa = getSupa(); if (!supa || !currentUser) return;
+    const { error } = await supa.auth.updateUser({ data: { username: val } });
+    if (error) {
+      if (msgEl) { msgEl.textContent = 'Erreur : ' + error.message; msgEl.style.color='#dc2626'; msgEl.style.display='block'; }
+    } else {
+      if (currentUser.user_metadata) currentUser.user_metadata.username = val;
+      updateAuthUI();
+      if (msgEl) { msgEl.textContent = '✅ Identifiant mis à jour !'; msgEl.style.color='#15803d'; msgEl.style.display='block'; }
+      setTimeout(() => { if (msgEl) msgEl.style.display='none'; }, 3000);
+    }
+  }
+
+  async function updateEmail() {
+    const val = ($('acct-email-input')?.value || '').trim();
+    const msgEl = $('acct-profile-msg');
+    if (!val || !val.includes('@')) { if (msgEl) { msgEl.textContent = 'Email invalide.'; msgEl.style.color='#dc2626'; msgEl.style.display='block'; } return; }
+    const supa = getSupa(); if (!supa || !currentUser) return;
+    const { error } = await supa.auth.updateUser({ email: val });
+    if (error) {
+      if (msgEl) { msgEl.textContent = 'Erreur : ' + error.message; msgEl.style.color='#dc2626'; msgEl.style.display='block'; }
+    } else {
+      if (msgEl) { msgEl.textContent = '📧 Confirmation envoyée à ' + val + '. Vérifiez votre boîte mail.'; msgEl.style.color='#15803d'; msgEl.style.display='block'; }
+      setTimeout(() => { if (msgEl) msgEl.style.display='none'; }, 5000);
+    }
+  }
+
+  async function generateProCode() {
+    if (!currentUser || currentUser.email !== 'morinleo40@gmail.com') return;
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    const supa = getSupa(); if (!supa) return;
+    const { error } = await supa.from('pro_codes').insert({ code });
+    if (error) { showToast('Erreur : ' + error.message, 'error', 4000); return; }
+    showToast('Code créé : ' + code, 'success', 8000);
+    loadProCodes();
+  }
+
+  async function loadProCodes() {
+    if (!currentUser || currentUser.email !== 'morinleo40@gmail.com') return;
+    const supa = getSupa(); if (!supa) return;
+    const { data, error } = await supa
+      .from('pro_codes')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    const listEl = $('admin-codes-list');
+    if (!listEl) return;
+    if (error || !data || !data.length) {
+      listEl.innerHTML = '<p style="font-size:.82rem;color:#64748b;margin:0;">Aucun code généré.</p>';
+      return;
+    }
+    listEl.innerHTML = data.map(c =>
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.8rem;">' +
+        '<code style="font-family:monospace;font-weight:700;letter-spacing:.06em;' + (c.used ? 'color:#94a3b8;text-decoration:line-through;' : 'color:#15803d;') + '">' + c.code + '</code>' +
+        '<span style="color:#94a3b8;">' + (c.used ? '✓ utilisé' : '◯ libre') + '</span>' +
+      '</div>'
+    ).join('');
+  }
+
   initAuth();
 </script>
 
@@ -4833,6 +4981,10 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
           <label>Confirmer le mot de passe</label>
           <input type="password" id="auth-pass-confirm" class="rb-input" placeholder="••••••••">
         </div>
+        <div id="auth-username-group" class="rb-form-group hidden" style="margin-top:12px;">
+          <label>Identifiant <span style="font-size:.75rem;color:#64748b;font-weight:400;">(optionnel)</span></label>
+          <input type="text" id="auth-username" class="rb-input" placeholder="ex: jean-dupont" autocomplete="username" maxlength="30">
+        </div>
         <div id="auth-error" style="display:none;color:var(--danger);font-size:.85rem;margin-top:10px;padding:8px 12px;background:#fee2e2;border-radius:6px;"></div>
         <button id="btn-auth-submit" class="rb-btn rb-btn-primary" style="width:100%;margin-top:18px;" onclick="submitAuth()">Se connecter</button>
         <div id="auth-forgot" style="text-align:center;margin-top:12px;">
@@ -4854,7 +5006,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     <!-- Avatar + email -->
     <div style="text-align:center;padding:20px 0 16px;">
       <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#15803d,#22c55e);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;font-weight:700;" id="acct-avatar">?</div>
-      <div id="acct-email" style="font-weight:700;color:var(--green-900);font-size:.95rem;word-break:break-all;"></div>
+      <div id="acct-username-display" style="font-weight:700;color:#15803d;font-size:1rem;display:none;"></div>
+      <div id="acct-email" style="font-size:.85rem;color:#64748b;word-break:break-all;margin-top:2px;"></div>
       <div id="acct-plan-badge" style="margin-top:10px;"></div>
     </div>
 
@@ -4896,6 +5049,62 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         <button class="rb-btn rb-btn-primary" style="width:100%;" onclick="changeAccountPassword()">Mettre à jour le mot de passe</button>
       </div>
     </details>
+
+    <!-- Activer un code pro -->
+    <div id="acct-pro-activate-section" style="margin-bottom:10px;">
+      <details>
+        <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:var(--green-50);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);">
+          🔓 Activer un code pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
+        </summary>
+        <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
+          <p style="font-size:.82rem;color:#64748b;margin:0 0 10px;">Entrez le code fourni par Rumicore pour personnaliser votre compte (identifiant, email, mot de passe).</p>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="acct-pro-code-input" class="rb-input" placeholder="EX: AB3C9DEF" maxlength="10"
+                   style="text-transform:uppercase;font-family:monospace;font-weight:700;letter-spacing:.08em;flex:1;">
+            <button id="acct-pro-code-btn" class="rb-btn rb-btn-primary" style="white-space:nowrap;" onclick="activateProCode()">Activer</button>
+          </div>
+          <div id="acct-pro-code-error" style="display:none;color:#dc2626;font-size:.82rem;margin-top:8px;padding:6px 10px;background:#fee2e2;border-radius:6px;"></div>
+          <div id="acct-pro-code-ok" style="display:none;color:#15803d;font-size:.82rem;margin-top:8px;padding:6px 10px;background:#f0fdf4;border-radius:6px;"></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Modifier mon profil (débloqué avec code pro) -->
+    <div id="acct-pro-edit-section" style="margin-bottom:10px;">
+      <details>
+        <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:var(--green-50);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid #86efac;">
+          ✏️ Modifier mon profil <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
+        </summary>
+        <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
+          <div class="rb-form-group" style="margin-bottom:10px;">
+            <label style="font-size:.82rem;">Identifiant</label>
+            <input type="text" id="acct-username-input" class="rb-input" placeholder="ex: jean-dupont" maxlength="30">
+          </div>
+          <div class="rb-form-group" style="margin-bottom:12px;">
+            <label style="font-size:.82rem;">Email</label>
+            <input type="email" id="acct-email-input" class="rb-input" placeholder="votre@email.com">
+          </div>
+          <div id="acct-profile-msg" style="display:none;font-size:.82rem;margin-bottom:10px;padding:8px 12px;border-radius:6px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="rb-btn rb-btn-primary" style="flex:1;font-size:.82rem;" onclick="updateUsername()">Mettre à jour l'identifiant</button>
+            <button class="rb-btn rb-btn-primary" style="flex:1;font-size:.82rem;" onclick="updateEmail()">Mettre à jour l'email</button>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Section admin (propriétaire uniquement) -->
+    <div id="acct-admin-section" style="margin-bottom:10px;display:none;">
+      <details>
+        <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:#fef9c3;border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid #fde68a;">
+          ⚙️ Gérer les codes pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
+        </summary>
+        <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
+          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:12px;" onclick="generateProCode()">➕ Générer un nouveau code</button>
+          <div id="admin-codes-list" style="max-height:200px;overflow-y:auto;font-size:.82rem;"></div>
+        </div>
+      </details>
+    </div>
 
     <!-- Actions -->
     <div style="display:flex;flex-direction:column;gap:8px;">
