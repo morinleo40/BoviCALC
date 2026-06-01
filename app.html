@@ -240,7 +240,7 @@ async function deleteAccount() {
     async function() {
       var supa = getSupa(); if (!supa) return;
       var res = await supa.rpc('delete_user');
-      if (res.error) { showToast && showToast('Erreur : ' + res.error.message, 'error', 4000); return; }
+      if (res.error) { showToast('Erreur suppression : ' + res.error.message, 'error', 6000); return; }
       try { localStorage.clear(); } catch(e) {}
       window.location.href = 'index.html';
     },
@@ -4907,22 +4907,37 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         .eq('code', code)
         .eq('used', false)
         .maybeSingle();
-      if (codeErr || !codeData) {
+      if (codeErr) {
+        if (errEl) { errEl.textContent = 'Erreur : ' + codeErr.message; errEl.style.display = 'block'; }
+        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
+        return;
+      }
+      if (!codeData) {
         if (errEl) { errEl.textContent = 'Code invalide ou déjà utilisé.'; errEl.style.display = 'block'; }
         if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
         return;
       }
       // Marquer le code comme utilisé
-      await supa.from('promo_codes')
+      const { error: upErr } = await supa.from('promo_codes')
         .update({ used: true, used_by: currentUser.id, used_at: new Date().toISOString() })
         .eq('code', code).eq('used', false);
+      if (upErr) {
+        if (errEl) { errEl.textContent = 'Erreur (marquage) : ' + upErr.message; errEl.style.display = 'block'; }
+        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
+        return;
+      }
       // Calculer la date d'expiration
       const durationDays = codeData.duration_days || 365;
       const until = new Date();
       until.setDate(until.getDate() + durationDays);
       // Mettre à jour le plan de l'utilisateur
-      await supa.from('user_plans')
+      const { error: planErr } = await supa.from('user_plans')
         .upsert({ user_id: currentUser.id, plan: 'pro', until: until.toISOString() }, { onConflict: 'user_id' });
+      if (planErr) {
+        if (errEl) { errEl.textContent = 'Erreur (plan) : ' + planErr.message; errEl.style.display = 'block'; }
+        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
+        return;
+      }
       // Succès
       userPlan = 'pro';
       updateAuthUI();
@@ -4936,7 +4951,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       if (promoBtn) promoBtn.style.display = 'none';
       setTimeout(() => $('promo-modal')?.classList.add('hidden'), 3000);
     } catch(e) {
-      if (errEl) { errEl.textContent = 'Erreur réseau. Réessayez.'; errEl.style.display = 'block'; }
+      if (errEl) { errEl.textContent = 'Erreur : ' + (e.message || e); errEl.style.display = 'block'; }
       if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
     }
   }
@@ -4995,7 +5010,12 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         .eq('code', code)
         .eq('used', false)
         .maybeSingle();
-      if (error || !data) {
+      if (error) {
+        if (errEl) { errEl.textContent = 'Erreur lecture : ' + error.message; errEl.style.display = 'block'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Activer'; }
+        return;
+      }
+      if (!data) {
         if (errEl) { errEl.textContent = 'Code invalide ou déjà utilisé.'; errEl.style.display = 'block'; }
         if (btn) { btn.disabled = false; btn.textContent = 'Activer'; }
         return;
@@ -5006,7 +5026,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         .eq('code', code)
         .eq('used', false);
       if (upErr) {
-        if (errEl) { errEl.textContent = 'Erreur : ' + upErr.message; errEl.style.display = 'block'; }
+        if (errEl) { errEl.textContent = 'Erreur mise à jour : ' + upErr.message; errEl.style.display = 'block'; }
         if (btn) { btn.disabled = false; btn.textContent = 'Activer'; }
         return;
       }
