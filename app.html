@@ -5511,12 +5511,19 @@ async function initEduBar() {
     .maybeSingle();
   if (!res.data) return;
   _eduMembership = res.data;
+  // If user previously dismissed the bar, keep it hidden but show the reopen pill
+  var dismissed = false;
+  try { dismissed = localStorage.getItem('edu-bar-dismissed') === '1'; } catch(e) {}
+  if (dismissed) {
+    var reopen = document.getElementById('edu-bar-reopen');
+    if (reopen) reopen.style.display = 'flex';
+    return;
+  }
   var bar = document.getElementById('edu-bar');
   if (!bar) return;
   bar.style.display = 'flex';
   document.getElementById('edu-bar-class-name').textContent = res.data.edu_classes?.nom || '—';
   document.body.style.paddingBottom = '64px';
-  // Lift suggestion button above the edu-bar
   var btnSuggest = document.getElementById('btn-suggest');
   if (btnSuggest) btnSuggest.style.bottom = '68px';
 
@@ -5543,8 +5550,8 @@ async function initEduBar() {
 
 function closeEduBar() {
   _eduBarActive = false;
+  try { localStorage.setItem('edu-bar-dismissed', '1'); } catch(e) {}
   if (_eduAutoSaveTimer) { clearInterval(_eduAutoSaveTimer); _eduAutoSaveTimer = null; }
-  // Effacer la présence en direct du côté prof
   if (_eduMembership && getSupa() && currentUser) {
     getSupa().from('edu_current_work').delete()
       .eq('student_id', currentUser.id).eq('class_id', _eduMembership.class_id).then(function(){});
@@ -5560,6 +5567,7 @@ function closeEduBar() {
 
 function reopenEduBar() {
   _eduBarActive = true;
+  try { localStorage.removeItem('edu-bar-dismissed'); } catch(e) {}
   var bar = document.getElementById('edu-bar');
   if (bar) bar.style.display = 'flex';
   document.body.style.paddingBottom = '64px';
