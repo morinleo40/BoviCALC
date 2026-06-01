@@ -113,7 +113,8 @@
       display: flex; align-items: center; gap: 10px;
       padding: 20px 4px 16px; border-bottom: 1px solid rgba(255,255,255,.12);
     }
-    .sb-logo-wrap img { height: 30px; filter: brightness(0) invert(1); }
+    .sb-logo-wrap .logo-pill { background:rgba(255,255,255,.92);border-radius:8px;padding:4px 7px;display:flex;align-items:center;flex-shrink:0; }
+    .sb-logo-wrap .logo-pill img { height: 24px; display:block; }
     .sb-logo-text { font-size: .95rem; font-weight: 900; color: #fff; letter-spacing: -.01em; }
     .sb-logo-badge {
       font-size: .58rem; font-weight: 800; padding: 2px 8px;
@@ -409,6 +410,31 @@
     .bilan-item .val { font-size: 1.1rem; font-weight: 800; color: var(--text); }
     .bilan-item .lbl { font-size: .72rem; color: var(--muted); margin-top: 4px; font-weight: 600; }
 
+    /* ── STUDENT EXERCISE CARD ── */
+    .s-exo-card {
+      background: linear-gradient(135deg,#faf5ff 0%,#fdf2f8 100%);
+      border: 1.5px solid #ddd6fe; border-radius: 16px;
+      padding: 22px 24px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 4px 20px rgba(124,58,237,.1);
+    }
+    .s-exo-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg,#7c3aed,#db2777);
+    }
+    .s-exo-eyebrow { font-size:.68rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px; }
+    .s-exo-title { font-size:1.1rem;font-weight:900;color:#1e293b;margin-bottom:6px; }
+    .s-exo-desc { font-size:.86rem;color:#64748b;line-height:1.6;margin-bottom:12px; }
+
+    /* ── EXERCISE RESULTS ── */
+    .exo-results { margin-top:16px;border-top:1.5px solid #f0ebff;padding-top:14px; }
+    .exo-results-title { font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px; }
+    .exo-result-row { display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f8f5ff;font-size:.83rem; }
+    .exo-result-row:last-child { border-bottom:none; }
+    .exo-result-name { flex:1;font-weight:600;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .exo-result-pending { font-size:.75rem;color:#94a3b8;font-style:italic; }
+    .exo-result-date { font-size:.72rem;color:#94a3b8;flex-shrink:0; }
+
     /* ── EXERCISE CARDS ── */
     .exo-card {
       background: #fff; border: 1.5px solid var(--border); border-radius: 16px;
@@ -552,7 +578,7 @@
   <nav class="sidebar">
     <div class="sb-header">
       <div class="sb-logo-wrap">
-        <img src="Logo RumiCORE.png" alt="">
+        <div class="logo-pill"><img src="Logo RumiCORE.png" alt="RumiCORE"></div>
         <span class="sb-logo-text">RumiCORE</span>
         <span class="sb-logo-badge">Édu</span>
       </div>
@@ -707,6 +733,10 @@
           <button class="mc-btn-leave" onclick="leaveClass()">↩ Quitter la classe</button>
         </div>
       </div>
+
+      <!-- Exercice actif du professeur -->
+      <div id="student-active-exo" style="display:none;"></div>
+
       <h3 style="font-size:.95rem;font-weight:800;margin-bottom:14px;color:var(--text);">📤 Mes soumissions</h3>
       <div id="student-subs-list">
         <div class="empty"><span class="ei">📋</span><p>Pas encore de travaux soumis.<br>Calculez une ration et soumettez-la depuis l'outil.</p></div>
@@ -833,6 +863,23 @@
       <div class="form-field">
         <label>PDI cible (g) <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(optionnel)</span></label>
         <input type="number" id="exo-pdi" class="form-input" placeholder="Ex : 850" step="1" min="0" max="5000">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-field">
+        <label>Date de rendu <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(optionnel)</span></label>
+        <input type="datetime-local" id="exo-due-date" class="form-input">
+      </div>
+      <div class="form-field">
+        <label>Exercice noté</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+          <label class="exo-toggle">
+            <input type="checkbox" id="exo-is-graded" checked>
+            <span class="exo-toggle-slider"></span>
+          </label>
+          <span id="exo-graded-lbl" style="font-size:.82rem;font-weight:600;color:var(--edu);">Noté</span>
+        </div>
       </div>
     </div>
 
@@ -1019,11 +1066,11 @@ function showPage(id) {
 
   // Top bar per page
   const bars = {
-    'dashboard':        { title: 'Mes classes' },
+    'dashboard':        { title: 'Mes classes', actions: `<a href="index_education.html" class="btn btn-ghost btn-sm">🏠 Accueil</a>` },
     'class':            { back: { label: 'Mes classes', page: 'dashboard' }, title: currentClassData?.nom || '—' },
     'prof-settings':    { back: { label: 'Tableau de bord', page: 'dashboard' }, title: 'Paramètres' },
-    'join':             { title: 'Rejoindre une classe' },
-    'student-home':     { title: 'Ma classe' },
+    'join':             { title: 'Rejoindre une classe', actions: `<a href="index_education.html" class="btn btn-ghost btn-sm">🏠 Accueil</a>` },
+    'student-home':     { title: 'Ma classe', actions: `<a href="index_education.html" class="btn btn-ghost btn-sm">🏠 Accueil</a>` },
     'student-settings': { back: { label: 'Ma classe', page: 'student-home' }, title: 'Paramètres' },
   };
   if (bars[id]) setTopBar(bars[id]);
@@ -1289,6 +1336,49 @@ function showStudentHome() {
   $('sc-nom').textContent = cls.nom;
   $('sc-meta').textContent = `Code : ${cls.code} · ${cls.capacite} élèves max · Rejoint le ${new Date(myMembership.joined_at).toLocaleDateString('fr-FR')}`;
   loadMySubmissions();
+  loadStudentActiveExo();
+}
+
+async function loadStudentActiveExo() {
+  if (!myMembership) return;
+  const supa = getSupa();
+  const { data: exo } = await supa.from('edu_exercises')
+    .select('*').eq('class_id', myMembership.class_id).eq('is_active', true)
+    .order('created_at', { ascending: false }).limit(1).maybeSingle();
+  const container = $('student-active-exo');
+  if (!container) return;
+  if (!exo) { container.style.display = 'none'; return; }
+
+  const pills = [
+    exo.animal_type ? `🐄 ${exo.animal_type}` : null,
+    exo.target_ufl  ? `⚡ UFL cible : ${exo.target_ufl}` : null,
+    exo.target_pdi  ? `🧬 PDI cible : ${exo.target_pdi} g` : null,
+    exo.is_graded !== false ? `✓ Noté` : `✗ Non noté`,
+  ].filter(Boolean).map(p => `<span class="exo-meta-pill">${p}</span>`).join('');
+
+  let dueDateHtml = '';
+  if (exo.due_date) {
+    const due = new Date(exo.due_date);
+    const isPast = due < new Date();
+    const dateStr = due.toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+    dueDateHtml = `<div style="margin-top:12px;font-size:.82rem;font-weight:700;padding:8px 12px;border-radius:9px;
+      background:${isPast ? '#fee2e2' : '#f0fdf4'};color:${isPast ? '#dc2626' : '#15803d'};display:inline-block;">
+      📅 À rendre avant le ${dateStr}${isPast ? ' — Délai dépassé' : ''}
+    </div>`;
+  }
+
+  container.innerHTML = `<div class="s-exo-card">
+    <div class="s-exo-eyebrow">📚 Exercice en cours</div>
+    <div class="s-exo-title">${exo.titre}</div>
+    ${exo.description ? `<div class="s-exo-desc">${exo.description}</div>` : ''}
+    ${pills ? `<div class="exo-card-meta" style="margin-bottom:10px;">${pills}</div>` : ''}
+    ${exo.instructions ? `<div class="exo-instructions">${exo.instructions}</div>` : ''}
+    ${dueDateHtml}
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="app.html" class="btn btn-green" style="text-decoration:none;">🧮 Ouvrir le calculateur →</a>
+    </div>
+  </div>`;
+  container.style.display = 'block';
 }
 
 async function joinClass() {
@@ -1356,25 +1446,78 @@ let currentExoEditId = null;
 async function loadExos() {
   if (!currentClassId) return;
   const supa = getSupa();
-  const { data } = await supa.from('edu_exercises')
-    .select('*').eq('class_id', currentClassId)
-    .order('created_at', { ascending: false });
-  renderExos(data || []);
+  const [exoRes, membersRes, subsRes] = await Promise.all([
+    supa.from('edu_exercises').select('*').eq('class_id', currentClassId).order('created_at', { ascending: false }),
+    supa.from('edu_members').select('student_id, student_name').eq('class_id', currentClassId),
+    supa.from('edu_submissions').select('student_id, score, exercise_id, submitted_at').eq('class_id', currentClassId).not('exercise_id', 'is', null)
+  ]);
+  renderExos(exoRes.data || [], membersRes.data || [], subsRes.data || []);
 }
 
-function renderExos(list) {
+function renderExos(list, members, subs) {
   const el = $('exos-list');
   if (!list.length) {
     el.innerHTML = '<div class="empty"><span class="ei">📚</span><p>Aucun exercice créé.<br>Cliquez sur "+ Nouvel exercice" pour commencer.</p></div>';
     return;
   }
+  // Build map: exercise_id → {student_id → sub}
+  const subsByExo = {};
+  (subs || []).forEach(s => {
+    if (!subsByExo[s.exercise_id]) subsByExo[s.exercise_id] = {};
+    subsByExo[s.exercise_id][s.student_id] = s;
+  });
+  const scoreColors = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#dc2626' };
+
   el.innerHTML = list.map(e => {
     const active = e.is_active;
     const pills = [
       e.animal_type ? `🐄 ${e.animal_type}` : null,
-      e.target_ufl  ? `UFL cible : ${e.target_ufl}` : null,
-      e.target_pdi  ? `PDI cible : ${e.target_pdi} g` : null,
+      e.target_ufl  ? `⚡ UFL : ${e.target_ufl}` : null,
+      e.target_pdi  ? `🧬 PDI : ${e.target_pdi} g` : null,
     ].filter(Boolean);
+
+    // Due date pill
+    let duePill = '';
+    if (e.due_date) {
+      const due = new Date(e.due_date);
+      const isPast = due < new Date();
+      const dateStr = due.toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      duePill = `<span class="exo-meta-pill" style="${isPast ? 'background:#fee2e2;color:#dc2626;border-color:#fecaca;' : 'background:#f0fdf4;color:#15803d;border-color:#bbf7d0;'}">📅 ${dateStr}</span>`;
+    }
+    // Graded pill
+    const gradedPill = e.is_graded !== false
+      ? `<span class="exo-meta-pill" style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0;">✓ Noté</span>`
+      : `<span class="exo-meta-pill" style="background:#f8fafc;color:#94a3b8;border-color:#e2e8f0;">✗ Non noté</span>`;
+
+    // Student results
+    const exoSubs = subsByExo[e.id] || {};
+    const rendus = Object.keys(exoSubs).length;
+    let studentsHtml = '';
+    if (members.length) {
+      studentsHtml = `<div class="exo-results">
+        <div class="exo-results-title">Travaux rendus — ${rendus} / ${members.length} élève${members.length > 1 ? 's' : ''}</div>
+        ${members.map(m => {
+          const sub = exoSubs[m.student_id];
+          if (sub) {
+            const score = sub.score || '?';
+            const bg = scoreColors[score] || '#94a3b8';
+            const date = new Date(sub.submitted_at).toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+            return `<div class="exo-result-row">
+              <div class="exo-result-name">${m.student_name || 'Élève'}</div>
+              <span class="score-badge score-${score}" style="background:${bg};width:26px;height:26px;font-size:.78rem;">${score}</span>
+              <span class="exo-result-date">${date}</span>
+            </div>`;
+          }
+          return `<div class="exo-result-row">
+            <div class="exo-result-name">${m.student_name || 'Élève'}</div>
+            <span class="exo-result-pending">En attente</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+
+    const allPills = [...pills.map(p => `<span class="exo-meta-pill">${p}</span>`), duePill, gradedPill].filter(Boolean).join('');
+
     return `<div class="exo-card${active ? '' : ' inactive'}">
       <div class="exo-card-top">
         <div class="exo-card-left">
@@ -1383,8 +1526,9 @@ function renderExos(list) {
         </div>
         <span class="exo-status-badge ${active ? 'active' : 'inactive'}">${active ? 'Actif' : 'Inactif'}</span>
       </div>
-      ${pills.length ? `<div class="exo-card-meta">${pills.map(p=>`<span class="exo-meta-pill">${p}</span>`).join('')}</div>` : ''}
+      ${allPills ? `<div class="exo-card-meta">${allPills}</div>` : ''}
       ${e.instructions ? `<div class="exo-instructions">${e.instructions}</div>` : ''}
+      ${studentsHtml}
       <div class="exo-card-actions">
         <button class="btn btn-ghost btn-sm" onclick="toggleExoActive('${e.id}',${!active})">
           ${active ? '⏸ Désactiver' : '▶ Activer'}
@@ -1406,8 +1550,11 @@ function openCreateExo() {
   $('exo-animal').value = '';
   $('exo-ufl').value = '';
   $('exo-pdi').value = '';
+  $('exo-due-date').value = '';
   $('exo-is-active').checked = true;
   $('exo-active-lbl').textContent = 'Actif';
+  $('exo-is-graded').checked = true;
+  $('exo-graded-lbl').textContent = 'Noté';
   $('exo-err').style.display = 'none';
   $('exo-modal').classList.add('open');
   setTimeout(() => $('exo-titre').focus(), 100);
@@ -1423,17 +1570,25 @@ function openEditExo(exo) {
   $('exo-animal').value = exo.animal_type || '';
   $('exo-ufl').value = exo.target_ufl || '';
   $('exo-pdi').value = exo.target_pdi || '';
+  $('exo-due-date').value = exo.due_date ? exo.due_date.slice(0, 16) : '';
   $('exo-is-active').checked = !!exo.is_active;
   $('exo-active-lbl').textContent = exo.is_active ? 'Actif' : 'Inactif';
+  $('exo-is-graded').checked = exo.is_graded !== false;
+  $('exo-graded-lbl').textContent = exo.is_graded !== false ? 'Noté' : 'Non noté';
   $('exo-err').style.display = 'none';
   $('exo-modal').classList.add('open');
 }
 
-// Wire toggle label
+// Wire toggle labels
 document.addEventListener('DOMContentLoaded', () => {
   const chk = $('exo-is-active');
   if (chk) chk.addEventListener('change', () => {
     $('exo-active-lbl').textContent = chk.checked ? 'Actif' : 'Inactif';
+  });
+  const chkG = $('exo-is-graded');
+  if (chkG) chkG.addEventListener('change', () => {
+    $('exo-graded-lbl').textContent = chkG.checked ? 'Noté' : 'Non noté';
+    $('exo-graded-lbl').style.color = chkG.checked ? 'var(--edu)' : 'var(--muted)';
   });
 });
 
@@ -1453,6 +1608,8 @@ async function saveExo() {
     target_ufl: parseFloat($('exo-ufl').value) || null,
     target_pdi: parseFloat($('exo-pdi').value) || null,
     is_active: $('exo-is-active').checked,
+    due_date: $('exo-due-date').value ? new Date($('exo-due-date').value).toISOString() : null,
+    is_graded: $('exo-is-graded').checked,
   };
   const supa = getSupa();
   let error;
