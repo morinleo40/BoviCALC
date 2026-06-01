@@ -329,8 +329,19 @@ function requirePro(feature) {
 }
 async function loadUserPlan() {
   var supa = getSupa(); if (!supa || !currentUser) { userPlan = 'free'; return; }
+  // 1. Vérifier les métadonnées (codes promo)
+  var meta = currentUser.user_metadata || {};
+  if (meta.plan === 'pro') {
+    var planUntil = meta.plan_until ? new Date(meta.plan_until) : null;
+    if (!planUntil || planUntil > new Date()) {
+      userPlan = 'pro';
+      updateAuthUI();
+      return;
+    }
+  }
+  // 2. Fallback : vérifier user_plans (abonnés Stripe)
   try {
-    var res = await supa.from('user_plans').select('plan').eq('user_id', currentUser.id).single();
+    var res = await supa.from('user_plans').select('plan').eq('user_id', currentUser.id).maybeSingle();
     userPlan = (res.data && res.data.plan) ? res.data.plan : 'free';
   } catch(e) { userPlan = 'free'; }
   updateAuthUI();
@@ -1971,7 +1982,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     if (okBtn) {
       okBtn.textContent = okLabel || 'Confirmer';
       okBtn.style.background = danger !== false ? '#dc2626' : '#15803d';
-      okBtn.onclick = function() { rbConfirmCancel(); if (_rbConfirmCb) _rbConfirmCb(); };
+      okBtn.onclick = function() { var cb = _rbConfirmCb; rbConfirmCancel(); if (cb) cb(); };
     }
     const ov = document.getElementById('rb-confirm-overlay');
     if (ov) { ov.style.display = 'flex'; }
@@ -4908,13 +4919,15 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       const durationDays = codeData.duration_days || 365;
       const until = new Date();
       until.setDate(until.getDate() + durationDays);
-      // Mettre à jour le plan de l'utilisateur
-      const { error: planErr } = await supa.from('user_plans')
-        .upsert({ user_id: currentUser.id, plan: 'pro', until: until.toISOString() }, { onConflict: 'user_id' });
+      // Stocker le plan dans user_metadata (pas de table, pas de RLS)
+      const { data: updData, error: planErr } = await supa.auth.updateUser({
+        data: { plan: 'pro', plan_until: until.toISOString() }
+      });
       if (planErr) {
         if (errEl) { errEl.textContent = 'Erreur (plan) : ' + planErr.message; errEl.style.display = 'block'; }
         return;
       }
+      if (updData && updData.user) currentUser = updData.user;
       // Succès
       userPlan = 'pro';
       updateAuthUI();
