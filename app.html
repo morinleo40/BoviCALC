@@ -254,21 +254,9 @@ function togglePwd(id, btn) {
   btn.textContent = show ? '🙈' : '👁';
 }
 function updateAuthUI() {
-  var btn = _$$('btn-header-auth'); if (!btn) return;
-  if (currentUser) {
-    var username2 = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
-    var prenom2 = (currentUser.user_metadata && currentUser.user_metadata.prenom) || '';
-    var name = username2 || prenom2 || (currentUser.email ? currentUser.email.split('@')[0] : 'Mon compte');
-    name = name.charAt(0).toUpperCase() + name.slice(1);
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> ' + name;
-    btn.classList.add('hdr-btn-account');
-    btn.classList.remove('hdr-btn-auth');
-  } else {
-    btn.innerHTML = '🔑 Connexion';
-    btn.classList.remove('hdr-btn-account');
-    btn.classList.add('hdr-btn-auth');
-  }
-  // Bouton déconnexion : visible uniquement si connecté
+  // Sidebar user update
+  if (typeof updateSidebarUser === 'function') updateSidebarUser();
+  // Bouton déconnexion legacy (ignoré si absent)
   var logoutBtn = _$$('btn-logout');
   if (logoutBtn) logoutBtn.style.display = currentUser ? '' : 'none';
   // Bandeau de bienvenue
@@ -472,39 +460,48 @@ async function initAuth() {
   </div>
 </div>
 
-<header class="rb-header">
-  <div class="rb-header-inner">
-    <div class="logo-box" onclick="backToHome()" style="cursor:pointer;gap:10px;">
-      <img src="Logo RumiCORE.png" alt="Rumicore Logo" class="logo">
-      <div>
-        <div style="color:#fff;font-weight:800;font-size:1.05rem;letter-spacing:-.02em;line-height:1.2;">Rumicore</div>
-        <div style="color:rgba(255,255,255,.7);font-size:.68rem;font-weight:500;letter-spacing:.01em;line-height:1.2;">Mieux rationner, c'est plus de Lait&nbsp;!</div>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button onclick="backToHome()" class="hdr-btn" title="Menu principal">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        Menu
-      </button>
-      <a href="index.html" class="hdr-btn" title="Page d'accueil">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-        Accueil
-      </a>
-      <button onclick="showTutorial()" class="hdr-btn" title="Guide de démarrage">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Guide
-      </button>
-      <button id="btn-logout" onclick="logoutUser()" class="hdr-btn hdr-btn-logout" style="display:none;" title="Se déconnecter">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Déconnexion
-      </button>
-      <button id="btn-header-auth" class="hdr-btn hdr-btn-account" onclick="onAuthBtnClick()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Connexion
-      </button>
+<div class="rb-app-shell">
+
+<nav class="rb-sidebar" id="rb-sidebar">
+
+  <div class="rsb-header">
+    <img src="Logo RumiCORE.png" alt="" class="rsb-logo" onerror="this.style.display='none'">
+    <div>
+      <div class="rsb-title">Rumicore</div>
+      <div class="rsb-sub">Éleveur</div>
     </div>
   </div>
-</header>
+
+  <div class="rsb-user" id="rsb-user" onclick="onAuthBtnClick()">
+    <div class="rsb-avatar" id="rsb-avatar">?</div>
+    <div class="rsb-user-info">
+      <div class="rsb-user-name" id="rsb-user-name">Connexion</div>
+      <div class="rsb-user-plan" id="rsb-user-plan"></div>
+    </div>
+  </div>
+
+  <div class="rsb-nav">
+    <div class="rsb-section-label">Navigation</div>
+    <button class="rsb-item active" id="rsb-home" onclick="backToHome()"><span class="rsb-icon">🏠</span> Accueil</button>
+    <button class="rsb-item" id="rsb-ration-az" onclick="onSidebarNav('ration-a-z')"><span class="rsb-icon">🐄</span> Ration de A à Z <span class="rsb-badge">Pro</span></button>
+    <button class="rsb-item" id="rsb-ration-seule" onclick="onSidebarNav('ration-seule')"><span class="rsb-icon">🌾</span> Analyser ma ration</button>
+    <button class="rsb-item" id="rsb-besoins" onclick="onSidebarNav('besoins')"><span class="rsb-icon">📊</span> Mes besoins <span class="rsb-badge">Pro</span></button>
+    <button class="rsb-item" id="rsb-bilan" onclick="onSidebarNav('bilan-fourrager')"><span class="rsb-icon">📦</span> Bilan fourrager <span class="rsb-badge">Pro</span></button>
+    <button class="rsb-item" id="rsb-rapports" onclick="onSidebarNav('rapports')"><span class="rsb-icon">📄</span> Mes rapports <span class="rsb-badge">Pro</span></button>
+
+    <div class="rsb-section-label" style="margin-top:8px;">Autres espaces</div>
+    <a href="app_education.html" class="rsb-item"><span class="rsb-icon">🎓</span> Éducation</a>
+    <a href="app_conseiller.html" class="rsb-item"><span class="rsb-icon">📋</span> Conseiller</a>
+    <a href="index.html" class="rsb-item"><span class="rsb-icon">🌐</span> Site public</a>
+  </div>
+
+  <div class="rsb-footer">
+    <button class="rsb-item" onclick="showTutorial()"><span class="rsb-icon">❓</span> Guide</button>
+    <button class="rsb-item" id="rsb-account-btn" onclick="onAuthBtnClick()"><span class="rsb-icon">⚙️</span> Mon compte</button>
+    <button class="rsb-item rsb-item-danger" id="rsb-logout-btn" style="display:none;" onclick="logoutUser()"><span class="rsb-icon">⏻</span> Déconnexion</button>
+  </div>
+
+</nav>
 
 <main class="rb-main">
   <!-- Accueil -->
@@ -1363,6 +1360,8 @@ async function initAuth() {
   </section>
 
 </main>
+
+</div><!-- /rb-app-shell -->
 
 <!-- ====== MODAL ALIMENT PERSONNALISÉ ====== -->
 <div id="custom-modal" class="rb-modal hidden">
@@ -5435,6 +5434,56 @@ async function submitEduWork() {
   if (typeof showToast === 'function') showToast('✅ Ration soumise à votre professeur !', 'success', 5000);
   eduAutoSave(false);
 }
+
+// ─── SIDEBAR ÉLEVEUR ──────────────────────────────────
+function onSidebarNav(id) {
+  var proSections = ['ration-a-z', 'besoins', 'bilan-fourrager', 'rapports'];
+  if (proSections.indexOf(id) !== -1 && !requirePro('Plan Pro')) return;
+  if (typeof window.showSection === 'function') window.showSection(id);
+  setSidebarActive(id);
+}
+
+function setSidebarActive(id) {
+  document.querySelectorAll('.rsb-item').forEach(function(el) { el.classList.remove('active'); });
+  var map = {
+    'home':             'rsb-home',
+    'ration-a-z':       'rsb-ration-az',
+    'ration-seule':     'rsb-ration-seule',
+    'besoins':          'rsb-besoins',
+    'bilan-fourrager':  'rsb-bilan',
+    'rapports':         'rsb-rapports',
+  };
+  var el = document.getElementById(map[id]);
+  if (el) el.classList.add('active');
+}
+
+function updateSidebarUser() {
+  var av = document.getElementById('rsb-avatar');
+  var nm = document.getElementById('rsb-user-name');
+  var pl = document.getElementById('rsb-user-plan');
+  var lo = document.getElementById('rsb-logout-btn');
+  if (!currentUser) {
+    if (av) av.textContent = '?';
+    if (nm) nm.textContent = 'Se connecter';
+    if (pl) pl.textContent = '';
+    if (lo) lo.style.display = 'none';
+    return;
+  }
+  var username = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
+  var prenom = (currentUser.user_metadata && currentUser.user_metadata.prenom) || '';
+  var name = username || prenom || (currentUser.email ? currentUser.email.split('@')[0] : 'Utilisateur');
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+  if (av) av.textContent = name.charAt(0).toUpperCase();
+  if (nm) nm.textContent = name;
+  if (pl) pl.textContent = (typeof userPlan !== 'undefined' && userPlan === 'pro') ? '⭐ Plan Pro' : 'Plan Gratuit';
+  if (lo) lo.style.display = '';
+}
+
+// Intercept backToHome to sync sidebar active state
+(function() {
+  var _orig = window.backToHome;
+  if (_orig) window.backToHome = function() { _orig(); setSidebarActive('home'); };
+})();
 </script>
 
 </body>
