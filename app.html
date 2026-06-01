@@ -167,6 +167,7 @@ function openAccountModal() {
     : '<span class="plan-badge-free">Gratuit</span>';
   var rumiCoeur = _$$('rumi-coeur-modal');
   if (rumiCoeur) rumiCoeur.style.display = userPlan === 'pro' ? 'flex' : 'none';
+  if (typeof updatePromoBtn === 'function') updatePromoBtn();
   var dt = _$$('acct-plan-details');
   if (dt) dt.innerHTML = userPlan === 'pro'
     ? '<p style="margin:0;font-size:.85rem;color:var(--green-900);">✅ Accès complet.</p>'
@@ -3925,6 +3926,16 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   window.openCustomModal    = openCustomModal;
   window.redeemPromo        = redeemPromo;
   window.openPromoModal     = openPromoModal;
+  window.rbConfirm          = rbConfirm;
+  window.showToast          = showToast;
+  window.updatePromoBtn     = updatePromoBtn;
+  window.activateProCode    = activateProCode;
+  window.generateProCode    = generateProCode;
+  window.generatePromoCode  = generatePromoCode;
+  window.updateUsername     = updateUsername;
+  window.updateEmail        = updateEmail;
+  window.loadProCodes       = loadProCodes;
+  window.showRumiTip        = showRumiTip;
 
   // -- Profils ration
   function updateRationProfiles() {
