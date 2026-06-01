@@ -40,8 +40,8 @@
       border-bottom: 1px solid rgba(255,255,255,.1);
       box-shadow: 0 4px 20px rgba(0,0,0,.45);
     }
-    .rsb-logo-pill { background: rgba(255,255,255,.92); border-radius: 8px; padding: 4px 7px; display: flex; align-items: center; flex-shrink: 0; }
-    .rsb-logo { height: 26px; display: block; }
+    .rsb-logo-pill { background: rgba(255,255,255,.95); border-radius: 8px; padding: 4px 7px; display: flex; align-items: center; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.2); }
+    .rsb-logo { height: 26px; display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,.15)); }
     .rsb-title { font-size: .92rem; font-weight: 900; color: #fff; line-height: 1.2; letter-spacing: -.01em; }
     .rsb-sub { font-size: .6rem; color: rgba(255,255,255,.5); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
 
@@ -780,7 +780,7 @@ async function initAuth() {
 
           <div class="rb-form-group">
             <label>Race (optionnel)</label>
-            <select id="race-animal" onchange="showRaceImage('race-animal','race-img-preview')"
+            <select id="race-animal" onchange="showRaceImage('race-animal','race-img-preview')">
               <option value="">Non spécifiée</option>
               <optgroup label="Laitières">
                 <option value="prim-holstein">Prim'Holstein</option>
@@ -1040,6 +1040,7 @@ async function initAuth() {
         <button type="button" id="btn-export-pdf" class="rb-btn" onclick="exportPDF()">📄 PDF</button>
       </div>
 
+      <div id="rumi-bilan-bar" style="display:none;"></div>
       <div id="resultat-bilan" class="rb-panel hidden result-panel">
         <h3>📊 Bilan nutritionnel</h3>
         <div id="resultat-bilan-content"></div>
@@ -2848,6 +2849,20 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     $('bilan-costs-btn')?.classList.remove('hidden');
     renderQualityScore(a, b);
     renderIndicateurs(a, b);
+    // RumiCORE branding banner in bilan
+    const rumiBar = $('rumi-bilan-bar');
+    if (rumiBar) {
+      const q2 = computeQualityScore(a, b);
+      const gc2 = scoreColor(q2.grade);
+      rumiBar.innerHTML = `<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#052e16,#15803d);border-radius:12px;padding:14px 18px;margin-bottom:16px;">
+        <img src="Logo RumiCORE.png" alt="RumiCORE" style="height:32px;border-radius:6px;background:#fff;padding:3px 5px;" onerror="this.style.display='none'">
+        <div style="flex:1;">
+          <div style="font-weight:800;color:#fff;font-size:.9rem;">Analyse RumiCORE — INRA 2018</div>
+          <div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:1px;">Score de ration : <strong style="color:${gc2};">${q2.grade} (${q2.total}/100)</strong> · Cliquez sur un indicateur pour les conseils détaillés</div>
+        </div>
+      </div>`;
+      rumiBar.style.display = '';
+    }
   }
   $('btn-calc-bilan')?.addEventListener('click', calcBilan);
   $('btn-goto-costs')?.addEventListener('click', () => { if(!lastA){showToast('Calculez d\'abord le bilan nutritionnel.', 'warn');return;} goToStep(4); });
@@ -3150,7 +3165,6 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   };
 
   function saveCurrentSession() {
-    if (!requireAuth('Sauvegarder une session')) return;
     if (!lastB || !lastA?.items?.length) {
       showToast('Calculez d\'abord un bilan complet avant de sauvegarder.', 'warn'); return;
     }
@@ -3231,6 +3245,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     set('gmq', s.animal.gmq); set('activite', s.animal.activite);
     set('tb', s.animal.tb); set('tp', s.animal.tp);
     $('type-animal')?.dispatchEvent(new Event('change'));
+    showRaceImage('race-animal', 'race-img-preview');
     if (s.mineraux) {
       set('mineraux-na',s.mineraux.na); set('mineraux-k',s.mineraux.k);
       set('mineraux-ca',s.mineraux.ca); set('mineraux-mg',s.mineraux.mg);
@@ -3285,69 +3300,81 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     // ── 1. Déficit énergétique ─────────────────────────────
     if (rUFL < 0.90) {
       const deficit = b.bUFL - a.totalUFL;
-      const f = bestExisting(x=>x.ufl/x.qty);
+      const fRaw = bestExisting(x=>x.ufl/x.qty);
       const alt = bestFromDB(x=>x.uflPerKgMS>1.0&&x.uflPerKgMS<3, x=>x.uflPerKgMS);
+      const f = (fRaw && fRaw.qty > 0 && isFinite(fRaw.ufl/fRaw.qty)) ? fRaw : null;
       const feed = f || alt;
       if (feed) {
         const uflPer = f ? f.ufl/f.qty : alt.uflPerKgMS;
-        const dq = Math.min(deficit/uflPer, 3);
-        suggs.push({icon:'⚡', tag:'Énergie', severity:'bad',
-          title:`Augmenter "${feed.nom || alt?.nom}"`,
-          qty: `+${dq.toFixed(1)} kg MS/j`,
-          effect:`Énergie : ${((a.totalUFL+dq*uflPer)/b.bUFL*100).toFixed(0)}% des besoins`,
-          consequence:'Un déficit énergétique entraîne une perte de poids, une chute de production et une mobilisation des réserves corporelles.',
-          feed: feed.nom || alt?.nom, sign:'+'
-        });
+        if (uflPer > 0 && isFinite(uflPer)) {
+          const dq = Math.min(deficit/uflPer, 3);
+          suggs.push({icon:'⚡', tag:'Énergie', severity:'bad',
+            title:`Augmenter "${feed.nom || alt?.nom}"`,
+            qty: `+${dq.toFixed(1)} kg MS/j`,
+            effect:`Énergie : ${((a.totalUFL+dq*uflPer)/b.bUFL*100).toFixed(0)}% des besoins`,
+            consequence:'Un déficit énergétique entraîne une perte de poids, une chute de production et une mobilisation des réserves corporelles.',
+            feed: feed.nom || alt?.nom, sign:'+'
+          });
+        }
       }
     }
 
     // ── 2. Excès énergétique ───────────────────────────────
     if (rUFL > 1.15) {
       const excess = a.totalUFL - b.bUFL;
-      const f = bestExisting(x=>x.ufl/x.qty);
-      if (f) {
-        const dq = Math.min(f.qty*0.4, excess/(f.ufl/f.qty));
-        suggs.push({icon:'✂️', tag:'Énergie', severity:'warn',
-          title:`Réduire "${f.nom}"`,
-          qty: `-${dq.toFixed(1)} kg MS/j`,
-          effect:`Énergie : ${((a.totalUFL-dq*(f.ufl/f.qty))/b.bUFL*100).toFixed(0)}% des besoins`,
-          consequence:'Un excès énergétique important favorise l\'engraissement, le risque de cétose et augmente le coût de la ration.',
-          feed: f.nom, sign:'-'
-        });
+      const f = bestExisting(x=>x.qty);
+      if (f && f.qty > 0) {
+        const uflPer = f.ufl/f.qty;
+        if (uflPer > 0 && isFinite(uflPer)) {
+          const dq = Math.min(f.qty*0.4, excess/uflPer);
+          suggs.push({icon:'✂️', tag:'Énergie', severity:'warn',
+            title:`Réduire "${f.nom}"`,
+            qty: `-${dq.toFixed(1)} kg MS/j`,
+            effect:`Énergie : ${((a.totalUFL-dq*uflPer)/b.bUFL*100).toFixed(0)}% des besoins`,
+            consequence:'Un excès énergétique important favorise l\'engraissement, le risque de cétose et augmente le coût de la ration.',
+            feed: f.nom, sign:'-'
+          });
+        }
       }
     }
 
     // ── 3. Déficit protéique (PDI) ─────────────────────────
     if (rPDI < 0.90) {
       const deficit = b.bPDI - a.totalPDI;
-      const f = bestExisting(x=>x.pdi/x.qty);
+      const fRaw = bestExisting(x=>x.pdi/x.qty);
       const alt = bestFromDB(x=>x.pdiPerKgMS>200, x=>x.pdiPerKgMS);
+      const f = (fRaw && fRaw.qty > 0 && isFinite(fRaw.pdi/fRaw.qty)) ? fRaw : null;
       const feed = f || alt;
       if (feed) {
         const pdiPer = f ? f.pdi/f.qty : alt?.pdiPerKgMS;
-        const dq = Math.min(deficit/pdiPer, 2);
-        suggs.push({icon:'🧬', tag:'Protéines', severity:'bad',
-          title:`Augmenter "${feed.nom || alt?.nom}"`,
-          qty: `+${dq.toFixed(1)} kg MS/j`,
-          effect:`PDI : ${((a.totalPDI+dq*pdiPer)/b.bPDI*100).toFixed(0)}% des besoins`,
-          consequence:'Un déficit en PDI réduit la production laitière, dégrade la fertilité et affaiblit l\'immunité.',
-          feed: feed.nom || alt?.nom, sign:'+'
-        });
+        if (pdiPer > 0 && isFinite(pdiPer)) {
+          const dq = Math.min(deficit/pdiPer, 2);
+          suggs.push({icon:'🧬', tag:'Protéines', severity:'bad',
+            title:`Augmenter "${feed.nom || alt?.nom}"`,
+            qty: `+${dq.toFixed(1)} kg MS/j`,
+            effect:`PDI : ${((a.totalPDI+dq*pdiPer)/b.bPDI*100).toFixed(0)}% des besoins`,
+            consequence:'Un déficit en PDI réduit la production laitière, dégrade la fertilité et affaiblit l\'immunité.',
+            feed: feed.nom || alt?.nom, sign:'+'
+          });
+        }
       }
     }
 
     // ── 4. Excès protéique ─────────────────────────────────
     if (rPDI > 1.20) {
-      const f = bestExisting(x=>x.pdi/x.qty);
-      if (f) {
-        const dq = Math.min(f.qty*0.3, (a.totalPDI-b.bPDI)/(f.pdi/f.qty));
-        suggs.push({icon:'✂️', tag:'Protéines', severity:'warn',
-          title:`Réduire "${f.nom}"`,
-          qty: `-${dq.toFixed(1)} kg MS/j`,
-          effect:`PDI : ${((a.totalPDI-dq*(f.pdi/f.qty))/b.bPDI*100).toFixed(0)}% des besoins`,
-          consequence:'Un excès protéique est coûteux et génère un surplus d\'azote (hausse urée lait, charge hépatique).',
-          feed: f.nom, sign:'-'
-        });
+      const f = bestExisting(x=>x.qty);
+      if (f && f.qty > 0) {
+        const pdiPer = f.pdi/f.qty;
+        if (pdiPer > 0 && isFinite(pdiPer)) {
+          const dq = Math.min(f.qty*0.3, (a.totalPDI-b.bPDI)/pdiPer);
+          suggs.push({icon:'✂️', tag:'Protéines', severity:'warn',
+            title:`Réduire "${f.nom}"`,
+            qty: `-${dq.toFixed(1)} kg MS/j`,
+            effect:`PDI : ${((a.totalPDI-dq*pdiPer)/b.bPDI*100).toFixed(0)}% des besoins`,
+            consequence:'Un excès protéique est coûteux et génère un surplus d\'azote (hausse urée lait, charge hépatique).',
+            feed: f.nom, sign:'-'
+          });
+        }
       }
     }
 
@@ -3622,7 +3649,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const kv=(l,v)=>'<div class="rp-kv"><span class="rp-kv-label">'+l+'</span><span class="rp-kv-val">'+v+'</span></div>';
     const ir=(ico,lbl,val,cls,badge)=>'<div class="rp-indicator-row"><span class="rp-ind-icon">'+ico+'</span><span class="rp-ind-label">'+lbl+'</span><span class="rp-ind-val">'+val+'</span>'+rpBadge(cls,badge)+'</div>';
 
-    let h='<div class="rp-header"><div class="rp-logo">Rumicore</div>'
+    let h='<div class="rp-header"><div class="rp-logo"><img src="Logo RumiCORE.png" alt="RumiCORE" style="height:36px;vertical-align:middle;border-radius:6px;background:#fff;padding:2px 4px;" onerror="this.outerHTML=\'<span style=&quot;font-weight:900;color:#15803d;&quot;>RumiCORE</span>\'"> <span style="font-size:.7rem;color:#64748b;vertical-align:middle;margin-left:4px;">Analyse INRA 2018</span></div>'
      +'<div class="rp-title-block"><div class="rp-title">Rapport de ration complet</div>'
      +'<div class="rp-subtitle">'+animalLabel+(race?' \xb7 '+race:'')+' — '+date+'</div></div>'
      +'<div class="rp-grade-badge" style="color:'+gc+';">'+q.grade+'<span class="rp-grade-sub">'+q.total+'/100</span></div></div>'
@@ -4400,7 +4427,10 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     let forageMS2=0; a.items.forEach(i=>{ if(getFeedCategory(i.nom)==='fourrage') forageMS2+=i.qty; });
     const pctConc = a.totalMS>0 ? (1-forageMS2/a.totalMS)*100 : 0;
     const colors = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#b91c1c' };
-    const bg     = { A:'#dcfce7', B:'#dbeafe', C:'#fef3c7', D:'#fee2e2' };
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const bg     = isDark
+      ? { A:'#052e16', B:'#0c1a3a', C:'#431407', D:'#450a0a' }
+      : { A:'#dcfce7', B:'#dbeafe', C:'#fef3c7', D:'#fee2e2' };
     const msgs   = {
       A:'Ration excellente — couverture optimale en énergie, protéines et équilibre E/P.',
       B:'Bonne ration — tous les critères principaux sont respectés, quelques ajustements possibles.',
@@ -4408,7 +4438,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       D:'Ration à revoir — déficits ou excès significatifs nuisant aux performances et à la santé.'
     };
     const cont = $('bilan-score'); if (!cont) return;
-    const bar = (score, max, color) => `<div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:3px;">
+    const barBg = isDark ? '#374151' : '#e2e8f0';
+    const bar = (score, max, color) => `<div style="height:6px;background:${barBg};border-radius:3px;overflow:hidden;margin-top:3px;">
       <div style="width:${(score/max*100).toFixed(0)}%;height:100%;background:${color};border-radius:3px;transition:width .5s;"></div></div>`;
     cont.innerHTML = `
       <div class="quality-card" style="border-left:6px solid ${colors[q.grade]};background:${bg[q.grade]};">
@@ -4418,7 +4449,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
             <div class="quality-title">Score global : <strong>${q.total}/100</strong></div>
             <div class="quality-msg">${msgs[q.grade]}</div>
             <div class="quality-progress" style="margin-top:10px;">
-              <div style="height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;">
+              <div style="height:10px;background:${barBg};border-radius:5px;overflow:hidden;">
                 <div style="width:${q.total}%;height:100%;background:${colors[q.grade]};border-radius:5px;transition:width .7s cubic-bezier(.4,0,.2,1);"></div>
               </div>
             </div>
@@ -4768,6 +4799,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   // INITIALISATION
   // =====================================================
   alimentsDb    = parseAlimentsCsv(window.RB_ALIMENTS_CSV||'');
+  alimentsDb.sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' }));
   customFoodsDb = loadLS(LS.customFoods,[]);
   costsByFeed   = loadLS(LS.costs,{});
   hydrate();
@@ -5848,6 +5880,11 @@ async function saveCustomFeed() {
   var nom = (document.getElementById('cfm-nom').value || '').trim();
   var errEl = document.getElementById('cfm-err');
   if (!nom) { errEl.textContent = 'Le nom est requis.'; errEl.style.display = 'block'; return; }
+  if (!currentUser) {
+    errEl.textContent = 'Connectez-vous pour sauvegarder vos aliments personnalisés.';
+    errEl.style.display = 'block';
+    return;
+  }
   var btn = document.getElementById('cfm-save-btn');
   btn.textContent = '…'; btn.disabled = true;
   var payload = {

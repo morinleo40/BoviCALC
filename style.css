@@ -222,6 +222,19 @@
 [data-theme="dark"] .wizard-step.active .step-number { background: var(--green-600); }
 [data-theme="dark"] .wizard-step.visited .step-number { background: var(--bg-elevated); color: var(--text-muted); }
 
+/* Dashboard sessions / custom feeds cards */
+[data-theme="dark"] .quality-card { border-color: var(--border) !important; }
+[data-theme="dark"] #custom-feeds-list .rb-panel { background: var(--bg-card) !important; border-color: var(--border) !important; }
+[data-theme="dark"] #custom-feeds-list .rb-panel > div[style*="background:#f0fdf4"] { background: #052e16 !important; }
+/* rb-prompt overlay */
+[data-theme="dark"] #rb-prompt-overlay > div { background: var(--bg-card) !important; }
+[data-theme="dark"] #rb-prompt-label { color: var(--text) !important; }
+[data-theme="dark"] #rb-prompt-input { background: var(--bg) !important; color: var(--text) !important; border-color: var(--border-md) !important; }
+[data-theme="dark"] #rb-confirm-overlay > div { background: var(--bg-card) !important; }
+[data-theme="dark"] #rb-confirm-msg { color: var(--text) !important; }
+/* Score chart in conseiller */
+[data-theme="dark"] .opti-sugg { background: var(--bg-card); border-color: var(--border); color: var(--text); }
+
 /* Transition fluide */
 *, *::before, *::after {
   transition: background-color .2s ease, border-color .2s ease, color .2s ease;

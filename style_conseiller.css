@@ -279,6 +279,7 @@ body {
 .data-table tbody tr:last-child td { border-bottom: none; }
 [data-theme="dark"] .data-table th { background: #111827; }
 [data-theme="dark"] .data-table tbody tr:hover { background: #1a2a18; }
+[data-theme="dark"] .data-table td { color: var(--text-light); border-color: var(--border); }
 
 /* ── TABS ── */
 .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
@@ -300,6 +301,11 @@ body {
 .badge-amber  { background: #fef3c7; color: #92400e; }
 .badge-red    { background: #fee2e2; color: #dc2626; }
 .badge-gray   { background: #f1f5f9; color: #475569; }
+[data-theme="dark"] .badge-green { background: #052e16; color: #4ade80; }
+[data-theme="dark"] .badge-blue  { background: #0c1a3a; color: #93c5fd; }
+[data-theme="dark"] .badge-amber { background: #431407; color: #fcd34d; }
+[data-theme="dark"] .badge-red   { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .badge-gray  { background: #1e293b; color: #94a3b8; }
 
 /* ── MODAL ── */
 .modal-overlay {
@@ -323,6 +329,7 @@ body {
 .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); padding: 4px; line-height: 1; }
 .modal-close:hover { color: var(--text); }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+[data-theme="dark"] .modal-box { background: var(--bg-card); border: 1px solid var(--border); }
 
 /* ── AUTH WALL ── */
 #auth-wall {
@@ -386,6 +393,7 @@ body {
 
 /* ── PROGRESS BARS ── */
 .progress-wrap { background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden; margin-top: 6px; }
+[data-theme="dark"] .progress-wrap { background: #334155; }
 .progress-bar { height: 100%; border-radius: 4px; transition: width .5s ease; }
 .progress-ok   { background: #16a34a; }
 .progress-warn { background: #d97706; }
