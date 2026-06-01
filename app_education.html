@@ -409,6 +409,60 @@
     .bilan-item .val { font-size: 1.1rem; font-weight: 800; color: var(--text); }
     .bilan-item .lbl { font-size: .72rem; color: var(--muted); margin-top: 4px; font-weight: 600; }
 
+    /* ── EXERCISE CARDS ── */
+    .exo-card {
+      background: #fff; border: 1.5px solid var(--border); border-radius: 16px;
+      padding: 20px 22px; margin-bottom: 12px; position: relative; overflow: hidden;
+      transition: all .18s; box-shadow: 0 2px 10px rgba(124,58,237,.06);
+    }
+    .exo-card::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+      background: linear-gradient(180deg, var(--edu), var(--edu2));
+      border-radius: 4px 0 0 4px;
+    }
+    .exo-card.inactive::before { background: #e2e8f0; }
+    .exo-card:hover { box-shadow: 0 6px 24px rgba(124,58,237,.14); border-color: #c4b5fd; }
+    .exo-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+    .exo-card-left { flex: 1; min-width: 0; }
+    .exo-card-title { font-size: .97rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .exo-card-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+    .exo-card-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .exo-meta-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #faf5ff; color: var(--edu); border: 1px solid #ede9fe;
+      font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    }
+    .exo-instructions {
+      font-size: .83rem; color: #374151; line-height: 1.65;
+      background: #f8f5ff; border-radius: 10px; padding: 12px 14px;
+      margin-top: 12px; border-left: 3px solid var(--edu);
+      white-space: pre-wrap;
+    }
+    .exo-card-actions { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
+    .exo-status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 20px; font-size: .72rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .05em; flex-shrink: 0;
+    }
+    .exo-status-badge.active { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .exo-status-badge.active::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; }
+    .exo-status-badge.inactive { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
+
+    /* Toggle switch */
+    .exo-toggle { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+    .exo-toggle input { opacity: 0; width: 0; height: 0; }
+    .exo-toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: #e2e8f0; border-radius: 22px; transition: .2s;
+    }
+    .exo-toggle-slider::before {
+      content: ''; position: absolute; width: 16px; height: 16px;
+      left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    .exo-toggle input:checked + .exo-toggle-slider { background: var(--edu); }
+    .exo-toggle input:checked + .exo-toggle-slider::before { transform: translateX(18px); }
+
     /* ── CONFIRM ── */
     #rb-confirm {
       display: none; position: fixed; inset: 0; z-index: 99999;
@@ -556,6 +610,7 @@
       <div class="tab-bar">
         <button id="cv-tab-students" class="tab-btn active" onclick="setCvTab('students')">👥 Élèves en direct</button>
         <button id="cv-tab-subs" class="tab-btn" onclick="setCvTab('subs')">📤 Soumissions</button>
+        <button id="cv-tab-exos" class="tab-btn" onclick="setCvTab('exos')">📚 Exercices</button>
       </div>
 
       <div id="cv-students-panel">
@@ -577,6 +632,19 @@
 
       <div id="cv-subs-panel" style="display:none;">
         <div id="subs-list"></div>
+      </div>
+
+      <div id="cv-exos-panel" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div>
+            <div style="font-size:.92rem;font-weight:800;color:var(--text);">Exercices de la classe</div>
+            <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">Les élèves voient l'exercice actif depuis leur espace.</div>
+          </div>
+          <button class="btn btn-green" onclick="openCreateExo()">+ Nouvel exercice</button>
+        </div>
+        <div id="exos-list">
+          <div class="empty"><span class="ei">📚</span><p>Aucun exercice créé.<br>Créez-en un pour vos élèves.</p></div>
+        </div>
       </div>
     </div>
 
@@ -705,6 +773,74 @@
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-ghost" onclick="document.getElementById('create-class-modal').classList.remove('open')">Annuler</button>
       <button class="btn btn-green" id="cc-btn" onclick="createClass()">Créer la classe</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL : Créer / Modifier exercice ════ -->
+<div class="modal-overlay" id="exo-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <h3 id="exo-modal-title">📚 Nouvel exercice</h3>
+      <button class="modal-close" onclick="document.getElementById('exo-modal').classList.remove('open')">×</button>
+    </div>
+
+    <div class="form-field">
+      <label>Titre de l'exercice <span style="color:var(--red)">*</span></label>
+      <input type="text" id="exo-titre" class="form-input" placeholder="Ex : Ration vache laitière 30L" maxlength="80">
+    </div>
+
+    <div class="form-field">
+      <label>Description courte <span style="font-size:.75rem;color:var(--muted);font-weight:400;">(visible par l'élève)</span></label>
+      <input type="text" id="exo-desc" class="form-input" placeholder="Ex : Équilibrer une ration pour une VL hautes performances" maxlength="120">
+    </div>
+
+    <div class="form-field">
+      <label>Consignes détaillées</label>
+      <textarea id="exo-instructions" class="form-input" rows="4" placeholder="Décrivez les attentes, contraintes, points à respecter…" maxlength="800" style="resize:vertical;"></textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-field">
+        <label>Type d'animal</label>
+        <select id="exo-animal" class="form-input">
+          <option value="">— Libre —</option>
+          <option value="Vache laitière">Vache laitière</option>
+          <option value="Vache allaitante">Vache allaitante</option>
+          <option value="Génisse">Génisse</option>
+          <option value="Taureau">Taureau</option>
+          <option value="Veau">Veau</option>
+          <option value="Bovin en croissance">Bovin en croissance</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Actif dès la création</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+          <label class="exo-toggle">
+            <input type="checkbox" id="exo-is-active" checked>
+            <span class="exo-toggle-slider"></span>
+          </label>
+          <span id="exo-active-lbl" style="font-size:.82rem;font-weight:600;color:var(--edu);">Actif</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-field">
+        <label>UFL cible <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(optionnel)</span></label>
+        <input type="number" id="exo-ufl" class="form-input" placeholder="Ex : 7.5" step="0.1" min="0" max="30">
+      </div>
+      <div class="form-field">
+        <label>PDI cible (g) <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(optionnel)</span></label>
+        <input type="number" id="exo-pdi" class="form-input" placeholder="Ex : 850" step="1" min="0" max="5000">
+      </div>
+    </div>
+
+    <div id="exo-err" style="display:none;color:var(--red);font-size:.82rem;padding:9px 12px;background:#fee2e2;border-radius:9px;margin-bottom:10px;font-weight:600;"></div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('exo-modal').classList.remove('open')">Annuler</button>
+      <button class="btn btn-green" id="exo-save-btn" onclick="saveExo()">Créer l'exercice</button>
     </div>
   </div>
 </div>
@@ -985,10 +1121,13 @@ async function openClassView(classId) {
 function setCvTab(tab) {
   currentCvTab = tab;
   $('cv-students-panel').style.display = tab === 'students' ? '' : 'none';
-  $('cv-subs-panel').style.display = tab === 'subs' ? '' : 'none';
+  $('cv-subs-panel').style.display     = tab === 'subs'     ? '' : 'none';
+  $('cv-exos-panel').style.display     = tab === 'exos'     ? '' : 'none';
   $('cv-tab-students').classList.toggle('active', tab === 'students');
-  $('cv-tab-subs').classList.toggle('active', tab === 'subs');
+  $('cv-tab-subs').classList.toggle('active',     tab === 'subs');
+  $('cv-tab-exos').classList.toggle('active',     tab === 'exos');
   if (tab === 'subs') loadSubmissions();
+  if (tab === 'exos') loadExos();
 }
 
 async function refreshLive() {
@@ -1208,6 +1347,144 @@ async function loadMySubmissions() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ══════════════ EXERCISES ══════════════
+
+let currentExoEditId = null;
+
+async function loadExos() {
+  if (!currentClassId) return;
+  const supa = getSupa();
+  const { data } = await supa.from('edu_exercises')
+    .select('*').eq('class_id', currentClassId)
+    .order('created_at', { ascending: false });
+  renderExos(data || []);
+}
+
+function renderExos(list) {
+  const el = $('exos-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><span class="ei">📚</span><p>Aucun exercice créé.<br>Cliquez sur "+ Nouvel exercice" pour commencer.</p></div>';
+    return;
+  }
+  el.innerHTML = list.map(e => {
+    const active = e.is_active;
+    const pills = [
+      e.animal_type ? `🐄 ${e.animal_type}` : null,
+      e.target_ufl  ? `UFL cible : ${e.target_ufl}` : null,
+      e.target_pdi  ? `PDI cible : ${e.target_pdi} g` : null,
+    ].filter(Boolean);
+    return `<div class="exo-card${active ? '' : ' inactive'}">
+      <div class="exo-card-top">
+        <div class="exo-card-left">
+          <div class="exo-card-title">${e.titre}</div>
+          ${e.description ? `<div class="exo-card-desc">${e.description}</div>` : ''}
+        </div>
+        <span class="exo-status-badge ${active ? 'active' : 'inactive'}">${active ? 'Actif' : 'Inactif'}</span>
+      </div>
+      ${pills.length ? `<div class="exo-card-meta">${pills.map(p=>`<span class="exo-meta-pill">${p}</span>`).join('')}</div>` : ''}
+      ${e.instructions ? `<div class="exo-instructions">${e.instructions}</div>` : ''}
+      <div class="exo-card-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toggleExoActive('${e.id}',${!active})">
+          ${active ? '⏸ Désactiver' : '▶ Activer'}
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="openEditExo(${JSON.stringify(e).replace(/"/g,'&quot;')})">✏️ Modifier</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteExo('${e.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCreateExo() {
+  currentExoEditId = null;
+  $('exo-modal-title').textContent = '📚 Nouvel exercice';
+  $('exo-save-btn').textContent = 'Créer l\'exercice';
+  $('exo-titre').value = '';
+  $('exo-desc').value = '';
+  $('exo-instructions').value = '';
+  $('exo-animal').value = '';
+  $('exo-ufl').value = '';
+  $('exo-pdi').value = '';
+  $('exo-is-active').checked = true;
+  $('exo-active-lbl').textContent = 'Actif';
+  $('exo-err').style.display = 'none';
+  $('exo-modal').classList.add('open');
+  setTimeout(() => $('exo-titre').focus(), 100);
+}
+
+function openEditExo(exo) {
+  currentExoEditId = exo.id;
+  $('exo-modal-title').textContent = '✏️ Modifier l\'exercice';
+  $('exo-save-btn').textContent = 'Enregistrer';
+  $('exo-titre').value = exo.titre || '';
+  $('exo-desc').value = exo.description || '';
+  $('exo-instructions').value = exo.instructions || '';
+  $('exo-animal').value = exo.animal_type || '';
+  $('exo-ufl').value = exo.target_ufl || '';
+  $('exo-pdi').value = exo.target_pdi || '';
+  $('exo-is-active').checked = !!exo.is_active;
+  $('exo-active-lbl').textContent = exo.is_active ? 'Actif' : 'Inactif';
+  $('exo-err').style.display = 'none';
+  $('exo-modal').classList.add('open');
+}
+
+// Wire toggle label
+document.addEventListener('DOMContentLoaded', () => {
+  const chk = $('exo-is-active');
+  if (chk) chk.addEventListener('change', () => {
+    $('exo-active-lbl').textContent = chk.checked ? 'Actif' : 'Inactif';
+  });
+});
+
+async function saveExo() {
+  const titre = $('exo-titre').value.trim();
+  const errEl = $('exo-err');
+  if (!titre) { errEl.textContent = 'Le titre est requis.'; errEl.style.display = 'block'; return; }
+  const btn = $('exo-save-btn');
+  btn.textContent = '…'; btn.disabled = true;
+  const payload = {
+    class_id: currentClassId,
+    teacher_id: currentUser.id,
+    titre,
+    description: $('exo-desc').value.trim() || null,
+    instructions: $('exo-instructions').value.trim() || null,
+    animal_type: $('exo-animal').value || null,
+    target_ufl: parseFloat($('exo-ufl').value) || null,
+    target_pdi: parseFloat($('exo-pdi').value) || null,
+    is_active: $('exo-is-active').checked,
+  };
+  const supa = getSupa();
+  let error;
+  if (currentExoEditId) {
+    ({ error } = await supa.from('edu_exercises').update(payload).eq('id', currentExoEditId));
+  } else {
+    ({ error } = await supa.from('edu_exercises').insert(payload));
+  }
+  btn.textContent = currentExoEditId ? 'Enregistrer' : 'Créer l\'exercice';
+  btn.disabled = false;
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+  $('exo-modal').classList.remove('open');
+  showToast(currentExoEditId ? 'Exercice mis à jour.' : 'Exercice créé !', 'success');
+  await loadExos();
+}
+
+async function toggleExoActive(id, active) {
+  const supa = getSupa();
+  const { error } = await supa.from('edu_exercises').update({ is_active: active }).eq('id', id);
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+  showToast(active ? 'Exercice activé.' : 'Exercice désactivé.', 'info');
+  await loadExos();
+}
+
+async function deleteExo(id) {
+  rbConfirm('Supprimer cet exercice ? Action irréversible.', async () => {
+    const supa = getSupa();
+    const { error } = await supa.from('edu_exercises').delete().eq('id', id);
+    if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+    showToast('Exercice supprimé.', 'info');
+    await loadExos();
+  }, 'Supprimer', true);
 }
 
 // ── Role switch ──

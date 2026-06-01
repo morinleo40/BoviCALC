@@ -9,6 +9,104 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="icon" type="image/png" href="./Logo RumiCORE.png">
   <link rel="apple-touch-icon" href="./Logo RumiCORE.png">
+  <style>
+    /* ── SIDEBAR ÉLEVEUR ────────────────────────── */
+    .rb-sidebar {
+      width: 240px !important;
+      background: #0b1e0f !important;
+      display: flex !important;
+      flex-direction: column !important;
+      position: fixed !important;
+      top: 0 !important; left: 0 !important; bottom: 0 !important;
+      z-index: 200 !important;
+      overflow-y: auto !important;
+      border-right: 1px solid rgba(255,255,255,.06) !important;
+      box-shadow: 3px 0 32px rgba(0,0,0,.4) !important;
+      scrollbar-width: thin;
+      scrollbar-color: #1a3a1e transparent;
+      font-family: 'Inter', system-ui, sans-serif !important;
+    }
+    .rb-main { margin-left: 240px !important; }
+
+    .rsb-header {
+      padding: 20px 16px 16px;
+      background: linear-gradient(160deg, #14532d 0%, #166534 55%, #15803d 100%);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,.45);
+    }
+    .rsb-logo { height: 34px; filter: brightness(0) invert(1); opacity: .9; }
+    .rsb-title { font-size: .92rem; font-weight: 900; color: #fff; line-height: 1.2; letter-spacing: -.01em; }
+    .rsb-sub { font-size: .6rem; color: rgba(255,255,255,.5); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+
+    .rsb-user {
+      padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      cursor: pointer; transition: background .15s;
+    }
+    .rsb-user:hover { background: rgba(255,255,255,.05); }
+    .rsb-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #15803d, #22c55e);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      font-weight: 800 !important; font-size: .88rem !important; color: #fff !important;
+      flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,.5);
+    }
+    .rsb-user-info { flex: 1; min-width: 0; }
+    .rsb-user-name { font-size: .82rem; font-weight: 700; color: #d1fae5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rsb-user-plan { font-size: .68rem; color: rgba(255,255,255,.32); margin-top: 1px; }
+
+    .rsb-nav { flex: 1; padding: 10px 8px; overflow-y: auto; }
+    .rsb-section-label {
+      font-size: .63rem; font-weight: 800; color: rgba(255,255,255,.2);
+      padding: 10px 10px 4px; text-transform: uppercase; letter-spacing: .1em;
+      display: block;
+    }
+    .rb-sidebar .rsb-item,
+    .rb-sidebar a.rsb-item {
+      display: flex !important; align-items: center; gap: 8px;
+      width: 100%; padding: 9px 11px; border-radius: 8px;
+      border: none !important; background: transparent !important;
+      font-size: .84rem !important; font-weight: 500 !important;
+      color: rgba(255,255,255,.48) !important;
+      cursor: pointer; text-align: left; text-decoration: none !important;
+      transition: all .15s; line-height: 1.3;
+      margin-bottom: 1px; box-shadow: none !important;
+      height: auto !important; letter-spacing: normal !important;
+    }
+    .rb-sidebar .rsb-item:hover,
+    .rb-sidebar a.rsb-item:hover {
+      background: rgba(255,255,255,.07) !important;
+      color: #d1fae5 !important;
+    }
+    .rb-sidebar .rsb-item.active {
+      background: rgba(34,197,94,.16) !important;
+      color: #4ade80 !important; font-weight: 700 !important;
+      box-shadow: inset 3px 0 0 #22c55e !important;
+    }
+    .rsb-icon { font-size: .95rem; flex-shrink: 0; width: 20px; text-align: center; display: inline-block; }
+    .rsb-badge {
+      margin-left: auto; flex-shrink: 0;
+      background: rgba(34,197,94,.1); color: rgba(74,222,128,.75);
+      font-size: .6rem; font-weight: 800; padding: 2px 6px; border-radius: 20px;
+      border: 1px solid rgba(34,197,94,.15); letter-spacing: .02em;
+    }
+    .rsb-footer {
+      padding: 6px 8px 14px;
+      border-top: 1px solid rgba(255,255,255,.06);
+      flex-shrink: 0;
+    }
+    .rb-sidebar .rsb-item-danger,
+    .rb-sidebar .rsb-item-danger:hover { color: rgba(252,165,165,.5) !important; }
+    .rb-sidebar .rsb-item-danger:hover { background: rgba(220,38,38,.08) !important; color: #fca5a5 !important; }
+
+    @media (max-width: 768px) {
+      .rb-sidebar { display: none !important; }
+      .rb-main { margin-left: 0 !important; }
+      #edu-bar { left: 0 !important; }
+    }
+  </style>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5292,18 +5390,46 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
 <!-- ═══════════════════════════════════════════════════════
      BARRE ÉDUCATION — s'active uniquement si l'élève est dans une classe
      ═══════════════════════════════════════════════════════ -->
-<div id="edu-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:8000;background:linear-gradient(135deg,#4c1d95,#7c3aed 60%,#db2777);color:#fff;padding:10px 20px;align-items:center;justify-content:space-between;box-shadow:0 -4px 20px rgba(124,58,237,.35);gap:12px;flex-wrap:wrap;">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <span style="font-size:1.4rem;">🎓</span>
-    <div>
-      <div style="font-size:.82rem;font-weight:800;letter-spacing:.01em;">Classe : <span id="edu-bar-class-name">—</span></div>
-      <div style="font-size:.71rem;opacity:.7;" id="edu-bar-save-status">Non sauvegardé</div>
+<div id="edu-bar" style="display:none;position:fixed;bottom:0;left:240px;right:0;z-index:99990;
+  background:linear-gradient(135deg,#2e0650 0%,#7c3aed 55%,#db2777 100%);
+  color:#fff;height:54px;align-items:center;justify-content:space-between;
+  box-shadow:0 -4px 28px rgba(124,58,237,.45);padding:0 18px 0 16px;gap:14px;">
+
+  <div style="display:flex;align-items:center;gap:12px;min-width:0;overflow:hidden;">
+    <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.25);
+      display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🎓</div>
+    <div style="min-width:0;">
+      <div id="edu-bar-exercise-row" style="display:none;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.6);
+        letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;">
+        📚 <span id="edu-bar-exercise-name">—</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:.83rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="edu-bar-class-name">—</span>
+        <span style="font-size:.7rem;color:rgba(255,255,255,.5);">·</span>
+        <span style="font-size:.71rem;color:rgba(255,255,255,.55);white-space:nowrap;" id="edu-bar-save-status">Non sauvegardé</span>
+      </div>
     </div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-    <button onclick="eduAutoSave(true)" style="padding:7px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;">💾 Sauvegarder</button>
-    <button onclick="openEduSubmitModal()" style="padding:7px 18px;border-radius:8px;border:none;background:#fff;color:#7c3aed;font-size:.85rem;font-weight:800;cursor:pointer;">📤 Soumettre →</button>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+    <button onclick="eduAutoSave(true)"
+      style="height:36px;padding:0 14px;border-radius:9px;border:1.5px solid rgba(255,255,255,.28);
+      background:rgba(255,255,255,.1);color:#fff;font-size:.8rem;font-weight:700;
+      cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;
+      transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+      💾 Sauvegarder
+    </button>
+    <button onclick="openEduSubmitModal()"
+      style="height:36px;padding:0 16px;border-radius:9px;border:none;
+      background:#fff;color:#7c3aed;font-size:.81rem;font-weight:800;
+      cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;
+      box-shadow:0 2px 12px rgba(0,0,0,.2);transition:transform .12s,box-shadow .12s;"
+      onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 18px rgba(0,0,0,.3)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 2px 12px rgba(0,0,0,.2)'">
+      📤 Soumettre →
+    </button>
   </div>
+
 </div>
 
 <!-- Modal soumission -->
@@ -5312,6 +5438,12 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
       <h3 style="font-size:1rem;font-weight:800;color:#1e293b;">📤 Soumettre ma ration</h3>
       <button onclick="document.getElementById('edu-submit-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:#64748b;line-height:1;">×</button>
+    </div>
+    <!-- Exercice actif -->
+    <div id="edu-sub-exo-banner" style="display:none;background:linear-gradient(135deg,#faf5ff,#fdf2f8);border:1.5px solid #ede9fe;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:.68rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">📚 Exercice en cours</div>
+      <div id="edu-sub-exo-titre" style="font-size:.88rem;font-weight:700;color:#1e293b;"></div>
+      <div id="edu-sub-exo-desc" style="font-size:.78rem;color:#64748b;margin-top:2px;"></div>
     </div>
     <div style="margin-bottom:12px;">
       <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:4px;">Titre du travail <span style="color:#dc2626;">*</span></label>
@@ -5335,6 +5467,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
 // ═══════════════════════════════════════════════════════
 var _eduMembership = null;
 var _eduAutoSaveTimer = null;
+var _eduActiveExo = null;
 
 async function initEduBar() {
   var supa = getSupa();
@@ -5349,7 +5482,24 @@ async function initEduBar() {
   if (!bar) return;
   bar.style.display = 'flex';
   document.getElementById('edu-bar-class-name').textContent = res.data.edu_classes?.nom || '—';
-  document.body.style.paddingBottom = '58px';
+  document.body.style.paddingBottom = '64px';
+
+  // Fetch active exercise
+  try {
+    var exoRes = await supa.from('edu_exercises')
+      .select('*').eq('class_id', res.data.class_id).eq('is_active', true)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle();
+    if (exoRes.data) {
+      _eduActiveExo = exoRes.data;
+      var exoRow = document.getElementById('edu-bar-exercise-row');
+      var exoName = document.getElementById('edu-bar-exercise-name');
+      if (exoRow && exoName) {
+        exoName.textContent = exoRes.data.titre;
+        exoRow.style.display = 'block';
+      }
+    }
+  } catch(e) {}
+
   if (_eduAutoSaveTimer) clearInterval(_eduAutoSaveTimer);
   _eduAutoSaveTimer = setInterval(function(){ eduAutoSave(false); }, 60000);
 }
@@ -5405,6 +5555,15 @@ function openEduSubmitModal() {
   document.getElementById('edu-sub-err').style.display = 'none';
   var btn = document.getElementById('edu-sub-btn');
   btn.textContent = 'Soumettre →'; btn.disabled = false;
+  // Show active exercise if any
+  var exoBanner = document.getElementById('edu-sub-exo-banner');
+  if (exoBanner && _eduActiveExo) {
+    document.getElementById('edu-sub-exo-titre').textContent = _eduActiveExo.titre;
+    document.getElementById('edu-sub-exo-desc').textContent = _eduActiveExo.description || '';
+    exoBanner.style.display = 'block';
+  } else if (exoBanner) {
+    exoBanner.style.display = 'none';
+  }
   document.getElementById('edu-submit-modal').style.display = 'flex';
   setTimeout(function(){ document.getElementById('edu-sub-titre').focus(); }, 100);
 }
