@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RumiCORE — Mon espace éleveur</title>
+  <link rel="icon" type="image/png" href="Logo RumiCORE.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f3effe; min-height: 100vh; color: #1e293b; }
+
+    nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo img { height: 32px; }
+    .logo-name { font-weight: 900; color: #15803d; font-size: 1rem; }
+    .logo-badge { background: linear-gradient(135deg,#15803d,#16a34a); color: #fff; font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: .06em; }
+
+    .hero { background: linear-gradient(135deg, #052e16 0%, #15803d 60%, #16a34a 100%); padding: 56px 24px 48px; text-align: center; color: #fff; }
+    .hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: 10px; }
+    .hero p { font-size: .95rem; color: rgba(255,255,255,.8); margin-bottom: 32px; }
+
+    .lookup-card { background: #fff; border-radius: 20px; padding: 28px; max-width: 460px; margin: 0 auto; box-shadow: 0 8px 40px rgba(0,0,0,.12); }
+    .lookup-card label { display: block; font-size: .82rem; font-weight: 700; color: #374151; margin-bottom: 6px; }
+    .lookup-card input { width: 100%; padding: 11px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: .95rem; font-family: inherit; outline: none; transition: border .15s; }
+    .lookup-card input:focus { border-color: #15803d; }
+    .lookup-btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: .92rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, #15803d, #16a34a); cursor: pointer; margin-top: 12px; transition: opacity .15s; }
+    .lookup-btn:hover { opacity: .9; }
+    .lookup-err { display: none; background: #fee2e2; color: #dc2626; font-size: .82rem; padding: 9px 12px; border-radius: 8px; margin-top: 10px; font-weight: 500; }
+
+    .main { max-width: 860px; margin: 0 auto; padding: 32px 20px 60px; }
+    .section-title { font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 16px; }
+
+    .ration-card { background: #fff; border-radius: 16px; border: 1.5px solid #e2e8f0; padding: 20px 22px; margin-bottom: 14px; transition: box-shadow .2s, border-color .2s; }
+    .ration-card:hover { box-shadow: 0 4px 20px rgba(21,128,61,.1); border-color: #bbf7d0; }
+    .rc-eyebrow { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #15803d; margin-bottom: 6px; }
+    .rc-title { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .rc-meta { font-size: .8rem; color: #64748b; margin-bottom: 12px; }
+    .rc-note { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 12px; font-size: .84rem; color: #14532d; line-height: 1.6; margin-bottom: 14px; font-style: italic; }
+    .rc-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .rc-btn { display: inline-block; padding: 9px 18px; border-radius: 9px; font-size: .85rem; font-weight: 700; text-decoration: none; cursor: pointer; border: none; transition: transform .12s; }
+    .rc-btn:hover { transform: translateY(-1px); }
+    .rc-btn-green { background: linear-gradient(135deg,#15803d,#16a34a); color: #fff; }
+    .rc-btn-ghost { background: #f8fafc; color: #475569; border: 1.5px solid #e2e8f0; }
+
+    .ration-aliments { margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+    .aliment-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: .85rem; border-bottom: 1px solid #f8fafc; }
+    .aliment-row:last-child { border-bottom: none; }
+    .aliment-nom { color: #374151; }
+    .aliment-qty { font-weight: 700; color: #15803d; font-size: .82rem; }
+
+    .empty { text-align: center; padding: 60px 20px; color: #94a3b8; }
+    .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    footer { background: #0f172a; padding: 20px 24px; text-align: center; color: #475569; font-size: .8rem; }
+    footer a { color: #94a3b8; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <img src="Logo RumiCORE.png" alt="RumiCORE" onerror="this.style.display='none'">
+    <span class="logo-name">RumiCORE</span>
+    <span class="logo-badge">Éleveur</span>
+  </a>
+  <a href="app.html" style="font-size:.84rem;color:#15803d;font-weight:700;text-decoration:none;">Calculateur →</a>
+</nav>
+
+<div class="hero">
+  <h1>Mon espace éleveur</h1>
+  <p>Retrouvez toutes les rations que votre conseiller vous a partagées.</p>
+  <div class="lookup-card">
+    <label for="ep-email">Votre adresse email</label>
+    <input type="email" id="ep-email" placeholder="votre@email.fr" onkeydown="if(event.key==='Enter')lookupRations()">
+    <button class="lookup-btn" onclick="lookupRations()">🔍 Voir mes rations reçues</button>
+    <div class="lookup-err" id="ep-err"></div>
+  </div>
+</div>
+
+<div class="main" id="ep-main" style="display:none;">
+  <div class="section-title" id="ep-count-lbl"></div>
+  <div id="ep-list"></div>
+</div>
+
+<footer>
+  <p>© 2026 RumiCORE &mdash; <a href="index.html">Accueil</a> &nbsp;·&nbsp; <a href="app.html">Calculateur</a></p>
+</footer>
+
+<script>
+const SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
+const SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
+let _supa = null;
+function getSupa() {
+  if (!_supa && window.supabase) _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  return _supa;
+}
+
+async function lookupRations() {
+  const email = (document.getElementById('ep-email')?.value || '').trim().toLowerCase();
+  const errEl = document.getElementById('ep-err');
+  errEl.style.display = 'none';
+  if (!email || !email.includes('@')) {
+    errEl.textContent = 'Entrez une adresse email valide.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const btn = document.querySelector('.lookup-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Recherche…'; }
+
+  const supa = getSupa();
+  const { data, error } = await supa
+    .from('shared_rations')
+    .select('*')
+    .ilike('farmer_email', email)
+    .order('created_at', { ascending: false });
+
+  if (btn) { btn.disabled = false; btn.textContent = '🔍 Voir mes rations reçues'; }
+  if (error) { errEl.textContent = 'Erreur : ' + error.message; errEl.style.display = 'block'; return; }
+
+  renderRations(data || []);
+}
+
+function renderRations(list) {
+  const main = document.getElementById('ep-main');
+  const listEl = document.getElementById('ep-list');
+  const countLbl = document.getElementById('ep-count-lbl');
+  main.style.display = '';
+
+  if (!list.length) {
+    countLbl.textContent = '';
+    listEl.innerHTML = `<div class="empty"><div class="empty-icon">📬</div><p>Aucune ration reçue pour cet email.<br>Vérifiez avec votre conseiller que le bon email a été utilisé.</p></div>`;
+    return;
+  }
+
+  countLbl.textContent = `${list.length} ration${list.length > 1 ? 's' : ''} reçue${list.length > 1 ? 's' : ''}`;
+
+  listEl.innerHTML = list.map(r => {
+    const date = new Date(r.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    const ration = Array.isArray(r.ration_data) ? r.ration_data : [];
+    const alimHtml = ration.length
+      ? `<div class="ration-aliments">
+          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:.05em;margin-bottom:6px;">Composition</div>
+          ${ration.map(a => `<div class="aliment-row"><span class="aliment-nom">${a.nom}</span><span class="aliment-qty">${a.qty} kg MS/j</span></div>`).join('')}
+        </div>` : '';
+    const newBadge = !r.opened_at ? '<span style="background:#dcfce7;color:#15803d;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;margin-left:8px;">Nouveau</span>' : '';
+    return `<div class="ration-card">
+      <div class="rc-eyebrow">📤 Partagé par ${r.advisor_name || 'votre conseiller'} · ${date}${newBadge}</div>
+      <div class="rc-title">${r.titre || 'Ration sans titre'}</div>
+      ${r.animal_type ? `<div class="rc-meta">🐄 ${r.animal_type}</div>` : '<div class="rc-meta"></div>'}
+      ${r.note ? `<div class="rc-note">"${r.note}"</div>` : ''}
+      ${alimHtml}
+      <div class="rc-actions" style="margin-top:14px;">
+        <a href="app.html?ration=${r.code}" class="rc-btn rc-btn-green">🧮 Ouvrir dans RumiCORE →</a>
+        <button class="rc-btn rc-btn-ghost" onclick="copyLink('${r.code}')">📋 Copier le lien</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function copyLink(code) {
+  const link = window.location.origin + '/app.html?ration=' + code;
+  navigator.clipboard?.writeText(link)
+    .then(() => alert('Lien copié !'))
+    .catch(() => alert('Lien : ' + link));
+}
+
+// Auto-lookup if email in URL param
+window.addEventListener('DOMContentLoaded', () => {
+  const email = new URLSearchParams(location.search).get('email');
+  if (email) {
+    const inp = document.getElementById('ep-email');
+    if (inp) { inp.value = email; lookupRations(); }
+  }
+});
+</script>
+</body>
+</html>

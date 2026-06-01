@@ -334,6 +334,12 @@ function setTheme(t) {
           <p>Aucune exploitation. <a href="#" onclick="openExpModal(null);return false;" style="color:#15803d;">Créer la première →</a></p>
         </div>
       </div>
+
+      <!-- Section alertes -->
+      <div id="dash-alerts" style="display:none;margin-top:28px;">
+        <h2 style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:14px;">⚠️ Exploitations à surveiller</h2>
+        <div id="dash-alerts-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
     </div>
 
     <!-- ══ PAGE: EXPLOITATIONS LIST ══ -->
@@ -376,6 +382,7 @@ function setTheme(t) {
         <button class="tab-btn" onclick="switchTab('tab-couts',this)">💰 Coûts</button>
         <button class="tab-btn" onclick="switchTab('tab-bf',this)">📦 Bilan fourrager</button>
         <button class="tab-btn" onclick="switchTab('tab-historique',this)">🕐 Historique</button>
+        <button class="tab-btn" onclick="switchTab('tab-notes',this)">📝 Visites</button>
         <button class="tab-btn" onclick="switchTab('tab-rapport',this)">📄 Rapport</button>
       </div>
 
@@ -678,6 +685,19 @@ function setTheme(t) {
 
       <!-- TAB: HISTORIQUE -->
       <div class="tab-content" id="tab-historique">
+        <!-- Graphique évolution des scores -->
+        <div class="card" id="score-chart-card" style="margin-bottom:16px;display:none;">
+          <div class="card-header"><div class="card-title">📈 Évolution du score dans le temps</div></div>
+          <div id="score-chart-wrap" style="overflow-x:auto;padding:4px 0;">
+            <svg id="score-chart-svg" height="120" style="display:block;min-width:100%;"></svg>
+          </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:.75rem;color:var(--text-muted);">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#15803d;margin-right:4px;"></span>A — Optimal</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0369a1;margin-right:4px;"></span>B — Bon</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#b45309;margin-right:4px;"></span>C — Passable</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc2626;margin-right:4px;"></span>D — Insuffisant</span>
+          </div>
+        </div>
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
             <div style="font-weight:700;color:var(--text);">Sessions enregistrées</div>
@@ -685,6 +705,37 @@ function setTheme(t) {
           </div>
           <div id="sessions-list">
             <div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune session enregistrée.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: NOTES DE VISITE -->
+      <div class="tab-content" id="tab-notes">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <div class="card-title">📝 Nouvelle note de visite</div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Date de visite</label>
+              <input type="date" class="form-input" id="note-date">
+            </div>
+            <div class="form-group">
+              <label>Objet / titre</label>
+              <input type="text" class="form-input" id="note-titre" placeholder="Ex : Bilan fourrager hivernal">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Observations</label>
+              <textarea class="form-textarea" id="note-content" rows="4" placeholder="État du troupeau, problèmes identifiés, recommandations…"></textarea>
+            </div>
+          </div>
+          <div id="note-err" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:8px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
+          <button class="btn btn-primary btn-sm" onclick="saveVisitNote()">💾 Enregistrer la note</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-weight:700;color:var(--text);">Historique des visites</div>
+          <div id="notes-list">
+            <div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune note de visite.</div>
           </div>
         </div>
       </div>
@@ -813,27 +864,23 @@ function setTheme(t) {
               placeholder="Ex : Cette ration est calculée pour une vache de 650 kg produisant 30 L/j…"></textarea>
           </div>
           <div class="form-group">
-            <label>Email de l'éleveur (optionnel — pour information)</label>
-            <input type="email" class="form-input" id="sh-email" placeholder="eleveur@exemple.fr">
+            <label>Emails des éleveurs <span style="font-size:.75rem;color:var(--text-muted);font-weight:400;">(un par ligne — un lien sera créé par email)</span></label>
+            <textarea class="form-textarea" id="sh-emails" rows="3" placeholder="eleveur1@exemple.fr&#10;eleveur2@exemple.fr&#10;eleveur3@exemple.fr"></textarea>
           </div>
           <div id="sh-err" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:10px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
-          <button class="btn btn-primary" onclick="createSharedRation()" id="sh-btn">🔗 Générer le lien de partage</button>
+          <button class="btn btn-primary" onclick="createSharedRation()" id="sh-btn">🔗 Générer les liens de partage</button>
         </div>
 
         <div class="card" id="sh-result-card" style="display:none;">
-          <div class="card-header"><div class="card-title">✅ Lien créé</div></div>
-          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Partagez ce lien avec votre éleveur. Il pourra ouvrir la ration directement dans RumiCORE.</p>
-          <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:16px;">
-            <input type="text" class="form-input" id="sh-link-input" readonly
-              style="font-size:.8rem;font-family:monospace;background:var(--bg);flex:1;">
-            <button class="btn btn-primary" onclick="copyShareLink()">📋 Copier</button>
-          </div>
+          <div class="card-header"><div class="card-title">✅ Liens créés</div></div>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Partagez chaque lien avec l'éleveur concerné. Il pourra ouvrir la ration directement dans RumiCORE.</p>
+          <div id="sh-links-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.83rem;color:var(--text-muted);line-height:1.7;">
-            <strong style="color:var(--text);">Ce que verra l'éleveur :</strong><br>
-            La ration s'affichera pré-remplie dans l'outil RumiCORE, avec un bandeau indiquant qu'elle a été partagée par vous.
+            <strong style="color:var(--text);">Portail éleveur :</strong><br>
+            L'éleveur peut aussi retrouver toutes ses rations reçues sur <a href="eleveur_portal.html" target="_blank" style="color:#15803d;font-weight:700;">eleveur_portal.html</a> en entrant son email.
           </div>
           <div style="margin-top:16px;">
-            <button class="btn btn-ghost btn-sm" onclick="resetShareForm()">+ Créer un autre lien</button>
+            <button class="btn btn-ghost btn-sm" onclick="resetShareForm()">+ Créer d'autres liens</button>
           </div>
         </div>
       </div>
@@ -1417,6 +1464,7 @@ function switchTab(tabId, btn) {
   if (t) t.classList.add('active');
   if (btn) btn.classList.add('active');
   if (tabId === 'tab-historique') loadSessionsForCurrentExp();
+  if (tabId === 'tab-notes') { loadVisitNotes(); if (_$('note-date') && !_$('note-date').value) _$('note-date').value = new Date().toISOString().slice(0,10); }
 }
 
 function toggleSidebar() {
@@ -1440,6 +1488,7 @@ async function loadExploitations() {
   renderExpTable();
   renderSidebarExps();
   updateDashMetrics();
+  loadDashboardAlerts(exploitations);
 }
 
 function renderExpCards() {
@@ -2139,8 +2188,10 @@ async function loadSessionsForCurrentExp() {
     if (error) throw error;
     if (!data||!data.length) {
       list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune session enregistrée.</div>';
+      renderScoreChart([]);
       return;
     }
+    renderScoreChart(data);
     list.innerHTML = `<table class="data-table">
       <thead><tr><th>Date</th><th>Nom</th><th>Score</th><th>UFL</th><th>PDI</th><th>Actions</th></tr></thead>
       <tbody>${data.map(s=>{
@@ -2938,7 +2989,12 @@ function transferTmsToStock() {
 }
 
 
-// ══ PARTAGE DE RATION ══════════════════════════════
+// ══ PARTAGE DE RATION (multi-éleveurs) ══════════════
+
+function genShareCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
 
 async function createSharedRation() {
   const titre = (_$('sh-titre')?.value || '').trim();
@@ -2955,54 +3011,232 @@ async function createSharedRation() {
     return nom && !isNaN(qty) ? { nom, qty } : null;
   }).filter(Boolean) : [];
 
+  // Multi-emails
+  const emailsTxt = (_$('sh-emails')?.value || '').trim();
+  const emails = emailsTxt
+    ? emailsTxt.split('\n').map(e => e.trim()).filter(e => e.includes('@'))
+    : [null];
+
   const supa = getSupa();
   if (!supa || !currentUser) return;
-
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const code = Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   const prenom = currentUser.user_metadata?.prenom || currentUser.email?.split('@')[0] || 'Conseiller';
-  const payload = {
-    advisor_id: currentUser.id,
-    advisor_name: prenom,
-    titre,
-    animal_type: _$('sh-animal')?.value || null,
-    ration_data,
-    note: (_$('sh-note')?.value || '').trim() || null,
-    farmer_email: (_$('sh-email')?.value || '').trim() || null,
-    code,
-  };
+  const animal_type = _$('sh-animal')?.value || null;
+  const note = (_$('sh-note')?.value || '').trim() || null;
 
   const btn = _$('sh-btn');
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
-  const { error } = await supa.from('shared_rations').insert(payload);
-  if (btn) { btn.disabled = false; btn.textContent = '🔗 Générer le lien de partage'; }
-  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
 
-  const link = window.location.origin + '/app.html?ration=' + code;
-  const inp = _$('sh-link-input');
-  if (inp) inp.value = link;
+  const baseUrl = window.location.origin + '/app.html?ration=';
+  const createdLinks = [];
+
+  for (const email of emails) {
+    const code = genShareCode();
+    const payload = {
+      advisor_id: currentUser.id, advisor_name: prenom,
+      titre, animal_type, ration_data, note,
+      farmer_email: email, code,
+    };
+    const { error } = await supa.from('shared_rations').insert(payload);
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; if (btn) { btn.disabled = false; btn.textContent = '🔗 Générer les liens de partage'; } return; }
+    createdLinks.push({ email, code, link: baseUrl + code });
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '🔗 Générer les liens de partage'; }
+
+  const listEl = _$('sh-links-list');
+  if (listEl) {
+    listEl.innerHTML = createdLinks.map(({ email, link }) => `
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+        <div style="flex:1;min-width:0;">
+          ${email ? `<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:3px;">${email}</div>` : ''}
+          <div style="font-size:.8rem;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${link}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="copyText('${link}')">📋</button>
+      </div>`).join('');
+  }
   const card = _$('sh-result-card');
   if (card) card.style.display = '';
-  showToast('Lien créé ! Copiez-le pour le partager.', 'success', 4000);
+  showToast(`${createdLinks.length} lien${createdLinks.length > 1 ? 's' : ''} créé${createdLinks.length > 1 ? 's' : ''} !`, 'success', 4000);
 }
 
-function copyShareLink() {
-  const inp = _$('sh-link-input');
-  if (!inp) return;
-  navigator.clipboard?.writeText(inp.value)
+function copyText(txt) {
+  navigator.clipboard?.writeText(txt)
     .then(() => showToast('Lien copié !', 'success'))
-    .catch(() => { inp.select(); document.execCommand('copy'); showToast('Lien copié !', 'success'); });
+    .catch(() => showToast('Copiez manuellement : ' + txt, 'info', 6000));
 }
 
 function resetShareForm() {
-  if (_$('sh-titre')) _$('sh-titre').value = '';
-  if (_$('sh-animal')) _$('sh-animal').value = '';
-  if (_$('sh-ration-txt')) _$('sh-ration-txt').value = '';
-  if (_$('sh-note')) _$('sh-note').value = '';
-  if (_$('sh-email')) _$('sh-email').value = '';
+  ['sh-titre','sh-animal','sh-ration-txt','sh-note','sh-emails'].forEach(id => { if (_$(id)) _$(id).value = ''; });
   if (_$('sh-err')) _$('sh-err').style.display = 'none';
   const card = _$('sh-result-card');
   if (card) card.style.display = 'none';
+}
+
+// ══ NOTES DE VISITE ══════════════════════════════
+
+async function loadVisitNotes() {
+  if (!currentExp) return;
+  const supa = getSupa();
+  const list = _$('notes-list');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">Chargement…</div>';
+  const { data, error } = await supa.from('visit_notes')
+    .select('*').eq('exploitation_id', currentExp.id).order('date', { ascending: false });
+  if (error || !data?.length) {
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune note de visite.</div>';
+    return;
+  }
+  list.innerHTML = data.map(n => `
+    <div style="border-bottom:1px solid var(--border);padding:16px 20px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:.75rem;font-weight:700;color:var(--text-muted);">📅 ${new Date(n.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span>
+            ${n.titre ? `<span style="font-weight:700;color:var(--text);font-size:.9rem;">${escHtml(n.titre)}</span>` : ''}
+          </div>
+          <div style="font-size:.87rem;color:var(--text);white-space:pre-wrap;line-height:1.65;">${escHtml(n.content||'')}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" style="flex-shrink:0;" onclick="deleteVisitNote(${n.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+async function saveVisitNote() {
+  const errEl = _$('note-err');
+  errEl.style.display = 'none';
+  const content = (_$('note-content')?.value || '').trim();
+  if (!content) { errEl.textContent = 'Le contenu est requis.'; errEl.style.display = 'block'; return; }
+  const date = _$('note-date')?.value || new Date().toISOString().slice(0,10);
+  const supa = getSupa();
+  const { error } = await supa.from('visit_notes').insert({
+    exploitation_id: currentExp.id,
+    advisor_id: currentUser.id,
+    date, titre: (_$('note-titre')?.value || '').trim() || null,
+    content,
+  });
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+  _$('note-content').value = '';
+  _$('note-titre').value = '';
+  _$('note-date').value = '';
+  showToast('Note enregistrée.', 'success');
+  await loadVisitNotes();
+}
+
+async function deleteVisitNote(id) {
+  rbConfirm('Supprimer cette note ?', async function() {
+    const supa = getSupa();
+    const { error } = await supa.from('visit_notes').delete().eq('id', id);
+    if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+    showToast('Note supprimée.', 'info');
+    await loadVisitNotes();
+  }, 'Supprimer', true);
+}
+
+// ══ GRAPHIQUE ÉVOLUTION SCORES ══════════════════
+
+function renderScoreChart(sessions) {
+  const card = _$('score-chart-card');
+  const svg = _$('score-chart-svg');
+  if (!card || !svg) return;
+
+  const scored = sessions.filter(s => s.data?.score && ['A','B','C','D'].includes(s.data.score)).slice(0, 20).reverse();
+  if (scored.length < 2) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  const scoreVal = { A: 4, B: 3, C: 2, D: 1 };
+  const scoreCol = { A: '#15803d', B: '#0369a1', C: '#b45309', D: '#dc2626' };
+  const W = Math.max(600, scored.length * 60);
+  const H = 120;
+  const padL = 30, padR = 16, padT = 14, padB = 28;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  svg.setAttribute('width', W);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  let pts = scored.map((s, i) => {
+    const x = padL + (i / (scored.length - 1)) * chartW;
+    const y = padT + chartH - ((scoreVal[s.data.score] - 1) / 3) * chartH;
+    return { x, y, score: s.data.score, date: new Date(s.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) };
+  });
+
+  // Grid lines
+  let svgContent = '';
+  [1,2,3,4].forEach(v => {
+    const y = padT + chartH - ((v-1)/3)*chartH;
+    const labels = {1:'D',2:'C',3:'B',4:'A'};
+    svgContent += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
+    svgContent += `<text x="${padL-5}" y="${y+4}" text-anchor="end" font-size="10" fill="#94a3b8" font-weight="700">${labels[v]}</text>`;
+  });
+
+  // Line
+  const polyline = pts.map(p => `${p.x},${p.y}`).join(' ');
+  svgContent += `<polyline points="${polyline}" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity=".4"/>`;
+
+  // Dots + labels
+  pts.forEach(p => {
+    svgContent += `<circle cx="${p.x}" cy="${p.y}" r="6" fill="${scoreCol[p.score]}" stroke="#fff" stroke-width="2"/>`;
+    svgContent += `<text x="${p.x}" y="${H-6}" text-anchor="middle" font-size="9" fill="#94a3b8">${p.date}</text>`;
+    svgContent += `<text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="11" font-weight="800" fill="${scoreCol[p.score]}">${p.score}</text>`;
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+// ══ ALERTES DASHBOARD ════════════════════════════
+
+async function loadDashboardAlerts(exps) {
+  if (!exps || !exps.length) return;
+  const supa = getSupa();
+  const alertsEl = _$('dash-alerts');
+  const listEl = _$('dash-alerts-list');
+  if (!alertsEl || !listEl) return;
+
+  // Get latest session per exploitation
+  const ids = exps.map(e => e.id);
+  const { data: sessions } = await supa.from('exploitation_sessions')
+    .select('exploitation_id, date, data').in('exploitation_id', ids)
+    .order('date', { ascending: false });
+
+  const latestByExp = {};
+  (sessions || []).forEach(s => {
+    if (!latestByExp[s.exploitation_id]) latestByExp[s.exploitation_id] = s;
+  });
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+  const alerts = [];
+
+  exps.forEach(exp => {
+    const latest = latestByExp[exp.id];
+    if (!latest) {
+      alerts.push({ exp, type: 'no-session', msg: 'Aucune session enregistrée' });
+    } else {
+      const lastDate = new Date(latest.date);
+      const score = latest.data?.score;
+      if (score === 'D') alerts.push({ exp, type: 'score-d', msg: `Dernier score D — ${lastDate.toLocaleDateString('fr-FR')}`, date: lastDate });
+      else if (lastDate < thirtyDaysAgo) alerts.push({ exp, type: 'inactive', msg: `Pas de session depuis ${Math.round((Date.now()-lastDate)/86400000)} jours`, date: lastDate });
+    }
+  });
+
+  if (!alerts.length) { alertsEl.style.display = 'none'; return; }
+  alertsEl.style.display = '';
+  const alertColors = { 'no-session': '#f8fafc', 'score-d': '#fef2f2', 'inactive': '#fffbeb' };
+  const alertBorders = { 'no-session': '#e2e8f0', 'score-d': '#fecaca', 'inactive': '#fde68a' };
+  const alertIcons = { 'no-session': '📋', 'score-d': '🔴', 'inactive': '⏰' };
+  listEl.innerHTML = alerts.map(a => `
+    <div style="display:flex;align-items:center;gap:14px;background:${alertColors[a.type]};border:1.5px solid ${alertBorders[a.type]};border-radius:12px;padding:12px 16px;cursor:pointer;" onclick="openExpById('${a.exp.id}')">
+      <span style="font-size:1.4rem;">${alertIcons[a.type]}</span>
+      <div style="flex:1;">
+        <div style="font-weight:700;color:var(--text);font-size:.9rem;">${escHtml(a.exp.nom)}</div>
+        <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">${a.msg}</div>
+      </div>
+      <span style="font-size:.8rem;color:#15803d;font-weight:700;">Voir →</span>
+    </div>`).join('');
+}
+
+function openExpById(id) {
+  const exp = exploitations.find(e => e.id === id);
+  if (exp) openExp(exp);
 }
 
 // ── Suggestions ─────────────────────────────────────
