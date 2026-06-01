@@ -136,25 +136,14 @@ function openAccountModal() {
     var initiale = (usernameAv || prenom3 || (currentUser.email || 'U')).charAt(0).toUpperCase();
     av.textContent = initiale;
   }
-  // Pro code sections — vérifier user_metadata ET localStorage (anti race-condition)
-  var _localCode = ''; try { _localCode = localStorage.getItem('bovicalc-pro-code') || ''; } catch(e) {}
-  var hasCode = _localCode || (currentUser && currentUser.user_metadata && currentUser.user_metadata.pro_code_activated);
   var isOwner = currentUser && currentUser.email === 'bovicalc@gmail.com';
-  var proActivateSection = _$$('acct-pro-activate-section');
-  if (proActivateSection) proActivateSection.style.display = (!hasCode && !isOwner) ? '' : 'none';
-  var proEditSection = _$$('acct-pro-edit-section');
-  if (proEditSection) proEditSection.style.display = hasCode ? '' : 'none';
-  // Pre-fill username input in edit section
-  if (hasCode) {
-    var uInput = _$$('acct-username-input');
-    if (uInput) uInput.value = (currentUser.user_metadata && currentUser.user_metadata.username) || '';
-    var eInput = _$$('acct-email-input');
-    if (eInput) eInput.value = currentUser.email || '';
-  }
+  // Section code Pro — visible uniquement pour les utilisateurs gratuits non-admin
+  var promoSection = _$$('acct-promo-section');
+  if (promoSection) promoSection.style.display = (!isOwner && userPlan !== 'pro') ? '' : 'none';
   var adminSection = _$$('acct-admin-section');
   if (adminSection) {
     adminSection.style.display = isOwner ? '' : 'none';
-    if (isOwner) loadProCodes();
+    if (isOwner) { if (typeof loadPromoCodesAdmin === 'function') loadPromoCodesAdmin(); }
   }
   // Bouton upgrade
   var upBtn = _$$('acct-upgrade-btn');
@@ -3925,16 +3914,10 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   window.setTheme           = setTheme;
   window.openCustomModal    = openCustomModal;
   window.redeemPromo        = redeemPromo;
-  window.openPromoModal     = openPromoModal;
   window.rbConfirm          = rbConfirm;
   window.showToast          = showToast;
-  window.updatePromoBtn     = updatePromoBtn;
-  window.activateProCode    = activateProCode;
-  window.generateProCode    = generateProCode;
   window.generatePromoCode  = generatePromoCode;
-  window.updateUsername     = updateUsername;
-  window.updateEmail        = updateEmail;
-  window.loadProCodes       = loadProCodes;
+  window.loadPromoCodesAdmin = loadPromoCodesAdmin;
   window.showRumiTip        = showRumiTip;
 
   // -- Profils ration
@@ -4889,26 +4872,13 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   // =====================================================
   // CODE PROMO
   // =====================================================
-  function openPromoModal() {
-    if (!requireAuth('Code promo')) return;
-    const inp = $('promo-code-input');
-    if (inp) inp.value = '';
-    $('promo-error') && ($('promo-error').style.display = 'none');
-    $('promo-success') && ($('promo-success').style.display = 'none');
-    const btn = $('promo-submit-btn');
-    if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
-    $('promo-modal')?.classList.remove('hidden');
-    setTimeout(() => $('promo-code-input')?.focus(), 100);
-  }
-
   async function redeemPromo() {
     if (!currentUser) return;
-    const code = ($('promo-code-input')?.value || '').trim().toUpperCase();
-    const errEl = $('promo-error'), okEl = $('promo-success'), btn = $('promo-submit-btn');
+    const code = ($('acct-promo-input')?.value || '').trim().toUpperCase();
+    const errEl = $('acct-promo-error'), okEl = $('acct-promo-ok');
     if (errEl) errEl.style.display = 'none';
     if (okEl)  okEl.style.display  = 'none';
     if (!code) { if (errEl) { errEl.textContent = 'Entrez un code.'; errEl.style.display = 'block'; } return; }
-    if (btn) { btn.textContent = 'Vérification…'; btn.disabled = true; }
     const supa = getSupa(); if (!supa) return;
     try {
       // Vérifier le code dans Supabase
@@ -4920,12 +4890,10 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         .maybeSingle();
       if (codeErr) {
         if (errEl) { errEl.textContent = 'Erreur : ' + codeErr.message; errEl.style.display = 'block'; }
-        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
         return;
       }
       if (!codeData) {
         if (errEl) { errEl.textContent = 'Code invalide ou déjà utilisé.'; errEl.style.display = 'block'; }
-        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
         return;
       }
       // Marquer le code comme utilisé
@@ -4934,7 +4902,6 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         .eq('code', code).eq('used', false);
       if (upErr) {
         if (errEl) { errEl.textContent = 'Erreur (marquage) : ' + upErr.message; errEl.style.display = 'block'; }
-        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
         return;
       }
       // Calculer la date d'expiration
@@ -4946,7 +4913,6 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         .upsert({ user_id: currentUser.id, plan: 'pro', until: until.toISOString() }, { onConflict: 'user_id' });
       if (planErr) {
         if (errEl) { errEl.textContent = 'Erreur (plan) : ' + planErr.message; errEl.style.display = 'block'; }
-        if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
         return;
       }
       // Succès
@@ -4957,21 +4923,16 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         okEl.innerHTML = `<div class="rumi-vignette rumi-fete" style="margin:0;padding:12px 14px;border-radius:10px;"><div class="rumi-avatar-wrap"><img src="Rumi Saut.png" alt="Rumi fête" style="width:40px;height:40px;border-radius:50%;padding:3px;background:#fff;border:2px solid #fbbf24;"><span class="rumi-emoji-badge">🎉</span></div><div class="rumi-bubble" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:0 10px 10px 10px;padding:10px 12px;"><strong style="font-size:.75rem;font-weight:700;color:#92400e;display:block;margin-bottom:3px;">RUMI FÊTE</strong><p style="margin:0;font-size:.85rem;color:#713f12;">Plan Pro activé jusqu'au ${untilStr} ! Vos vaches méritent le meilleur. 🎉</p></div></div>`;
         okEl.style.display = 'block';
       }
-      if (btn) { btn.textContent = '✅ Activé !'; btn.disabled = true; }
-      const promoBtn = $('btn-promo');
-      if (promoBtn) promoBtn.style.display = 'none';
-      setTimeout(() => $('promo-modal')?.classList.add('hidden'), 3000);
+      // Cacher la section code Pro après succès
+      const promoSection = $('acct-promo-section');
+      if (promoSection) setTimeout(() => promoSection.style.display = 'none', 3000);
     } catch(e) {
       if (errEl) { errEl.textContent = 'Erreur : ' + (e.message || e); errEl.style.display = 'block'; }
-      if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
     }
   }
 
-  // Afficher le bouton promo si plan free
-  function updatePromoBtn() {
-    const btn = $('btn-promo');
-    if (btn && currentUser) btn.style.display = userPlan === 'free' ? '' : 'none';
-  }
+  // Compat — plus utilisé mais gardé pour éviter des erreurs si référencé
+  function updatePromoBtn() {}
 
   // =====================================================
   // RUMI — vignettes mascotte
@@ -5231,6 +5192,26 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       </div>
     </div>
 
+    <!-- J'ai un code Pro (inline, visible uniquement si plan gratuit) -->
+    <div id="acct-promo-section" style="margin-bottom:10px;display:none;">
+      <details>
+        <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:var(--green-50);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);">
+          🎟️ J'ai un code Pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
+        </summary>
+        <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
+          <p style="font-size:.82rem;color:#64748b;margin:0 0 10px;">Entrez votre code pour activer le plan Pro gratuitement.</p>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="acct-promo-input" class="rb-input" placeholder="Ex : BOVIPRO1"
+                   style="text-transform:uppercase;letter-spacing:.1em;font-weight:700;flex:1;"
+                   onkeydown="if(event.key==='Enter')redeemPromo()">
+            <button class="rb-btn rb-btn-primary" style="white-space:nowrap;" onclick="redeemPromo()">Activer</button>
+          </div>
+          <div id="acct-promo-error" style="display:none;color:#dc2626;font-size:.82rem;margin-top:8px;padding:6px 10px;background:#fee2e2;border-radius:6px;"></div>
+          <div id="acct-promo-ok" style="display:none;color:#15803d;font-size:.82rem;margin-top:8px;padding:6px 10px;background:#f0fdf4;border-radius:6px;"></div>
+        </div>
+      </details>
+    </div>
+
     <!-- Thème clair / sombre -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--green-50);border-radius:10px;margin-bottom:10px;border:1px solid var(--border);">
       <span style="font-size:.88rem;font-weight:600;color:var(--text);">🌗 Thème</span>
@@ -5265,71 +5246,21 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       </div>
     </details>
 
-    <!-- Activer un code pro -->
-    <div id="acct-pro-activate-section" style="margin-bottom:10px;">
-      <details>
-        <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:var(--green-50);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);">
-          🔓 Activer un code pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
-        </summary>
-        <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
-          <p style="font-size:.82rem;color:#64748b;margin:0 0 10px;">Entrez le code fourni par Rumicore pour personnaliser votre compte (identifiant, email, mot de passe).</p>
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="acct-pro-code-input" class="rb-input" placeholder="EX: AB3C9DEF" maxlength="10"
-                   style="text-transform:uppercase;font-family:monospace;font-weight:700;letter-spacing:.08em;flex:1;">
-            <button id="acct-pro-code-btn" class="rb-btn rb-btn-primary" style="white-space:nowrap;" onclick="activateProCode()">Activer</button>
-          </div>
-          <div id="acct-pro-code-error" style="display:none;color:#dc2626;font-size:.82rem;margin-top:8px;padding:6px 10px;background:#fee2e2;border-radius:6px;"></div>
-          <div id="acct-pro-code-ok" style="display:none;color:#15803d;font-size:.82rem;margin-top:8px;padding:6px 10px;background:#f0fdf4;border-radius:6px;"></div>
-        </div>
-      </details>
-    </div>
-
-    <!-- Modifier mon profil (débloqué avec code pro) -->
-    <div id="acct-pro-edit-section" style="margin-bottom:10px;">
-      <details>
-        <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:var(--green-50);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid #86efac;">
-          ✏️ Modifier mon profil <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
-        </summary>
-        <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
-          <div class="rb-form-group" style="margin-bottom:10px;">
-            <label style="font-size:.82rem;">Identifiant</label>
-            <input type="text" id="acct-username-input" class="rb-input" placeholder="ex: jean-dupont" maxlength="30">
-          </div>
-          <div class="rb-form-group" style="margin-bottom:12px;">
-            <label style="font-size:.82rem;">Email</label>
-            <input type="email" id="acct-email-input" class="rb-input" placeholder="votre@email.com">
-          </div>
-          <div id="acct-profile-msg" style="display:none;font-size:.82rem;margin-bottom:10px;padding:8px 12px;border-radius:6px;"></div>
-          <div style="display:flex;gap:8px;">
-            <button class="rb-btn rb-btn-primary" style="flex:1;font-size:.82rem;" onclick="updateUsername()">Mettre à jour l'identifiant</button>
-            <button class="rb-btn rb-btn-primary" style="flex:1;font-size:.82rem;" onclick="updateEmail()">Mettre à jour l'email</button>
-          </div>
-        </div>
-      </details>
-    </div>
-
     <!-- Section admin (propriétaire uniquement) -->
     <div id="acct-admin-section" style="margin-bottom:10px;display:none;">
       <details>
         <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:#fef9c3;border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid #fde68a;">
-          ⚙️ Gérer les codes pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
+          ⚙️ Gérer les codes Pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
         </summary>
         <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
-          <p style="font-size:.8rem;font-weight:700;color:var(--text);margin:0 0 8px;">Codes pro (personnalisation compte)</p>
-          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:8px;" onclick="generateProCode()">➕ Générer un code pro</button>
-          <div id="admin-codes-list" style="max-height:150px;overflow-y:auto;font-size:.8rem;margin-bottom:16px;"></div>
-          <p style="font-size:.8rem;font-weight:700;color:var(--text);margin:0 0 8px;">Codes promo (upgrade plan Pro)</p>
-          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:8px;" onclick="generatePromoCode()">➕ Générer un code promo</button>
-          <div id="admin-promo-list" style="max-height:150px;overflow-y:auto;font-size:.8rem;"></div>
+          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:10px;" onclick="generatePromoCode()">➕ Générer un code Pro</button>
+          <div id="admin-promo-list" style="max-height:200px;overflow-y:auto;font-size:.8rem;"></div>
         </div>
       </details>
     </div>
 
     <!-- Actions -->
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <button id="btn-promo" class="rb-btn rb-btn-ghost" style="width:100%;display:none;" onclick="openPromoModal()">
-        🎟️ J'ai un code promo
-      </button>
       <a href="#" onclick="openStripeCheckout();return false;" id="acct-upgrade-btn"
          style="display:none;width:100%;padding:11px;background:linear-gradient(135deg,#15803d,#22c55e);color:#fff;border-radius:10px;font-weight:700;font-size:.9rem;text-align:center;text-decoration:none;">
         ⭐ Passer au plan Pro
