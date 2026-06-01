@@ -138,7 +138,7 @@ function openAccountModal() {
   }
   // Pro code sections
   var hasCode = currentUser && currentUser.user_metadata && currentUser.user_metadata.pro_code_activated;
-  var isOwner = currentUser && currentUser.email === 'morinleo40@gmail.com';
+  var isOwner = currentUser && currentUser.email === 'bovicalc@gmail.com';
   var proActivateSection = _$$('acct-pro-activate-section');
   if (proActivateSection) proActivateSection.style.display = (!hasCode && !isOwner) ? '' : 'none';
   var proEditSection = _$$('acct-pro-edit-section');
@@ -4917,7 +4917,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   }
 
   async function generateProCode() {
-    if (!currentUser || currentUser.email !== 'morinleo40@gmail.com') return;
+    if (!currentUser || currentUser.email !== 'bovicalc@gmail.com') return;
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
     for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
@@ -4929,7 +4929,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   }
 
   async function loadProCodes() {
-    if (!currentUser || currentUser.email !== 'morinleo40@gmail.com') return;
+    if (!currentUser || currentUser.email !== 'bovicalc@gmail.com') return;
     const supa = getSupa(); if (!supa) return;
     const { data, error } = await supa
       .from('pro_codes')
