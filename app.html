@@ -224,9 +224,13 @@ function openStripeCheckout() {
   if (email) url += '?prefilled_email=' + encodeURIComponent(email);
   window.open(url, '_blank');
 }
-function logoutUser() {
-  try { var supa = getSupa(); if (supa) supa.auth.signOut(); } catch(e) {}
-  window.location.href = 'index.html';
+async function logoutUser() {
+  closeAccountModal();
+  try { var supa = getSupa(); if (supa) await supa.auth.signOut(); } catch(e) {}
+  currentUser = null;
+  userPlan = 'free';
+  updateAuthUI();
+  showAuthWall();
 }
 function togglePwd(id, btn) {
   var inp = _$$(id); if (!inp) return;
@@ -405,6 +409,12 @@ async function initAuth() {
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);text-align:center;">
         <span style="font-size:.78rem;color:var(--text-muted);">Vous êtes conseiller agricole ?</span>
         <a href="app_conseiller.html" style="font-size:.78rem;color:#15803d;font-weight:700;text-decoration:none;margin-left:6px;">Accéder à Rumicore Conseiller →</a>
+      </div>
+      <div style="margin-top:12px;text-align:center;">
+        <a href="index.html" style="font-size:.8rem;color:#64748b;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+          Retour à l'accueil
+        </a>
       </div>
     </div>
   </div>
