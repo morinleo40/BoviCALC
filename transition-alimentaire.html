@@ -58,6 +58,12 @@
     .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
     .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
     @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+    .art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+    .art-hero { position:relative;overflow:hidden; }
+    .art-hero-inner { position:relative;z-index:1; }
+    .art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+    .art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
   </style>
 </head>
 <body>
@@ -68,6 +74,7 @@
 </nav>
 
 <header class="art-hero">
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/2/25/Newborn_calf_in_Burgundy_%281%29.jpg" alt="Vêlage en Bourgogne — début de la période de transition post-partum">
   <div class="art-hero-inner">
     <span class="art-category">Nutrition</span>
     <h1>La période de transition chez la vache laitière :<br>clé de la réussite de la lactation</h1>
@@ -103,6 +110,11 @@
   <div class="art-warning">
     <p><strong>Attention au tarissement trop court ou mal géré :</strong> Un tarissement de moins de 45 jours (ou absence de tarissement) ne permet pas à la mamelle de se régénérer correctement et réduit le potentiel de la lactation suivante de 10 à 20 %. Un tarissement de plus de 70 jours augmente le risque d'engraissement et de cétose type 2. La durée optimale est de <strong>55 à 65 jours</strong>.</p>
   </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière en période de transition pré-vêlage" loading="lazy">
+    <figcaption>Vache laitière en fin de gestation : la période de transition démarre 3 semaines avant le vêlage. La ration préparto doit introduire progressivement les concentrés de la ration de lactation pour adapter la flore ruminale et prévenir l'acidose post-vêlage.</figcaption>
+  </figure>
 
   <h2>La ration préparto (–21 jours à J0)</h2>
 
@@ -153,6 +165,11 @@
   <div class="art-infobox">
     <p><strong>Alimentation des primipares :</strong> Les génisses en première lactation doivent recevoir <strong>10 à 15 % de plus que les vaches adultes à même niveau de production</strong>. Elles sont encore en croissance (ossification complète vers 4 ans) et la compétition à l'auge avec les vaches âgées les pénalise. Si possible, loger les primipares en groupe séparé en post-partum.</p>
   </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches en post-partum accédant à la ration de production" loading="lazy">
+    <figcaption>Vaches en début de lactation consommant leur ration de production : la montée en concentrés après le vêlage ne doit pas dépasser 300 à 500 g par jour pour éviter l'acidose ruminale et maintenir un bon niveau de fibres dans la ration.</figcaption>
+  </figure>
 
   <h2>Les transitions à ne jamais imposer brutalement</h2>
 

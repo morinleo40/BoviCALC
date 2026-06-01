@@ -58,6 +58,12 @@
     .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
     .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
     @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+    .art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+    .art-hero { position:relative;overflow:hidden; }
+    .art-hero-inner { position:relative;z-index:1; }
+    .art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+    .art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
   </style>
 </head>
 <body>
@@ -68,6 +74,7 @@
 </nav>
 
 <header class="art-hero">
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Birth_of_a_calf.JPG" alt="Naissance d'un veau — vêlage bovin">
   <div class="art-hero-inner">
     <span class="art-category">Reproduction</span>
     <h1>Gestion des vêlages :<br>préparation, surveillance et soins au nouveau-né</h1>
@@ -131,6 +138,11 @@
     <p><strong>Quand intervenir absolument :</strong> Si 30 minutes après la rupture de la poche des eaux, aucune partie du veau n'est visible à la vulve — ou si les pieds sont visibles depuis plus de 45 minutes sans progression — il faut intervenir. Chaque minute de délai augmente le risque d'asphyxie du veau et de lésions traumatiques chez la mère.</p>
   </div>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Birth_of_a_calf.JPG" alt="Naissance d'un veau" loading="lazy">
+    <figcaption>Naissance d'un veau : les stades du vêlage normal suivent une chronologie précise. Toute déviation par rapport aux durées normales doit alerter l'éleveur sur une possible dystocie nécessitant une intervention.</figcaption>
+  </figure>
+
   <h2>L'aide au vêlage : les bons gestes</h2>
 
   <h3>Vérification de la présentation</h3>
@@ -153,6 +165,11 @@
   <p>Le placenta doit être expulsé dans les 8 à 12 heures suivant le vêlage. Au-delà de 24 heures, on parle de rétention placentaire. Causes : hypocalcémie, vêlage difficile, infection, gémellité, veau mort.</p>
 
   <p><strong>Ne jamais enlever manuellement le placenta avant 48 heures minimum</strong> : les cotylédons ne sont pas encore détachés, le retrait forcé arrache la muqueuse utérine et aggrave le risque d'endométrite et d'infertilité. Appeler le vétérinaire pour une décision adaptée selon l'état général de la vache.</p>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/2/25/Newborn_calf_in_Burgundy_%281%29.jpg" alt="Veau nouveau-né en Bourgogne" loading="lazy">
+    <figcaption>Veau nouveau-né en Bourgogne : dans les minutes suivant la naissance, dégager les voies respiratoires, stimuler la respiration et s'assurer que le veau tète le colostrum dans les 2 premières heures sont les priorités absolues.</figcaption>
+  </figure>
 
   <h2>Soins immédiats au veau nouveau-né</h2>
 

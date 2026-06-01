@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cow_female_black_white.jpg" alt="Vache Holstein en période de tarissement">
   <div class="inner">
     <span class="tag">Nutrition</span>
     <h1>Alimentation de la vache tarie<br>et de la période de transition</h1>
@@ -95,6 +102,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <tr><td>Magnésium</td><td>Augmenter à 40-50 g/j</td></tr>
 </table>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Grass_field_and_silage_bales_-_geograph.org.uk_-_7278793.jpg" alt="Balles de foin et prairie pour vaches taries" loading="lazy">
+    <figcaption>Prairie avec balles de foin : la ration de la vache tarie en phase longue repose essentiellement sur le foin et la paille, avec des apports minéraux adaptés — pas d'ensilage de maïs pour éviter l'engraissement.</figcaption>
+  </figure>
+
 <h2>La transition alimentaire : habituer le rumen</h2>
 <p>Au vêlage, la vache passe d'une ration sèche à base de foin à une ration riche en énergie fermentescible. Si ce changement est brutal, la population bactérienne ruminale n'est pas adaptée → acidose, chute d'ingestion, fourbure.</p>
 <p>Protocole de transition :</p>
@@ -119,6 +131,11 @@ footer a{color:#94a3b8;text-decoration:none}
 
 <h3>Alternative : supplémentation calcique au vêlage</h3>
 <p>Si le BACA n'est pas géré : administrer du calcium sous forme de gel oral (30 g Ca) ou en injection SC au moment du vêlage et J+1. Moins préventif mais applicable dans tous les élevages.</p>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches en transition pré-vêlage consommant la ration TMR" loading="lazy">
+    <figcaption>Vaches en pré-vêlage accédant à la ration de transition : l'introduction progressive des concentrés dans les 3 semaines avant le vêlage est essentielle pour adapter la flore ruminale.</figcaption>
+  </figure>
 
 <h2>Gestion pratique de la ration de transition</h2>
 

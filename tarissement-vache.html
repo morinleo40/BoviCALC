@@ -43,6 +43,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -53,6 +59,7 @@ footer a{color:#94a3b8;text-decoration:none}
 </nav>
 
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cow_female_black_white.jpg" alt="Vache Holstein en période de tarissement">
   <div class="inner">
     <span class="tag">Conduite d'élevage</span>
     <h1>Conduite du tarissement<br>de la vache laitière</h1>
@@ -87,6 +94,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <tr><td>45 à 60 jours</td><td>Optimal</td></tr>
   <tr><td>Plus de 70 jours</td><td>Engraissement, acétonémie post-vêlage</td></tr>
 </table>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cow_female_black_white.jpg" alt="Vache laitière Holstein au repos, en tarissement" loading="lazy">
+    <figcaption>Vache Holstein en période de tarissement : le repos mammaire dure idéalement 6 à 8 semaines. Pendant cette période, la vache doit maintenir une NEC stable entre 3,0 et 3,5 pour aborder le vêlage dans des conditions optimales.</figcaption>
+  </figure>
 
 <h2>Alimentation en période sèche</h2>
 
@@ -126,6 +138,11 @@ footer a{color:#94a3b8;text-decoration:none}
 <div class="infobox">
   <p><strong>Bonne pratique :</strong> Combiner obturation interne + antibiotique dans les quartiers positifs en bactériologie = taux de guérison supérieur à 85 % pour les mammites à staphylocoques à coagulase négative.</p>
 </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Grass_field_and_silage_bales_-_geograph.org.uk_-_7278793.jpg" alt="Prairie et foin pour vaches taries" loading="lazy">
+    <figcaption>Ration à base de foin et de paille pour vaches taries : en phase longue de tarissement, la ration doit couvrir les besoins d'entretien sans excès énergétique pour éviter l'engraissement (NEC cible 3,0-3,5).</figcaption>
+  </figure>
 
 <h2>Conduite pratique du tarissement</h2>
 

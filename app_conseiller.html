@@ -769,6 +769,7 @@ function setTheme(t) {
             <a href="./app.html" class="btn btn-ghost btn-sm">🐄 Rumicore Éleveur</a>
             <a href="index_conseiller.html" class="btn btn-ghost btn-sm">← Page d'accueil Conseiller</a>
             <button class="btn btn-danger btn-sm" onclick="logoutUser()" style="margin-top:8px;">⏻ Se déconnecter</button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteAccount()" style="margin-top:4px;color:#94a3b8;border-color:#e2e8f0;font-size:.8rem;">🗑️ Supprimer mon compte</button>
           </div>
         </div>
       </div>
@@ -1255,6 +1256,42 @@ function logoutUser() {
   try { const supa = getSupa(); if(supa) supa.auth.signOut(); } catch(e) {}
   window.location.href = 'index_conseiller.html';
 }
+
+async function deleteAccount() {
+  rbConfirm(
+    'Supprimer définitivement votre compte ? Toutes vos données seront effacées et cette action est irréversible.',
+    async function() {
+      const supa = getSupa(); if (!supa) return;
+      const res = await supa.rpc('delete_user');
+      if (res.error) { showToast('Erreur suppression : ' + res.error.message, 'error', 6000); return; }
+      try { localStorage.clear(); } catch(e) {}
+      window.location.href = 'index_conseiller.html';
+    },
+    'Supprimer mon compte',
+    true
+  );
+}
+
+// ── Confirm dialog ──
+var _rbConfirmCb = null;
+function rbConfirm(msg, onOk, okLabel, danger) {
+  _rbConfirmCb = onOk;
+  const el = document.getElementById('rb-confirm-msg'); if (el) el.textContent = msg;
+  const okBtn = document.getElementById('rb-confirm-ok');
+  if (okBtn) {
+    okBtn.textContent = okLabel || 'Confirmer';
+    okBtn.style.background = danger !== false ? '#dc2626' : '#15803d';
+    okBtn.onclick = function() { var cb = _rbConfirmCb; rbConfirmCancel(); if (cb) cb(); };
+  }
+  const ov = document.getElementById('rb-confirm-overlay');
+  if (ov) ov.style.display = 'flex';
+}
+function rbConfirmCancel() {
+  const ov = document.getElementById('rb-confirm-overlay');
+  if (ov) ov.style.display = 'none';
+  _rbConfirmCb = null;
+}
+function rbConfirmSimple(msg, onOk) { rbConfirm(msg, onOk, 'Confirmer', true); }
 
 function updateSidebarUser() {
   if (!currentUser) return;
@@ -2887,6 +2924,17 @@ async function submitSuggestion() {
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button onclick="closeSuggestModal()" style="padding:10px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;">Annuler</button>
       <button onclick="submitSuggestion()" style="padding:10px 20px;border-radius:8px;border:none;background:#15803d;color:#fff;font-size:.875rem;font-weight:700;cursor:pointer;">Envoyer →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm dialog ── -->
+<div id="rb-confirm-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:24px 28px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:360px;width:90%;">
+    <div id="rb-confirm-msg" style="font-size:.95rem;font-weight:600;color:#1e293b;margin-bottom:20px;line-height:1.5;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="rbConfirmCancel()" style="padding:9px 18px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;">Annuler</button>
+      <button id="rb-confirm-ok" style="padding:9px 18px;border-radius:8px;border:none;background:#dc2626;color:#fff;font-size:.875rem;font-weight:700;cursor:pointer;">Confirmer</button>
     </div>
   </div>
 </div>

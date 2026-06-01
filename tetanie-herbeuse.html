@@ -58,6 +58,12 @@
     .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
     .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
     @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+    .art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+    .art-hero { position:relative;overflow:hidden; }
+    .art-hero-inner { position:relative;z-index:1; }
+    .art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+    .art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
   </style>
 </head>
 <body>
@@ -68,6 +74,7 @@
 </nav>
 
 <header class="art-hero">
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Dairy_cows_on_pasture_in_Ireland.jpg" alt="Vaches au pâturage printanier — herbe de printemps riche et pauvre en magnésium disponible">
   <div class="art-hero-inner">
     <span class="art-category">Santé saisonnière</span>
     <h1>Tétanie herbeuse (hypomagnésémie) :<br>prévenir le risque au printemps</h1>
@@ -115,6 +122,11 @@
   <h3>Phase 3 — Mort (variable)</h3>
   <p>Sans traitement rapide, les convulsions épuisent l'animal et provoquent une détresse cardiorespiratoire. La mort peut survenir en 30 minutes à quelques heures. La mort subite, sans stade convulsif observable, est possible chez des animaux retrouvés sans signe apparent.</p>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Dairy_cows_on_pasture_in_Ireland.jpg" alt="Vaches laitières en pâturage printanier vert et riche en azote" loading="lazy">
+    <figcaption>Prairie de printemps luxuriante : l'herbe poussant rapidement sur des sols potassiques et fertilisés est pauvre en magnésium biodisponible. Dès l'apparition des premiers signes de nervosité ou de marche ébrieuse, une intervention vétérinaire immédiate est nécessaire.</figcaption>
+  </figure>
+
   <h2>Traitement d'urgence</h2>
 
   <h3>Injection de sulfate de magnésium en sous-cutané</h3>
@@ -130,6 +142,11 @@
   <div class="art-infobox">
     <p><strong>Calme absolu :</strong> Lors d'une tétanie, évitez tout stimulis supplémentaire. N'approchez pas la vache en courant, ne criez pas, ne la forcez pas à se relever. Chaque agitation peut déclencher une nouvelle crise convulsive et aggraver l'état. Approche lente, gestes doux, environnement silencieux.</p>
   </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Vache_Prim%27Holstein%2C_Morbihan.jpg" alt="Vache Prim'Holstein supplémentée en magnésium pour prévenir la tétanie" loading="lazy">
+    <figcaption>Vache Prim'Holstein en Morbihan, région à risque de tétanie herbeuse printanière : la supplémentation quotidienne en oxyde de magnésium (50 g/vache/jour dans la ration ou via des bolus) prévient efficacement la maladie pendant toute la période à risque.</figcaption>
+  </figure>
 
   <h2>Prévention : le magnésium supplémentaire chaque jour</h2>
 

@@ -58,6 +58,12 @@
     .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
     .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
     @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+    .art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+    .art-hero { position:relative;overflow:hidden; }
+    .art-hero-inner { position:relative;z-index:1; }
+    .art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+    .art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
   </style>
 </head>
 <body>
@@ -68,6 +74,7 @@
 </nav>
 
 <header class="art-hero">
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches laitières consommant une ration TMR">
   <div class="art-hero-inner">
     <span class="art-category">Santé ruminale</span>
     <h1>Acidose ruminale chez les bovins :<br>SARA et acidose aiguë, comment les éviter</h1>
@@ -132,6 +139,11 @@
     <p><strong>Indicateur pratique :</strong> Un taux butyreux (TB) régulièrement inférieur à 36 g/kg sur les contrôles laitiers successifs, sans autre explication (alimentation correcte en fibres), doit faire suspecter une SARA. C'est le signal d'alarme le plus accessible en élevage laitier.</p>
   </div>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière en France en bonne santé ruminale" loading="lazy">
+    <figcaption>Vache laitière française au pâturage : l'accès à l'herbe longue et à la paille stimule la rumination et la production de salive tampon, mécanisme clé de protection contre l'acidose ruminale.</figcaption>
+  </figure>
+
   <h2>Causes et aliments à risque</h2>
 
   <p>Tous les glucides ne fermentent pas de la même façon dans le rumen. <strong>L'amidon dit "rapide"</strong> (contenu dans les céréales à paroi amincie ou finement broyées) est dégradé en quelques heures, provoquant un pic d'AGV. L'amidon dit "lent" (maïs grain entier ou grossièrement broyé, protégé par la paroi de l'endosperme) fermente plus progressivement.</p>
@@ -176,6 +188,11 @@
   <div class="art-infobox">
     <p><strong>Tampons ruminaux :</strong> En rations haute production (> 30 kg de lait/j) avec proportion élevée de concentrés, l'ajout de tampons chimiques (bicarbonate de sodium 150–200 g/j, oxyde de magnésium 30–50 g/j) permet de réduire le risque d'acidose d'environ 30 %. Ce n'est cependant pas un substitut à la gestion des fibres — c'est un complément de sécurité.</p>
   </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Grass_field_and_silage_bales_-_geograph.org.uk_-_7278793.jpg" alt="Balles d'enrubannage et prairie en Normandie" loading="lazy">
+    <figcaption>Balles d'enrubannage dans une prairie : les fourrages conservés restent une source de fibres longues essentielle pour maintenir le pH ruminal et prévenir la SARA en élevage laitier.</figcaption>
+  </figure>
 
   <h2>Prévention : les règles fondamentales</h2>
 

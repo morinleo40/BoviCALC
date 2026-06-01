@@ -58,6 +58,12 @@
     .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
     .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
     @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+    .art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+    .art-hero { position:relative;overflow:hidden; }
+    .art-hero-inner { position:relative;z-index:1; }
+    .art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+    .art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
   </style>
 </head>
 <body>
@@ -68,6 +74,7 @@
 </nav>
 
 <header class="art-hero">
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches laitières en ration calculée selon les normes INRA">
   <div class="art-hero-inner">
     <span class="art-category">Référentiels</span>
     <h1>Normes INRA 2018 : guide complet pour l'éleveur bovin</h1>
@@ -140,6 +147,11 @@
     <p><strong>Impact pratique :</strong> Si vous utilisez encore des tables ou un logiciel basé sur INRA 1988, vos rations sont légèrement sous-évaluées en énergie. Pour une vache à 30 L/j, l'écart peut représenter 0,5 à 0,8 UFL/jour, soit l'équivalent de 1 à 2 kg de concentré. Vérifiez la version des tables utilisées par votre outil de rationnement.</p>
   </div>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches Prim'Holstein consommant une ration TMR équilibrée selon INRA 2018" loading="lazy">
+    <figcaption>Ration TMR calculée selon les normes INRA 2018 : l'intégration des glucides fermentescibles et des protéines PDI permet un équilibrage précis couvrant à la fois les besoins énergétiques et les besoins azotés de la vache laitière.</figcaption>
+  </figure>
+
   <h2>La grande nouveauté : les glucides fermentescibles</h2>
 
   <p>C'est l'une des avancées les plus importantes des normes 2018 : la décomposition fine des glucides de la ration en plusieurs fractions aux effets distincts sur la fermentation ruminale. Cette distinction est cruciale pour prévenir l'acidose et optimiser la production laitière.</p>
@@ -162,6 +174,11 @@
   <div class="art-infobox">
     <p><strong>SARA (Sub-Acute Ruminal Acidosis) :</strong> Le pH ruminal oscille entre 5,5 et 6,2 pendant plus de 3 heures par jour. Conséquences : dégradation de l'épithélium ruminal, dépression butyreuse, boiteries chroniques (fourbures), baisse d'ingestion. Un des troubles les plus coûteux et les moins visibles en élevage laitier intensif.</p>
   </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière française, fruit du rationnement INRA" loading="lazy">
+    <figcaption>Vache laitière en France : les normes INRA 2018 sont le référentiel officiel utilisé par les conseillers agricoles français pour formuler les rations et optimiser les performances des troupeaux laitiers hexagonaux.</figcaption>
+  </figure>
 
   <h2>Le BACA : bilan acido-basique intégré</h2>
 

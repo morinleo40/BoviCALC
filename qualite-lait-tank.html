@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/3/35/Cow_in_milking_robot_01.jpg" alt="Vache en robot de traite pour contrôle qualité lait">
   <div class="inner">
     <span class="tag">Production laitière</span>
     <h1>Qualité du lait en tank :<br>TB, TP, cellules et germes</h1>
@@ -97,6 +104,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <li>Réduire la part des céréales rapidement fermentescibles</li>
 </ul>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Cow_in_milking_robot_01.jpg" alt="Vache en robot de traite automatique avec analyse en temps réel" loading="lazy">
+    <figcaption>Robot de traite : les robots modernes mesurent en continu le TB, le TP et la conductivité du lait à chaque traite, fournissant un tableau de bord de la qualité laitière en temps réel pour chaque vache du troupeau.</figcaption>
+  </figure>
+
 <h2>Le taux protéique (TP) : reflet de l'énergie disponible</h2>
 <p>Contrairement au TB, le TP dépend davantage de <strong>l'apport énergétique global</strong> de la ration que des protéines elles-mêmes. Un déficit énergétique est la principale cause de TP bas.</p>
 
@@ -136,6 +148,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <li>Tarissement sélectif : antibiothérapie ciblée + obturateur interne</li>
   <li>Réformer les vaches chroniques (> 3 quartiers infectés, > 1 000 000 cell)</li>
 </ul>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière française productrice de lait de qualité" loading="lazy">
+    <figcaption>La qualité du lait produit par cette vache Prim'Holstein se lit dans les analyses du lait en tank : TB, TP, cellules somatiques et germes totaux sont les indicateurs qui déterminent la prime ou la pénalité appliquée par la laiterie.</figcaption>
+  </figure>
 
 <h2>Les germes totaux et spores butyriques</h2>
 

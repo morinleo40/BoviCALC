@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière post-partum en France">
   <div class="inner">
     <span class="tag">Santé au vêlage</span>
     <h1>Métrite post-partum chez la vache :<br>reconnaître, traiter, prévenir</h1>
@@ -77,6 +84,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <tr><td>Métrite clinique</td><td>J10 à J21</td><td>Écoulement purulent (blanc-jaune) ou muco-purulent, sans fièvre systématique</td><td>Modérée</td></tr>
   <tr><td>Endométrite subclinique</td><td>J21 à J50</td><td>Pas de signe visible, diagnostic par cytologie ou vaginoscopie, retours en chaleurs répétés</td><td>Insidieuse</td></tr>
 </table>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Birth_of_a_calf.JPG" alt="Vêlage bovin, période à risque de métrite" loading="lazy">
+    <figcaption>Le vêlage est la période la plus à risque de métrite post-partum : toute contamination bactérienne de l'utérus lors de l'expulsion ou de la délivrance peut déclencher une inflammation utérine dans les jours suivants.</figcaption>
+  </figure>
 
 <h2>Facteurs de risque à connaître</h2>
 
@@ -117,6 +129,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <li><strong>Score 2 :</strong> mucus muco-purulent (< 50 % pus)</li>
   <li><strong>Score 3 :</strong> écoulement purulent franc (> 50 % pus)</li>
 </ul>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière en convalescence post-partum" loading="lazy">
+    <figcaption>Surveillance post-partum : un examen clinique systématique entre J3 et J14 après le vêlage permet de détecter précocement une métrite et de mettre en route le traitement avant que l'infection ne compromette la fertilité.</figcaption>
+  </figure>
 
 <h2>Traitement</h2>
 

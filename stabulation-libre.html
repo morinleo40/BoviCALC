@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/3/30/Dairy_farm_2.jpg" alt="Ferme laitière moderne avec stabulation libre">
   <div class="inner">
     <span class="tag">Bâtiment d'élevage</span>
     <h1>Stabulation libre :<br>conception, dimensions et gestion</h1>
@@ -81,6 +88,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <p><strong>Test logette :</strong> Une vache se couche naturellement en temps normal en moins de 5 secondes. Si elle hésite, se met à genoux longtemps ou se couche dans le couloir, c'est que la logette est mal dimensionnée ou trop dure.</p>
 </div>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Dairy_farm_2.jpg" alt="Vue aérienne d'une exploitation laitière moderne en stabulation libre" loading="lazy">
+    <figcaption>Vue aérienne d'une exploitation laitière moderne : la conception du bâtiment (orientation, ventilation traversante, ratio logettes/vaches, longueur de cornadis) détermine directement le confort animal et les résultats sanitaires et économiques.</figcaption>
+  </figure>
+
 <h2>Revêtement des logettes</h2>
 
 <h3>Béton nu</h3>
@@ -103,6 +115,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <tr><td>Couloir principal (avec croisement)</td><td>3,00 m</td><td>3,50 m</td></tr>
   <tr><td>Longueur de front d'auge / vache</td><td>0,70 m</td><td>0,80 - 0,90 m</td></tr>
 </table>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches Prim'Holstein dans une stabulation libre bien ventilée" loading="lazy">
+    <figcaption>Stabulation libre avec accès libre à la ration TMR : le couloir d'alimentation doit permettre à toutes les vaches d'accéder simultanément à la ration (60 cm de cornadis par vache minimum) pour éviter la compétition alimentaire.</figcaption>
+  </figure>
 
 <h2>Ventilation : l'enjeu climatique</h2>
 <p>Une mauvaise ventilation est la première cause de problèmes respiratoires et de baisse de production en été. Les objectifs :</p>

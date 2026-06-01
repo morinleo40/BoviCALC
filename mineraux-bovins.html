@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches laitières consommant leur ration minérale">
   <div class="inner">
     <span class="tag">Nutrition</span>
     <h1>Gestion des minéraux en élevage bovin :<br>Ca, P, Mg, Na et oligo-éléments</h1>
@@ -91,6 +98,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <p><strong>Surdosage en P :</strong> Un excès de phosphore augmente le risque de lithiases urinaires chez les mâles et perturbe l'absorption du calcium. Ne jamais dépasser 80-90 g P/j chez la vache laitière.</p>
 </div>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Dairy_cows_on_pasture_in_Ireland.jpg" alt="Vaches au pâturage — apport minéral de l'herbe" loading="lazy">
+    <figcaption>Vaches laitières au pâturage : l'herbe de prairie fournit calcium, phosphore et magnésium, mais avec des teneurs variables selon la saison et la fertilisation. Les apports minéraux complémentaires doivent être ajustés en conséquence.</figcaption>
+  </figure>
+
 <h2>Le magnésium (Mg)</h2>
 
 <h3>Rôle et tétanie herbeuse</h3>
@@ -111,6 +123,11 @@ footer a{color:#94a3b8;text-decoration:none}
 <h2>Le sodium (Na) et le sel</h2>
 <p>Le sodium régule l'équilibre hydro-électrolytique et l'appétit. Les fourrages en sont pauvres (0,5-1 g/kg MS). Apporter du <strong>sel à raison de 30-50 g/vache/j</strong> (NaCl = 39 % Na, 61 % Cl).</p>
 <p>Le potassium (K), présent en excès dans les jeunes herbes et les ensilages, entre en concurrence avec le Na et le Mg pour l'absorption digestive. Une herbe printemps peut contenir 35-45 g K/kg MS, soit 3 fois les besoins — ce qui explique la tétanie printanière.</p>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cows_eating_TMR.JPG" alt="Vaches consommant un complément minéral vitaminé dans la ration TMR" loading="lazy">
+    <figcaption>L'intégration des minéraux et oligo-éléments dans la ration TMR assure une consommation homogène et évite les pics de surcomplémentation. Les CMV (Compléments Minéraux Vitaminés) sont formulés pour couvrir précisément les déficits identifiés par analyse fourragère.</figcaption>
+  </figure>
 
 <h2>Les oligo-éléments essentiels</h2>
 

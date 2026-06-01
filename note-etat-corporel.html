@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Vache_Prim%27Holstein%2C_Morbihan.jpg" alt="Vache Prim'Holstein en bonne note d'état corporel">
   <div class="inner">
     <span class="tag">Gestion du troupeau</span>
     <h1>La note d'état corporel (NEC) :<br>évaluer et piloter l'état des vaches</h1>
@@ -84,6 +91,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <tr><td>Entrée en tarissement</td><td>3,0 à 3,5</td><td>Acétonémie type 2 si > 3,75 à la mise à la reproduction</td></tr>
 </table>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Vache_Prim%27Holstein%2C_Morbihan.jpg" alt="Vache Prim'Holstein avec flancs visibles pour notation NEC" loading="lazy">
+    <figcaption>Vache Prim'Holstein : la notation NEC s'effectue par observation et palpation de la région lombo-sacrée, des épines transverses et des côtes. Une NEC idéale au vêlage se situe entre 3,0 et 3,25 sur l'échelle de 1 à 5.</figcaption>
+  </figure>
+
 <h2>Interpréter les variations de NEC</h2>
 
 <h3>La perte de NEC en début de lactation</h3>
@@ -108,6 +120,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <li>NEC > 4 au vêlage → augmentation des kystes ovariens</li>
   <li>NEC idéale à la saillie : 2,75 à 3,25</li>
 </ul>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière française avec réserves corporelles optimales" loading="lazy">
+    <figcaption>Vache en lactation avec une NEC correcte : une perte de NEC de plus de 1 point entre le vêlage et le pic de production est un signal d'alarme indiquant un bilan énergétique négatif trop intense, nécessitant une révision de la ration.</figcaption>
+  </figure>
 
 <h2>Plan de notation pratique pour l'élevage</h2>
 <p>Mettre en place un programme de notation systématique :</p>

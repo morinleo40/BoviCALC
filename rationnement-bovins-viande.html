@@ -58,6 +58,12 @@
     .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
     .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
     @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+    .art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+    .art-hero { position:relative;overflow:hidden; }
+    .art-hero-inner { position:relative;z-index:1; }
+    .art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+    .art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
   </style>
 </head>
 <body>
@@ -68,6 +74,7 @@
 </nav>
 
 <header class="art-hero">
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/1/10/Hereford_cattle_in_Koski%2C_Perni%C3%B6%2C_Salo%2C_Finland.jpg" alt="Bovins viande Hereford au pâturage">
   <div class="art-hero-inner">
     <span class="art-category">Bovins viande</span>
     <h1>Rationner les bovins viande : taurillons, bœufs et vaches allaitantes</h1>
@@ -149,6 +156,11 @@
 
   <p>La ration d'un bœuf peut être davantage fourrageuse qu'un taurillon, avec une part d'ensilage d'herbe ou de foin plus importante et moins de concentrés. Cette flexibilité est un atout économique lorsque les fourrages produits à la ferme sont abondants.</p>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/1/10/Hereford_cattle_in_Koski%2C_Perni%C3%B6%2C_Salo%2C_Finland.jpg" alt="Bovins viande Hereford au pâturage" loading="lazy">
+    <figcaption>Bovins Hereford au pâturage : les races allaitantes à fort potentiel musculaire (Charolaise, Limousine, Blonde d'Aquitaine) ont des besoins en UFV et en PDI spécifiques selon l'objectif de croissance (GMQ cible) et le type génétique.</figcaption>
+  </figure>
+
   <h2>La vache allaitante : entretien et lactation combinés</h2>
 
   <h3>Spécificités de la vache allaitante</h3>
@@ -186,6 +198,11 @@
       <tr><td><strong>Total</strong></td><td><strong>14,7</strong></td><td><strong>12,34</strong></td><td><strong>1 328</strong></td></tr>
     </tbody>
   </table>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Dairy_cows_on_pasture_in_Ireland.jpg" alt="Vaches allaitantes avec leurs veaux au pâturage" loading="lazy">
+    <figcaption>Vaches allaitantes avec leurs veaux au pâturage : la vache allaitante doit couvrir simultanément ses besoins d'entretien, de production laitière pour le veau et de reconstitution des réserves pour la prochaine gestation.</figcaption>
+  </figure>
 
   <h2>Le broutard : une phase critique à ne pas négliger</h2>
 

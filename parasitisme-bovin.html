@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Dairy_cows_on_pasture_in_Ireland.jpg" alt="Bovins au pâturage — zone de contamination parasitaire">
   <div class="inner">
     <span class="tag">Santé animale</span>
     <h1>Parasitisme interne des bovins :<br>strongles, douves, coccidies</h1>
@@ -90,6 +97,11 @@ footer a{color:#94a3b8;text-decoration:none}
 <h3>Les coccidies (Eimeria spp.)</h3>
 <p>Les coccidies sont des protozoaires parasites de l'intestin grêle et du gros intestin. Elles touchent essentiellement les veaux de 3 semaines à 6 mois. Les symptômes : diarrhée profuse souvent hémorragique, déshydratation, mort possible chez les veaux affaiblis. Traitement : diclazuril (Vecoxan®) ou toltrazuril (Baycox®).</p>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Dairy_cows_on_pasture_in_Ireland.jpg" alt="Bovins pâturant dans une prairie humide favorable aux parasites" loading="lazy">
+    <figcaption>Pâturage en terrain humide : les zones marécageuses et les secteurs de bord de ruisseau sont les lieux de prédilection de la grande douve du foie (Fasciola hepatica). La gestion des accès à ces zones réduit significativement la contamination.</figcaption>
+  </figure>
+
 <h2>Diagnostic et suivi parasitaire</h2>
 
 <table>
@@ -124,6 +136,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <li>Alterner les familles d'anthelminthiques</li>
   <li>Peser les animaux avant traitement pour doser correctement</li>
 </ul>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Grass_field_and_silage_bales_-_geograph.org.uk_-_7278793.jpg" alt="Prairie avec parcelles alternées pour gestion parasitaire" loading="lazy">
+    <figcaption>Rotation des parcelles de pâturage : alterner les lots d'animaux sur les parcelles et respecter des périodes de repos de 6 à 8 semaines interrompt les cycles des strongles gastro-intestinaux et réduit la charge parasitaire.</figcaption>
+  </figure>
 
 <h2>Gestion du pâturage pour réduire la pression parasitaire</h2>
 <ul>

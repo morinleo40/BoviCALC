@@ -58,6 +58,12 @@
     .art-related-card .tag { font-size:.72rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:8px; }
     .art-related-card h4 { font-size:.9rem; font-weight:700; color:#1e293b; line-height:1.4; }
     @media(max-width:640px) { .art-hero h1 { font-size:1.5rem; } .art-nav-links { display:none; } }
+    .art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+    .art-hero { position:relative;overflow:hidden; }
+    .art-hero-inner { position:relative;z-index:1; }
+    .art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+    .art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+    .art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
   </style>
 </head>
 <body>
@@ -68,6 +74,7 @@
 </nav>
 
 <header class="art-hero">
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/3/35/Cow_in_milking_robot_01.jpg" alt="Vache en robot de traite">
   <div class="art-hero-inner">
     <span class="art-category">Santé mammaire</span>
     <h1>Mammites chez la vache laitière :<br>causes, prévention et impact sur la production</h1>
@@ -111,6 +118,11 @@
     <p><strong>Identification des germes :</strong> La culture bactériologique d'un échantillon de lait prélevé en conditions stériles (avant traitement) est indispensable pour adapter l'antibiothérapie et orienter le plan de prévention. Coût : 20 à 40 € par prélèvement. Rentable dès le premier cas récidivant.</p>
   </div>
 
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Cow_in_milking_robot_01.jpg" alt="Vache laitière en robot de traite automatisé" loading="lazy">
+    <figcaption>Robot de traite automatisé : les systèmes de traite modernes analysent en temps réel la conductivité du lait et le CCS, permettant la détection précoce des mammites subcliniques avant l'apparition des signes cliniques.</figcaption>
+  </figure>
+
   <h2>Cellules somatiques et perte de production</h2>
 
   <p>Les cellules somatiques (CS) sont majoritairement des globules blancs (polynucléaires neutrophiles) mobilisés pour lutter contre l'infection. Leur accumulation dans le lait est un indicateur d'inflammation. Leur impact sur la production est linéaire :</p>
@@ -140,6 +152,11 @@
   <div class="art-warning">
     <p><strong>Gestion de crise CCS :</strong> Quand le CCS tanker dépasse 300 000, il faut agir vite. Isoler les vaches avec CCS individuel &gt; 1 million, renforcer l'hygiène de la traite, faire des cultures bactériologiques sur les cas récidivants. Un plan d'action avec votre vétérinaire doit être mis en place sous 15 jours maximum.</p>
   </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière française avec mamelle saine" loading="lazy">
+    <figcaption>Vache laitière Prim'Holstein : une bonne santé mammaire se traduit par un taux de cellules somatiques inférieur à 200 000 cellules/mL et l'absence de signes inflammatoires sur les quartiers.</figcaption>
+  </figure>
 
   <h2>Le protocole de traite en 5 points</h2>
 

@@ -41,6 +41,12 @@ td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
 .art-cta a{background:#fff;color:#15803d;font-weight:700;padding:11px 26px;border-radius:8px;text-decoration:none;font-size:.9rem}
 footer{background:#0f172a;padding:24px 32px;text-align:center;color:#64748b;font-size:.82rem;margin-top:56px}
 footer a{color:#94a3b8;text-decoration:none}
+.art-hero-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity; }
+header { position:relative;overflow:hidden; }
+.inner { position:relative;z-index:1; }
+.art-figure { margin:28px 0;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10); }
+.art-figure img { width:100%;height:240px;object-fit:cover;display:block; }
+.art-figure figcaption { background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 16px;font-size:.78rem;color:#64748b;font-style:italic; }
 </style>
 </head>
 <body>
@@ -49,6 +55,7 @@ footer a{color:#94a3b8;text-decoration:none}
   <a href="/app.html" class="cta-btn">Essayer Rumicore →</a>
 </nav>
 <header>
+  <img class="art-hero-img" src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Vache_Prim%27Holstein%2C_Morbihan.jpg" alt="Vache Prim'Holstein — élevage laitier breton">
   <div class="inner">
     <span class="tag">Reproduction bovine</span>
     <h1>Insémination artificielle bovine :<br>techniques, timing et résultats</h1>
@@ -92,6 +99,11 @@ footer a{color:#94a3b8;text-decoration:none}
   <li><strong>Taureau vasectomisé (marqueur) :</strong> méthode très fiable mais nécessite un taureau dédié</li>
   <li><strong>Progesterone on-farm test :</strong> valide que la vache est en phase folliculaire</li>
 </ul>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Dairy_cow_in_France.jpg" alt="Vache laitière en chaleurs au pâturage" loading="lazy">
+    <figcaption>Vache laitière en période d'oestrus : la détection fiable des chaleurs est le facteur limitant principal du taux de réussite en insémination artificielle. Une surveillance visuelle 3 fois par jour reste la méthode de référence.</figcaption>
+  </figure>
 
 <h2>Synchronisation des chaleurs</h2>
 
@@ -139,6 +151,11 @@ footer a{color:#94a3b8;text-decoration:none}
 <div class="warning">
   <p><strong>Erreurs fréquentes :</strong> Ne jamais décongeler dans l'eau froide ou à température ambiante. Ne jamais remettre une paillette dans l'azote après décongélation. Un écart de température lors de la décongélation peut réduire la motilité du sperme de 50 %.</p>
 </div>
+
+  <figure class="art-figure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Vache_Prim%27Holstein%2C_Morbihan.jpg" alt="Vache Prim'Holstein gestante" loading="lazy">
+    <figcaption>Vache Prim'Holstein en Morbihan : après une insémination réussie, la confirmation de gestation par échographie ou dosage de PAG (Protéines Associées à la Gestation) à J28-J30 permet d'anticiper les vêlages et d'optimiser la gestion du troupeau.</figcaption>
+  </figure>
 
 <h2>Diagnostic de gestation</h2>
 <ul>
