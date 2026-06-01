@@ -244,6 +244,9 @@ function setTheme(t) {
       <button class="sidebar-item" id="nav-rapports" onclick="showPage('rapports')">
         <span class="si-icon">📄</span> Rapports
       </button>
+      <button class="sidebar-item" id="nav-share" onclick="showPage('share')">
+        <span class="si-icon">📤</span> Partager une ration
+      </button>
       <button class="sidebar-item" id="nav-settings" onclick="showPage('settings')">
         <span class="si-icon">⚙️</span> Paramètres
       </button>
@@ -770,6 +773,67 @@ function setTheme(t) {
             <a href="index_conseiller.html" class="btn btn-ghost btn-sm">← Page d'accueil Conseiller</a>
             <button class="btn btn-danger btn-sm" onclick="logoutUser()" style="margin-top:8px;">⏻ Se déconnecter</button>
             <button class="btn btn-ghost btn-sm" onclick="deleteAccount()" style="margin-top:4px;color:#94a3b8;border-color:#e2e8f0;font-size:.8rem;">🗑️ Supprimer mon compte</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: PARTAGER UNE RATION ══ -->
+    <div class="page-content hidden" id="page-share">
+      <div class="grid-2" style="align-items:start;max-width:860px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 Partager une ration par lien</div></div>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:18px;line-height:1.6;">
+            Créez un lien unique que votre éleveur peut ouvrir pour retrouver la ration préconfigurée dans RumiCORE.
+          </p>
+          <div class="form-group">
+            <label>Titre de la ration <span style="color:#dc2626;">*</span></label>
+            <input type="text" class="form-input" id="sh-titre" placeholder="Ex : Ration été VL 30 L — GAEC Dupont">
+          </div>
+          <div class="form-group">
+            <label>Type d'animal</label>
+            <select class="form-select" id="sh-animal">
+              <option value="">Non spécifié</option>
+              <option value="vache-laitiere">Vache laitière</option>
+              <option value="vache-tarie">Vache tarie</option>
+              <option value="vache-allaitante">Vache allaitante</option>
+              <option value="taurillon">Taurillon (JB)</option>
+              <option value="genisse">Génisse</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Composition de la ration (aliments + kg MS/j, un par ligne)</label>
+            <textarea class="form-textarea" id="sh-ration-txt" rows="6"
+              placeholder="Ensilage maïs : 8&#10;Foin de ray-grass : 3&#10;Tourteau de soja 48 : 1.5&#10;Maïs grain : 2"></textarea>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">Format : Nom aliment : quantité kg MS/j</div>
+          </div>
+          <div class="form-group">
+            <label>Note pour l'éleveur</label>
+            <textarea class="form-textarea" id="sh-note" rows="3"
+              placeholder="Ex : Cette ration est calculée pour une vache de 650 kg produisant 30 L/j…"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Email de l'éleveur (optionnel — pour information)</label>
+            <input type="email" class="form-input" id="sh-email" placeholder="eleveur@exemple.fr">
+          </div>
+          <div id="sh-err" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:10px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
+          <button class="btn btn-primary" onclick="createSharedRation()" id="sh-btn">🔗 Générer le lien de partage</button>
+        </div>
+
+        <div class="card" id="sh-result-card" style="display:none;">
+          <div class="card-header"><div class="card-title">✅ Lien créé</div></div>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Partagez ce lien avec votre éleveur. Il pourra ouvrir la ration directement dans RumiCORE.</p>
+          <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:16px;">
+            <input type="text" class="form-input" id="sh-link-input" readonly
+              style="font-size:.8rem;font-family:monospace;background:var(--bg);flex:1;">
+            <button class="btn btn-primary" onclick="copyShareLink()">📋 Copier</button>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.83rem;color:var(--text-muted);line-height:1.7;">
+            <strong style="color:var(--text);">Ce que verra l'éleveur :</strong><br>
+            La ration s'affichera pré-remplie dans l'outil RumiCORE, avec un bandeau indiquant qu'elle a été partagée par vous.
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-ghost btn-sm" onclick="resetShareForm()">+ Créer un autre lien</button>
           </div>
         </div>
       </div>
@@ -1309,12 +1373,12 @@ function updateSidebarUser() {
 
 /* ══ NAVIGATION ══ */
 function showPage(page) {
-  const pages = ['dashboard','exploitations','exp-detail','rapports','settings'];
+  const pages = ['dashboard','exploitations','exp-detail','rapports','settings','share'];
   pages.forEach(p => {
     const el = document.getElementById('page-'+p);
     if (el) el.classList.toggle('hidden', p !== page);
   });
-  const navs = ['dashboard','exploitations','rapports','settings'];
+  const navs = ['dashboard','exploitations','rapports','settings','share'];
   navs.forEach(n => {
     const el = document.getElementById('nav-'+n);
     if(el) el.classList.toggle('active', n===page);
@@ -1324,7 +1388,8 @@ function showPage(page) {
     'exploitations':'Mes exploitations',
     'exp-detail': currentExp ? currentExp.nom : 'Exploitation',
     'rapports':'Rapports',
-    'settings':'Paramètres'
+    'settings':'Paramètres',
+    'share':'Partager une ration'
   };
   document.getElementById('page-title').textContent = titles[page] || '';
 
@@ -1334,6 +1399,8 @@ function showPage(page) {
     tba.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="editCurrentExp()">✏️ Modifier</button>
       <button class="btn btn-primary btn-sm" onclick="saveSession()">💾 Sauvegarder</button>
       <button class="btn btn-secondary btn-sm" onclick="printRapport()">📄 PDF</button>`;
+  } else if (page === 'share') {
+    tba.innerHTML = '';
   } else {
     tba.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openExpModal(null)">+ Nouvelle exploitation</button>`;
   }
@@ -2870,6 +2937,73 @@ function transferTmsToStock() {
   showToast(`${tms.toFixed(2)} t MS de "${c.label}" ajoutées aux stocks.`, 'success');
 }
 
+
+// ══ PARTAGE DE RATION ══════════════════════════════
+
+async function createSharedRation() {
+  const titre = (_$('sh-titre')?.value || '').trim();
+  const errEl = _$('sh-err');
+  errEl.style.display = 'none';
+  if (!titre) { errEl.textContent = 'Le titre est requis.'; errEl.style.display = 'block'; return; }
+
+  const rationTxt = (_$('sh-ration-txt')?.value || '').trim();
+  const ration_data = rationTxt ? rationTxt.split('\n').map(line => {
+    const parts = line.split(':');
+    if (parts.length < 2) return null;
+    const nom = parts.slice(0, -1).join(':').trim();
+    const qty = parseFloat(parts[parts.length - 1].trim());
+    return nom && !isNaN(qty) ? { nom, qty } : null;
+  }).filter(Boolean) : [];
+
+  const supa = getSupa();
+  if (!supa || !currentUser) return;
+
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const code = Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const prenom = currentUser.user_metadata?.prenom || currentUser.email?.split('@')[0] || 'Conseiller';
+  const payload = {
+    advisor_id: currentUser.id,
+    advisor_name: prenom,
+    titre,
+    animal_type: _$('sh-animal')?.value || null,
+    ration_data,
+    note: (_$('sh-note')?.value || '').trim() || null,
+    farmer_email: (_$('sh-email')?.value || '').trim() || null,
+    code,
+  };
+
+  const btn = _$('sh-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  const { error } = await supa.from('shared_rations').insert(payload);
+  if (btn) { btn.disabled = false; btn.textContent = '🔗 Générer le lien de partage'; }
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+
+  const link = window.location.origin + '/app.html?ration=' + code;
+  const inp = _$('sh-link-input');
+  if (inp) inp.value = link;
+  const card = _$('sh-result-card');
+  if (card) card.style.display = '';
+  showToast('Lien créé ! Copiez-le pour le partager.', 'success', 4000);
+}
+
+function copyShareLink() {
+  const inp = _$('sh-link-input');
+  if (!inp) return;
+  navigator.clipboard?.writeText(inp.value)
+    .then(() => showToast('Lien copié !', 'success'))
+    .catch(() => { inp.select(); document.execCommand('copy'); showToast('Lien copié !', 'success'); });
+}
+
+function resetShareForm() {
+  if (_$('sh-titre')) _$('sh-titre').value = '';
+  if (_$('sh-animal')) _$('sh-animal').value = '';
+  if (_$('sh-ration-txt')) _$('sh-ration-txt').value = '';
+  if (_$('sh-note')) _$('sh-note').value = '';
+  if (_$('sh-email')) _$('sh-email').value = '';
+  if (_$('sh-err')) _$('sh-err').style.display = 'none';
+  const card = _$('sh-result-card');
+  if (card) card.style.display = 'none';
+}
 
 // ── Suggestions ─────────────────────────────────────
 function openSuggestModal() {

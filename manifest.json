@@ -1,0 +1,17 @@
+{
+  "name": "RumiCORE",
+  "short_name": "RumiCORE",
+  "description": "Calculateur de rations bovines INRA 2018",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#15803d",
+  "icons": [
+    {
+      "src": "/Logo RumiCORE.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

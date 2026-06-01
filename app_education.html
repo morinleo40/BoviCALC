@@ -933,6 +933,9 @@ let myMembership = null;
 let currentCvTab = 'students';
 let liveRefreshInterval = null;
 let _rbCb = null;
+let _lastExoList = [];
+let _lastExoMembers = [];
+let _lastExoSubsByExo = {};
 
 function getSupa() {
   if (!_supa && window.supabase) _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1449,7 +1452,7 @@ async function loadExos() {
   const [exoRes, membersRes, subsRes] = await Promise.all([
     supa.from('edu_exercises').select('*').eq('class_id', currentClassId).order('created_at', { ascending: false }),
     supa.from('edu_members').select('student_id, student_name').eq('class_id', currentClassId),
-    supa.from('edu_submissions').select('student_id, score, exercise_id, submitted_at').eq('class_id', currentClassId).not('exercise_id', 'is', null)
+    supa.from('edu_submissions').select('student_id, score, exercise_id, submitted_at, exo_delta_ufl, exo_delta_pdi').eq('class_id', currentClassId).not('exercise_id', 'is', null)
   ]);
   renderExos(exoRes.data || [], membersRes.data || [], subsRes.data || []);
 }
@@ -1466,6 +1469,10 @@ function renderExos(list, members, subs) {
     if (!subsByExo[s.exercise_id]) subsByExo[s.exercise_id] = {};
     subsByExo[s.exercise_id][s.student_id] = s;
   });
+  // Store globally for PDF export
+  _lastExoList = list;
+  _lastExoMembers = members;
+  _lastExoSubsByExo = subsByExo;
   const scoreColors = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#dc2626' };
 
   el.innerHTML = list.map(e => {
@@ -1502,9 +1509,19 @@ function renderExos(list, members, subs) {
             const score = sub.score || '?';
             const bg = scoreColors[score] || '#94a3b8';
             const date = new Date(sub.submitted_at).toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+            let deltaHtml = '';
+            if (sub.exo_delta_ufl !== null && sub.exo_delta_ufl !== undefined) {
+              const dUFL = Number(sub.exo_delta_ufl);
+              deltaHtml += `<span style="font-size:.72rem;font-weight:700;color:${dUFL >= 0 ? '#15803d' : '#dc2626'};">${dUFL >= 0 ? '+' : ''}${dUFL.toFixed(1)} UFL</span>`;
+            }
+            if (sub.exo_delta_pdi !== null && sub.exo_delta_pdi !== undefined) {
+              const dPDI = Number(sub.exo_delta_pdi);
+              deltaHtml += `<span style="font-size:.72rem;font-weight:700;color:${dPDI >= 0 ? '#15803d' : '#dc2626'};margin-left:6px;">${dPDI >= 0 ? '+' : ''}${Math.round(dPDI)} g PDI</span>`;
+            }
             return `<div class="exo-result-row">
               <div class="exo-result-name">${m.student_name || 'Élève'}</div>
               <span class="score-badge score-${score}" style="background:${bg};width:26px;height:26px;font-size:.78rem;">${score}</span>
+              ${deltaHtml ? `<span style="display:flex;gap:2px;align-items:center;">${deltaHtml}</span>` : ''}
               <span class="exo-result-date">${date}</span>
             </div>`;
           }
@@ -1534,6 +1551,7 @@ function renderExos(list, members, subs) {
           ${active ? '⏸ Désactiver' : '▶ Activer'}
         </button>
         <button class="btn btn-ghost btn-sm" onclick="openEditExo(${JSON.stringify(e).replace(/"/g,'&quot;')})">✏️ Modifier</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportExoPDF('${e.id}')">📄 PDF</button>
         <button class="btn btn-danger btn-sm" onclick="deleteExo('${e.id}')">🗑️</button>
       </div>
     </div>`;
@@ -1642,6 +1660,100 @@ async function deleteExo(id) {
     showToast('Exercice supprimé.', 'info');
     await loadExos();
   }, 'Supprimer', true);
+}
+
+// ══════════════ PDF EXPORT ══════════════
+
+function exportExoPDF(exoId) {
+  const exo = _lastExoList.find(e => e.id === exoId);
+  if (!exo) { showToast('Données introuvables. Rechargez les exercices.', 'error'); return; }
+  const members = _lastExoMembers;
+  const exoSubs = _lastExoSubsByExo[exoId] || {};
+  const scoreColors = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#dc2626' };
+  const now = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+  const rendered = Object.keys(exoSubs).length;
+  const total = members.length;
+
+  let rowsHtml = members.map(m => {
+    const sub = exoSubs[m.student_id];
+    if (sub) {
+      const score = sub.score || '?';
+      const bg = scoreColors[score] || '#94a3b8';
+      const date = new Date(sub.submitted_at).toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const dUFL = sub.exo_delta_ufl !== null && sub.exo_delta_ufl !== undefined ? Number(sub.exo_delta_ufl) : null;
+      const dPDI = sub.exo_delta_pdi !== null && sub.exo_delta_pdi !== undefined ? Number(sub.exo_delta_pdi) : null;
+      const uflStr = dUFL !== null ? `<span style="color:${dUFL>=0?'#15803d':'#dc2626'}">${dUFL>=0?'+':''}${dUFL.toFixed(1)} UFL</span>` : '—';
+      const pdiStr = dPDI !== null ? `<span style="color:${dPDI>=0?'#15803d':'#dc2626'}">${dPDI>=0?'+':''}${Math.round(dPDI)} g</span>` : '—';
+      return `<tr>
+        <td>${m.student_name || 'Élève'}</td>
+        <td style="text-align:center;"><span style="display:inline-block;background:${bg};color:#fff;border-radius:6px;padding:2px 10px;font-weight:800;">${score}</span></td>
+        <td style="text-align:center;">${uflStr}</td>
+        <td style="text-align:center;">${pdiStr}</td>
+        <td style="color:#64748b;font-size:.85em;">${date}</td>
+      </tr>`;
+    }
+    return `<tr>
+      <td>${m.student_name || 'Élève'}</td>
+      <td style="text-align:center;color:#94a3b8;">—</td>
+      <td style="text-align:center;color:#94a3b8;">—</td>
+      <td style="text-align:center;color:#94a3b8;">—</td>
+      <td style="color:#94a3b8;">En attente</td>
+    </tr>`;
+  }).join('');
+
+  const dueDateHtml = exo.due_date
+    ? `<p style="margin:4px 0;font-size:.9rem;color:#475569;">📅 Date de rendu : ${new Date(exo.due_date).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}</p>`
+    : '';
+  const pillsHtml = [
+    exo.animal_type ? `<span class="pill">🐄 ${exo.animal_type}</span>` : null,
+    exo.target_ufl  ? `<span class="pill">⚡ UFL cible : ${exo.target_ufl}</span>` : null,
+    exo.target_pdi  ? `<span class="pill">🧬 PDI cible : ${exo.target_pdi} g</span>` : null,
+    `<span class="pill">${exo.is_graded !== false ? '✓ Noté' : '✗ Non noté'}</span>`,
+  ].filter(Boolean).join('');
+
+  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Résultats — ${exo.titre}</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #1e293b; padding: 32px; max-width: 820px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; color: #7c3aed; margin-bottom: 4px; }
+    .meta { font-size: .85rem; color: #64748b; margin-bottom: 16px; }
+    .pill { display: inline-block; background: #f3effe; border: 1px solid #ddd6fe; border-radius: 20px; padding: 3px 10px; font-size: .8rem; margin-right: 6px; color: #7c3aed; }
+    .stats { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+    .stat { background: #faf5ff; border: 1.5px solid #ede9fe; border-radius: 10px; padding: 12px 20px; text-align: center; }
+    .stat-val { font-size: 1.6rem; font-weight: 900; color: #7c3aed; }
+    .stat-lbl { font-size: .78rem; color: #64748b; margin-top: 2px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th { background: #7c3aed; color: #fff; text-align: left; padding: 10px 12px; font-size: .85rem; }
+    td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; font-size: .9rem; }
+    tr:nth-child(even) td { background: #faf5ff; }
+    .footer { margin-top: 24px; font-size: .78rem; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+    @media print { body { padding: 16px; } }
+  </style></head><body>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="background:linear-gradient(135deg,#7c3aed,#db2777);border-radius:10px;padding:8px 14px;color:#fff;font-weight:900;font-size:1.1rem;">RumiCORE</div>
+    <div><div style="font-size:.72rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.06em;">Éducation · Résultats d'exercice</div>
+    <div style="font-size:.78rem;color:#94a3b8;">Exporté le ${now}</div></div>
+  </div>
+  <h1>${exo.titre}</h1>
+  ${exo.description ? `<p style="margin:6px 0;color:#475569;">${exo.description}</p>` : ''}
+  ${dueDateHtml}
+  <div class="meta" style="margin-top:8px;">${pillsHtml}</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Élèves</div></div>
+    <div class="stat"><div class="stat-val">${rendered}</div><div class="stat-lbl">Rendus</div></div>
+    <div class="stat"><div class="stat-val">${total - rendered}</div><div class="stat-lbl">En attente</div></div>
+    <div class="stat"><div class="stat-val">${rendered && total ? Math.round(rendered/total*100) : 0}%</div><div class="stat-lbl">Taux de rendu</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Élève</th><th style="text-align:center;">Score</th><th style="text-align:center;">Δ UFL</th><th style="text-align:center;">Δ PDI</th><th>Soumis le</th></tr></thead>
+    <tbody>${rowsHtml}</tbody>
+  </table>
+  <div class="footer">RumiCORE Éducation · Rationnement bovin INRA 2018 · rumicore.fr</div>
+  <script>window.onload = function() { window.print(); }</scr` + `ipt>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+  else showToast('Autorisez les popups pour exporter en PDF.', 'warn');
 }
 
 // ── Role switch ──
