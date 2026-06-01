@@ -222,7 +222,7 @@ async function resetPassword() {
   else showAuthError(res.error.message);
 }
 var STRIPE_MONTHLY = 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00';
-var STRIPE_ANNUAL  = 'REMPLACER_PAR_LIEN_STRIPE_ANNUEL';
+var STRIPE_ANNUAL  = 'https://buy.stripe.com/9B614faqs8iS9312TGbMQ01';
 
 function openStripeCheckout() {
   var m = _$$('billing-modal'); if (m) m.classList.remove('hidden');
@@ -561,7 +561,7 @@ async function initAuth() {
   <!-- Rumi parle — conseil du jour -->
   <div id="rumi-tip-home" class="rumi-vignette rumi-parle" style="margin-bottom:20px;display:none;">
     <div class="rumi-avatar-wrap">
-      <img src="Logo RumiCORE.png" alt="Rumi">
+      <img src="Rumi parle + Bulle.png" alt="Rumi parle">
       <span class="rumi-emoji-badge">💬</span>
     </div>
     <div class="rumi-bubble">
@@ -4928,7 +4928,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       updateAuthUI();
       if (okEl) {
         const untilStr = until.toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
-        okEl.innerHTML = `<div class="rumi-vignette rumi-fete" style="margin:0;padding:12px 14px;border-radius:10px;"><div class="rumi-avatar-wrap"><img src="Logo RumiCORE.png" alt="Rumi" style="width:40px;height:40px;border-radius:50%;padding:3px;background:#fff;border:2px solid #fbbf24;"><span class="rumi-emoji-badge">🎉</span></div><div class="rumi-bubble" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:0 10px 10px 10px;padding:10px 12px;"><strong style="font-size:.75rem;font-weight:700;color:#92400e;display:block;margin-bottom:3px;">RUMI FÊTE</strong><p style="margin:0;font-size:.85rem;color:#713f12;">Plan Pro activé jusqu'au ${untilStr} ! Vos vaches méritent le meilleur. 🎉</p></div></div>`;
+        okEl.innerHTML = `<div class="rumi-vignette rumi-fete" style="margin:0;padding:12px 14px;border-radius:10px;"><div class="rumi-avatar-wrap"><img src="Rumi Saut.png" alt="Rumi fête" style="width:40px;height:40px;border-radius:50%;padding:3px;background:#fff;border:2px solid #fbbf24;"><span class="rumi-emoji-badge">🎉</span></div><div class="rumi-bubble" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:0 10px 10px 10px;padding:10px 12px;"><strong style="font-size:.75rem;font-weight:700;color:#92400e;display:block;margin-bottom:3px;">RUMI FÊTE</strong><p style="margin:0;font-size:.85rem;color:#713f12;">Plan Pro activé jusqu'au ${untilStr} ! Vos vaches méritent le meilleur. 🎉</p></div></div>`;
         okEl.style.display = 'block';
       }
       if (btn) { btn.textContent = '✅ Activé !'; btn.disabled = true; }
@@ -5191,7 +5191,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     <!-- Rumi coeur — message Pro -->
     <div id="rumi-coeur-modal" class="rumi-vignette rumi-coeur" style="display:none;margin-bottom:14px;">
       <div class="rumi-avatar-wrap">
-        <img src="Logo RumiCORE.png" alt="Rumi">
+        <img src="Rumi coeur.png" alt="Rumi coeur">
         <span class="rumi-emoji-badge">❤️</span>
       </div>
       <div class="rumi-bubble">
