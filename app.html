@@ -136,8 +136,9 @@ function openAccountModal() {
     var initiale = (usernameAv || prenom3 || (currentUser.email || 'U')).charAt(0).toUpperCase();
     av.textContent = initiale;
   }
-  // Pro code sections
-  var hasCode = currentUser && currentUser.user_metadata && currentUser.user_metadata.pro_code_activated;
+  // Pro code sections — vérifier user_metadata ET localStorage (anti race-condition)
+  var _localCode = ''; try { _localCode = localStorage.getItem('bovicalc-pro-code') || ''; } catch(e) {}
+  var hasCode = _localCode || (currentUser && currentUser.user_metadata && currentUser.user_metadata.pro_code_activated);
   var isOwner = currentUser && currentUser.email === 'bovicalc@gmail.com';
   var proActivateSection = _$$('acct-pro-activate-section');
   if (proActivateSection) proActivateSection.style.display = (!hasCode && !isOwner) ? '' : 'none';
@@ -227,6 +228,7 @@ function openStripeCheckout() {
 async function logoutUser() {
   closeAccountModal();
   try { var supa = getSupa(); if (supa) await supa.auth.signOut(); } catch(e) {}
+  try { localStorage.removeItem('bovicalc-pro-code'); } catch(e) {}
   currentUser = null;
   userPlan = 'free';
   updateAuthUI();
@@ -4812,31 +4814,42 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     if (okEl)  okEl.style.display  = 'none';
     if (!code) { if (errEl) { errEl.textContent = 'Entrez un code.'; errEl.style.display = 'block'; } return; }
     if (btn) { btn.textContent = 'Vérification…'; btn.disabled = true; }
+    const supa = getSupa(); if (!supa) return;
     try {
-      const res = await fetch('/.netlify/functions/redeem-promo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, userId: currentUser.id }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        if (errEl) { errEl.textContent = data.error || 'Code invalide.'; errEl.style.display = 'block'; }
+      // Vérifier le code dans Supabase
+      const { data: codeData, error: codeErr } = await supa
+        .from('promo_codes')
+        .select('*')
+        .eq('code', code)
+        .eq('used', false)
+        .maybeSingle();
+      if (codeErr || !codeData) {
+        if (errEl) { errEl.textContent = 'Code invalide ou déjà utilisé.'; errEl.style.display = 'block'; }
         if (btn) { btn.textContent = 'Activer le code'; btn.disabled = false; }
         return;
       }
+      // Marquer le code comme utilisé
+      await supa.from('promo_codes')
+        .update({ used: true, used_by: currentUser.id, used_at: new Date().toISOString() })
+        .eq('code', code).eq('used', false);
+      // Calculer la date d'expiration
+      const durationDays = codeData.duration_days || 365;
+      const until = new Date();
+      until.setDate(until.getDate() + durationDays);
+      // Mettre à jour le plan de l'utilisateur
+      await supa.from('user_plans')
+        .upsert({ user_id: currentUser.id, plan: 'pro', until: until.toISOString() }, { onConflict: 'user_id' });
       // Succès
       userPlan = 'pro';
       updateAuthUI();
       if (okEl) {
-        const until = data.until ? new Date(data.until).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '';
-        okEl.innerHTML = `✅ Plan Pro activé jusqu'au ${until} !`;
+        const untilStr = until.toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+        okEl.innerHTML = `✅ Plan Pro activé jusqu'au ${untilStr} !`;
         okEl.style.display = 'block';
       }
       if (btn) { btn.textContent = '✅ Activé !'; btn.disabled = true; }
-      // Masquer le bouton promo (code utilisé)
       const promoBtn = $('btn-promo');
       if (promoBtn) promoBtn.style.display = 'none';
-      // Fermer après 3s
       setTimeout(() => $('promo-modal')?.classList.add('hidden'), 3000);
     } catch(e) {
       if (errEl) { errEl.textContent = 'Erreur réseau. Réessayez.'; errEl.style.display = 'block'; }
@@ -4887,6 +4900,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         return;
       }
       await supa.auth.updateUser({ data: { pro_code_activated: code } });
+      // Stocker en localStorage pour éviter les race conditions avec onAuthStateChange
+      try { localStorage.setItem('bovicalc-pro-code', code); } catch(e) {}
       if (currentUser.user_metadata) currentUser.user_metadata.pro_code_activated = code;
       if (okEl) { okEl.textContent = '✅ Code activé ! Vous pouvez maintenant modifier votre profil.'; okEl.style.display = 'block'; }
       setTimeout(() => { closeAccountModal(); openAccountModal(); }, 1800);
