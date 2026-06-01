@@ -419,12 +419,17 @@ function requireAuth(feature) {
 }
 function requirePro(feature) {
   if (!currentUser) return requireAuth(feature);
-  if (userPlan === 'pro') return true;
+  if (userPlan === 'pro' || userPlan === 'conseiller') return true;
   showToast('⭐ "' + feature + '" est réservé au plan Pro. Passez Pro pour y accéder.', 'warn', 4500);
   return false;
 }
 async function loadUserPlan() {
   var supa = getSupa(); if (!supa || !currentUser) { userPlan = 'free'; return; }
+  // 0. Comptes admin/développeur
+  var ADMIN_EMAILS = ['bovicalc@gmail.com', 'morinleo40@gmail.com'];
+  if (ADMIN_EMAILS.indexOf((currentUser.email||'').toLowerCase()) !== -1) {
+    userPlan = 'pro'; updateAuthUI(); return;
+  }
   // 1. Vérifier les métadonnées (codes promo)
   var meta = currentUser.user_metadata || {};
   if (meta.plan === 'pro') {
@@ -553,11 +558,6 @@ async function initAuth() {
         <a href="#" onclick="resetWallPassword();return false;" style="font-size:.8rem;color:var(--text-muted);text-decoration:underline;">Mot de passe oublié ?</a>
       </div>
 
-      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);text-align:center;">
-        <button onclick="continueAsGuest()" style="background:none;border:none;cursor:pointer;font-size:.82rem;color:#64748b;text-decoration:underline;padding:0;">
-          Continuer sans compte (accès libre)
-        </button>
-      </div>
     </div>
 
     <div class="auth-wall-footer">
@@ -2854,12 +2854,29 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     if (rumiBar) {
       const q2 = computeQualityScore(a, b);
       const gc2 = scoreColor(q2.grade);
-      rumiBar.innerHTML = `<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#052e16,#15803d);border-radius:12px;padding:14px 18px;margin-bottom:16px;">
-        <img src="Logo RumiCORE.png" alt="RumiCORE" style="height:32px;border-radius:6px;background:#fff;padding:3px 5px;" onerror="this.style.display='none'">
-        <div style="flex:1;">
-          <div style="font-weight:800;color:#fff;font-size:.9rem;">Analyse RumiCORE — INRA 2018</div>
-          <div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:1px;">Score de ration : <strong style="color:${gc2};">${q2.grade} (${q2.total}/100)</strong> · Cliquez sur un indicateur pour les conseils détaillés</div>
+      const rUFL2 = b.bUFL > 0 ? a.totalUFL / b.bUFL : 1;
+      const rPDI2 = b.bPDI > 0 ? a.totalPDI / b.bPDI : 1;
+      const ppu2  = a.totalUFL > 0 ? a.totalPDI / a.totalUFL : 0;
+      const tips2 = [];
+      if      (rUFL2 < 0.80) tips2.push({icon:'⚡', txt:`Déficit énergétique sévère (${(rUFL2*100).toFixed(0)}%) — augmentez ensilage maïs ou céréales aplaties. Risque cétose.`});
+      else if (rUFL2 < 0.90) tips2.push({icon:'⚡', txt:`Déficit énergétique modéré (${(rUFL2*100).toFixed(0)}%) — ajoutez un concentré énergétique (pulpe betterave, orge).`});
+      else if (rUFL2 > 1.15) tips2.push({icon:'✂️', txt:`Excès énergétique (${(rUFL2*100).toFixed(0)}%) — réduisez les concentrés pour limiter l'engraissement.`});
+      if      (rPDI2 < 0.85) tips2.push({icon:'🧬', txt:`Déficit protéique sévère (${(rPDI2*100).toFixed(0)}%) — ajoutez tourteau de colza ou de soja (+0,5–1 kg MS/j).`});
+      else if (rPDI2 < 0.90) tips2.push({icon:'🧬', txt:`Déficit PDI (${(rPDI2*100).toFixed(0)}%) — complétez avec un tourteau protéique ou de la luzerne déshydratée.`});
+      else if (rPDI2 > 1.20) tips2.push({icon:'✂️', txt:`Excès protéique (${(rPDI2*100).toFixed(0)}%) — réduisez l'azote (coûteux, surcharge rénale, urée lait haute).`});
+      if (ppu2 < 82 && rUFL2 >= 0.88) tips2.push({icon:'⚖️', txt:`Ratio PDI/UFL bas (${ppu2.toFixed(0)} g/UFL — cible 90–105) : ajoutez un tourteau pour équilibrer.`});
+      if (ppu2 > 115 && rPDI2 >= 0.95) tips2.push({icon:'⚖️', txt:`Ratio PDI/UFL élevé (${ppu2.toFixed(0)} g/UFL) : ajoutez maïs ou céréales pour équilibrer énergie/protéines.`});
+      if (b.ingestionCapacite > 0 && a.totalMS > b.ingestionCapacite * 1.05) tips2.push({icon:'🫁', txt:`MS totale (${a.totalMS.toFixed(1)} kg) proche ou au-dessus de la capacité (${b.ingestionCapacite.toFixed(1)} kg) — risque de refus.`});
+      if (tips2.length === 0) tips2.push({icon:'✅', txt:'Ration bien équilibrée — énergie, PDI et ratio PDI/UFL dans les cibles INRA 2018.'});
+      rumiBar.innerHTML = `<div style="background:linear-gradient(135deg,#052e16,#15803d);border-radius:12px;padding:14px 18px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:${tips2.length?'10px':'0'};">
+          <img src="Logo RumiCORE.png" alt="RumiCORE" style="height:32px;border-radius:6px;background:#fff;padding:3px 5px;" onerror="this.style.display='none'">
+          <div style="flex:1;">
+            <div style="font-weight:800;color:#fff;font-size:.9rem;">Analyse RumiCORE — INRA 2018</div>
+            <div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px;">Score qualité : <strong style="color:${gc2};font-size:.85rem;">${q2.grade} — ${q2.total}/100</strong> · Énergie ${q2.eS}/35 · PDI ${q2.pS}/35 · Équilibre ${q2.bS}/20 · Fourrages ${q2.aS}/10</div>
+          </div>
         </div>
+        ${tips2.map(t=>`<div style="display:flex;align-items:flex-start;gap:8px;background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.81rem;color:rgba(255,255,255,.92);line-height:1.4;"><span style="font-size:1rem;flex-shrink:0;">${t.icon}</span><span>${t.txt}</span></div>`).join('')}
       </div>`;
       rumiBar.style.display = '';
     }
@@ -3291,7 +3308,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const suggs = [];
 
     // Trouver le meilleur aliment existant par critère, ou suggérer un aliment de la DB
-    function bestExisting(byFn) { return [...a.items].sort((x,y)=>byFn(y)-byFn(x))[0]; }
+    function bestExisting(byFn) { return [...a.items].filter(x=>x&&x.qty>0).sort((x,y)=>(byFn(y)||0)-(byFn(x)||0))[0]; }
     function bestFromDB(filterFn, byFn) {
       const db = [...alimentsDb, ...customFoodsDb];
       return db.filter(filterFn).sort((x,y)=>byFn(y)-byFn(x))[0];
@@ -3649,11 +3666,11 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const kv=(l,v)=>'<div class="rp-kv"><span class="rp-kv-label">'+l+'</span><span class="rp-kv-val">'+v+'</span></div>';
     const ir=(ico,lbl,val,cls,badge)=>'<div class="rp-indicator-row"><span class="rp-ind-icon">'+ico+'</span><span class="rp-ind-label">'+lbl+'</span><span class="rp-ind-val">'+val+'</span>'+rpBadge(cls,badge)+'</div>';
 
-    let h='<div class="rp-header"><div class="rp-logo"><img src="Logo RumiCORE.png" alt="RumiCORE" style="height:36px;vertical-align:middle;border-radius:6px;background:#fff;padding:2px 4px;" onerror="this.outerHTML=\'<span style=&quot;font-weight:900;color:#15803d;&quot;>RumiCORE</span>\'"> <span style="font-size:.7rem;color:#64748b;vertical-align:middle;margin-left:4px;">Analyse INRA 2018</span></div>'
+    let h='<div class="rp-header"><div class="rp-logo"><img src="Logo RumiCORE.png" alt="RumiCORE" style="height:36px;vertical-align:middle;border-radius:6px;background:#fff;padding:2px 4px;" onerror="this.outerHTML=\'<span style=&quot;font-weight:900;color:#15803d;&quot;>RumiCORE</span>\'"> <span style="font-size:.7rem;color:rgba(255,255,255,.7);vertical-align:middle;margin-left:6px;">Analyse INRA 2018</span></div>'
      +'<div class="rp-title-block"><div class="rp-title">Rapport de ration complet</div>'
-     +'<div class="rp-subtitle">'+animalLabel+(race?' \xb7 '+race:'')+' — '+date+'</div></div>'
+     +'<div class="rp-subtitle">'+animalLabel+(race?' · '+race:'')+' — '+date+'</div></div>'
      +'<div class="rp-grade-badge" style="color:'+gc+';">'+q.grade+'<span class="rp-grade-sub">'+q.total+'/100</span></div></div>'
-     +'<div class="rp-body">';
+     +'<div class="rp-body rp-page1">';
 
     // 1 Animal
     const raceImgSrc = getRaceImgSrc(race);
@@ -3678,8 +3695,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
        +'</div></div></div>';
     }
 
-    // 3 Ration
-    h+='<div class="rp-section"><div class="rp-section-title">3 — Composition de la ration</div>'
+    // 3 Ration — PAGE 2
+    h+='</div><div class="rp-body rp-page2"><div class="rp-section"><div class="rp-section-title">3 — Composition de la ration</div>'
      +'<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j</th><th class="rp-num">% MS</th><th class="rp-num">'+eu+'</th><th class="rp-num">PDI g</th></tr></thead><tbody>'
      +lastA.items.map(i=>'<tr><td>'+i.nom+'</td><td class="rp-num">'+i.qty.toFixed(1)+'</td>'
        +'<td class="rp-num">'+(lastA.totalMS>0?(i.qty/lastA.totalMS*100).toFixed(0)+'%':'')+'</td>'
@@ -3707,8 +3724,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
      +'<div style="width:'+q.total+'%;height:100%;background:'+gc+';border-radius:3px;"></div></div></div></div>'
      +'</div>';
 
-    // 5 Indicateurs nutritionnels
-    h+='<div class="rp-section"><div class="rp-section-title">5 — Analyse par indicateur</div>'
+    // 5 Indicateurs nutritionnels — PAGE 3
+    h+='</div><div class="rp-body rp-page3"><div class="rp-section"><div class="rp-section-title">5 — Analyse par indicateur</div>'
      +ir('⚡','\xc9nergie',lastA.totalUFL.toFixed(2)+'/'+lastB.bUFL.toFixed(2)+' '+eu+' ('+(rUFL*100).toFixed(0)+'%)',rpStatus(rUFL),rpStatus(rUFL)==='ok'?'Optimal':rpStatus(rUFL)==='bad'?'D\xe9ficit':'Exc\xe8s')
      +ir('🧬','Prot\xe9ines PDI',lastA.totalPDI.toFixed(0)+'/'+lastB.bPDI.toFixed(0)+' g ('+(rPDI*100).toFixed(0)+'%)',rpStatus(rPDI),rpStatus(rPDI)==='ok'?'Optimal':rpStatus(rPDI)==='bad'?'D\xe9ficit':'Exc\xe8s')
      +ir('⚖️','Equilibre PDI/'+eu,ppu.toFixed(0)+' g/'+eu+' (cible 90–105)',ppu>=90&&ppu<=105?'ok':ppu>=82&&ppu<=115?'warn':'bad',ppu>=90&&ppu<=105?'Optimal':ppu>=82&&ppu<=115?'\xc0 ajuster':'D\xe9s\xe9quilibre')
@@ -3718,23 +3735,41 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
      +(lysA>0?ir('💊','Lysine',lysA.toFixed(0)+' g/j = '+lysP.toFixed(1)+'% PDI (cible ≥ 7.2%)',lysP>=7.2?'ok':lysP>=6.5?'warn':'bad',lysP>=7.2?'Optimal':lysP>=6.5?'Correct':'D\xe9ficit'):'')
      +'</div>';
 
-    // 5b Glucides fermentescibles
-    const alKg=(lastA.totalAL||0)/lastA.totalMS, arKg=(lastA.totalAR||0)/lastA.totalMS, ssKg=(lastA.totalSS||0)/lastA.totalMS;
+    // 5b Glucides fermentescibles — schéma visuel
+    const alKg=(lastA.totalAL||0)/(lastA.totalMS||1), arKg=(lastA.totalAR||0)/(lastA.totalMS||1), ssKg=(lastA.totalSS||0)/(lastA.totalMS||1);
     const ferment=arKg+ssKg;
     if(lastA.totalMS>0&&(alKg+arKg+ssKg)>1){
-      const glucRisk=ferment>200?{c:'bad',t:'Risque acidose \xe9lev\xe9'}:ferment>160?{c:'warn',t:'Surveiller'}:{c:'ok',t:'Correct'};
-      h+='<div class="rp-section"><div class="rp-section-title">5b — Glucides fermentescibles (g/kg MS ration)</div>'
-       +'<table class="rp-table"><thead><tr><th>Type</th><th class="rp-num">g/kg MS</th><th class="rp-num">g/j</th><th>Description</th><th>Statut</th></tr></thead><tbody>'
-       +(alKg>0?'<tr><td>Amidon lent</td><td class="rp-num">'+alKg.toFixed(0)+'</td><td class="rp-num">'+lastA.totalAL.toFixed(0)+'</td><td>Ma\xefs, manioc…</td><td class="rp-status-ok">✓ Fermentation lente</td></tr>':'')
-       +(arKg>0?'<tr><td>Amidon rapide</td><td class="rp-num">'+arKg.toFixed(0)+'</td><td class="rp-num">'+lastA.totalAR.toFixed(0)+'</td><td>Bl\xe9, orge…</td><td class="rp-status-'+(arKg>150?'bad':arKg>100?'warn':'ok')+'">'+(arKg>150?'⚠ \xc9lev\xe9':arKg>100?'~ Surveiller':'✓ Correct')+'</td></tr>':'')
-       +(ssKg>0?'<tr><td>Sucres solubles</td><td class="rp-num">'+ssKg.toFixed(0)+'</td><td class="rp-num">'+lastA.totalSS.toFixed(0)+'</td><td>Betterave, herbe, m\xe9lasse…</td><td class="rp-status-'+(ssKg>120?'warn':'ok')+'">'+(ssKg>120?'~ Surveiller':'✓ Correct')+'</td></tr>':'')
-       +'<tr class="rp-total"><td>Total fermentescible (rapide + solubles)</td><td class="rp-num">'+ferment.toFixed(0)+'</td><td class="rp-num">'+(ferment*lastA.totalMS).toFixed(0)+'</td><td>Seuil risque : 200 g/kg MS</td><td class="rp-status-'+glucRisk.c+'">'+glucRisk.t+'</td></tr>'
-       +'</tbody></table></div>';
+      const glucRisk=ferment>200?{c:'bad',t:'Risque acidose élevé ⚠',col:'#b91c1c'}:ferment>160?{c:'warn',t:'Surveiller ~',col:'#d97706'}:{c:'ok',t:'Correct ✓',col:'#15803d'};
+      const totalGluc=alKg+arKg+ssKg||1;
+      const pctAL=Math.round(alKg/totalGluc*100), pctAR=Math.round(arKg/totalGluc*100), pctSS=100-pctAL-pctAR;
+      // SVG stacked bar
+      const svgW=560, svgH=52;
+      const barY=10, barH=26, barRx=6;
+      const wAL=Math.round(pctAL/100*svgW), wAR=Math.round(pctAR/100*svgW), wSS=svgW-wAL-wAR;
+      const svgBar='<svg width="100%" viewBox="0 0 '+svgW+' '+svgH+'" style="display:block;margin:10px 0 4px;">'
+        +(alKg>0?'<rect x="0" y="'+barY+'" width="'+wAL+'" height="'+barH+'" rx="'+barRx+'" fill="#3b82f6"/>':'')
+        +(arKg>0?'<rect x="'+wAL+'" y="'+barY+'" width="'+wAR+'" height="'+barH+'" rx="0" fill="#f97316"/>':'')
+        +(ssKg>0?'<rect x="'+(wAL+wAR)+'" y="'+barY+'" width="'+wSS+'" height="'+barH+'" rx="'+barRx+'" rx-top-left="0" fill="#eab308"/>':'')
+        +(alKg>0&&wAL>40?'<text x="'+(wAL/2)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">'+alKg.toFixed(0)+'</text>':'')
+        +(arKg>0&&wAR>40?'<text x="'+(wAL+wAR/2)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">'+arKg.toFixed(0)+'</text>':'')
+        +(ssKg>0&&wSS>40?'<text x="'+(wAL+wAR+wSS/2)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="700">'+ssKg.toFixed(0)+'</text>':'')
+        +'</svg>';
+      const legend='<div style="display:flex;gap:16px;font-size:.78rem;margin-top:2px;">'
+        +(alKg>0?'<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3b82f6;margin-right:4px;vertical-align:middle;"></span>Amidon lent '+alKg.toFixed(0)+' g/kg MS <span style="color:#64748b;">(maïs, manioc — fermentation lente, risque faible)</span></span>':'')
+        +(arKg>0?'<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f97316;margin-right:4px;vertical-align:middle;"></span>Amidon rapide '+arKg.toFixed(0)+' g/kg MS <span style="color:#64748b;">(blé, orge — seuil risque >150 g/kg MS)</span></span>':'')
+        +(ssKg>0?'<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#eab308;margin-right:4px;vertical-align:middle;"></span>Sucres solubles '+ssKg.toFixed(0)+' g/kg MS <span style="color:#64748b;">(betterave, herbe, mélasse)</span></span>':'')
+        +'</div>';
+      const threshold='<div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px;border-radius:8px;border-left:4px solid '+glucRisk.col+';background:'+(glucRisk.c==='bad'?'#fef2f2':glucRisk.c==='warn'?'#fffbeb':'#f0fdf4')+';">'
+        +'<span style="font-weight:700;font-size:.85rem;color:'+glucRisk.col+';">Total fermentescible : '+ferment.toFixed(0)+' g/kg MS</span>'
+        +'<span style="font-size:.8rem;color:#475569;margin-left:auto;">Seuil acidose : 200 g/kg MS — Statut : '+glucRisk.t+'</span></div>';
+      h+='<div class="rp-section"><div class="rp-section-title">5b — Schéma des glucides fermentescibles (g/kg MS ration)</div>'
+       +svgBar+legend+threshold+'</div>';
     }
 
     // 5c Bilan minéral détaillé
     const nap=getNum('mineraux-na'),kp=getNum('mineraux-k'),cap2=getNum('mineraux-ca');
     const mgp=getNum('mineraux-mg'),clp=getNum('mineraux-cl'),sp=getNum('mineraux-s');
+    const pp=getNum('mineraux-p')||0;
     if(nap||kp||cap2||mgp||clp||sp){
       const rCaP2=cap2>0&&pp>0?cap2/pp:0;
       h+='<div class="rp-section"><div class="rp-section-title">5c — Bilan min\xe9ral</div>'
@@ -5908,7 +5943,22 @@ async function saveCustomFeed() {
   }
   btn.textContent = _cfmEditId ? 'Enregistrer' : 'Créer';
   btn.disabled = false;
-  if (err) { errEl.textContent = err.message; errEl.style.display = 'block'; return; }
+  if (err) {
+    // Fallback localStorage si Supabase indisponible
+    var lsFeeds;
+    try { lsFeeds = JSON.parse(localStorage.getItem('bovicalc-custom-feeds-supa') || '[]'); } catch(e) { lsFeeds = []; }
+    var lsItem = { id: '_ls_' + Date.now(), nom: payload.nom, ms: payload.ms, ufl: payload.ufl, pdi: payload.pdi, ca: payload.ca, p: payload.p, na: payload.na, mg: payload.mg, k: payload.k };
+    if (_cfmEditId && _cfmEditId.toString().startsWith('_ls_')) {
+      lsFeeds = lsFeeds.map(f => f.id === _cfmEditId ? {...lsItem, id: _cfmEditId} : f);
+    } else {
+      lsFeeds.push(lsItem);
+    }
+    try { localStorage.setItem('bovicalc-custom-feeds-supa', JSON.stringify(lsFeeds)); } catch(e) {}
+    document.getElementById('custom-feed-modal').classList.add('hidden');
+    if (typeof showToast === 'function') showToast('Aliment sauvegardé localement.', 'info');
+    if (typeof loadCustomFeeds === 'function') await loadCustomFeeds();
+    return;
+  }
   document.getElementById('custom-feed-modal').classList.add('hidden');
   if (typeof showToast === 'function') showToast(_cfmEditId ? 'Aliment mis à jour.' : 'Aliment créé !', 'success');
   await loadCustomFeeds();

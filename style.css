@@ -1487,6 +1487,10 @@ a.hdr-btn:hover {
   *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   body > * { display: none !important; }
   #print-rapport { display: block !important; font-family: 'Inter', Arial, sans-serif; font-size: 11pt; color: #0f172a; padding: 0; margin: 0; }
+  .rp-page2, .rp-page3 { break-before: page; page-break-before: always; }
+  .rp-section { break-inside: avoid; page-break-inside: avoid; }
+  .rp-header { break-after: avoid; }
+  @page { margin: 14mm 12mm; }
 }
 
 /* Styles du rapport imprimable */
