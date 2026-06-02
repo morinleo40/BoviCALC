@@ -907,9 +907,16 @@
     </div>
 
     <div class="form-field">
-      <label>Documents à partager <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(un par ligne : Nom : URL)</span></label>
-      <textarea id="exo-docs" class="form-input" rows="3" style="resize:vertical;" placeholder="Énoncé complet : https://drive.google.com/...&#10;Cours de référence : https://...&#10;Barème : https://..."></textarea>
-      <div style="font-size:.72rem;color:var(--muted);margin-top:3px;">Format : <code>Nom du document : https://lien.fr</code> · un document par ligne</div>
+      <label>Documents à partager</label>
+      <div id="exo-docs-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;">
+          📁 Ajouter un fichier
+          <input type="file" id="exo-doc-file" style="display:none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg">
+        </label>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addDocByUrl()">🔗 Lien externe</button>
+      </div>
+      <div id="exo-doc-uploading" style="display:none;font-size:.75rem;color:var(--muted);margin-top:5px;">⏳ Envoi en cours…</div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -1547,6 +1554,49 @@ async function loadMySubmissions() {
 // ══════════════ EXERCISES ══════════════
 
 let currentExoEditId = null;
+let _exoDocsList = [];
+
+function renderExoDocsList() {
+  const el = $('exo-docs-list');
+  if (!el) return;
+  if (!_exoDocsList.length) {
+    el.innerHTML = '<div style="font-size:.75rem;color:var(--muted);padding:2px 0;">Aucun document ajouté</div>';
+    return;
+  }
+  el.innerHTML = _exoDocsList.map((d, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f5ff;border:1px solid #e4dcfd;border-radius:8px;">
+      <span style="font-size:.9rem;">📄</span>
+      <a href="${d.url}" target="_blank" rel="noopener" style="flex:1;font-size:.82rem;font-weight:600;color:var(--edu);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${d.name}">${d.name}</a>
+      <button type="button" onclick="_exoDocsList.splice(${i},1);renderExoDocsList();" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.1rem;line-height:1;padding:0 2px;flex-shrink:0;" title="Supprimer">×</button>
+    </div>`).join('');
+}
+
+async function addDocByUrl() {
+  const input = prompt('Nom du document et URL\n\nFormat : Nom : https://...');
+  if (!input) return;
+  const m = input.match(/^(.+?)\s*:\s*(https?:\/\/.+)$/);
+  if (!m) { showToast('Format invalide. Utilisez : Nom : https://lien', 'warn'); return; }
+  _exoDocsList.push({ name: m[1].trim(), url: m[2].trim() });
+  renderExoDocsList();
+}
+
+async function handleExoDocUpload(file) {
+  if (!file || !currentUser) return;
+  const supa = getSupa();
+  if (!supa) return;
+  const uploadEl = $('exo-doc-uploading');
+  if (uploadEl) uploadEl.style.display = 'block';
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `${currentUser.id}/${Date.now()}_${safeName}`;
+  const { error } = await supa.storage.from('edu-documents').upload(path, file, { upsert: false });
+  if (uploadEl) uploadEl.style.display = 'none';
+  if (error) { showToast('Erreur upload : ' + error.message, 'error'); return; }
+  const { data: { publicUrl } } = supa.storage.from('edu-documents').getPublicUrl(path);
+  const name = file.name.replace(/\.[^.]+$/, '');
+  _exoDocsList.push({ name, url: publicUrl });
+  renderExoDocsList();
+  showToast('Document ajouté !', 'success');
+}
 
 async function loadExos() {
   if (!currentClassId) return;
@@ -1672,7 +1722,8 @@ function openCreateExo() {
   $('exo-ufl').value = '';
   $('exo-pdi').value = '';
   $('exo-due-date').value = '';
-  if ($('exo-docs')) $('exo-docs').value = '';
+  _exoDocsList = [];
+  renderExoDocsList();
   $('exo-is-active').checked = true;
   $('exo-active-lbl').textContent = 'Actif';
   $('exo-is-graded').checked = true;
@@ -1693,10 +1744,8 @@ function openEditExo(exo) {
   $('exo-ufl').value = exo.target_ufl || '';
   $('exo-pdi').value = exo.target_pdi || '';
   $('exo-due-date').value = exo.due_date ? exo.due_date.slice(0, 16) : '';
-  if ($('exo-docs')) {
-    const docs = Array.isArray(exo.documents) ? exo.documents : [];
-    $('exo-docs').value = docs.map(d => `${d.name} : ${d.url}`).join('\n');
-  }
+  _exoDocsList = Array.isArray(exo.documents) ? [...exo.documents] : [];
+  renderExoDocsList();
   $('exo-is-active').checked = !!exo.is_active;
   $('exo-active-lbl').textContent = exo.is_active ? 'Actif' : 'Inactif';
   $('exo-is-graded').checked = exo.is_graded !== false;
@@ -1705,7 +1754,7 @@ function openEditExo(exo) {
   $('exo-modal').classList.add('open');
 }
 
-// Wire toggle labels
+// Wire toggle labels + file upload
 document.addEventListener('DOMContentLoaded', () => {
   const chk = $('exo-is-active');
   if (chk) chk.addEventListener('change', () => {
@@ -1716,6 +1765,11 @@ document.addEventListener('DOMContentLoaded', () => {
     $('exo-graded-lbl').textContent = chkG.checked ? 'Noté' : 'Non noté';
     $('exo-graded-lbl').style.color = chkG.checked ? 'var(--edu)' : 'var(--muted)';
   });
+  const fileInput = $('exo-doc-file');
+  if (fileInput) fileInput.addEventListener('change', async e => {
+    const f = e.target.files?.[0];
+    if (f) { await handleExoDocUpload(f); e.target.value = ''; }
+  });
 });
 
 async function saveExo() {
@@ -1724,11 +1778,7 @@ async function saveExo() {
   if (!titre) { errEl.textContent = 'Le titre est requis.'; errEl.style.display = 'block'; return; }
   const btn = $('exo-save-btn');
   btn.textContent = '…'; btn.disabled = true;
-  const docsRaw = $('exo-docs')?.value?.trim() || '';
-  const documents = docsRaw ? docsRaw.split('\n').map(line => {
-    const m = line.match(/^(.+?)\s*:\s*(https?:\/\/.+)$/);
-    return m ? { name: m[1].trim(), url: m[2].trim() } : null;
-  }).filter(Boolean) : [];
+  const documents = _exoDocsList.length ? _exoDocsList : null;
   const payload = {
     class_id: currentClassId,
     teacher_id: currentUser.id,
