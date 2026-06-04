@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tarifs — Rumicore, logiciel de rationnement bovin gratuit</title>
-  <meta name="description" content="Découvrez les tarifs de Rumicore : plan Gratuit pour démarrer et plan Pro à 15 €/mois pour un accès complet au rationnement bovin. Sans engagement, résiliable à tout moment.">
+  <title>Tarifs — Rumicore, logiciel de rationnement bovin | Offre lancement −25 %</title>
+  <meta name="description" content="Offre lancement −25 % jusqu'au 1er juillet : Rumicore Pro à 15 €/mois au lieu de 20 €, ou 210 €/an. Accès complet au rationnement bovin INRA 2018. Sans engagement.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://rumicore.com/tarifs.html">
   <meta property="og:title" content="Tarifs — Rumicore, rationneur bovin gratuit">
@@ -119,9 +119,7 @@
     .btn-primary:hover { background: #f0fdf4; transform: translateY(-2px); }
 
     /* ── TOGGLE ── */
-    .billing-toggle {
-      display: flex; justify-content: center; margin-bottom: 40px;
-    }
+    .billing-toggle { display: flex; justify-content: center; margin-bottom: 40px; }
     .toggle-inner {
       display: inline-flex; align-items: center; gap: 0;
       background: #f1f5f9; border-radius: 12px; padding: 4px;
@@ -131,17 +129,64 @@
       padding: 9px 22px; border-radius: 9px; border: none; font-size: .9rem;
       font-weight: 600; cursor: pointer; transition: all .2s; background: transparent; color: #64748b;
     }
-    .toggle-btn.active {
-      background: #15803d; color: #fff; font-weight: 700;
-      box-shadow: 0 2px 8px rgba(21,128,61,.25);
+    .toggle-btn.active { background: #15803d; color: #fff; font-weight: 700; box-shadow: 0 2px 8px rgba(21,128,61,.25); }
+    .saving-badge { margin-left: 6px; background: #dcfce7; color: #15803d; font-size: .72rem; font-weight: 800; padding: 2px 7px; border-radius: 20px; }
+
+    /* ── PROMO ── */
+    .promo-top-bar {
+      background: linear-gradient(90deg, #052e16 0%, #15803d 50%, #052e16 100%);
+      padding: 10px 24px; text-align: center; display: flex;
+      align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
     }
-    .saving-badge {
-      margin-left: 6px; background: #dcfce7; color: #15803d;
-      font-size: .72rem; font-weight: 800; padding: 2px 7px; border-radius: 20px;
+    .promo-top-bar span { color: #fff; font-size: .88rem; font-weight: 700; }
+    .promo-top-bar .countdown-chips { display: flex; gap: 8px; }
+    .chip {
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 8px; padding: 4px 10px; color: #fff;
+      font-size: .82rem; font-weight: 800; min-width: 44px; text-align: center;
     }
+    .chip-label { font-size: .55rem; font-weight: 600; opacity: .7; display: block; }
+    .promo-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #fff; font-size: .78rem; font-weight: 900;
+      padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: .05em;
+      box-shadow: 0 2px 10px rgba(245,158,11,.4);
+    }
+    .price-old {
+      font-size: 1.3rem; color: #94a3b8; text-decoration: line-through;
+      font-weight: 600; margin-right: 6px;
+    }
+    .price-promo-tag {
+      display: inline-block; background: #fef3c7; color: #92400e;
+      font-size: .72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px;
+      margin-left: 8px; vertical-align: middle;
+    }
+    .promo-until {
+      font-size: .75rem; color: #94a3b8; margin-top: 6px;
+    }
+    .rumi-bubble {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 14px;
+      padding: 18px 22px; max-width: 700px; margin: 40px auto 0;
+    }
+    .rumi-bubble img { width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; }
+    .rumi-bubble-text { font-size: .92rem; color: #166534; line-height: 1.6; }
+    .rumi-bubble-text strong { font-weight: 800; }
   </style>
 </head>
 <body>
+
+<!-- BARRE PROMO -->
+<div class="promo-top-bar">
+  <span>🔥 Offre lancement &nbsp;−25 % jusqu'au 1er juillet</span>
+  <div class="countdown-chips">
+    <div class="chip"><span id="cd-days">—</span><span class="chip-label">jours</span></div>
+    <div class="chip"><span id="cd-hours">—</span><span class="chip-label">h</span></div>
+    <div class="chip"><span id="cd-mins">—</span><span class="chip-label">min</span></div>
+  </div>
+  <span>→ Pro à <strong>15 €/mois</strong> au lieu de 20 €</span>
+</div>
 
 <!-- NAV -->
 <nav style="background:#fff;border-bottom:1px solid #e2e8f0;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
@@ -165,6 +210,13 @@
   <div class="tag">Tarifs</div>
   <h1>Nos tarifs —&nbsp;<em>Rumicore</em></h1>
   <p>Commencez gratuitement et passez au Pro quand vous en avez besoin. Sans engagement, résiliable à tout moment.</p>
+  <div class="rumi-bubble">
+    <img src="Logo RumiCORE.png" alt="Rumi">
+    <div class="rumi-bubble-text">
+      <strong>Rumi vous parle 🐄</strong><br>
+      Pour fêter le lancement de RumiCORE, je vous offre <strong>−25 % sur le plan Pro jusqu'au 1er juillet</strong> : seulement <strong>15 €/mois</strong> au lieu de 20 €, ou <strong>210 €/an</strong>. Après cette date, le tarif normal reprend. Profitez-en pendant qu'il est temps !
+    </div>
+  </div>
 </div>
 
 <!-- PLANS -->
@@ -180,7 +232,7 @@
       <div class="toggle-inner">
         <button class="toggle-btn active" id="btn-monthly" onclick="setBilling('monthly')">Mensuel</button>
         <button class="toggle-btn" id="btn-annual" onclick="setBilling('annual')">
-          Annuel <span class="saving-badge">−10 %</span>
+          Annuel <span class="saving-badge">210 € · promo</span>
         </button>
       </div>
     </div>
@@ -210,13 +262,17 @@
 
       <!-- Plan Pro -->
       <div class="plan highlighted">
-        <div class="plan-badge">⭐ Accès complet</div>
+        <div class="plan-badge">🔥 Offre lancement −25 %</div>
         <div class="plan-name">Pro</div>
         <div class="plan-desc">Accès complet pour les éleveurs exigeants.</div>
         <div class="plan-price">
-          <div class="plan-amount" id="pro-price">15 €</div>
+          <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+            <span class="price-old" id="pro-price-old">20 €</span>
+            <div class="plan-amount" id="pro-price">15 €</div>
+          </div>
           <div class="plan-period" id="pro-period">/ mois TTC</div>
-          <div id="pro-saving" style="display:none;margin-top:8px;display:inline-block;background:#dcfce7;color:#15803d;font-size:.8rem;font-weight:800;padding:4px 12px;border-radius:20px;border:1px solid #bbf7d0;">Économie 20 € · −10 %</div>
+          <div class="promo-until" id="pro-promo-until">Offre jusqu'au 1er juillet 2026</div>
+          <div id="pro-saving" style="display:none;margin-top:8px;background:#dcfce7;color:#15803d;font-size:.8rem;font-weight:800;padding:4px 12px;border-radius:20px;border:1px solid #bbf7d0;display:inline-block;">Économie 30 € · −25 %</div>
         </div>
         <ul class="plan-features">
           <li><span>✅</span><span>Ration de A à Z complète</span></li>
@@ -303,6 +359,11 @@
       </details>
 
       <details>
+        <summary>🔥 Combien de temps dure l'offre lancement −25 % ?</summary>
+        <p>L'offre de lancement est valable jusqu'au <strong>1er juillet 2026</strong> inclus. Pendant cette période, le plan Pro est à <strong>15 €/mois</strong> (au lieu de 20 €) ou <strong>210 €/an</strong>. Si vous souscrivez avant le 1er juillet, vous conservez votre tarif tant que vous restez abonné — aucune surprise. Après cette date, le tarif normal s'applique uniquement aux nouveaux abonnés.</p>
+      </details>
+
+      <details>
         <summary>Quelle est la différence entre le plan éleveur et le plan conseiller ?</summary>
         <p>Rumicore propose le même accès Pro pour les éleveurs et les conseillers agricoles. La version Conseiller (accessible via <a href="index_conseiller.html" style="color:#15803d;font-weight:600;">index_conseiller.html</a>) est spécifiquement pensée pour les techniciens qui gèrent plusieurs élevages : génération de rapports PDF à envoyer aux clients, outil d'analyse rapide en visite, et présentation adaptée au conseil agricole.</p>
       </details>
@@ -313,9 +374,14 @@
 
 <!-- CTA -->
 <div class="cta-section">
-  <h2>Commencez gratuitement dès aujourd'hui</h2>
-  <p>Aucune carte bancaire requise pour le plan Gratuit. Passez au Pro en un clic quand vous êtes prêt.</p>
-  <a href="app.html" class="btn-primary">Accéder à Rumicore →</a>
+  <div style="font-size:3.5rem;margin-bottom:16px;">🐄</div>
+  <h2>Rumi vous attend !</h2>
+  <p>Démarrez gratuitement et rejoignez les éleveurs qui rationalisent leur troupeau avec les normes INRA 2018. Offre lancement −25 % jusqu'au 1er juillet.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;">
+    <a href="app.html" class="btn-primary">Commencer gratuitement →</a>
+    <a href="app.html" style="padding:13px 32px;background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;">🔥 Souscrire au Pro (15 €/mois)</a>
+  </div>
+  <p style="margin-top:20px;font-size:.8rem;color:rgba(255,255,255,.5);">Offre valable jusqu'au 1er juillet 2026 · Sans engagement · Résiliable à tout moment</p>
 </div>
 
 <!-- FOOTER -->
@@ -326,23 +392,49 @@
 <script>
 let billing = 'monthly';
 
+// Countdown jusqu'au 1er juillet 2026
+(function countdown() {
+  const end = new Date('2026-07-01T00:00:00');
+  function tick() {
+    const now = new Date();
+    const diff = end - now;
+    if (diff <= 0) {
+      document.querySelectorAll('.chip').forEach(c => c.style.display = 'none');
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('cd-days').textContent = d;
+    document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-mins').textContent = String(m).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 30000);
+})();
+
 function setBilling(mode) {
   billing = mode;
   document.getElementById('btn-monthly').classList.toggle('active', mode === 'monthly');
   document.getElementById('btn-annual').classList.toggle('active', mode === 'annual');
 
   if (mode === 'monthly') {
+    document.getElementById('pro-price-old').textContent = '20 €';
     document.getElementById('pro-price').textContent = '15 €';
     document.getElementById('pro-period').textContent = '/ mois TTC';
+    document.getElementById('pro-promo-until').textContent = 'Offre jusqu\'au 1er juillet 2026';
     document.getElementById('pro-saving').style.display = 'none';
     document.getElementById('pro-cta').href = 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00';
-    document.getElementById('pro-cta').textContent = 'Souscrire au Pro';
+    document.getElementById('pro-cta').textContent = 'Souscrire au Pro — 15 €/mois';
   } else {
-    document.getElementById('pro-price').textContent = '160 €';
-    document.getElementById('pro-period').textContent = '/ an TTC';
+    document.getElementById('pro-price-old').textContent = '240 €';
+    document.getElementById('pro-price').textContent = '210 €';
+    document.getElementById('pro-period').textContent = '/ an TTC · soit 17,50 €/mois';
+    document.getElementById('pro-promo-until').textContent = 'Offre jusqu\'au 1er juillet 2026 — économisez 30 €';
     document.getElementById('pro-saving').style.display = 'inline-block';
+    document.getElementById('pro-saving').textContent = 'Économie 30 € · −12,5 %';
     document.getElementById('pro-cta').href = 'https://buy.stripe.com/9B614faqs8iS9312TGbMQ01';
-    document.getElementById('pro-cta').textContent = 'Souscrire au Pro (annuel)';
+    document.getElementById('pro-cta').textContent = 'Souscrire au Pro — 210 €/an';
   }
 }
 </script>

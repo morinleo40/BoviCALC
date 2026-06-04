@@ -394,18 +394,18 @@ const PRICING_CONFIG = {
     },
     {
       id: 'pro', name: 'Pro', description: 'Accès complet pour les éleveurs exigeants.',
-      badge: '⭐ Accès complet', highlighted: true,
+      badge: '🔥 Lancement −25 %', highlighted: true,
       ctaStyle: 'primary',
       monthly: {
-        price: 15, priceLabel: '15 €', period: '/ mois TTC',
-        ctaText: 'Souscrire au Pro', ctaLink: 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00',
-        savingsBadge: null,
+        price: 15, priceLabel: '15 €', period: '/ mois TTC · offre jusqu\'au 1er juillet',
+        ctaText: 'Souscrire au Pro — 15 €/mois', ctaLink: 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00',
+        savingsBadge: '−25 % lancement · au lieu de 20 €',
       },
       annual: {
-        price: 160, priceLabel: '160 €', period: '/ an TTC',
-        ctaText: 'Souscrire au Pro (annuel)',
+        price: 210, priceLabel: '210 €', period: '/ an TTC · offre jusqu\'au 1er juillet',
+        ctaText: 'Souscrire au Pro — 210 €/an',
         ctaLink: 'https://buy.stripe.com/9B614faqs8iS9312TGbMQ01',
-        savingsBadge: 'Économie 20 € · −10 %',
+        savingsBadge: '−25 % lancement · au lieu de 240 €',
       },
       features: [
         { text: 'Ration de A à Z complète',            ok: true },
@@ -847,6 +847,15 @@ const PRICING_CONFIG = {
       <p id="pricing-subtitle"></p>
     </div>
 
+    <!-- Bulle Rumi promo -->
+    <div style="display:flex;align-items:flex-start;gap:14px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:18px 22px;max-width:680px;margin:0 auto 36px;">
+      <img src="Logo RumiCORE.png" alt="Rumi" style="width:48px;height:48px;border-radius:50%;flex-shrink:0;">
+      <div style="font-size:.9rem;color:#166534;line-height:1.6;">
+        <strong>🐄 Rumi fête le lancement !</strong><br>
+        Offre exclusive jusqu'au <strong>1er juillet 2026</strong> : Pro à <strong>15 €/mois</strong> au lieu de 20 € (−25 %), ou <strong>210 €/an</strong>. Souscrivez maintenant et gardez ce tarif à vie.
+      </div>
+    </div>
+
     <!-- Toggle mensuel / annuel -->
     <div style="display:flex;justify-content:center;margin-bottom:36px;">
       <div style="display:inline-flex;align-items:center;gap:0;background:#f1f5f9;border-radius:12px;padding:4px;border:1px solid #e2e8f0;">
@@ -857,7 +866,7 @@ const PRICING_CONFIG = {
         <button id="toggle-annual" onclick="setBilling('annual')"
           style="padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:#64748b;">
           Annuel
-          <span id="annual-badge" style="margin-left:6px;background:#dcfce7;color:#15803d;font-size:.72rem;font-weight:800;padding:2px 7px;border-radius:20px;">−10 %</span>
+          <span id="annual-badge" style="margin-left:6px;background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:800;padding:2px 7px;border-radius:20px;">🔥 210 €</span>
         </button>
       </div>
     </div>
@@ -935,7 +944,7 @@ const PRICING_CONFIG = {
 
     <details style="border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:10px;background:#fff;">
       <summary style="font-weight:600;font-size:.9rem;color:#1e293b;cursor:pointer;">Le rationnement bovin en ligne est-il gratuit ?</summary>
-      <p style="font-size:.85rem;color:#64748b;line-height:1.7;margin-top:10px;">Oui, Rumicore propose un accès <strong>gratuit au rationnement bovin en ligne</strong>. L'outil de base (calcul de ration simple, analyse des apports) est accessible sans abonnement. La version Pro à 15 €/mois débloque la ration automatique, le bilan fourrager, les rapports PDF et les profils sauvegardés.</p>
+      <p style="font-size:.85rem;color:#64748b;line-height:1.7;margin-top:10px;">Oui, Rumicore propose un accès <strong>gratuit au rationnement bovin en ligne</strong>. L'outil de base (calcul de ration simple, analyse des apports) est accessible sans abonnement. La version Pro débloque la ration automatique, le bilan fourrager, les rapports PDF et les profils sauvegardés — <strong>15 €/mois en offre lancement jusqu'au 1er juillet 2026</strong> (20 €/mois ensuite), ou 210 €/an.</p>
     </details>
 
     <details style="border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:10px;background:#fff;">
