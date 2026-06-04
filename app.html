@@ -2202,8 +2202,9 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   function rbPromptOk() {
     const inp = document.getElementById('rb-prompt-input');
     const val = inp?.value?.trim() || '';
+    const cb = _rbPromptCb;
     rbPromptCancel();
-    if (val && _rbPromptCb) _rbPromptCb(val);
+    if (val && cb) cb(val);
   }
   function rbPromptCancel() {
     const ov = document.getElementById('rb-prompt-overlay');
