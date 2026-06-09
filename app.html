@@ -251,7 +251,8 @@ function openAccountModal() {
     var initiale = (usernameAv || prenom3 || (currentUser.email || 'U')).charAt(0).toUpperCase();
     av.textContent = initiale;
   }
-  var isOwner = currentUser && currentUser.email === 'bovicalc@gmail.com';
+  var ADMIN_EMAILS_UI = ['bovicalc@gmail.com', 'morinleo40@gmail.com'];
+  var isOwner = currentUser && ADMIN_EMAILS_UI.indexOf((currentUser.email||'').toLowerCase()) !== -1;
   // Section code Pro — visible uniquement pour les utilisateurs gratuits non-admin
   var promoSection = _$$('acct-promo-section');
   if (promoSection) promoSection.style.display = (!isOwner && userPlan !== 'pro') ? '' : 'none';
@@ -5245,7 +5246,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       }
       // Marquer le code comme utilisé
       const { error: upErr } = await supa.from('promo_codes')
-        .update({ used: true, used_by: currentUser.id, used_at: new Date().toISOString() })
+        .update({ used: true, used_by: currentUser.id, used_at: new Date().toISOString(), used_email: currentUser.email || null })
         .eq('code', code).eq('used', false);
       if (upErr) {
         if (errEl) { errEl.textContent = 'Erreur (marquage) : ' + upErr.message; errEl.style.display = 'block'; }
@@ -5429,38 +5430,65 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     loadPromoCodesAdmin();
   }
 
-  async function generatePromoCode() {
-    if (!currentUser || currentUser.email !== 'bovicalc@gmail.com') return;
+  function _genCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    const seg = n => Array.from({length:n}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+    return 'RUMI-' + seg(4) + '-' + seg(4);
+  }
+
+  async function generatePromoCode() {
+    const ADMINS = ['bovicalc@gmail.com','morinleo40@gmail.com'];
+    if (!currentUser || !ADMINS.includes((currentUser.email||'').toLowerCase())) return;
+    const qty      = parseInt($('admin-promo-qty')?.value  || '1', 10) || 1;
+    const duration = parseInt($('admin-promo-days')?.value || '365', 10) || 365;
+    const note     = ($('admin-promo-note')?.value || '').trim();
     const supa = getSupa(); if (!supa) return;
-    const { error } = await supa.from('promo_codes').insert({ code, plan: 'pro', duration_days: 365 });
+    const rows = Array.from({length: Math.min(qty,20)}, () => ({
+      code: _genCode(), plan: 'pro', duration_days: duration, note: note || null
+    }));
+    const { data, error } = await supa.from('promo_codes').insert(rows).select('code');
     if (error) { showToast('Erreur : ' + error.message, 'error', 4000); return; }
-    showToast('Code promo créé : ' + code, 'success', 8000);
+    const codes = (data || rows).map(r => r.code).join('\n');
+    showToast('✅ ' + rows.length + ' code(s) créé(s) !', 'success', 5000);
+    // Afficher les codes dans une alert lisible
+    const listEl = $('admin-promo-new-codes');
+    if (listEl) {
+      listEl.innerHTML = (data || rows).map(r =>
+        '<div style="font-family:monospace;font-size:.88rem;font-weight:700;color:#15803d;padding:3px 0;letter-spacing:.05em;">' + r.code + '</div>'
+      ).join('');
+      listEl.style.display = '';
+    }
+    if ($('admin-promo-note')) $('admin-promo-note').value = '';
     loadPromoCodesAdmin();
   }
 
   async function loadPromoCodesAdmin() {
-    if (!currentUser || currentUser.email !== 'bovicalc@gmail.com') return;
+    const ADMINS = ['bovicalc@gmail.com','morinleo40@gmail.com'];
+    if (!currentUser || !ADMINS.includes((currentUser.email||'').toLowerCase())) return;
     const supa = getSupa(); if (!supa) return;
     const { data, error } = await supa
       .from('promo_codes')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(30);
+      .limit(50);
     const listEl = $('admin-promo-list');
     if (!listEl) return;
     if (error || !data || !data.length) {
-      listEl.innerHTML = '<p style="color:#64748b;margin:0;">Aucun code.</p>';
+      listEl.innerHTML = '<p style="color:#64748b;margin:0;font-size:.8rem;">Aucun code.</p>';
       return;
     }
-    listEl.innerHTML = data.map(c =>
-      '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);">' +
-        '<code style="font-family:monospace;font-weight:700;letter-spacing:.06em;' + (c.used ? 'color:#94a3b8;text-decoration:line-through;' : 'color:#15803d;') + '">' + c.code + '</code>' +
-        '<span style="color:#94a3b8;">' + (c.used ? '✓ utilisé' : '◯ libre') + '</span>' +
-      '</div>'
-    ).join('');
+    listEl.innerHTML = data.map(c => {
+      const used = c.used || false;
+      const exp  = c.duration_days ? c.duration_days + ' j' : '365 j';
+      return '<div style="padding:6px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<code style="font-family:monospace;font-weight:700;font-size:.82rem;letter-spacing:.05em;' + (used ? 'color:#94a3b8;text-decoration:line-through;' : 'color:#15803d;') + '">' + c.code + '</code>' +
+          '<span style="font-size:.72rem;color:#94a3b8;">' + (used ? '✓ utilisé' : '◯ libre') + ' · ' + exp + '</span>' +
+        '</div>' +
+        (c.note ? '<div style="font-size:.72rem;color:#64748b;margin-top:1px;">📋 ' + c.note + '</div>' : '') +
+        (used && c.used_email ? '<div style="font-size:.7rem;color:#94a3b8;margin-top:1px;">👤 ' + c.used_email + '</div>' : '') +
+      '</div>';
+    }).join('');
   }
 
   initAuth();
@@ -5602,8 +5630,29 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
           ⚙️ Gérer les codes Pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
         </summary>
         <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
-          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:10px;" onclick="generatePromoCode()">➕ Générer un code Pro</button>
-          <div id="admin-promo-list" style="max-height:200px;overflow-y:auto;font-size:.8rem;"></div>
+          <!-- Formulaire génération -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div>
+              <label style="font-size:.72rem;font-weight:700;color:#64748b;display:block;margin-bottom:3px;">Nb de codes</label>
+              <input type="number" id="admin-promo-qty" class="rb-input" value="1" min="1" max="20" style="padding:6px 10px;font-size:.85rem;">
+            </div>
+            <div>
+              <label style="font-size:.72rem;font-weight:700;color:#64748b;display:block;margin-bottom:3px;">Durée (jours)</label>
+              <input type="number" id="admin-promo-days" class="rb-input" value="365" min="1" max="1095" style="padding:6px 10px;font-size:.85rem;">
+            </div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <label style="font-size:.72rem;font-weight:700;color:#64748b;display:block;margin-bottom:3px;">Note (client, pack…)</label>
+            <input type="text" id="admin-promo-note" class="rb-input" placeholder="Ex: Pack 3 sièges — GAEC Dupont" style="padding:6px 10px;font-size:.82rem;">
+          </div>
+          <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:10px;" onclick="generatePromoCode()">➕ Générer les codes</button>
+          <!-- Codes nouvellement générés -->
+          <div id="admin-promo-new-codes" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+            <div style="font-size:.7rem;font-weight:700;color:#15803d;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Codes générés — à copier :</div>
+          </div>
+          <!-- Liste historique -->
+          <div style="font-size:.72rem;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Historique</div>
+          <div id="admin-promo-list" style="max-height:220px;overflow-y:auto;font-size:.8rem;"></div>
         </div>
       </details>
     </div>
