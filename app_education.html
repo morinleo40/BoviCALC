@@ -639,6 +639,12 @@
       <label>Mot de passe</label>
       <input type="password" id="aw-password" class="aw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitAuth()">
     </div>
+    <div id="aw-disclaimer-group" style="display:none;margin-bottom:14px;padding:12px 14px;background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:8px;">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.78rem;color:#4c1d95;line-height:1.5;">
+        <input type="checkbox" id="aw-disclaimer-check" style="margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:#7c3aed;">
+        <span>Je reconnais que <strong>RumiCORE Éducation est un outil pédagogique d'aide à la décision</strong>. Les résultats sont fournis à titre indicatif. L'enseignant reste seul responsable de l'usage des résultats dans ses cours.</span>
+      </label>
+    </div>
     <button class="aw-btn" onclick="submitAuth()">Continuer →</button>
     <div class="aw-err" id="aw-err"></div>
   </div>
@@ -852,6 +858,10 @@
   </div><!-- /main -->
 </div><!-- /app-layout -->
 
+<div style="background:#0f0820;border-top:1px solid #2d1b4e;padding:7px 20px;text-align:center;font-size:.7rem;color:#6b5e8a;line-height:1.5;position:fixed;bottom:0;left:0;right:0;z-index:10;">
+  ⚠️ <strong style="color:#9987c9;">RumiCORE Éducation est un outil pédagogique d'aide à la décision.</strong> Les résultats sont indicatifs. L'enseignant reste responsable de leur usage en cours.
+</div>
+
 <!-- ════════════════════════════════════════
      MODALS
 ════════════════════════════════════════ -->
@@ -1033,8 +1043,20 @@ function getSupa() {
 function $(id) { return document.getElementById(id); }
 
 const _urlRole = new URLSearchParams(location.search).get('role');
+
+// Portail obligatoire : accès direct sans rôle → redirection
+if (!_urlRole) {
+  const _storedRole = localStorage.getItem('edu-role');
+  if (_storedRole) {
+    history.replaceState(null, '', 'app_education.html?role=' + _storedRole);
+  } else {
+    window.location.replace('index_education.html');
+  }
+}
+if (_urlRole) try { localStorage.setItem('edu-role', _urlRole); } catch(e) {}
+
 let _authMode = 'login';
-let _selectedRole = _urlRole || 'student';
+let _selectedRole = _urlRole || localStorage.getItem('edu-role') || 'student';
 
 // ── Auth ──
 function switchTab(t) {
@@ -1043,6 +1065,7 @@ function switchTab(t) {
   $('tab-register').classList.toggle('active', t === 'register');
   $('aw-role-section').style.display = t === 'register' ? '' : 'none';
   $('aw-prenom-field').style.display = t === 'register' ? '' : 'none';
+  $('aw-disclaimer-group').style.display = t === 'register' ? '' : 'none';
   if (t === 'register') selectRole(_selectedRole);
 }
 
@@ -1067,6 +1090,7 @@ async function submitAuth() {
   } else {
     const prenom = $('aw-prenom').value.trim();
     if (!prenom) { errEl.textContent = 'Votre prénom est requis.'; errEl.style.display = 'block'; return; }
+    if (!$('aw-disclaimer-check')?.checked) { errEl.textContent = 'Veuillez accepter les conditions d\'utilisation.'; errEl.style.display = 'block'; return; }
     const { data, error } = await supa.auth.signUp({
       email, password: pwd,
       options: { data: { prenom, role: _selectedRole } }

@@ -33,6 +33,7 @@ function switchWallTab(t) {
   var cg=_$('wall-cg'); if(cg) cg.style.display=t==='register'?'':'none';
   var pg=_$('wall-pg'); if(pg) pg.style.display=t==='register'?'':'none';
   var fg=_$('wall-fg'); if(fg) fg.style.display=t==='register'?'none':'';
+  var dg=_$('wall-disclaimer-group'); if(dg) dg.style.display=t==='register'?'':'none';
   var er=_$('wall-err'); if(er) er.style.display='none';
 }
 function showWallErr(m) { var e=_$('wall-err'); if(e){e.textContent=m;e.style.display='block';} }
@@ -48,6 +49,7 @@ async function submitWall() {
       var conf=(_$('wall-conf')||{}).value||'';
       if(pass!==conf){showWallErr('Mots de passe différents.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return;}
       if(pass.length<6){showWallErr('6 caractères minimum.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return;}
+      var dc=_$('wall-disclaimer-check'); if(dc&&!dc.checked){showWallErr('Veuillez accepter les conditions d\'utilisation.'); if(btn){btn.disabled=false;btn.textContent='Créer mon compte';} return;}
       var prenom=(_$('wall-prenom')||{}).value||'';
       var r1=await supa.auth.signUp({email,password:pass,options:{data:{prenom}}});
       if(r1.error){showWallErr(r1.error.message);if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}}
@@ -156,6 +158,12 @@ function setTheme(t) {
     </div>
     <div id="wall-pg" style="display:none;"><input type="text" id="wall-prenom" class="auth-input" placeholder="Votre prénom" autocomplete="given-name"></div>
     <div id="wall-cg" style="display:none;"><input type="password" id="wall-conf" class="auth-input" placeholder="Confirmer le mot de passe"></div>
+    <div id="wall-disclaimer-group" style="display:none;margin-bottom:12px;padding:11px 13px;background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:8px;">
+      <label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:.77rem;color:#0c4a6e;line-height:1.5;">
+        <input type="checkbox" id="wall-disclaimer-check" style="margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:#0369a1;">
+        <span>Je reconnais que <strong>RumiCORE Conseiller est un outil d'aide à la décision</strong> basé sur les normes INRA 2018. Les résultats sont fournis à titre indicatif. Leur utilisation dans le cadre du conseil agricole relève de ma seule responsabilité professionnelle.</span>
+      </label>
+    </div>
     <div id="wall-err" class="auth-error" style="display:none;"></div>
     <button id="btn-wall-sub" class="auth-btn" onclick="submitWall()">Se connecter</button>
     <div id="wall-fg" style="text-align:center;margin-top:12px;">
@@ -828,6 +836,10 @@ function setTheme(t) {
 
   </div><!-- /main-content -->
 </div><!-- /app-layout -->
+
+<div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:7px 20px;text-align:center;font-size:.7rem;color:#94a3b8;line-height:1.5;position:fixed;bottom:0;left:0;right:0;z-index:10;">
+  ⚠️ <strong style="color:#64748b;">RumiCORE Conseiller est un outil d'aide à la décision.</strong> Les résultats sont indicatifs (normes INRA 2018). Leur usage dans le cadre du conseil relève de la seule responsabilité du technicien.
+</div>
 
 <!-- ────────── MODAL: EXPLOITATION ────────── -->
 <div class="modal-overlay hidden" id="exp-modal" onclick="if(event.target===this)closeExpModal()">

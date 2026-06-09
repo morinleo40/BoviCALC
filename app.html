@@ -164,6 +164,8 @@ function switchWallTab(tab) {
   if (fg) fg.classList.toggle('hidden', tab === 'register');
   var ug = _$$('wall-username-group');
   if (ug) ug.classList.toggle('hidden', tab !== 'register');
+  var dg = _$$('wall-disclaimer-group');
+  if (dg) dg.classList.toggle('hidden', tab !== 'register');
   var err = _$$('wall-error'); if (err) err.style.display = 'none';
 }
 function showWallError(msg) {
@@ -188,6 +190,11 @@ async function submitWall() {
       }
       if (pass.length < 6) {
         showWallError('Mot de passe : 6 caractères minimum.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
+      }
+      var disclaimerCheck = _$$('wall-disclaimer-check');
+      if (disclaimerCheck && !disclaimerCheck.checked) {
+        showWallError('Veuillez accepter les conditions d\'utilisation avant de créer votre compte.');
         if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte'; } return;
       }
       var prenom = ((_$$('wall-prenom') || {}).value || '').trim();
@@ -548,6 +555,13 @@ async function initAuth() {
           <button type="button" onclick="togglePwd('wall-pass-confirm',this)" tabindex="-1"
                   style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.1rem;padding:4px;">👁</button>
         </div>
+      </div>
+
+      <div id="wall-disclaimer-group" class="hidden" style="margin-top:14px;padding:12px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.8rem;color:#166534;line-height:1.5;">
+          <input type="checkbox" id="wall-disclaimer-check" style="margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:#15803d;">
+          <span>Je reconnais que <strong>RumiCORE est un outil d'aide à la décision</strong> basé sur les normes INRA 2018. Les résultats sont fournis à titre indicatif uniquement. L'utilisation des recommandations relève de ma seule responsabilité. RumiCORE ne saurait être tenu responsable de toute conséquence résultant de l'usage de l'application. <a href="a-propos.html" target="_blank" style="color:#15803d;font-weight:700;">En savoir plus →</a></span>
+        </label>
       </div>
 
       <div id="wall-error" style="display:none;color:var(--danger);font-size:.85rem;margin-top:10px;padding:8px 12px;background:#fee2e2;border-radius:6px;"></div>
@@ -1495,6 +1509,10 @@ async function initAuth() {
   </section>
 
 </main>
+
+<div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:8px 24px;text-align:center;font-size:.72rem;color:#94a3b8;line-height:1.5;flex-shrink:0;">
+  ⚠️ <strong style="color:#64748b;">RumiCORE est un outil d'aide à la décision.</strong> Les résultats sont fournis à titre indicatif sur la base des normes INRA 2018. L'utilisation des recommandations relève de la seule responsabilité de l'utilisateur. RumiCORE ne peut être tenu responsable de toute conséquence résultant de l'usage de l'application.
+</div>
 
 </div><!-- /rb-app-shell -->
 
