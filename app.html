@@ -2869,15 +2869,26 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       if (ppu2 > 115 && rPDI2 >= 0.95) tips2.push({icon:'⚖️', txt:`Ratio PDI/UFL élevé (${ppu2.toFixed(0)} g/UFL) : ajoutez maïs ou céréales pour équilibrer énergie/protéines.`});
       if (b.ingestionCapacite > 0 && a.totalMS > b.ingestionCapacite * 1.05) tips2.push({icon:'🫁', txt:`MS totale (${a.totalMS.toFixed(1)} kg) proche ou au-dessus de la capacité (${b.ingestionCapacite.toFixed(1)} kg) — risque de refus.`});
       if (tips2.length === 0) tips2.push({icon:'✅', txt:'Ration bien équilibrée — énergie, PDI et ratio PDI/UFL dans les cibles INRA 2018.'});
+      const rumiReaction = {
+        A: { emoji:'🎉', msg:'Ration <strong>excellente</strong> ! Énergie, PDI et équilibre sont dans les cibles INRA 2018. Tes vaches sont entre de bonnes mains — maintiens ce cap !', bg:'rgba(74,222,128,.18)', border:'rgba(74,222,128,.35)' },
+        B: { emoji:'😊', msg:'Très <strong>bonne ration</strong> — quelques petits points à affiner pour atteindre l\'excellence. Consulte les indicateurs ci-dessous pour voir où optimiser.', bg:'rgba(96,165,250,.18)', border:'rgba(96,165,250,.35)' },
+        C: { emoji:'😟', msg:'Ration <strong>passable</strong>, mais avec des déséquilibres à corriger. Tes vaches ne donnent probablement pas leur plein potentiel. Regarde les indicateurs rouges en priorité.', bg:'rgba(251,191,36,.18)', border:'rgba(251,191,36,.35)' },
+        D: { emoji:'😰', msg:'Ration <strong>déséquilibrée</strong> — des corrections urgentes sont nécessaires. Des déficits importants peuvent impacter la santé, la production et la fertilité du troupeau. Agis vite !', bg:'rgba(248,113,113,.18)', border:'rgba(248,113,113,.35)' },
+      }[q2.grade] || { emoji:'🐄', msg:'Analyse en cours...', bg:'rgba(255,255,255,.12)', border:'rgba(255,255,255,.2)' };
+
       rumiBar.innerHTML = `<div style="background:linear-gradient(135deg,#052e16,#15803d);border-radius:12px;padding:14px 18px;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:${tips2.length?'10px':'0'};">
-          <img src="Logo RumiCORE.png" alt="RumiCORE" style="height:32px;border-radius:6px;background:#fff;padding:3px 5px;" onerror="this.style.display='none'">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <img src="Logo RumiCORE.png" alt="RumiCORE" style="height:36px;border-radius:8px;background:#fff;padding:3px 6px;box-shadow:0 2px 8px rgba(0,0,0,.2);" onerror="this.style.display='none'">
           <div style="flex:1;">
-            <div style="font-weight:800;color:#fff;font-size:.9rem;">Analyse RumiCORE — INRA 2018</div>
-            <div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px;">Score qualité : <strong style="color:${gc2};font-size:.85rem;">${q2.grade} — ${q2.total}/100</strong> · Énergie ${q2.eS}/35 · PDI ${q2.pS}/35 · Équilibre ${q2.bS}/20 · Fourrages ${q2.aS}/10</div>
+            <div style="font-weight:800;color:#fff;font-size:.92rem;">Analyse RumiCORE — INRA 2018</div>
+            <div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px;">Score qualité : <strong style="color:${gc2};font-size:.88rem;">${q2.grade} — ${q2.total}/100</strong> · Énergie ${q2.eS}/35 · PDI ${q2.pS}/35 · Équilibre ${q2.bS}/20 · Fourrages ${q2.aS}/10</div>
           </div>
         </div>
-        ${tips2.map(t=>`<div style="display:flex;align-items:flex-start;gap:8px;background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.81rem;color:rgba(255,255,255,.92);line-height:1.4;"><span style="font-size:1rem;flex-shrink:0;">${t.icon}</span><span>${t.txt}</span></div>`).join('')}
+        <div style="display:flex;align-items:flex-start;gap:10px;background:${rumiReaction.bg};border:1px solid ${rumiReaction.border};border-radius:9px;padding:10px 13px;margin-bottom:${tips2.length?'8px':'0'};">
+          <span style="font-size:1.4rem;line-height:1;flex-shrink:0;">${rumiReaction.emoji}</span>
+          <div style="font-size:.83rem;color:#fff;line-height:1.5;"><strong style="color:rgba(255,255,255,.9);">Rumi dit :</strong> ${rumiReaction.msg}</div>
+        </div>
+        ${tips2.map(t=>`<div style="display:flex;align-items:flex-start;gap:8px;background:rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.81rem;color:rgba(255,255,255,.92);line-height:1.4;"><span style="font-size:1rem;flex-shrink:0;">${t.icon}</span><span>${t.txt}</span></div>`).join('')}
       </div>`;
       rumiBar.style.display = '';
     }
@@ -3148,6 +3159,52 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       aaDetail += tip('info','💊','Sources Met protégée : DL-méthionine, Smartamine M, Mepron') +
         tip('info','🌱','Sources Lys protégée : Lysine HCl protégée, AjiPro-L');
     }
+
+    // ── Rumi speech bubble helper ────────────────────────
+    const rumiSay = (cls, msg) => {
+      const c = {
+        ok:   {bg:'#f0fdf4', border:'#86efac', text:'#166534', head:'#15803d'},
+        warn: {bg:'#fffbeb', border:'#fde68a', text:'#92400e', head:'#b45309'},
+        bad:  {bg:'#fff1f2', border:'#fecdd3', text:'#9f1239', head:'#dc2626'},
+        info: {bg:'#f0f9ff', border:'#bae6fd', text:'#0c4a6e', head:'#0369a1'},
+      }[cls] || {bg:'#f0f9ff', border:'#bae6fd', text:'#0c4a6e', head:'#0369a1'};
+      return `<div style="display:flex;align-items:flex-start;gap:10px;background:${c.bg};border:1.5px solid ${c.border};border-radius:10px;padding:10px 14px;margin-top:10px;">
+        <img src="Logo RumiCORE.png" alt="Rumi" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;background:#fff;padding:2px;box-shadow:0 1px 4px rgba(0,0,0,.1);" onerror="this.style.display='none'">
+        <div><div style="font-size:.67rem;font-weight:900;color:${c.head};text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">🐄 Rumi vous dit</div><div style="font-size:.83rem;color:${c.text};line-height:1.55;">${msg}</div></div>
+      </div>`;
+    };
+
+    // Ajouter Rumi à chaque détail
+    if (rUFL < 0.8)       eDetail += rumiSay('bad',  "Ce déficit sévère va forcer tes vaches à brûler leurs graisses. La cétose guette — corps cétoniques, chute d'appétit, baisse de production. Ajoute du maïs ensilage ou de la pulpe betterave <strong>sans attendre</strong>.");
+    else if (rUFL < 0.9)  eDetail += rumiSay('warn', "Petit déficit énergétique. En tout début de lactation c'est physiologique, mais si ça dure les vaches maigrissent. Surveille leur note d'état corporel et ne descends pas sous 2,5/5.");
+    else if (rUFL <= 1.1) eDetail += rumiSay('ok',   "Énergie au top ! Tes vaches ont exactement ce qu'il leur faut. Maintiens cette ration et recheck si tu changes de fourrage ou si la production monte 🌟");
+    else if (rUFL <= 1.2) eDetail += rumiSay('warn', "Léger excès d'énergie. Pas alarmant pour les vaches en production, mais attention aux vaches taries : elles s'engraissent vite. NEC cible au vêlage ≤ 3,5/5.");
+    else                  eDetail += rumiSay('bad',  "Trop d'énergie aussi c'est un problème ! Engraissement, stéatose hépatique, vêlages difficiles... Allège les concentrés et remplace par des fourrages grossiers 🚨");
+
+    if (rPDI < 0.82)      pDetail += rumiSay('bad',  "Grosse carence en protéines ! Production en berne, poids qui fond, fertilité en chute... Ajoute <strong>tourteau de colza ou de soja</strong> rapidement. +0,5 kg/j minimum.");
+    else if (rPDI < 0.9)  pDetail += rumiSay('warn', "Léger manque de PDI. Un peu plus de tourteau dans la ration et ce sera réglé. La production laitière et le taux protéique du lait t'en remercieront 💪");
+    else if (rPDI <= 1.12)pDetail += rumiSay('ok',   "Belles protéines ! La ration est bien pourvue en PDI. Les bactéries de ton rumen travaillent dans les meilleures conditions 🎯");
+    else                  pDetail += rumiSay('warn', "Excès de protéines = argent gaspillé + pollution azotée. Les protéines inutilisées finissent dans l'urine et les lisiers. Réduis les tourteaux et surveille l'urée du lait 💰");
+
+    if (ppu < 82)         eDetail2 += rumiSay('bad',  "Trop peu d'azote fermentescible par rapport à l'énergie. Les microbes du rumen manquent de carburant azoté pour travailler correctement. Ajoute de la <strong>luzerne ou du colza</strong> 🔬");
+    else if (ppu <= 105)  eDetail2 += rumiSay('ok',   "Équilibre parfait énergie/protéines ! Les bactéries du rumen synthétisent des protéines microbiennes à plein régime. C'est la base d'une bonne efficacité alimentaire 🎉");
+    else if (ppu <= 120)  eDetail2 += rumiSay('warn', "Un peu trop de protéines par rapport à l'énergie. C'est coûteux — les protéines en excès s'évaporent en ammoniac. Rééquilibre avec un peu plus de céréales ou de pulpe ⚖️");
+    else                  eDetail2 += rumiSay('bad',  "Excès azoté important ! Ça coûte très cher et ça pollue. Tes vaches excrètent de l'ammoniac, le lisier s'acidifie, l'urée du lait explose... Coupe dans les apports protéiques ✂️");
+
+    if (pctConc < 35)     aDetail += rumiSay('ok',   "Belle ration fourragère ! Le rumen est heureux — rumination active, pH stable au-dessus de 6,2. C'est la base de la santé digestive et d'une longue carrière pour tes vaches 🌾");
+    else if (pctConc < 50)aDetail += rumiSay('warn', "La ration se concentre un peu. Rien d'alarmant si tu fractionnes les concentrés, mais veille à avoir <strong>toujours du foin à disposition</strong>. Le rumen est plus fragile qu'on ne croit !");
+    else if (pctConc < 62)aDetail += rumiSay('bad',  "Trop de concentrés ! L'acidose sub-clinique est probablement déjà là — boiteries, papilles ruminales abîmées, production qui chute... Agis maintenant avant que ce soit irréversible 🚨");
+    else                  aDetail += rumiSay('bad',  "Urgence absolue 🆘 À ce niveau de concentrés, l'acidose clinique est quasi certaine. Arrête ce programme alimentaire immédiatement et consulte un technicien ou vétérinaire !");
+
+    if (!hasBaca)         mDetail += rumiSay('info', "Je ne peux pas analyser les minéraux sans les valeurs Na, K, Ca, Mg, Cl et S ! Renseigne-les dans le formulaire — c'est souvent là que se cachent les problèmes de fièvre de lait et de tétanie herbeuse 📊");
+    else if (bacaNeg && b.typeLabel === 'vache-prepa-velage') mDetail += rumiSay('ok', "BACA anionique parfait pour une vache de prépa vêlage ! Cette acidification contrôlée va mobiliser le calcium des os avant la mise bas et prévenir la fièvre de lait. Exactement ce qu'il faut 👏");
+    else if (bacaNeg)     mDetail += rumiSay('warn', "BACA trop acide pour une vache en production. Une acidification excessive peut stresser le métabolisme. Vérifie tes sources de chlore et de soufre dans les compléments minéraux 🧪");
+    else if (bacaPos)     mDetail += rumiSay('warn', "BACA très alcalin — souvent signe d'herbe riche en potassium. Risque de tétanie herbeuse si tes vaches vont au pâturage ! <strong>Supplémente en magnésium impérativement</strong> : 50 g MgO/j 💊");
+    else                  mDetail += rumiSay('ok',   "BACA équilibré, bravo ! L'équilibre acido-basique de la ration est bon. Surveille à chaque changement de fourrage, surtout au passage à l'herbe 🌿");
+
+    if (!metApport && !lysApport) aaDetail += rumiSay('info', "Donne-moi les apports en méthionine et lysine pour aller encore plus loin ! Ces deux acides aminés limitants font la différence pour les vaches > 30 L/jour. Les données sont sur les fiches produits des aliments 🔬");
+    else if (aaCls === 'ok')      aaDetail += rumiSay('ok',   "Méthionine et Lysine au niveau cible — bravo ! Pour les vaches hautes productrices, c'est ce qui fait la différence entre une bonne ration et une ration d'exception. Taux protéique du lait au top 🏆");
+    else                          aaDetail += rumiSay('bad',  "Les acides aminés limitants freinent la production ! La vache a beau avoir assez de PDI totaux, si Met ou Lys manquent, le taux protéique du lait est pénalisé. Pense aux <strong>acides aminés protégés</strong> 💊");
 
     // ── Rendu final ─────────────────────────────────────
     const container = document.getElementById('bilan-indicateurs');
