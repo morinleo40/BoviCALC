@@ -702,6 +702,18 @@ async function initAuth() {
     </div>
   </div>
 
+  <!-- Rappels vêlage & tarissement -->
+  <div id="velage-reminders-wrap" style="margin-bottom:24px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;font-size:1rem;color:var(--green-900);">📅 Rappels vêlage & tarissement</h3>
+      <button class="rb-btn rb-btn-ghost" style="font-size:.8rem;padding:6px 12px;" onclick="openVelageModal()">+ Ajouter une date</button>
+    </div>
+    <div id="velage-reminders-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+  <div id="velage-reminders-empty-cta" style="margin-bottom:24px;display:none;text-align:right;">
+    <button class="rb-btn rb-btn-ghost" style="font-size:.8rem;padding:6px 12px;" onclick="openVelageModal()">📅 + Ajouter un rappel de vêlage</button>
+  </div>
+
   <!-- Dashboard dernières sessions -->
   <div id="home-dashboard" style="margin-top:32px;display:none;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
@@ -1052,6 +1064,8 @@ async function initAuth() {
         <button type="button" class="rb-btn rb-btn-ghost" onclick="goToStep(2)">← Étape 2 : Ration</button>
         <button type="button" id="btn-calc-bilan" class="rb-btn rb-btn-primary">📊 Calculer le bilan</button>
         <button type="button" id="btn-optimize" class="rb-btn hidden">🔧 Suggestions d'ajustements</button>
+        <button type="button" id="btn-compare-last" class="rb-btn hidden" onclick="compareWithLastSession()">🔄 Comparer avec la dernière session</button>
+        <button type="button" id="btn-share-conseiller" class="rb-btn hidden" onclick="shareWithConseiller()">📤 Partager avec mon conseiller</button>
         <button type="button" id="btn-export-pdf" class="rb-btn" onclick="exportPDF()">📄 PDF</button>
       </div>
 
@@ -1729,6 +1743,42 @@ async function initAuth() {
     </div>
     <button class="rb-btn rb-btn-primary" onclick="runComparison()" style="margin-bottom:20px;">⚖️ Comparer</button>
     <div id="compare-result"></div>
+  </div>
+</div>
+
+<!-- ====== MODAL RAPPEL VÊLAGE ====== -->
+<div id="velage-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:420px;">
+    <div class="rb-modal-header">
+      <h3>📅 Date de vêlage</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('velage-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <input type="hidden" id="velage-id">
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:6px;">Repère / Nom de l'animal</label>
+      <input type="text" id="velage-label" class="rb-select" style="width:100%;" placeholder="Ex: Vache n°42">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:6px;">Date de vêlage prévue</label>
+      <input type="date" id="velage-date" class="rb-select" style="width:100%;">
+    </div>
+    <div class="rb-form-actions" style="justify-content:space-between;">
+      <button class="rb-btn" id="velage-delete-btn" style="background:var(--danger);color:#fff;display:none;" onclick="deleteVelageReminder()">🗑 Supprimer</button>
+      <button class="rb-btn rb-btn-primary" onclick="saveVelageReminder()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL PARTAGE CONSEILLER ====== -->
+<div id="share-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:420px;text-align:center;">
+    <div class="rb-modal-header">
+      <h3>📤 Partager avec mon conseiller</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('share-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;text-align:left;">Transmettez ce code à votre conseiller RumiCORE (par SMS, email ou de visu). Il pourra importer votre ration directement dans son espace, sans ressaisie. Le code est valable 7 jours et à usage unique.</p>
+    <div id="share-code-display" style="font-family:monospace;font-size:1.4rem;font-weight:900;letter-spacing:.08em;color:var(--green-700);background:var(--green-50);border:2px dashed #86efac;border-radius:10px;padding:16px;margin-bottom:14px;"></div>
+    <button class="rb-btn rb-btn-primary" style="width:100%;" onclick="copyShareCode()">📋 Copier le code</button>
   </div>
 </div>
 
@@ -2866,6 +2916,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       ${renderGlucides(a)}`;
     $('resultat-bilan')?.classList.remove('hidden');
     $('btn-optimize')?.classList.remove('hidden');
+    $('btn-compare-last')?.classList.remove('hidden');
+    $('btn-share-conseiller')?.classList.remove('hidden');
     $('bilan-costs-btn')?.classList.remove('hidden');
     renderQualityScore(a, b);
     renderIndicateurs(a, b);
@@ -3641,6 +3693,77 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const sA = sessions.find(s=>s.id===idA);
     const sB = sessions.find(s=>s.id===idB);
     if (!sA||!sB) return;
+    renderComparisonBetween(sA, sB);
+  }
+
+  function compareWithLastSession() {
+    if (!requirePro('Comparaison de sessions')) return;
+    if (!lastA || !lastB || !lastA.items?.length) { showToast('Calculez d\'abord un bilan complet.', 'warn'); return; }
+    const sessions = loadLS(SESS_KEY, []);
+    if (!sessions.length) { showToast('Aucune session sauvegardée pour comparer. Sauvegardez d\'abord une session (💾).', 'warn'); return; }
+    const last = sessions[0];
+    const rationCount = document.querySelectorAll('#ration-lines .rb-ration-row').length;
+    const current = {
+      name: 'Ration actuelle',
+      date: new Date().toLocaleDateString('fr-FR'),
+      animal: {
+        type: $('type-animal')?.value, poids: $('poids-vif')?.value,
+        prod: $('production-lait')?.value, gmq: $('gmq')?.value,
+      },
+      rationCount,
+      lastA, lastB,
+    };
+    renderComparisonBetween(last, current);
+    document.getElementById('compare-modal')?.classList.remove('hidden');
+  }
+
+  // =====================================================
+  // PARTAGE DE RATION AVEC LE CONSEILLER
+  // =====================================================
+  function genShareCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const seg = n => Array.from({ length: n }, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+    return `SHARE-${seg(4)}-${seg(4)}`;
+  }
+
+  async function shareWithConseiller() {
+    if (!requirePro('Partage avec un conseiller')) return;
+    if (!lastA || !lastB || !lastA.items?.length) { showToast('Calculez d\'abord un bilan complet.', 'warn'); return; }
+    const supa = getSupa();
+    if (!supa || !currentUser) { showToast('Connectez-vous pour partager votre ration.', 'warn'); return; }
+    const rationLines = [];
+    document.querySelectorAll('#ration-lines .rb-ration-row').forEach(row => {
+      const inp = row.querySelectorAll('input');
+      if (inp[0]?.value) rationLines.push({ nom: inp[0].value, qty: inp[1]?.value || '' });
+    });
+    const code = genShareCode();
+    const ration_data = {
+      animal: {
+        type: $('type-animal')?.value, race: $('race-animal')?.value,
+        poids: $('poids-vif')?.value, prod: $('production-lait')?.value,
+        gmq: $('gmq')?.value, activite: $('activite')?.value,
+        tb: $('tb')?.value, tp: $('tp')?.value,
+      },
+      rationLines, lastA, lastB,
+    };
+    const { error } = await supa.from('ration_shares').insert({
+      code, eleveur_id: currentUser.id, eleveur_email: currentUser.email,
+      eleveur_name: currentUser.user_metadata?.prenom || '',
+      ration_data,
+    });
+    if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+    $('share-code-display').textContent = code;
+    document.getElementById('share-modal')?.classList.remove('hidden');
+  }
+
+  function copyShareCode() {
+    const code = $('share-code-display')?.textContent;
+    if (!code) return;
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(code);
+    showToast('✅ Code copié !', 'success');
+  }
+
+  function renderComparisonBetween(sA, sB) {
     const cont = $('compare-result'); if (!cont) return;
 
     const eu = s => UFV_TYPES.includes(s.lastB?.typeLabel) ? 'UFV':'UFL';
@@ -4617,6 +4740,105 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   // =====================================================
   // DASHBOARD ACCUEIL
   // =====================================================
+  // =====================================================
+  // RAPPELS VÊLAGE & TARISSEMENT
+  // =====================================================
+  const VELAGE_KEY = 'bovicalc-velage-reminders';
+  function getVelageReminders() { return loadLS(VELAGE_KEY, []); }
+  function saveVelageReminders(list) { saveLS(VELAGE_KEY, list); }
+  function escVelage(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
+  function openVelageModal(id) {
+    const list = getVelageReminders();
+    const r = id ? list.find(x => x.id === id) : null;
+    $('velage-id').value = id || '';
+    $('velage-label').value = r?.label || '';
+    $('velage-date').value = r?.velageDate || '';
+    $('velage-delete-btn').style.display = r ? '' : 'none';
+    document.getElementById('velage-modal')?.classList.remove('hidden');
+  }
+
+  function saveVelageReminder() {
+    const label = $('velage-label')?.value.trim();
+    const date = $('velage-date')?.value;
+    if (!label || !date) { showToast('Renseignez le repère et la date.', 'warn'); return; }
+    const id = $('velage-id')?.value;
+    let list = getVelageReminders();
+    if (id) {
+      const idx = list.findIndex(x => x.id === id);
+      if (idx >= 0) list[idx] = { ...list[idx], label, velageDate: date };
+    } else {
+      list.push({ id: Date.now().toString(), label, velageDate: date });
+    }
+    saveVelageReminders(list);
+    document.getElementById('velage-modal')?.classList.add('hidden');
+    renderVelageReminders();
+    showToast('✅ Rappel enregistré.', 'success');
+  }
+
+  function deleteVelageReminder() {
+    const id = $('velage-id')?.value;
+    if (!id) return;
+    saveVelageReminders(getVelageReminders().filter(x => x.id !== id));
+    document.getElementById('velage-modal')?.classList.add('hidden');
+    renderVelageReminders();
+    showToast('Rappel supprimé.', 'info');
+  }
+
+  function renderVelageReminders() {
+    const wrap = $('velage-reminders-wrap');
+    const listEl = $('velage-reminders-list');
+    const emptyCta = $('velage-reminders-empty-cta');
+    if (!wrap || !listEl) return;
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    // Nettoyage auto : retire les vêlages passés depuis + de 14 jours
+    let reminders = getVelageReminders().filter(r => {
+      const days = Math.round((today - new Date(r.velageDate)) / 86400000);
+      return days < 14;
+    });
+    saveVelageReminders(reminders);
+
+    if (!reminders.length) {
+      wrap.style.display = 'none';
+      if (emptyCta) emptyCta.style.display = currentUser ? '' : 'none';
+      return;
+    }
+    if (emptyCta) emptyCta.style.display = 'none';
+    wrap.style.display = '';
+
+    const items = reminders.map(r => {
+      const vDate = new Date(r.velageDate);
+      const daysToVelage = Math.round((vDate - today) / 86400000);
+      const tarDate = new Date(vDate); tarDate.setDate(tarDate.getDate() - 60);
+      const daysToTar = Math.round((tarDate - today) / 86400000);
+      let icon, color, bg, msg;
+      if (daysToVelage < 0) {
+        icon='🐮'; color='#64748b'; bg='#f1f5f9'; msg=`Vêlage passé depuis ${Math.abs(daysToVelage)} j`;
+      } else if (daysToVelage <= 3) {
+        icon='🚨'; color='#dc2626'; bg='#fef2f2'; msg=`Vêlage imminent — ${daysToVelage} j restant${daysToVelage>1?'s':''}`;
+      } else if (daysToVelage <= 21) {
+        icon='⚠️'; color='#b45309'; bg='#fffbeb'; msg=`Préparation vêlage en cours — vêlage dans ${daysToVelage} j`;
+      } else if (daysToTar >= -3 && daysToTar <= 7) {
+        icon='🔔'; color='#0369a1'; bg='#eff6ff';
+        msg = daysToTar >= 0 ? `Tarissement à prévoir dans ${daysToTar} j` : `Tarissement recommandé depuis ${Math.abs(daysToTar)} j`;
+      } else {
+        icon='📅'; color='#15803d'; bg='#f0fdf4'; msg=`Vêlage dans ${daysToVelage} j · Tarissement dans ${daysToTar} j`;
+      }
+      return { daysToVelage, html: `
+        <div style="display:flex;align-items:center;gap:12px;background:${bg};border:1.5px solid ${color}33;border-radius:10px;padding:10px 14px;cursor:pointer;" onclick="openVelageModal('${r.id}')">
+          <span style="font-size:1.3rem;flex-shrink:0;">${icon}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:.88rem;color:var(--text);">${escVelage(r.label)}</div>
+            <div style="font-size:.8rem;color:${color};font-weight:600;margin-top:2px;">${msg}</div>
+          </div>
+          <span style="font-size:.78rem;color:var(--text-muted);flex-shrink:0;">${vDate.toLocaleDateString('fr-FR')}</span>
+        </div>` };
+    }).sort((a,b) => a.daysToVelage - b.daysToVelage);
+
+    listEl.innerHTML = items.map(x => x.html).join('');
+  }
+
   function refreshDashboard() {
     const sessions = loadLS(SESS_KEY, []);
     const dash = document.getElementById('home-dashboard');
@@ -4926,6 +5148,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   // Initialiser la culture et la forme du calculateur silo
   onTmsCultureChange(); onTmsShapeChange();
   refreshDashboard();
+  renderVelageReminders();
 
   // =====================================================
   // TOOLTIPS

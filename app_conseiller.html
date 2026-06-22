@@ -342,6 +342,17 @@ function setTheme(t) {
             <option value="viande">Viande</option>
             <option value="mixte">Mixte</option>
           </select>
+          <select class="form-select" id="filter-tag" style="width:150px;padding:6px 10px;" onchange="filterExpCards()">
+            <option value="">Tous tags</option>
+          </select>
+          <select class="form-select" id="sort-exp" style="width:180px;padding:6px 10px;" onchange="filterExpCards()">
+            <option value="recent">Bilan le + récent</option>
+            <option value="inactive">Inactif d'abord</option>
+            <option value="score-best">Meilleur score</option>
+            <option value="score-worst">Score le + faible</option>
+            <option value="name">Nom (A-Z)</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="exportExpCSV()">⬇️ Export CSV</button>
         </div>
       </div>
 
@@ -558,6 +569,7 @@ function setTheme(t) {
                 <button class="btn btn-primary" onclick="calcBilan()">Calculer le bilan</button>
                 <button class="btn btn-ghost btn-sm" onclick="openRationLibrary()">📚 Modèles</button>
                 <button class="btn btn-ghost btn-sm" onclick="saveToLibrary()">💾 Sauver modèle</button>
+                <button class="btn btn-ghost btn-sm" onclick="openImportCodeModal()">📥 Code éleveur</button>
                 <button class="btn btn-ghost btn-sm" onclick="clearRation()">🗑 Vider</button>
               </div>
             </div>
@@ -620,6 +632,14 @@ function setTheme(t) {
               <thead><tr><th>Aliment</th><th>kg MS/j</th><th>€/t MS</th><th>€/j</th><th>% coût</th></tr></thead>
               <tbody id="cout-detail-body"></tbody>
             </table>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-header">
+              <div class="card-title">🎯 Optimiseur de coût</div>
+              <button class="btn btn-primary btn-sm" onclick="optimizeRationCost()">Optimiser</button>
+            </div>
+            <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:0;">Recherche la combinaison la moins chère parmi les aliments tarifés ci-dessus, qui respecte les besoins UFL/PDI, la capacité d'ingestion et un minimum de fourrages (≥ 30% MS).</p>
+            <div id="cout-optimizer-result"></div>
           </div>
         </div>
       </div>
@@ -922,6 +942,10 @@ function setTheme(t) {
         <label>Notes internes</label>
         <textarea class="form-textarea" id="em-notes" rows="3" placeholder="Contexte, problématiques connues…"></textarea>
       </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Tags (séparés par virgule)</label>
+        <input type="text" class="form-input" id="em-tags" placeholder="Ex: urgent, premium, à relancer">
+      </div>
     </div>
     <div id="exp-modal-err" style="display:none;color:#dc2626;font-size:.82rem;margin-top:8px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
     <div class="modal-actions">
@@ -964,6 +988,26 @@ function setTheme(t) {
         <input type="text" class="form-input" id="library-name" placeholder="Nom du modèle (ex: VL 8000L été)" style="flex:1;">
         <button class="btn btn-primary btn-sm" onclick="confirmSaveToLibrary()">Sauvegarder</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── MODAL: IMPORT CODE ÉLEVEUR ────────── -->
+<div class="modal-overlay hidden" id="import-code-modal" onclick="if(event.target===this)closeImportCodeModal()">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <h3>📥 Importer un code éleveur</h3>
+      <button class="modal-close" onclick="closeImportCodeModal()">×</button>
+    </div>
+    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px;">Votre éleveur peut générer un code de partage depuis son espace RumiCORE (bouton "📤 Partager avec mon conseiller"). Saisissez-le ci-dessous pour importer sa ration dans l'exploitation actuellement ouverte.</p>
+    <div class="form-group">
+      <label>Code de partage</label>
+      <input type="text" class="form-input" id="import-code-input" placeholder="SHARE-XXXX-XXXX" style="font-family:monospace;text-transform:uppercase;">
+    </div>
+    <div id="import-code-err" style="display:none;color:#dc2626;font-size:.82rem;margin-top:8px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeImportCodeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmImportCode()">Importer</button>
     </div>
   </div>
 </div>
@@ -1488,6 +1532,7 @@ async function loadExploitations() {
     console.warn('loadExploitations:', e);
     exploitations = [];
   }
+  populateTagFilter();
   renderExpCards();
   renderExpTable();
   renderSidebarExps();
@@ -1499,11 +1544,15 @@ function renderExpCards() {
   const grid = document.getElementById('exp-cards-grid');
   const q = (document.getElementById('search-exp')?.value||'').toLowerCase();
   const ft = document.getElementById('filter-type')?.value||'';
-  const exps = exploitations.filter(e => {
+  const ftag = document.getElementById('filter-tag')?.value||'';
+  const sortBy = document.getElementById('sort-exp')?.value||'recent';
+  let exps = exploitations.filter(e => {
     if (q && !e.nom.toLowerCase().includes(q)) return false;
     if (ft && e.type !== ft) return false;
+    if (ftag && !getExpTags(e.id).includes(ftag)) return false;
     return true;
   });
+  exps = sortExps(exps, sortBy);
 
   if (!exps.length) {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-muted);">
@@ -1537,13 +1586,14 @@ function renderExpCards() {
         <span style="${_isInactive?'color:#b45309;font-weight:600;':''}">Dernier bilan : ${lastDate}</span>
         <span class="exp-score-badge ${scoreClass}">Score ${scoreLabel}</span>
       </div>
+      ${tagPills(e.id)}
     </div>`;
   }).join('');
 
   document.getElementById('sb-exp-count').textContent = exploitations.length;
 }
 
-function filterExpCards() { renderExpCards(); }
+function filterExpCards() { renderExpCards(); renderExpTable(); }
 
 function renderExpTable() {
   const tbody = document.getElementById('exp-tbody');
@@ -1551,7 +1601,9 @@ function renderExpTable() {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Aucune exploitation</td></tr>';
     return;
   }
-  tbody.innerHTML = exploitations.map(e => {
+  const sortBy = document.getElementById('sort-exp')?.value||'recent';
+  const sorted = sortExps(exploitations, sortBy);
+  tbody.innerHTML = sorted.map(e => {
     const score = e.last_score||'';
     const scoreClass = score?'badge-'+(score==='A'||score==='B'?'green':score==='C'?'amber':'red'):'badge-gray';
     const lastDate = e.last_session_date ? new Date(e.last_session_date).toLocaleDateString('fr-FR') : '—';
@@ -1560,7 +1612,7 @@ function renderExpTable() {
     const _newT   = new Date(Date.now() - (_ast.newExpDays||7)   * 86400000);
     const _inaT   = e.last_session_date ? new Date(e.last_session_date) < _inactT : new Date(e.created_at) < _newT;
     return `<tr style="${_inaT?'background:#fffbeb;':''}">
-      <td><strong>${escHtml(e.nom)}</strong>${_inaT?'<span style="margin-left:6px;font-size:.7rem;color:#b45309;font-weight:700;">⏰ Inactif</span>':''}</td>
+      <td><strong>${escHtml(e.nom)}</strong>${_inaT?'<span style="margin-left:6px;font-size:.7rem;color:#b45309;font-weight:700;">⏰ Inactif</span>':''}${tagPills(e.id)}</td>
       <td><span class="badge badge-${e.type==='lait'?'green':e.type==='viande'?'amber':'blue'}">${e.type||'lait'}</span></td>
       <td>${escHtml(e.contact_nom||'')} ${e.contact_tel?'· '+e.contact_tel:''}</td>
       <td style="${_inaT?'color:#b45309;font-weight:600;':''}">${_inaT?'⏰ ':''}${lastDate}</td>
@@ -1657,6 +1709,245 @@ function renderDashCharts() {
         <div style="width:8px;height:8px;background:${scols[s]};border-radius:1px;"></div><span style="color:var(--text);">${s}</span></div>`).join('')}
     </div>`;
   }
+}
+
+/* ══ TAGS PERSONNALISÉS ══ */
+const TAGS_LS_KEY = 'rumi-conseiller-exp-tags';
+function getAllTagsMap() {
+  try { return JSON.parse(localStorage.getItem(TAGS_LS_KEY) || '{}'); } catch { return {}; }
+}
+function getExpTags(id) { return getAllTagsMap()[id] || []; }
+function setExpTags(id, tags) {
+  const m = getAllTagsMap();
+  if (tags.length) m[id] = tags; else delete m[id];
+  localStorage.setItem(TAGS_LS_KEY, JSON.stringify(m));
+  populateTagFilter();
+}
+function populateTagFilter() {
+  const sel = document.getElementById('filter-tag');
+  if (!sel) return;
+  const cur = sel.value;
+  const m = getAllTagsMap();
+  const allTags = [...new Set(Object.values(m).flat())].sort();
+  sel.innerHTML = '<option value="">Tous tags</option>' + allTags.map(t=>`<option value="${escHtml(t)}">${escHtml(t)}</option>`).join('');
+  if (allTags.includes(cur)) sel.value = cur;
+}
+function tagPills(id) {
+  const tags = getExpTags(id);
+  if (!tags.length) return '';
+  return `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">` +
+    tags.map(t=>`<span style="background:#ede9fe;color:#6d28d9;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">${escHtml(t)}</span>`).join('') +
+    `</div>`;
+}
+
+/* ══ TRI EXPLOITATIONS ══ */
+function sortExps(exps, sortBy) {
+  const scoreVal = { A:4, B:3, C:2, D:1 };
+  const arr = [...exps];
+  const dateOf = e => new Date(e.last_session_date || e.created_at || 0).getTime();
+  if (sortBy === 'name') arr.sort((a,b)=>a.nom.localeCompare(b.nom));
+  else if (sortBy === 'score-best') arr.sort((a,b)=>(scoreVal[b.last_score]||0)-(scoreVal[a.last_score]||0));
+  else if (sortBy === 'score-worst') arr.sort((a,b)=>(scoreVal[a.last_score]||0)-(scoreVal[b.last_score]||0));
+  else if (sortBy === 'inactive') arr.sort((a,b)=>dateOf(a)-dateOf(b));
+  else arr.sort((a,b)=>dateOf(b)-dateOf(a)); // 'recent' par défaut
+  return arr;
+}
+
+/* ══ OPTIMISEUR DE COÛT (recherche locale coût minimal) ══ */
+function optimizeRationCost() {
+  const resCont = document.getElementById('cout-optimizer-result');
+  if (!resCont) return;
+  if (!lastBesoins) { showToast('Calculez d\'abord le bilan dans l\'onglet "Ration & Bilan".', 'warn'); return; }
+  const items = document.getElementById('cout-prix-lines')?._items;
+  if (!items || !items.length) { showToast('Chargez d\'abord la ration ("📥 Charger la ration").', 'warn'); return; }
+
+  const b = lastBesoins;
+  const cap = b.ingestionCapacite > 0 ? b.ingestionCapacite : Infinity;
+  const prices = items.map((it,i) => parseFloat(document.getElementById('cout-prix-'+i)?.value) || 0);
+  if (!prices.some(p => p > 0)) { showToast('Saisissez au moins un prix (€/t MS) pour optimiser.', 'warn'); return; }
+
+  const feeds = items.map((it,i) => {
+    const f = findFood(it.nom);
+    return {
+      nom: it.nom,
+      uflKg: it.qty > 0 ? it.ufl/it.qty : (f?.uflPerKgMS||0),
+      pdiKg: it.qty > 0 ? it.pdi/it.qty : (f?.pdiPerKgMS||0),
+      pricePerKg: (prices[i]||0) / 1000,
+      isForage: getFeedCategory(it.nom) === 'fourrage',
+      hasPrice: (prices[i]||0) > 0,
+    };
+  });
+
+  const priced = feeds.filter(f => f.hasPrice);
+  if (priced.length < 2) { showToast('Il faut au moins 2 aliments tarifés pour rechercher une optimisation.', 'warn'); return; }
+
+  // Quantités initiales = ration actuelle ; les aliments non tarifés restent fixes
+  let qtys = items.map(it => it.qty);
+  const fixedMS = items.reduce((s,it,i) => s + (feeds[i].hasPrice ? 0 : it.qty), 0);
+  const fixedForageMS = items.reduce((s,it,i) => s + (feeds[i].hasPrice ? 0 : (feeds[i].isForage?it.qty:0)), 0);
+  const idxPriced = feeds.map((f,i)=>f.hasPrice?i:-1).filter(i=>i>=0);
+
+  const totalUFL = () => qtys.reduce((s,q,i) => s + q*feeds[i].uflKg, 0);
+  const totalPDI = () => qtys.reduce((s,q,i) => s + q*feeds[i].pdiKg, 0);
+  const totalMSp = () => idxPriced.reduce((s,i) => s + qtys[i], 0);
+  const totalCostP = () => idxPriced.reduce((s,i) => s + qtys[i]*feeds[i].pricePerKg, 0);
+  const forageMS = () => idxPriced.reduce((s,i) => s + (feeds[i].isForage?qtys[i]:0), 0) + fixedForageMS;
+
+  const penalty = () => {
+    const uflR = b.bUFL>0 ? totalUFL()/b.bUFL : 1, pdiR = b.bPDI>0 ? totalPDI()/b.bPDI : 1;
+    const ms = totalMSp() + fixedMS;
+    const forPct = ms>0 ? forageMS()/ms : 1;
+    let p = 0;
+    if (uflR < 1.0) p += (1.0-uflR)*8000; else if (uflR > 1.10) p += (uflR-1.10)*5000;
+    if (pdiR < 1.0) p += (1.0-pdiR)*8000; else if (pdiR > 1.15) p += (pdiR-1.15)*5000;
+    if (ms > cap) p += (ms-cap)*4000;
+    if (forPct < 0.30) p += (0.30-forPct)*6000;
+    return p;
+  };
+  const objective = () => totalCostP() + penalty();
+
+  const step = 0.2;
+  let iter = 0, improved = true;
+  while (improved && iter < 500) {
+    improved = false; iter++;
+    const base = objective();
+    let bestDelta = 1e-6, bestI = -1, bestJ = -1;
+    for (const i of idxPriced) {
+      if (qtys[i] < step) continue;
+      for (const j of idxPriced) {
+        if (i === j) continue;
+        qtys[i] -= step; qtys[j] += step;
+        const delta = base - objective();
+        qtys[i] += step; qtys[j] -= step;
+        if (delta > bestDelta) { bestDelta = delta; bestI = i; bestJ = j; }
+      }
+    }
+    if (bestI >= 0) { qtys[bestI] -= step; qtys[bestJ] += step; improved = true; }
+  }
+
+  // Résultats
+  const oldCost = idxPriced.reduce((s,i) => s + items[i].qty*feeds[i].pricePerKg, 0);
+  const newCost = totalCostP();
+  const savingDay = oldCost - newCost;
+  const nbVL = parseInt(document.getElementById('cout-nb-vl')?.value) || 1;
+  const uflR = b.bUFL>0 ? (totalUFL()/b.bUFL*100) : 0;
+  const pdiR = b.bPDI>0 ? (totalPDI()/b.bPDI*100) : 0;
+  const msFinal = totalMSp() + fixedMS;
+  const forPctFinal = msFinal>0 ? (forageMS()/msFinal*100) : 0;
+  const feasible = uflR>=97 && uflR<=112 && pdiR>=97 && pdiR<=117 && msFinal<=cap*1.03 && forPctFinal>=28;
+
+  const rows = idxPriced.map(i => {
+    const d = qtys[i] - items[i].qty;
+    const col = Math.abs(d)<0.05 ? '#64748b' : d>0 ? '#16a34a' : '#dc2626';
+    return `<tr>
+      <td>${escHtml(feeds[i].nom)}</td>
+      <td>${items[i].qty.toFixed(1)} kg</td>
+      <td style="font-weight:700;">${qtys[i].toFixed(1)} kg</td>
+      <td style="color:${col};font-weight:700;">${d>0?'+':''}${d.toFixed(1)} kg</td>
+    </tr>`;
+  }).join('');
+
+  resCont.innerHTML = `
+    <div style="margin-top:14px;${feasible?'':'border:1.5px solid #fde68a;background:#fffbeb;border-radius:10px;padding:10px 14px;'}">
+      ${feasible?'':'<div style="font-size:.8rem;color:#92400e;font-weight:700;margin-bottom:8px;">⚠️ Optimum approché — certaines contraintes restent tendues avec les aliments tarifés disponibles. Ajoutez un aliment énergétique ou protéique tarifé pour améliorer la marge.</div>'}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="metric-card" style="margin:0;"><div class="metric-lbl">Coût avant</div><div class="metric-val">${oldCost.toFixed(2)} €/j</div></div>
+        <div class="metric-card" style="margin:0;"><div class="metric-lbl">Coût optimisé</div><div class="metric-val" style="color:#16a34a;">${newCost.toFixed(2)} €/j</div></div>
+        <div class="metric-card" style="margin:0;"><div class="metric-lbl">Économie</div><div class="metric-val" style="color:${savingDay>0?'#16a34a':'#64748b'};">${savingDay>0?'-':''}${Math.abs(savingDay).toFixed(2)} €/j</div></div>
+      </div>
+      <div style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px;">
+        Sur le troupeau (${nbVL} animaux) : <strong style="color:${savingDay>0?'#16a34a':'#64748b'};">${(savingDay*nbVL).toFixed(0)} €/j</strong> soit ≈ <strong>${(savingDay*nbVL*30).toFixed(0)} €/mois</strong>.
+        Couverture : ⚡ ${uflR.toFixed(0)}% UFL · 🧬 ${pdiR.toFixed(0)}% PDI · 🌾 ${forPctFinal.toFixed(0)}% fourrages.
+      </div>
+      <table class="data-table" style="margin-bottom:10px;"><thead><tr><th>Aliment</th><th>Avant</th><th>Optimisé</th><th>Δ</th></tr></thead><tbody>${rows}</tbody></table>
+      <button class="btn btn-primary btn-sm" onclick='applyOptimizedRation(${JSON.stringify(idxPriced.map(i=>({nom:feeds[i].nom,qty:+qtys[i].toFixed(1)})))})'>✅ Appliquer cette ration</button>
+    </div>`;
+}
+
+function applyOptimizedRation(suggestions) {
+  suggestions.forEach(s => {
+    document.querySelectorAll('#ration-rows .ration-row').forEach(row => {
+      const nomInp = row.querySelector('.ration-input-nom');
+      if (nomInp && nomInp.value === s.nom) {
+        const qtyInp = row.querySelector('.ration-input-qty');
+        if (qtyInp) qtyInp.value = s.qty.toFixed(1);
+      }
+    });
+  });
+  switchTab('tab-ration', document.querySelector('#page-exp-detail .tab-btn'));
+  calcBilan();
+  showToast('✅ Ration optimisée appliquée — bilan recalculé.', 'success');
+}
+
+/* ══ EXPORT CSV PORTEFEUILLE ══ */
+function exportExpCSV() {
+  if (!exploitations.length) { showToast('Aucune exploitation à exporter.', 'warn'); return; }
+  const headers = ['Nom','Type','Nb animaux','Contact','Téléphone','Email','Adresse','Score','UFL','PDI','MS','Date dernier bilan','Tags'];
+  const esc = v => '"' + String(v??'').replace(/"/g,'""') + '"';
+  const rows = exploitations.map(e => [
+    e.nom, e.type||'lait', e.nb_animaux||'', e.contact_nom||'', e.contact_tel||'', e.contact_email||'', e.adresse||'',
+    e.last_score||'', e.last_ufl||'', e.last_pdi||'', e.last_ms||'',
+    e.last_session_date ? new Date(e.last_session_date).toLocaleDateString('fr-FR') : '',
+    getExpTags(e.id).join('; '),
+  ].map(esc).join(','));
+  const csv = '﻿' + headers.map(esc).join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rumicore-portefeuille-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ Export CSV téléchargé.', 'success');
+}
+
+/* ══ IMPORT CODE ÉLEVEUR ══ */
+function openImportCodeModal() {
+  if (!currentExp) { showToast('Ouvrez d\'abord une exploitation.', 'warn'); return; }
+  document.getElementById('import-code-input').value = '';
+  document.getElementById('import-code-err').style.display = 'none';
+  document.getElementById('import-code-modal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('import-code-input')?.focus(), 150);
+}
+function closeImportCodeModal() {
+  document.getElementById('import-code-modal').classList.add('hidden');
+}
+
+async function confirmImportCode() {
+  const code = document.getElementById('import-code-input').value.trim().toUpperCase();
+  const errEl = document.getElementById('import-code-err');
+  errEl.style.display = 'none';
+  if (!code) { errEl.textContent = 'Entrez un code.'; errEl.style.display = 'block'; return; }
+  if (!currentExp) { showToast('Ouvrez d\'abord une exploitation.', 'warn'); return; }
+  const supa = getSupa();
+  const { data, error } = await supa.from('ration_shares').select('*').eq('code', code).is('claimed_by', null).maybeSingle();
+  if (error || !data) { errEl.textContent = 'Code invalide, déjà utilisé ou introuvable.'; errEl.style.display = 'block'; return; }
+  if (Date.now() - new Date(data.created_at).getTime() > 7*86400000) { errEl.textContent = 'Ce code a expiré (validité 7 jours).'; errEl.style.display = 'block'; return; }
+
+  const rd = data.ration_data || {};
+  const a = rd.animal || {};
+  if (a.type) { const el = document.getElementById('r-type-animal'); if (el) { el.value = a.type; onAnimalTypeChange(); } }
+  if (a.race) { const el = document.getElementById('r-race'); if (el) el.value = a.race; }
+  if (a.poids) { const el = document.getElementById('r-pv'); if (el) el.value = a.poids; }
+  if (a.prod) { const el = document.getElementById('r-prod'); if (el) el.value = a.prod; }
+  if (a.gmq) { const el = document.getElementById('r-gmq'); if (el) el.value = a.gmq; }
+  if (a.tb) { const el = document.getElementById('r-tb'); if (el) el.value = a.tb; }
+  if (a.activite) { const el = document.getElementById('r-activite'); if (el) el.value = a.activite; }
+
+  const cont = document.getElementById('ration-rows');
+  if (cont && rd.rationLines?.length) {
+    cont.innerHTML = '';
+    rd.rationLines.forEach(r => {
+      addRationRow();
+      const rows2 = cont.querySelectorAll('.ration-row');
+      const last = rows2[rows2.length-1];
+      if (last) { last.querySelector('.ration-input-nom').value = r.nom||''; last.querySelector('.ration-input-qty').value = r.qty||''; }
+    });
+  }
+
+  await supa.from('ration_shares').update({ claimed_by: currentUser.id, claimed_at: new Date().toISOString() }).eq('id', data.id);
+  closeImportCodeModal();
+  showToast(`✅ Ration de ${data.eleveur_name || data.eleveur_email || 'l\'éleveur'} importée !`, 'success');
 }
 
 /* ══ BIBLIOTHÈQUE DE RATIONS TYPES ══ */
@@ -1846,6 +2137,7 @@ function openExpModal(id) {
   document.getElementById('em-contact-email').value = exp?.contact_email || '';
   document.getElementById('em-adresse').value = exp?.adresse || '';
   document.getElementById('em-notes').value = exp?.notes || '';
+  document.getElementById('em-tags').value = id ? getExpTags(id).join(', ') : '';
   document.getElementById('exp-modal-err').style.display = 'none';
   document.getElementById('btn-delete-exp').style.display = exp ? '' : 'none';
   modal.classList.remove('hidden');
@@ -1868,14 +2160,17 @@ async function saveExp() {
     notes: document.getElementById('em-notes').value.trim()||null,
     updated_at: new Date().toISOString(),
   };
+  const tags = document.getElementById('em-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
   try {
     if (id) {
       const { error } = await supa.from('exploitations').update(payload).eq('id',id);
       if (error) throw error;
+      setExpTags(id, tags);
     } else {
       payload.conseiller_id = currentUser.id;
-      const { error } = await supa.from('exploitations').insert(payload);
+      const { data: inserted, error } = await supa.from('exploitations').insert(payload).select('id').single();
       if (error) throw error;
+      if (inserted?.id) setExpTags(inserted.id, tags);
     }
     closeExpModal();
     await loadExploitations();

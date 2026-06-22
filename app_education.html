@@ -550,6 +550,7 @@
     .exo-status-badge.inactive { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
 
     /* Toggle switch */
+    .exo-type-btn.active { background: var(--edu) !important; color: #fff !important; border-color: var(--edu) !important; }
     .exo-toggle { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
     .exo-toggle input { opacity: 0; width: 0; height: 0; }
     .exo-toggle-slider {
@@ -719,6 +720,7 @@
         <button id="cv-tab-students" class="tab-btn active" onclick="setCvTab('students')">👥 Élèves en direct</button>
         <button id="cv-tab-subs" class="tab-btn" onclick="setCvTab('subs')">📤 Soumissions</button>
         <button id="cv-tab-exos" class="tab-btn" onclick="setCvTab('exos')">📚 Exercices</button>
+        <button id="cv-tab-progress" class="tab-btn" onclick="setCvTab('progress')">📊 Progression</button>
       </div>
 
       <div id="cv-students-panel">
@@ -753,6 +755,10 @@
         <div id="exos-list">
           <div class="empty"><span class="ei">📚</span><p>Aucun exercice créé.<br>Créez-en un pour vos élèves.</p></div>
         </div>
+      </div>
+
+      <div id="cv-progress-panel" style="display:none;">
+        <div id="progress-content"><div class="empty"><span class="ei">📊</span><p>Chargement…</p></div></div>
       </div>
     </div>
 
@@ -907,6 +913,14 @@
     </div>
 
     <div class="form-field">
+      <label>Type d'exercice</label>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-ghost btn-sm exo-type-btn active" id="exo-type-ration-btn" onclick="setExoType('ration')" style="flex:1;">🌾 Exercice de ration</button>
+        <button type="button" class="btn btn-ghost btn-sm exo-type-btn" id="exo-type-qcm-btn" onclick="setExoType('qcm')" style="flex:1;">📝 Quiz QCM</button>
+      </div>
+    </div>
+
+    <div class="form-field">
       <label>Description courte <span style="font-size:.75rem;color:var(--muted);font-weight:400;">(visible par l'élève)</span></label>
       <input type="text" id="exo-desc" class="form-input" placeholder="Ex : Équilibrer une ration pour une VL hautes performances" maxlength="120">
     </div>
@@ -930,7 +944,7 @@
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-      <div class="form-field">
+      <div class="form-field" id="exo-animal-field">
         <label>Type d'animal</label>
         <select id="exo-animal" class="form-input">
           <option value="">— Libre —</option>
@@ -954,7 +968,7 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div id="exo-ration-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
       <div class="form-field">
         <label>UFL cible <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(optionnel)</span></label>
         <input type="number" id="exo-ufl" class="form-input" placeholder="Ex : 7.5" step="0.1" min="0" max="30">
@@ -963,6 +977,12 @@
         <label>PDI cible (g) <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(optionnel)</span></label>
         <input type="number" id="exo-pdi" class="form-input" placeholder="Ex : 850" step="1" min="0" max="5000">
       </div>
+    </div>
+
+    <div class="form-field" id="exo-qcm-builder" style="display:none;">
+      <label>Questions du quiz <span style="font-size:.73rem;color:var(--muted);font-weight:400;">(4 choix par question, cochez la bonne réponse)</span></label>
+      <div id="qcm-questions-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;"></div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="addQcmQuestion()">+ Ajouter une question</button>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -1286,11 +1306,14 @@ function setCvTab(tab) {
   $('cv-students-panel').style.display = tab === 'students' ? '' : 'none';
   $('cv-subs-panel').style.display     = tab === 'subs'     ? '' : 'none';
   $('cv-exos-panel').style.display     = tab === 'exos'     ? '' : 'none';
+  $('cv-progress-panel').style.display = tab === 'progress' ? '' : 'none';
   $('cv-tab-students').classList.toggle('active', tab === 'students');
   $('cv-tab-subs').classList.toggle('active',     tab === 'subs');
   $('cv-tab-exos').classList.toggle('active',     tab === 'exos');
+  $('cv-tab-progress').classList.toggle('active', tab === 'progress');
   if (tab === 'subs') loadSubmissions();
   if (tab === 'exos') loadExos();
+  if (tab === 'progress') loadProgressTab();
 }
 
 async function refreshLive() {
@@ -1465,6 +1488,14 @@ async function loadStudentActiveExo() {
   if (!container) return;
   if (!exo) { container.style.display = 'none'; return; }
 
+  if (exo.type === 'qcm') {
+    const { data: existingSub } = await supa.from('edu_submissions')
+      .select('*').eq('exercise_id', exo.id).eq('student_id', currentUser.id).maybeSingle();
+    container.innerHTML = existingSub ? renderQcmResult(exo, existingSub) : renderQcmForm(exo);
+    container.style.display = 'block';
+    return;
+  }
+
   const pills = [
     exo.animal_type ? `🐄 ${exo.animal_type}` : null,
     exo.target_ufl  ? `⚡ UFL cible : ${exo.target_ufl}` : null,
@@ -1515,6 +1546,101 @@ async function loadStudentActiveExo() {
     </div>
   </div>`;
   container.style.display = 'block';
+}
+
+/* ══ QUIZ QCM — CÔTÉ ÉLÈVE ══ */
+function renderQcmForm(exo) {
+  const questions = exo.qcm_questions || [];
+  let dueDateHtml = '';
+  if (exo.due_date) {
+    const due = new Date(exo.due_date);
+    const isPast = due < new Date();
+    const dateStr = due.toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+    dueDateHtml = `<div style="margin-top:10px;font-size:.82rem;font-weight:700;padding:8px 12px;border-radius:9px;
+      background:${isPast ? '#fee2e2' : '#f0fdf4'};color:${isPast ? '#dc2626' : '#15803d'};display:inline-block;">
+      📅 À rendre avant le ${dateStr}${isPast ? ' — Délai dépassé' : ''}
+    </div>`;
+  }
+  return `<div class="s-exo-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px;">
+      <div class="s-exo-eyebrow">📝 Quiz en cours</div>
+      ${exo.is_graded !== false ? '<span style="background:#fef3c7;color:#92400e;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.03em;">NOTÉ</span>' : '<span style="background:#f1f5f9;color:#64748b;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:20px;">NON NOTÉ</span>'}
+    </div>
+    <div class="s-exo-title">${escHtmlEdu(exo.titre)}</div>
+    ${exo.description ? `<div class="s-exo-desc">${escHtmlEdu(exo.description)}</div>` : ''}
+    ${dueDateHtml}
+    ${exo.instructions ? `<div class="exo-instructions" style="margin-top:14px;">${exo.instructions}</div>` : ''}
+    <form id="qcm-take-form" style="margin-top:18px;display:flex;flex-direction:column;gap:14px;" onsubmit="event.preventDefault();submitQcm('${exo.id}');">
+      ${questions.map((q,i) => `
+        <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;">
+          <div style="font-weight:700;font-size:.88rem;margin-bottom:10px;">${i+1}. ${escHtmlEdu(q.q)}</div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            ${q.choices.map((c,j) => `
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem;padding:7px 9px;border-radius:6px;transition:background .15s;" onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='transparent'">
+                <input type="radio" name="qcm-q${i}" value="${j}" required>
+                <span>${escHtmlEdu(c)}</span>
+              </label>`).join('')}
+          </div>
+        </div>`).join('')}
+      <button type="submit" class="btn btn-green" style="align-self:flex-start;">✅ Valider mes réponses</button>
+    </form>
+  </div>`;
+}
+
+function renderQcmResult(exo, sub) {
+  const questions = exo.qcm_questions || [];
+  const answers = sub.qcm_answers || [];
+  const pct = sub.qcm_pct ?? 0;
+  const scoreColor = pct >= 80 ? '#15803d' : pct >= 50 ? '#b45309' : '#dc2626';
+  return `<div class="s-exo-card">
+    <div class="s-exo-eyebrow">📝 Quiz terminé</div>
+    <div class="s-exo-title">${escHtmlEdu(exo.titre)}</div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:2.2rem;font-weight:900;color:${scoreColor};">${pct}%</div>
+      <div style="font-size:.85rem;color:var(--muted);">Soumis le ${new Date(sub.submitted_at).toLocaleDateString('fr-FR')}</div>
+    </div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
+      ${questions.map((q,i) => {
+        const ans = answers[i];
+        const isCorrect = ans === q.correct;
+        return `<div style="background:${isCorrect?'#f0fdf4':'#fef2f2'};border:1px solid ${isCorrect?'#bbf7d0':'#fecaca'};border-radius:10px;padding:12px 14px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:6px;">${isCorrect?'✅':'❌'} ${i+1}. ${escHtmlEdu(q.q)}</div>
+          <div style="font-size:.82rem;color:var(--muted);">Votre réponse : ${escHtmlEdu(q.choices[ans] ?? '—')}</div>
+          ${!isCorrect ? `<div style="font-size:.82rem;color:#15803d;font-weight:600;margin-top:2px;">Bonne réponse : ${escHtmlEdu(q.choices[q.correct])}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+async function submitQcm(exerciseId) {
+  const supa = getSupa();
+  const { data: exo } = await supa.from('edu_exercises').select('*').eq('id', exerciseId).single();
+  if (!exo) return;
+  const questions = exo.qcm_questions || [];
+  const answers = [];
+  let correctCount = 0;
+  questions.forEach((q,i) => {
+    const sel = document.querySelector(`input[name="qcm-q${i}"]:checked`);
+    const ans = sel ? parseInt(sel.value) : -1;
+    answers.push(ans);
+    if (ans === q.correct) correctCount++;
+  });
+  const pct = questions.length ? Math.round(correctCount / questions.length * 100) : 0;
+  const grade = pct >= 85 ? 'A' : pct >= 70 ? 'B' : pct >= 50 ? 'C' : 'D';
+  const { error } = await supa.from('edu_submissions').insert({
+    class_id: exo.class_id,
+    exercise_id: exo.id,
+    student_id: currentUser.id,
+    student_name: myMembership?.student_name || currentUser.user_metadata?.prenom || 'Élève',
+    score: grade,
+    qcm_pct: pct,
+    qcm_answers: answers,
+    submitted_at: new Date().toISOString(),
+  });
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+  showToast(`✅ Quiz soumis — Score : ${pct}%`, 'success');
+  loadStudentActiveExo();
 }
 
 async function joinClass() {
@@ -1622,6 +1748,132 @@ async function handleExoDocUpload(file) {
   showToast('Document ajouté !', 'success');
 }
 
+/* ══ DASHBOARD PROF — PROGRESSION DE CLASSE ══ */
+async function loadProgressTab() {
+  if (!currentClassId) return;
+  const supa = getSupa();
+  const [exoRes, membersRes, subsRes] = await Promise.all([
+    supa.from('edu_exercises').select('*').eq('class_id', currentClassId),
+    supa.from('edu_members').select('student_id, student_name').eq('class_id', currentClassId),
+    supa.from('edu_submissions').select('student_id, student_name, score, exercise_id, qcm_pct, submitted_at').eq('class_id', currentClassId).not('exercise_id', 'is', null),
+  ]);
+  renderProgress(exoRes.data || [], membersRes.data || [], subsRes.data || []);
+}
+
+function renderProgress(exos, members, subs) {
+  const cont = $('progress-content');
+  if (!members.length) { cont.innerHTML = '<div class="empty"><span class="ei">📊</span><p>Aucun élève dans cette classe encore.</p></div>'; return; }
+  if (!exos.length) { cont.innerHTML = '<div class="empty"><span class="ei">📊</span><p>Aucun exercice créé — la progression apparaîtra une fois des exercices assignés.</p></div>'; return; }
+
+  const activeExos = exos.filter(e => e.is_active);
+  const gradeCount = { A:0, B:0, C:0, D:0 };
+  subs.forEach(s => { if (s.score && gradeCount[s.score] !== undefined) gradeCount[s.score]++; });
+  const totalGraded = gradeCount.A + gradeCount.B + gradeCount.C + gradeCount.D;
+
+  const qcmPcts = subs.filter(s => s.qcm_pct != null).map(s => s.qcm_pct);
+  const avgPct = qcmPcts.length ? Math.round(qcmPcts.reduce((a,b)=>a+b,0)/qcmPcts.length) : null;
+
+  const subsByExo = {};
+  subs.forEach(s => { if (!subsByExo[s.exercise_id]) subsByExo[s.exercise_id] = new Set(); subsByExo[s.exercise_id].add(s.student_id); });
+  let totalPossible = 0, totalRendus = 0;
+  exos.forEach(e => { totalPossible += members.length; totalRendus += (subsByExo[e.id]?.size || 0); });
+  const completionRate = totalPossible ? Math.round(totalRendus/totalPossible*100) : 0;
+
+  const cols = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#dc2626' };
+  let donutHtml = '<div style="color:var(--muted);font-size:.85rem;padding:8px 0;">Aucune note encore.</div>';
+  if (totalGraded > 0) {
+    const r=40, sw=16, circ=2*Math.PI*r, cx=56, cy=56;
+    let offset = 0;
+    const segs = ['A','B','C','D'].filter(k=>gradeCount[k]>0).map(k => {
+      const arc = (gradeCount[k]/totalGraded)*circ;
+      const rot = -90 + (offset/circ)*360;
+      offset += arc;
+      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${cols[k]}" stroke-width="${sw}" stroke-dasharray="${arc.toFixed(2)} ${circ.toFixed(2)}" transform="rotate(${rot.toFixed(2)},${cx},${cy})"/>`;
+    });
+    const legend = ['A','B','C','D'].filter(k=>gradeCount[k]>0).map(k => `
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <div style="width:10px;height:10px;border-radius:2px;background:${cols[k]};flex-shrink:0;"></div>
+        <span style="font-size:.8rem;color:var(--text);">Note ${k}</span>
+        <span style="font-size:.8rem;font-weight:700;margin-left:auto;padding-left:8px;">${gradeCount[k]}</span>
+      </div>`).join('');
+    donutHtml = `<div style="display:flex;align-items:center;gap:16px;">
+      <svg width="112" height="112" viewBox="0 0 112 112" style="flex-shrink:0;">${segs.join('')}
+        <text x="56" y="53" text-anchor="middle" font-size="15" font-weight="900" style="fill:var(--text)">${totalGraded}</text>
+        <text x="56" y="67" text-anchor="middle" font-size="6.5" style="fill:#94a3b8">note${totalGraded>1?'s':''}</text>
+      </svg>
+      <div style="flex:1;">${legend}</div>
+    </div>`;
+  }
+
+  const exoRows = exos.map(e => {
+    const rendus = subsByExo[e.id]?.size || 0;
+    const pctRendu = members.length ? Math.round(rendus/members.length*100) : 0;
+    const exoGrades = { A:0, B:0, C:0, D:0 };
+    subs.filter(s=>s.exercise_id===e.id).forEach(s => { if (s.score && exoGrades[s.score]!==undefined) exoGrades[s.score]++; });
+    const gradesStr = ['A','B','C','D'].filter(k=>exoGrades[k]>0).map(k=>`${exoGrades[k]}${k}`).join(' · ') || '—';
+    return `<tr>
+      <td>${escHtmlEdu(e.titre)} ${e.type==='qcm'?'<span style="font-size:.7rem;color:var(--edu);font-weight:700;"> · 📝 QCM</span>':''}</td>
+      <td>${e.is_active ? '<span style="color:#15803d;font-weight:700;">Actif</span>' : '<span style="color:#94a3b8;">Inactif</span>'}</td>
+      <td>${rendus} / ${members.length} (${pctRendu}%)</td>
+      <td>${gradesStr}</td>
+    </tr>`;
+  }).join('');
+
+  const byStudent = {};
+  subs.forEach(s => {
+    if (!byStudent[s.student_id]) byStudent[s.student_id] = { name: s.student_name||'Élève', count:0, grades:{A:0,B:0,C:0,D:0}, lastDate:null };
+    const st = byStudent[s.student_id];
+    st.count++;
+    if (s.score && st.grades[s.score]!==undefined) st.grades[s.score]++;
+    if (!st.lastDate || new Date(s.submitted_at) > new Date(st.lastDate)) st.lastDate = s.submitted_at;
+  });
+  const gradeScore = g => g.A*4 + g.B*3 + g.C*2 + g.D*1;
+  const studentRows = Object.values(byStudent)
+    .sort((a,b) => (gradeScore(b.grades)/(b.count||1)) - (gradeScore(a.grades)/(a.count||1)))
+    .map(s => {
+      const gradesStr = ['A','B','C','D'].filter(k=>s.grades[k]>0).map(k=>`${s.grades[k]}${k}`).join(' · ') || '—';
+      return `<tr>
+        <td>${escHtmlEdu(s.name)}</td>
+        <td>${s.count}</td>
+        <td>${gradesStr}</td>
+        <td>${s.lastDate ? new Date(s.lastDate).toLocaleDateString('fr-FR') : '—'}</td>
+      </tr>`;
+    }).join('');
+
+  const metric = (lbl, val, color) => `<div style="background:#faf5ff;border:1.5px solid #e4dcfd;border-radius:12px;padding:14px 16px;">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">${lbl}</div>
+    <div style="font-size:1.6rem;font-weight:900;${color?'color:'+color+';':''}">${val}</div>
+  </div>`;
+
+  cont.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px;">
+      ${metric('Élèves', members.length)}
+      ${metric('Exercices actifs', activeExos.length)}
+      ${metric('Taux de rendu', completionRate+'%', '#0369a1')}
+      ${metric('Score QCM moyen', avgPct!=null ? avgPct+'%' : '—', '#15803d')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:16px;margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">📊 Distribution des notes</div>
+        ${donutHtml}
+      </div>
+      <div class="card">
+        <div class="card-title">📚 Performance par exercice</div>
+        <div class="table-wrap" style="overflow-x:auto;">
+          <table class="stud-table"><thead><tr><th>Exercice</th><th>Statut</th><th>Rendus</th><th>Notes</th></tr></thead>
+          <tbody>${exoRows}</tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Classement élèves</div>
+      <div class="table-wrap" style="overflow-x:auto;">
+        <table class="stud-table"><thead><tr><th>Élève</th><th>Soumissions</th><th>Notes</th><th>Dernière activité</th></tr></thead>
+        <tbody>${studentRows || '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">Aucune soumission encore.</td></tr>'}</tbody></table>
+      </div>
+    </div>`;
+}
+
 async function loadExos() {
   if (!currentClassId) return;
   const supa = getSupa();
@@ -1654,6 +1906,7 @@ function renderExos(list, members, subs) {
   el.innerHTML = list.map(e => {
     const active = e.is_active;
     const pills = [
+      e.type === 'qcm' ? `📝 Quiz QCM — ${(e.qcm_questions||[]).length} question${(e.qcm_questions||[]).length>1?'s':''}` : null,
       e.animal_type ? `🐄 ${e.animal_type}` : null,
       e.target_ufl  ? `⚡ UFL : ${e.target_ufl}` : null,
       e.target_pdi  ? `🧬 PDI : ${e.target_pdi} g` : null,
@@ -1752,6 +2005,9 @@ function openCreateExo() {
   $('exo-active-lbl').textContent = 'Actif';
   $('exo-is-graded').checked = true;
   $('exo-graded-lbl').textContent = 'Noté';
+  $('qcm-questions-list').innerHTML = '';
+  _qcmQCounter = 0;
+  setExoType('ration');
   $('exo-err').style.display = 'none';
   $('exo-modal').classList.add('open');
   setTimeout(() => $('exo-titre').focus(), 100);
@@ -1770,6 +2026,10 @@ function openEditExo(exo) {
   $('exo-due-date').value = exo.due_date ? exo.due_date.slice(0, 16) : '';
   _exoDocsList = Array.isArray(exo.documents) ? [...exo.documents] : [];
   renderExoDocsList();
+  $('qcm-questions-list').innerHTML = '';
+  _qcmQCounter = 0;
+  (exo.qcm_questions || []).forEach(q => addQcmQuestion(q));
+  setExoType(exo.type === 'qcm' ? 'qcm' : 'ration');
   $('exo-is-active').checked = !!exo.is_active;
   $('exo-active-lbl').textContent = exo.is_active ? 'Actif' : 'Inactif';
   $('exo-is-graded').checked = exo.is_graded !== false;
@@ -1796,10 +2056,72 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+/* ══ TYPE D'EXERCICE & BUILDER QCM ══ */
+let _exoType = 'ration';
+let _qcmQCounter = 0;
+
+function setExoType(t) {
+  _exoType = t;
+  $('exo-type-ration-btn').classList.toggle('active', t === 'ration');
+  $('exo-type-qcm-btn').classList.toggle('active', t === 'qcm');
+  $('exo-animal-field').style.display = t === 'ration' ? '' : 'none';
+  $('exo-ration-fields').style.display = t === 'ration' ? '' : 'none';
+  $('exo-qcm-builder').style.display = t === 'qcm' ? '' : 'none';
+}
+
+function escAttrEdu(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+function escHtmlEdu(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
+function addQcmQuestion(data) {
+  const idx = _qcmQCounter++;
+  const list = $('qcm-questions-list');
+  const div = document.createElement('div');
+  div.className = 'qcm-q-row';
+  div.style = 'border:1px solid var(--border);border-radius:10px;padding:12px;';
+  div.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;">
+      <span class="qcm-q-num" style="font-weight:800;color:var(--edu);font-size:.85rem;padding-top:9px;white-space:nowrap;">Q${list.children.length+1}.</span>
+      <input type="text" class="form-input qcm-q-text" placeholder="Énoncé de la question" style="flex:1;" value="${escAttrEdu(data?.q)}">
+      <button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('.qcm-q-row').remove();renumberQcm();">🗑</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;padding-left:30px;">
+      ${[0,1,2,3].map(i => `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="radio" name="qcm-correct-${idx}" class="qcm-correct-radio" value="${i}" ${(data?.correct??0)===i?'checked':''}>
+          <input type="text" class="form-input qcm-choice" placeholder="Choix ${i+1}" style="flex:1;padding:6px 10px;" value="${escAttrEdu(data?.choices?.[i])}">
+        </div>`).join('')}
+    </div>`;
+  list.appendChild(div);
+  renumberQcm();
+}
+function renumberQcm() {
+  $('qcm-questions-list').querySelectorAll('.qcm-q-row').forEach((row, i) => {
+    const n = row.querySelector('.qcm-q-num'); if (n) n.textContent = `Q${i+1}.`;
+  });
+}
+function getQcmQuestions() {
+  const rows = $('qcm-questions-list')?.querySelectorAll('.qcm-q-row') || [];
+  const questions = [];
+  rows.forEach(row => {
+    const q = row.querySelector('.qcm-q-text').value.trim();
+    const choices = [...row.querySelectorAll('.qcm-choice')].map(c => c.value.trim());
+    const correctInput = row.querySelector('.qcm-correct-radio:checked');
+    const correct = correctInput ? parseInt(correctInput.value) : 0;
+    if (q && choices.every(c => c)) questions.push({ q, choices, correct });
+  });
+  return questions;
+}
+
 async function saveExo() {
   const titre = $('exo-titre').value.trim();
   const errEl = $('exo-err');
   if (!titre) { errEl.textContent = 'Le titre est requis.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  let qcmQuestions = null;
+  if (_exoType === 'qcm') {
+    qcmQuestions = getQcmQuestions();
+    if (!qcmQuestions.length) { errEl.textContent = 'Ajoutez au moins une question complète (énoncé + 4 choix).'; errEl.style.display = 'block'; return; }
+  }
   const btn = $('exo-save-btn');
   btn.textContent = '…'; btn.disabled = true;
   const documents = _exoDocsList.length ? _exoDocsList : null;
@@ -1807,11 +2129,13 @@ async function saveExo() {
     class_id: currentClassId,
     teacher_id: currentUser.id,
     titre,
+    type: _exoType,
     description: $('exo-desc').value.trim() || null,
     instructions: $('exo-instructions').value.trim() || null,
-    animal_type: $('exo-animal').value || null,
-    target_ufl: parseFloat($('exo-ufl').value) || null,
-    target_pdi: parseFloat($('exo-pdi').value) || null,
+    animal_type: _exoType === 'ration' ? ($('exo-animal').value || null) : null,
+    target_ufl: _exoType === 'ration' ? (parseFloat($('exo-ufl').value) || null) : null,
+    target_pdi: _exoType === 'ration' ? (parseFloat($('exo-pdi').value) || null) : null,
+    qcm_questions: qcmQuestions,
     is_active: $('exo-is-active').checked,
     due_date: $('exo-due-date').value ? new Date($('exo-due-date').value).toISOString() : null,
     is_graded: $('exo-is-graded').checked,
