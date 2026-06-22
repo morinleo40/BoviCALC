@@ -320,6 +320,18 @@ function setTheme(t) {
         </div>
       </div>
 
+      <!-- Graphiques portefeuille -->
+      <div id="dash-charts-wrap" style="display:none;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header"><div class="card-title">📊 Distribution des scores</div></div>
+          <div id="chart-score-donut" style="display:flex;align-items:center;gap:16px;padding:4px 0;min-height:90px;"></div>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header"><div class="card-title">🐄 Scores par type de production</div></div>
+          <div id="chart-score-by-type" style="padding:4px 0;min-height:90px;"></div>
+        </div>
+      </div>
+
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
         <h2 style="font-size:1rem;font-weight:800;color:var(--text);">Toutes les exploitations</h2>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -542,8 +554,10 @@ function setTheme(t) {
                 <!-- rows added dynamically -->
               </div>
               <div id="ration-datalist-container"></div>
-              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
                 <button class="btn btn-primary" onclick="calcBilan()">Calculer le bilan</button>
+                <button class="btn btn-ghost btn-sm" onclick="openRationLibrary()">📚 Modèles</button>
+                <button class="btn btn-ghost btn-sm" onclick="saveToLibrary()">💾 Sauver modèle</button>
                 <button class="btn btn-ghost btn-sm" onclick="clearRation()">🗑 Vider</button>
               </div>
             </div>
@@ -551,7 +565,10 @@ function setTheme(t) {
             <!-- Bilan résultat -->
             <div id="bilan-result-wrap" style="display:none;">
               <div class="card" style="margin-bottom:16px;">
-                <div class="card-header"><div class="card-title">📊 Bilan nutritionnel</div></div>
+                <div class="card-header">
+                  <div class="card-title">📊 Bilan nutritionnel</div>
+                  <button class="btn btn-ghost btn-sm" id="btn-compare" onclick="showComparePanel()" style="display:none;">🔄 Comparer</button>
+                </div>
                 <div id="bilan-result"></div>
               </div>
               <div id="glucides-wrap"></div>
@@ -559,6 +576,8 @@ function setTheme(t) {
               <div id="bilan-score"></div>
               <!-- Indicateurs cliquables -->
               <div id="bilan-indicateurs" style="margin-bottom:16px;"></div>
+              <!-- Comparaison session précédente -->
+              <div id="compare-wrap" style="display:none;margin-bottom:16px;"></div>
               <!-- Optimiseur -->
               <div class="card" style="margin-bottom:16px;">
                 <div class="card-header">
@@ -927,6 +946,24 @@ function setTheme(t) {
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeSessionModal()">Annuler</button>
       <button class="btn btn-primary" onclick="confirmSaveSession()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── MODAL: BIBLIOTHÈQUE RATIONS ────────── -->
+<div class="modal-overlay hidden" id="library-modal" onclick="if(event.target===this)closeLibraryModal()">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>📚 Bibliothèque de rations types</h3>
+      <button class="modal-close" onclick="closeLibraryModal()">×</button>
+    </div>
+    <div id="library-list" style="max-height:380px;overflow-y:auto;margin-bottom:14px;"></div>
+    <div id="library-save-form" style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:.78rem;font-weight:700;color:#64748b;margin-bottom:6px;">Sauvegarder la ration actuelle comme modèle :</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" class="form-input" id="library-name" placeholder="Nom du modèle (ex: VL 8000L été)" style="flex:1;">
+        <button class="btn btn-primary btn-sm" onclick="confirmSaveToLibrary()">Sauvegarder</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1550,6 +1587,179 @@ function renderSidebarExps() {
     </button>`).join('');
 }
 
+/* ══ GRAPHIQUES DASHBOARD ══ */
+function renderDashCharts() {
+  const wrap = document.getElementById('dash-charts-wrap');
+  if (!wrap) return;
+  const total = exploitations.length;
+  if (!total) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+
+  // --- Donut distribution scores ---
+  const donutEl = document.getElementById('chart-score-donut');
+  if (donutEl) {
+    const cnt = { A:0, B:0, C:0, D:0, none:0 };
+    exploitations.forEach(e => { const k = e.last_score; if(k&&cnt[k]!==undefined) cnt[k]++; else cnt.none++; });
+    const cols  = { A:'#16a34a', B:'#0ea5e9', C:'#f59e0b', D:'#ef4444', none:'#cbd5e1' };
+    const lbls  = { A:'Score A', B:'Score B', C:'Score C', D:'Score D', none:'Sans bilan' };
+    const r = 40, sw = 16, circ = 2 * Math.PI * r, cx = 56, cy = 56;
+    let offsetArc = 0;
+    const segs = ['A','B','C','D','none'].filter(k => cnt[k] > 0).map(k => {
+      const arc = (cnt[k] / total) * circ;
+      const rotDeg = -90 + (offsetArc / circ) * 360;
+      offsetArc += arc;
+      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${cols[k]}" stroke-width="${sw}"
+        stroke-dasharray="${arc.toFixed(2)} ${circ.toFixed(2)}"
+        transform="rotate(${rotDeg.toFixed(2)},${cx},${cy})"/>`;
+    });
+    const svgHtml = `<svg width="112" height="112" viewBox="0 0 112 112" style="flex-shrink:0;">
+      ${segs.join('')}
+      <text x="${cx}" y="${cy-3}" text-anchor="middle" fill="currentColor" font-size="15" font-weight="900" style="fill:var(--text)">${total}</text>
+      <text x="${cx}" y="${cy+11}" text-anchor="middle" font-size="6.5" style="fill:#94a3b8">exploit.</text>
+    </svg>`;
+    const legend = ['A','B','C','D','none'].filter(k=>cnt[k]>0).map(k=>
+      `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+         <div style="width:10px;height:10px;border-radius:2px;background:${cols[k]};flex-shrink:0;"></div>
+         <span style="font-size:.78rem;color:var(--text);">${lbls[k]}</span>
+         <span style="font-size:.78rem;font-weight:700;margin-left:auto;padding-left:6px;">${cnt[k]}</span>
+       </div>`).join('');
+    donutEl.innerHTML = svgHtml + `<div style="flex:1;">${legend}</div>`;
+  }
+
+  // --- Barres par type de production ---
+  const barEl = document.getElementById('chart-score-by-type');
+  if (barEl) {
+    const types = ['lait','viande','mixte'];
+    const tlbls = { lait:'🥛 Lait', viande:'🥩 Viande', mixte:'🔀 Mixte' };
+    const scols  = { A:'#16a34a', B:'#0ea5e9', C:'#f59e0b', D:'#ef4444' };
+    const byType = {};
+    types.forEach(t => { byType[t] = {A:0,B:0,C:0,D:0,total:0}; });
+    exploitations.forEach(e => {
+      const t = e.type||'lait'; if(!byType[t]) return;
+      byType[t].total++;
+      if(e.last_score && byType[t][e.last_score]!==undefined) byType[t][e.last_score]++;
+    });
+    const active = types.filter(t => byType[t].total > 0);
+    if (!active.length) { barEl.innerHTML = '<div style="font-size:.8rem;color:var(--text-muted);padding:8px;">Aucune donnée</div>'; return; }
+    barEl.innerHTML = active.map(t => {
+      const d = byType[t];
+      const bars = ['A','B','C','D'].filter(s=>d[s]>0).map(s => {
+        const w = Math.round((d[s]/d.total)*100);
+        return `<div title="${s} : ${d[s]}" style="width:${w}%;min-width:2px;height:12px;background:${scols[s]};" ></div>`;
+      }).join('');
+      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:.76rem;font-weight:600;min-width:72px;color:var(--text);">${tlbls[t]}</div>
+        <div style="flex:1;display:flex;gap:2px;background:#f1f5f9;border-radius:3px;overflow:hidden;height:12px;">${bars||'<div style="width:100%;background:#e2e8f0;"></div>'}</div>
+        <div style="font-size:.72rem;color:#64748b;min-width:30px;text-align:right;">${d.total}×</div>
+      </div>`;
+    }).join('') + `<div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;">
+      ${['A','B','C','D'].map(s=>`<div style="display:flex;align-items:center;gap:3px;font-size:.7rem;">
+        <div style="width:8px;height:8px;background:${scols[s]};border-radius:1px;"></div><span style="color:var(--text);">${s}</span></div>`).join('')}
+    </div>`;
+  }
+}
+
+/* ══ BIBLIOTHÈQUE DE RATIONS TYPES ══ */
+const TPL_LS_KEY = 'rumi-conseiller-ration-tpl';
+
+function getTemplates() {
+  try { return JSON.parse(localStorage.getItem(TPL_LS_KEY) || '[]'); } catch { return []; }
+}
+function saveTemplates(tpls) {
+  localStorage.setItem(TPL_LS_KEY, JSON.stringify(tpls));
+}
+
+function openRationLibrary() {
+  renderLibraryList();
+  document.getElementById('library-modal').classList.remove('hidden');
+  document.getElementById('library-name').value = '';
+}
+function closeLibraryModal() {
+  document.getElementById('library-modal').classList.add('hidden');
+}
+
+function renderLibraryList() {
+  const tpls = getTemplates();
+  const cont = document.getElementById('library-list');
+  if (!tpls.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text-muted);">📭 Aucun modèle sauvegardé.<br><span style="font-size:.8rem;">Composez une ration puis cliquez sur "Sauvegarder modèle".</span></div>';
+    return;
+  }
+  cont.innerHTML = tpls.map((t, i) => {
+    const preview = (t.rows||[]).slice(0,4).map(r => `${r.nom} (${parseFloat(r.qty)||0} kg MS)`).join(', ');
+    const more = (t.rows||[]).length > 4 ? ` +${(t.rows.length-4)} autres` : '';
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:2px;">${escHtml(t.name)}</div>
+          <div style="font-size:.75rem;color:#64748b;margin-bottom:4px;">🐄 ${t.typeAnimal||'—'} ${t.pv?'· '+t.pv+' kg PV':''} ${t.prod?'· '+t.prod+' L/j':''}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">${escHtml(preview)}${more}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <button class="btn btn-primary btn-sm" onclick="applyTemplate(${i})">Appliquer</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTemplate(${i})">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveToLibrary() {
+  openRationLibrary();
+  setTimeout(() => document.getElementById('library-name').focus(), 150);
+}
+
+function confirmSaveToLibrary() {
+  const name = document.getElementById('library-name').value.trim();
+  if (!name) { showToast('Donnez un nom au modèle.', 'warn'); return; }
+  const rows = getRationRows();
+  if (!rows.length) { showToast('La ration est vide.', 'warn'); return; }
+  const tpls = getTemplates();
+  tpls.unshift({
+    id: Date.now().toString(),
+    name,
+    typeAnimal: document.getElementById('r-type-animal')?.value || '',
+    pv: gN('r-pv') || null,
+    prod: gN('r-prod') || null,
+    rows,
+    createdAt: new Date().toISOString(),
+  });
+  saveTemplates(tpls);
+  document.getElementById('library-name').value = '';
+  renderLibraryList();
+  showToast(`✅ Modèle "${name}" sauvegardé.`, 'success');
+}
+
+function applyTemplate(i) {
+  const tpls = getTemplates();
+  const t = tpls[i];
+  if (!t) return;
+  if (t.typeAnimal) { const el = document.getElementById('r-type-animal'); if(el) { el.value = t.typeAnimal; onAnimalTypeChange(); } }
+  if (t.pv) { const el = document.getElementById('r-pv'); if(el) el.value = t.pv; }
+  if (t.prod) { const el = document.getElementById('r-prod'); if(el) el.value = t.prod; }
+  const cont = document.getElementById('ration-rows');
+  if (cont && t.rows && t.rows.length) {
+    cont.innerHTML = '';
+    t.rows.forEach(r => {
+      addRationRow();
+      const rows2 = cont.querySelectorAll('.ration-row');
+      const last = rows2[rows2.length-1];
+      if (last) { last.querySelector('.ration-input-nom').value = r.nom||''; last.querySelector('.ration-input-qty').value = r.qty||''; }
+    });
+  }
+  closeLibraryModal();
+  showToast(`📚 Modèle "${t.name}" appliqué.`, 'success');
+}
+
+function deleteTemplate(i) {
+  const tpls = getTemplates();
+  const name = tpls[i]?.name || '';
+  tpls.splice(i, 1);
+  saveTemplates(tpls);
+  renderLibraryList();
+  showToast(`Modèle "${name}" supprimé.`, 'info');
+}
+
 const ALERT_LS_KEY = 'rumi-conseiller-alerts';
 function getAlertSettings() {
   try { return JSON.parse(localStorage.getItem(ALERT_LS_KEY)||'{}'); } catch { return {}; }
@@ -1578,6 +1788,7 @@ function updateDashMetrics() {
   document.getElementById('m-total').textContent = total;
   document.getElementById('m-good').textContent = good;
   document.getElementById('m-warn').textContent = warn;
+  renderDashCharts();
   // Sessions ce mois — on laisse async
   loadMonthSessionCount();
 }
@@ -1974,6 +2185,12 @@ function calcBilan() {
 
   renderQualityScore(a, b);
   renderIndicateurs(a, b);
+
+  // Afficher bouton comparer + reset panneau si exploitation chargée
+  const _btnCmp = document.getElementById('btn-compare');
+  if (_btnCmp) _btnCmp.style.display = currentExp ? '' : 'none';
+  const _cmpWrap = document.getElementById('compare-wrap');
+  if (_cmpWrap) _cmpWrap.style.display = 'none';
 
   // Persist score
   if (currentExp) updateExpScore(rUFL, rPDI, ppu, a);
@@ -2784,6 +3001,145 @@ function renderIndicateurs(a,b) {
     card('ingestion','🐄','Ingestion / Saturation',ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail)+
     card('ferment','🌾','Fermentescibilité (SARA)',fCls,fBadge,fBadgeCls,fResume,fDetail)+
     card('densite','📊','Densité énergétique',dCls,dBadge,dBadgeCls,dResume,dDetail);
+}
+
+/* ══ COMPARAISON SESSIONS ══ */
+async function showComparePanel() {
+  const wrap = document.getElementById('compare-wrap');
+  if (!wrap) return;
+  if (!currentExp) { showToast('Ouvrez une exploitation.', 'warn'); return; }
+  if (!lastApports || !lastBesoins) { showToast('Calculez d\'abord un bilan.', 'warn'); return; }
+
+  // Toggle
+  if (wrap.style.display !== 'none') { wrap.style.display = 'none'; return; }
+
+  wrap.style.display = '';
+  wrap.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">⏳ Chargement de la session précédente…</div>';
+
+  try {
+    const supa = getSupa();
+    const { data, error } = await supa.from('exploitation_sessions')
+      .select('*').eq('exploitation_id', currentExp.id)
+      .order('date', { ascending: false }).limit(1);
+    if (error) throw error;
+    if (!data || !data.length || !data[0].data?.apports) {
+      wrap.innerHTML = `<div class="card" style="margin-bottom:0;"><div class="card-header"><div class="card-title">🔄 Comparaison</div></div>
+        <div style="padding:16px;text-align:center;color:var(--text-muted);">Aucune session précédente sauvegardée pour cette exploitation.</div></div>`;
+      return;
+    }
+    const s = data[0];
+    wrap.innerHTML = renderCompare(s.data.apports, s.data.besoins, s.data.rows || [], s.data.score || '—', new Date(s.date).toLocaleDateString('fr-FR'));
+  } catch(e) {
+    wrap.innerHTML = `<div class="card" style="padding:16px;color:#dc2626;">Erreur : ${e.message}</div>`;
+  }
+}
+
+function renderCompare(pA, pB, pRows, pScore, pDate) {
+  const cA = lastApports, cB = lastBesoins;
+  const eu = UFV_TYPES.includes(cB.typeLabel) ? 'UFV' : 'UFL';
+
+  const pRUFL = pB.bUFL > 0 ? pA.totalUFL / pB.bUFL : 0;
+  const pRPDI = pB.bPDI > 0 ? pA.totalPDI / pB.bPDI : 0;
+  const cRUFL = cB.bUFL > 0 ? cA.totalUFL / cB.bUFL : 0;
+  const cRPDI = cB.bPDI > 0 ? cA.totalPDI / cB.bPDI : 0;
+  const cScore = computeScore(cRUFL, cRPDI, cA.totalUFL > 0 ? cA.totalPDI / cA.totalUFL : 0);
+  const scoreVal = { A:4, B:3, C:2, D:1 };
+  const scoreImproved = (scoreVal[cScore]||0) > (scoreVal[pScore]||0);
+  const scoreSame = cScore === pScore;
+
+  const SC = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#dc2626' };
+
+  // Delta helpers
+  const pct = (cur, prev) => {
+    const d = (cur - prev) * 100;
+    const sign = d > 0 ? '+' : '';
+    const col = d > 0.5 ? '#16a34a' : d < -0.5 ? '#dc2626' : '#64748b';
+    return `<span style="color:${col};font-weight:700;">${sign}${d.toFixed(0)} pp</span>`;
+  };
+  const diff = (cur, prev, unit='', dec=1) => {
+    const d = cur - prev;
+    const sign = d > 0 ? '+' : '';
+    const col = Math.abs(d) < 0.001 ? '#64748b' : d > 0 ? '#16a34a' : '#dc2626';
+    return `<span style="color:${col};font-weight:700;">${sign}${d.toFixed(dec)}${unit}</span>`;
+  };
+  const mRow = (icon, label, pv, cv, dv) =>
+    `<tr><td style="font-size:.82rem;color:var(--text-muted);padding:5px 12px 5px 0;white-space:nowrap;">${icon} ${label}</td>
+     <td style="font-size:.85rem;font-weight:600;text-align:right;padding:5px 10px;">${pv}</td>
+     <td style="color:#94a3b8;text-align:center;padding:5px 4px;">→</td>
+     <td style="font-size:.85rem;font-weight:600;padding:5px 10px;">${cv}</td>
+     <td style="padding:5px 0;">${dv}</td></tr>`;
+
+  // Ration diff
+  const prevMap = {};
+  pRows.forEach(r => { if(r.nom) prevMap[r.nom.toLowerCase()] = { nom: r.nom, qty: parseFloat(r.qty)||0 }; });
+  const currMap = {};
+  getRationRows().forEach(r => { if(r.nom) currMap[r.nom.toLowerCase()] = { nom: r.nom, qty: parseFloat(r.qty)||0 }; });
+
+  let itemsHtml = '';
+  const iRow = (icon, col, html) =>
+    `<div style="display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:.82rem;">
+      <span style="color:${col};font-weight:900;min-width:14px;flex-shrink:0;">${icon}</span><span>${html}</span></div>`;
+
+  Object.keys(currMap).forEach(k => {
+    if (!prevMap[k]) {
+      itemsHtml += iRow('+', '#16a34a', `<strong>${escHtml(currMap[k].nom)}</strong> — ${currMap[k].qty.toFixed(1)} kg MS <span style="color:#16a34a;font-size:.75rem;">(ajouté)</span>`);
+    } else {
+      const d = currMap[k].qty - prevMap[k].qty;
+      if (Math.abs(d) > 0.05) {
+        const col = d > 0 ? '#0369a1' : '#b45309';
+        itemsHtml += iRow('~', col, `<strong>${escHtml(currMap[k].nom)}</strong> : ${prevMap[k].qty.toFixed(1)} → <strong>${currMap[k].qty.toFixed(1)} kg MS</strong> <span style="color:${col};font-weight:700;">(${d>0?'+':''}${d.toFixed(1)} kg)</span>`);
+      }
+    }
+  });
+  Object.keys(prevMap).forEach(k => {
+    if (!currMap[k]) itemsHtml += iRow('−', '#dc2626', `<strong>${escHtml(prevMap[k].nom)}</strong> — supprimé <span style="color:#94a3b8;font-size:.75rem;">(était ${prevMap[k].qty.toFixed(1)} kg)</span>`);
+  });
+  if (!itemsHtml) itemsHtml = '<div style="font-size:.82rem;color:var(--text-muted);">Mêmes aliments et quantités — aucune modification.</div>';
+
+  const pDens = pA.totalMS > 0 ? pA.totalUFL / pA.totalMS : 0;
+  const cDens = cA.totalMS > 0 ? cA.totalUFL / cA.totalMS : 0;
+
+  return `<div class="card" style="margin-bottom:0;border-left:4px solid #6366f1;">
+    <div class="card-header">
+      <div class="card-title">🔄 Comparaison — session du ${pDate}</div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('compare-wrap').style.display='none'">✕</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:4px;">Session du ${pDate}</div>
+        <div style="font-size:2.8rem;font-weight:900;color:${SC[pScore]||'#64748b'};line-height:1;">${pScore}</div>
+        <div style="font-size:.72rem;color:#94a3b8;margin-top:2px;">Score précédent</div>
+      </div>
+      <div style="background:${scoreImproved?'#f0fdf4':scoreSame?'#f8fafc':'#fef2f2'};border-radius:10px;padding:12px;text-align:center;border:2px solid ${scoreImproved?'#86efac':scoreSame?'#e2e8f0':'#fecaca'};">
+        <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:4px;">Bilan actuel ${scoreImproved?'📈':scoreSame?'↔':'📉'}</div>
+        <div style="font-size:2.8rem;font-weight:900;color:${SC[cScore]||'#64748b'};line-height:1;">${cScore}</div>
+        <div style="font-size:.72rem;font-weight:700;color:${scoreImproved?'#15803d':scoreSame?'#64748b':'#dc2626'};margin-top:2px;">${scoreImproved?'✅ Amélioration':scoreSame?'Stable':'⚠️ Régression'}</div>
+      </div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+      <thead><tr>
+        <th style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;text-align:left;padding-bottom:6px;">Indicateur</th>
+        <th style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;text-align:right;padding-bottom:6px;">Avant</th>
+        <th></th>
+        <th style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;padding-bottom:6px;">Après</th>
+        <th style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;padding-bottom:6px;">Δ</th>
+      </tr></thead>
+      <tbody>
+        ${mRow('⚡', `Énergie (${eu})`, `${(pRUFL*100).toFixed(0)}%`, `${(cRUFL*100).toFixed(0)}%`, pct(cRUFL, pRUFL))}
+        ${mRow('🧬', 'Protéines (PDI)', `${(pRPDI*100).toFixed(0)}%`, `${(cRPDI*100).toFixed(0)}%`, pct(cRPDI, pRPDI))}
+        ${mRow('🐄', 'MS totale', `${pA.totalMS.toFixed(1)} kg`, `${cA.totalMS.toFixed(1)} kg`, diff(cA.totalMS, pA.totalMS, ' kg'))}
+        ${mRow('📊', `Densité (${eu}/kg MS)`, pDens.toFixed(3), cDens.toFixed(3), diff(cDens, pDens, '', 3))}
+        ${pA.totalPDI&&cA.totalPDI ? mRow('⚖️', 'PDI total', `${pA.totalPDI.toFixed(0)} g`, `${cA.totalPDI.toFixed(0)} g`, diff(cA.totalPDI, pA.totalPDI, ' g', 0)) : ''}
+      </tbody>
+    </table>
+
+    <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:.04em;margin-bottom:6px;">Modifications de la ration</div>
+    <div style="background:#f8fafc;border-radius:8px;padding:10px 14px;">
+      ${itemsHtml}
+    </div>
+  </div>`;
 }
 
 /* ══ OPTIMISEUR ══ */
