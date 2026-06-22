@@ -832,6 +832,23 @@ function setTheme(t) {
           </div>
         </div>
       </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header"><div class="card-title">🔔 Alertes & Surveillance</div></div>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">Configurez le délai sans bilan au-delà duquel une exploitation remonte automatiquement en alerte sur le tableau de bord et dans la liste des exploitations.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Inactivité — jours sans bilan</label>
+            <input type="number" class="form-input" id="alert-inactive-days" min="1" max="365" value="30">
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">Défaut : 30 j. Au-delà, l'exploitation apparaît avec le badge ⏰ et remonte dans les alertes du tableau de bord.</div>
+          </div>
+          <div class="form-group">
+            <label>Nouvelle exploitation sans bilan (jours)</label>
+            <input type="number" class="form-input" id="alert-new-exp-days" min="1" max="60" value="7">
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">Défaut : 7 j. Une exploitation créée mais sans aucun bilan enregistré remonte en alerte.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveAlertSettings()">💾 Sauvegarder</button>
+      </div>
     </div>
 
   </div><!-- /main-content -->
@@ -1401,6 +1418,7 @@ function showPage(page) {
     tba.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openExpModal(null)">+ Nouvelle exploitation</button>`;
   }
 
+  if (page === 'settings') loadAlertSettingsUI();
   if (page !== 'exp-detail') prevPage = page;
 }
 
@@ -1464,7 +1482,13 @@ function renderExpCards() {
     const scoreLabel = score || '—';
     const typeClass = e.type==='viande'?'type-viande':e.type==='mixte'?'type-mixte':'';
     const lastDate = e.last_session_date ? new Date(e.last_session_date).toLocaleDateString('fr-FR') : 'Jamais';
-    return `<div class="exp-card ${typeClass}" onclick="openExp('${e.id}')">
+    const _as2 = getAlertSettings();
+    const _inactThresh = new Date(Date.now() - (_as2.inactiveDays||30) * 86400000);
+    const _newThresh   = new Date(Date.now() - (_as2.newExpDays||7)   * 86400000);
+    const _isInactive  = e.last_session_date ? new Date(e.last_session_date) < _inactThresh : new Date(e.created_at) < _newThresh;
+    const _daysSince   = e.last_session_date ? Math.round((Date.now()-new Date(e.last_session_date).getTime())/86400000) : null;
+    return `<div class="exp-card ${typeClass}" style="${_isInactive?'border-color:#fde68a;':''}" onclick="openExp('${e.id}')">
+      ${_isInactive?`<div style="background:#fffbeb;border-bottom:1px solid #fde68a;border-radius:10px 10px 0 0;padding:4px 12px;font-size:.72rem;color:#92400e;font-weight:700;">⏰ Inactif${_daysSince?` depuis ${_daysSince} j`:' — jamais de bilan'} — à contacter</div>`:''}
       <div class="exp-card-name">${escHtml(e.nom)}</div>
       <div class="exp-card-type">${e.type||'lait'} ${e.nb_animaux?'• '+e.nb_animaux+' animaux':''}</div>
       <div class="exp-card-stats">
@@ -1473,7 +1497,7 @@ function renderExpCards() {
         <div class="exp-stat"><div class="exp-stat-val">${e.last_ms||'—'}</div><div class="exp-stat-lbl">kg MS</div></div>
       </div>
       <div class="exp-card-footer">
-        <span>Dernier bilan : ${lastDate}</span>
+        <span style="${_isInactive?'color:#b45309;font-weight:600;':''}">Dernier bilan : ${lastDate}</span>
         <span class="exp-score-badge ${scoreClass}">Score ${scoreLabel}</span>
       </div>
     </div>`;
@@ -1494,11 +1518,15 @@ function renderExpTable() {
     const score = e.last_score||'';
     const scoreClass = score?'badge-'+(score==='A'||score==='B'?'green':score==='C'?'amber':'red'):'badge-gray';
     const lastDate = e.last_session_date ? new Date(e.last_session_date).toLocaleDateString('fr-FR') : '—';
-    return `<tr>
-      <td><strong>${escHtml(e.nom)}</strong></td>
+    const _ast = getAlertSettings();
+    const _inactT = new Date(Date.now() - (_ast.inactiveDays||30) * 86400000);
+    const _newT   = new Date(Date.now() - (_ast.newExpDays||7)   * 86400000);
+    const _inaT   = e.last_session_date ? new Date(e.last_session_date) < _inactT : new Date(e.created_at) < _newT;
+    return `<tr style="${_inaT?'background:#fffbeb;':''}">
+      <td><strong>${escHtml(e.nom)}</strong>${_inaT?'<span style="margin-left:6px;font-size:.7rem;color:#b45309;font-weight:700;">⏰ Inactif</span>':''}</td>
       <td><span class="badge badge-${e.type==='lait'?'green':e.type==='viande'?'amber':'blue'}">${e.type||'lait'}</span></td>
       <td>${escHtml(e.contact_nom||'')} ${e.contact_tel?'· '+e.contact_tel:''}</td>
-      <td>${lastDate}</td>
+      <td style="${_inaT?'color:#b45309;font-weight:600;':''}">${_inaT?'⏰ ':''}${lastDate}</td>
       <td><span class="badge ${scoreClass}">${score||'—'}</span></td>
       <td style="display:flex;gap:6px;">
         <button class="btn btn-ghost btn-sm" onclick="openExp('${e.id}')">Ouvrir</button>
@@ -1520,6 +1548,27 @@ function renderSidebarExps() {
       <span class="sidebar-exp-name">${escHtml(e.nom)}</span>
       <span class="sidebar-exp-type">${e.type||''}</span>
     </button>`).join('');
+}
+
+const ALERT_LS_KEY = 'rumi-conseiller-alerts';
+function getAlertSettings() {
+  try { return JSON.parse(localStorage.getItem(ALERT_LS_KEY)||'{}'); } catch { return {}; }
+}
+function saveAlertSettings() {
+  const days = Math.max(1, parseInt(document.getElementById('alert-inactive-days')?.value)||30);
+  const newDays = Math.max(1, parseInt(document.getElementById('alert-new-exp-days')?.value)||7);
+  localStorage.setItem(ALERT_LS_KEY, JSON.stringify({inactiveDays:days, newExpDays:newDays}));
+  showToast('Paramètres alertes sauvegardés.', 'success');
+  loadDashboardAlerts(exploitations);
+  renderExpCards();
+  renderExpTable();
+}
+function loadAlertSettingsUI() {
+  const s = getAlertSettings();
+  const el = document.getElementById('alert-inactive-days');
+  const el2 = document.getElementById('alert-new-exp-days');
+  if(el) el.value = s.inactiveDays || 30;
+  if(el2) el2.value = s.newExpDays || 7;
 }
 
 function updateDashMetrics() {
@@ -2622,8 +2671,8 @@ function renderIndicateurs(a,b) {
   const pctConc=a.totalMS>0?(1-foragekgMS/a.totalMS)*100:0;
   const pctFourrage=100-pctConc;
   const na=gN('mineraux-na'),k=gN('mineraux-k'),ca=gN('mineraux-ca');
-  const mg=gN('mineraux-mg'),cl=gN('mineraux-cl'),s=gN('mineraux-s');
-  const hasBaca=na||k||ca||mg||cl||s;
+  const mg=gN('mineraux-mg'),cl=gN('mineraux-cl'),s=gN('mineraux-s'),pp=gN('mineraux-p');
+  const hasBaca=na||k||ca||mg||cl||s||pp;
   const baca=hasBaca?(na*43.5+k*25.6+ca*49.9+mg*82.2)-(cl*28.2+s*62.4):null;
   const caApport=ca*a.totalMS,mgApport=mg*a.totalMS,naApport=na*a.totalMS;
   let caReq=50,mgReq=15,naReq=8;
@@ -2684,12 +2733,45 @@ function renderIndicateurs(a,b) {
   if(ca>0){const r=caApport/caReq;mDetail+=tip(r<0.75?'danger':r>1.4?'warn':'ok','Ca',`Ca : apport ${caApport.toFixed(0)} g/j — besoin ${caReq.toFixed(0)} g/j — ${r<0.75?'⚠️ Déficit (risque fièvre de lait)':r>1.4?'Excès':'✅ Correct'}`);}
   if(mg>0){const r=mgApport/mgReq;mDetail+=tip(r<0.75?'danger':r>1.8?'warn':'ok','Mg',`Mg : apport ${mgApport.toFixed(0)} g/j — besoin ${mgReq.toFixed(0)} g/j — ${r<0.75?'⚠️ Déficit (risque tétanie)':r>1.8?'Excès léger':'✅ Correct'}`);}
   if(na>0){const r=naApport/naReq;mDetail+=tip(r<0.7?'warn':r>2.5?'warn':'ok','Na',`Na : apport ${naApport.toFixed(0)} g/j — besoin ${naReq.toFixed(0)} g/j — ${r<0.7?'Déficit':r>2.5?'Excès':'✅ Correct'}`);}
+  if(pp>0){const pApport=pp*a.totalMS;const pReq=b.typeLabel==='vache-laitiere'?35+0.3*prod:25;const r=pApport/pReq;mDetail+=tip(r<0.75?'danger':r>1.8?'warn':'ok','P',`P : apport ${pApport.toFixed(0)} g/j — besoin ${pReq.toFixed(0)} g/j — ${r<0.75?'⚠️ Déficit (risque os/reproduction)':r>1.8?'Excès (risque métabolique)':'✅ Correct'}`);if(ca>0)mDetail+=tip(ca/pp<1.2?'warn':ca/pp>2.5?'warn':'ok','Ca/P',`Ratio Ca/P = ${(ca/pp).toFixed(1)} (cible 1.5–2.5) — ${ca/pp<1.2?'⚠️ Trop bas':ca/pp>2.5?'⚠️ Trop élevé (réduit absorption P)':'✅ Correct'}`);}
   }
 
   // 6. ACIDES AMINÉS
   let aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail;
   if(!metApport&&!lysApport){aaCls='info';aaBadge='Non renseigné';aaBadgeCls='rb-badge-gray';aaResume='Saisir Met et Lys (g/j)';aaDetail=adv('Renseignez Met et Lys pour évaluer les AA limitants — essentiel pour les vaches hautes productrices.')+tip('info','Met','Méthionine : 1er AA limitant')+tip('info','Lys','Lysine : 2e AA limitant')+tip('info','📊','Cibles INRA : Met ≥ 2.4% PDI — Lys ≥ 7.2% PDI');}
   else{const metOk=!metApport||metPct>=2.0,lysOk=!lysApport||lysPct>=6.5;aaCls=metOk&&lysOk?'ok':'bad';aaBadge=metOk&&lysOk?'Équilibré':'À corriger';aaBadgeCls=metOk&&lysOk?'rb-badge-green':'rb-badge-red';aaResume=[metApport?`Met ${metPct.toFixed(1)}%`:'',lysApport?`Lys ${lysPct.toFixed(1)}%`:''].filter(Boolean).join(' / ')+' du PDI';aaDetail=adv('Les AA limitants chez la vache laitière sont la Méthionine et la Lysine.');if(metApport){const st=metPct>=2.4?'ok':metPct>=2.0?'warn':'danger';aaDetail+=tip(st,'Met',`Met : ${metApport.toFixed(0)} g/j = ${metPct.toFixed(1)}% PDI (cible ≥ 2.4%) — ${metPct>=2.4?'✅ Optimal':metPct>=2.0?'Correct':'⚠️ Déficit'}`);}if(lysApport){const st=lysPct>=7.2?'ok':lysPct>=6.5?'warn':'danger';aaDetail+=tip(st,'Lys',`Lys : ${lysApport.toFixed(0)} g/j = ${lysPct.toFixed(1)}% PDI (cible ≥ 7.2%) — ${lysPct>=7.2?'✅ Optimal':lysPct>=6.5?'Correct':'⚠️ Déficit'}`);}}
+
+  // 7. INGESTION / SATURATION RUMINALE
+  let ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail;
+  const cap=b.ingestionCapacite;
+  if(cap<=0){ingCls='info';ingBadge='Non calculée';ingBadgeCls='rb-badge-gray';ingResume='Saisir le poids vif';ingDetail=adv('La capacité d\'ingestion est estimée automatiquement à partir du poids vif et du type d\'animal. Renseignez le PV pour activer cet indicateur.')+tip('info','📏','Typiquement ~3% du PV pour une VL en lactation (ex: 600 kg → 18 kg MS/j)');}
+  else{const ri=a.totalMS/cap;ingResume=`${a.totalMS.toFixed(1)} / ${cap.toFixed(1)} kg MS/j`;
+    if(ri<0.88){ingCls='warn';ingBadge='Sous-ingestion';ingBadgeCls='rb-badge-orange';ingDetail=adv(`La vache n'exploite que ${(ri*100).toFixed(0)}% de sa capacité d'ingestion (${cap.toFixed(1)} kg MS/j). La production peut être bridée.`)+tip('warn','📋','Vérifier appétence et fraîcheur des fourrages')+tip('warn','⏰','Fractionner les repas pour stimuler la consommation')+tip('warn','🌾','Un fourrage de mauvaise qualité ou trop humide peut réduire l\'ingestion');}
+    else if(ri<=1.05){ingCls='ok';ingBadge='Optimal';ingBadgeCls='rb-badge-green';ingDetail=adv(`Ingestion optimale : ${a.totalMS.toFixed(1)} kg MS/j pour une capacité de ${cap.toFixed(1)} kg.`)+tip('ok','✅','La ration correspond bien à la capacité d\'ingestion de l\'animal');}
+    else if(ri<=1.12){ingCls='warn';ingBadge='Limite haute';ingBadgeCls='rb-badge-orange';ingDetail=adv(`Ration légèrement supérieure à la capacité d\'ingestion (${(ri*100).toFixed(0)}%). Des refus sont probables.`)+tip('warn','📊','Surveiller les refus au cornadis')+tip('warn','✂️','Réduire légèrement les concentrés ou améliorer la compaction de la ration');}
+    else{ingCls='bad';ingBadge='Surcharge';ingBadgeCls='rb-badge-red';ingDetail=adv(`Surcharge importante (${(ri*100).toFixed(0)}% de la capacité). Refus et risque d\'acidose si les animaux trient.`)+tip('danger','🚨',`Réduire la ration de ${(a.totalMS-cap).toFixed(1)} kg MS/j`)+tip('danger','✂️','Réduire les concentrés en priorité');}}
+
+  // 8. FERMENTESCIBILITÉ (AR + SS)
+  let fCls,fBadge,fBadgeCls,fResume,fDetail;
+  const arKgF=(a.totalAR||0)/(a.totalMS||1),ssKgF=(a.totalSS||0)/(a.totalMS||1),fermentF=arKgF+ssKgF;
+  if(!(a.totalAR||0)&&!(a.totalSS||0)){fCls='info';fBadge='Non disponible';fBadgeCls='rb-badge-gray';fResume='Données AR/SS absentes';fDetail=adv('L\'amidon rapidement fermentescible (AR) et les sucres solubles (SS) sont calculés automatiquement pour les aliments présents dans la base. Cet indicateur précise le risque SARA au-delà du simple % de concentrés.')+tip('info','🌽','AR élevé : blé, orge aplati > 250 g/kg MS')+tip('info','🍬','SS élevé : betterave, herbe jeune, mélasse > 100 g/kg MS');}
+  else{fResume=`${fermentF.toFixed(0)} g AR+SS / kg MS`;
+    if(fermentF<100){fCls='ok';fBadge='Faible';fBadgeCls='rb-badge-green';fDetail=adv(`Fermentescibilité faible (${fermentF.toFixed(0)} g/kg MS). Risque SARA minimal.`)+tip('ok','✅','Ration à fermentation lente — favorable à la rumination et au pH ruminal');}
+    else if(fermentF<150){fCls='ok';fBadge='Modérée';fBadgeCls='rb-badge-green';fDetail=adv(`Fermentescibilité modérée (${fermentF.toFixed(0)} g/kg MS). Valeur acceptable.`)+tip('ok','✅','Dans la plage recommandée')+tip('info','⏰','Fractionner si distribution en 1–2 repas/j');}
+    else if(fermentF<200){fCls='warn';fBadge='Élevée';fBadgeCls='rb-badge-orange';fDetail=adv(`AR+SS = ${fermentF.toFixed(0)} g/kg MS. Risque SARA si la ration est mal fractionnée.`)+tip('warn','⏰','Fractionner en ≥ 3 repas/jour')+tip('warn','🌾','Foin long à disposition pour tamponner le pH ruminal')+(arKgF>ssKgF?tip('warn','🌽','Réduire les céréales aplaties (principale source d\'AR)'):tip('warn','🍬','Modérer la betterave ou la mélasse'));}
+    else{fCls='bad';fBadge='Très élevée';fBadgeCls='rb-badge-red';fDetail=adv(`⚠️ AR+SS = ${fermentF.toFixed(0)} g/kg MS — Risque SARA clinique élevé.`)+tip('danger','🚨','Substituer blé/orge par maïs grain ou maïs ensilage (AR plus lent)')+tip('danger','💊','Bicarbonate de Na 200 g/j + MgO 50 g/j en tampon')+tip('danger','🌾','Augmenter la fibre efficace : foin long ou paille hachée fine');}
+    if(arKgF>0)fDetail+=tip(arKgF>150?'danger':arKgF>100?'warn':'ok','AR',`Amidon rapide : ${arKgF.toFixed(0)} g/kg MS (cible < 150)`);
+    if(ssKgF>0)fDetail+=tip(ssKgF>120?'warn':'ok','SS',`Sucres solubles : ${ssKgF.toFixed(0)} g/kg MS (cible < 120)`);}
+
+  // 9. DENSITÉ ÉNERGÉTIQUE
+  let dCls,dBadge,dBadgeCls,dResume,dDetail;
+  const densE=a.totalMS>0?a.totalUFL/a.totalMS:0;
+  const dLow=UFV_TYPES.includes(b.typeLabel)?0.78:0.82,dHigh=UFV_TYPES.includes(b.typeLabel)?0.91:0.97;
+  dResume=densE>0?`${densE.toFixed(3)} ${eu}/kg MS`:'—';
+  if(!densE){dCls='info';dBadge='—';dBadgeCls='rb-badge-gray';dDetail=adv('Calculez la ration pour obtenir la densité énergétique.');}
+  else if(densE<dLow){dCls='warn';dBadge='Trop faible';dBadgeCls='rb-badge-orange';dDetail=adv(`Densité énergétique faible (${densE.toFixed(3)} ${eu}/kg MS — cible ${dLow}–${dHigh}). La ration est très volumineuse.`)+tip('warn','📦','Chez les hautes productrices, une ration trop diluée peut limiter les apports énergétiques')+tip('warn','🌽','Augmenter ensilage de maïs dense ou céréales aplaties');}
+  else if(densE<=dHigh){dCls='ok';dBadge='Optimale';dBadgeCls='rb-badge-green';dDetail=adv(`Densité énergétique optimale (${densE.toFixed(3)} ${eu}/kg MS — cible ${dLow}–${dHigh}).`)+tip('ok','✅','Bonne concentration énergétique — ni trop diluée ni trop concentrée');}
+  else{dCls='warn';dBadge='Élevée';dBadgeCls='rb-badge-orange';dDetail=adv(`Densité énergétique élevée (${densE.toFixed(3)} ${eu}/kg MS). Ration très concentrée en énergie.`)+tip('warn','⚠️','Risque d\'acidose si les fourrages grossiers sont insuffisants')+tip('warn','🌾','Vérifier l\'apport en fibres longues (NDF efficace)');}
 
   const container=document.getElementById('bilan-indicateurs'); if(!container)return;
   container.innerHTML=`<div style="margin-bottom:10px;font-size:.82rem;color:var(--text-muted);">🔍 Cliquez sur une carte pour afficher les conseils</div>`+
@@ -2698,7 +2780,10 @@ function renderIndicateurs(a,b) {
     card('equilibre','⚖️',`Équilibre E/P`,eCls2,eBadge2,eBadgeCls2,`PDI/${eu} = ${ppu.toFixed(0)} g/${eu}`,eDetail2)+
     card('acidose','🔥','Risque Acidose',aCls,aBadge,aBadgeCls,`${pctConc.toFixed(0)}% concentrés / ${pctFourrage.toFixed(0)}% fourrages`,aDetail)+
     card('mineraux','⚗️','Minéraux & BACA',mCls,mBadge,mBadgeCls,mResume,mDetail)+
-    card('aa','🔬','Acides aminés',aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail);
+    card('aa','🔬','Acides aminés',aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail)+
+    card('ingestion','🐄','Ingestion / Saturation',ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail)+
+    card('ferment','🌾','Fermentescibilité (SARA)',fCls,fBadge,fBadgeCls,fResume,fDetail)+
+    card('densite','📊','Densité énergétique',dCls,dBadge,dBadgeCls,dResume,dDetail);
 }
 
 /* ══ OPTIMISEUR ══ */
@@ -3077,8 +3162,9 @@ async function loadDashboardAlerts(exps) {
     if (!latestByExp[s.exploitation_id]) latestByExp[s.exploitation_id] = s;
   });
 
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
-  const sevenDaysAgo  = new Date(Date.now() -  7 * 86400000);
+  const _as = getAlertSettings();
+  const thirtyDaysAgo = new Date(Date.now() - (_as.inactiveDays||30) * 86400000);
+  const sevenDaysAgo  = new Date(Date.now() - (_as.newExpDays||7)   * 86400000);
   const alerts = [];
 
   exps.forEach(exp => {
