@@ -2451,7 +2451,9 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
 
   const UFV_TYPES = ['genisse','genisse-engrais','vache-reforme','veau',
                      'taurillon','boeuf-engrais','vache-allaitante','genisse-viande','broutard'];
-  const LAIT_TYPES = ['vache-laitiere','vache-tarie','vache-prepa-velage','vache-allaitante'];
+  // Types pour lesquels Production/TB/TP sont affichés ET réellement utilisés dans le calcul des besoins
+  // (vache-tarie et vache-prepa-velage ne dépendent que du poids vif + activité — pas de production : voir computeBesoins)
+  const LAIT_TYPES = ['vache-laitiere','vache-allaitante'];
   const GMQ_TYPES  = ['genisse','genisse-engrais','vache-reforme','veau',
                       'taurillon','boeuf-engrais','genisse-viande','broutard'];
 
