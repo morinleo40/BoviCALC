@@ -1,0 +1,241 @@
+Nom,Statut,UFL_RumiCORE,UFL_INRA2018,UFV_INRA2018,PDIA,PDI_INRA2018,BPR,UEL,UEB,bVEc,Confiance,EcartUFL_pct,Libelle_source
+Avoine,OK,0.87,0.9900000095367432,0.949999988079071,20,73,-14,,,0.3100000023841858,1,14,Céréales / Avoine
+Avoine décortiquée,OK,1,1.159999966621399,1.1699999570846558,25,83,-6,,,0.1469999998807907,1,16,Céréales / Avoine décortiquée
+Avoine floconnée,OK,0.9,0.9900000095367432,0.949999988079071,24,77,-15,,,0.32199999690055847,1,10,Céréales / Avoine floconnée
+Blé dur,OK,1.06,1.190000057220459,1.2100000381469727,36,95,16,,,0.1469999998807907,1,12,Céréales / Blé dur
+Blé tendre,OK,1.04,1.190000057220459,1.2100000381469727,28,89,-13,,,0.15299999713897705,1,14,Céréales / Blé tendre
+Blé aplati,A_VERIFIER,1.06,1.190000057220459,1.2100000381469727,28,89,-13,,,0.15299999713897705,0.33,12,Céréales / Blé tendre
+Maïs,OK,1.11,1.2400000095367432,1.2599999904632568,43,94,-53,,,0.335999995470047,1,12,Céréales / Maïs
+Maïs extrudé,OK,1.15,1.2400000095367432,1.2599999904632568,52,107,-69,,,0.23000000417232513,1,8,Céréales / Maïs extrudé
+Maïs floconné,OK,1.13,1.2400000095367432,1.2599999904632568,52,110,-74,,,0.18799999356269836,1,10,Céréales / Maïs floconné
+Maïs humide,OK,1.12,1.2300000190734863,1.2599999904632568,24,78,-34,,,0.19900000095367432,1,10,Céréales / Maïs humide
+Maïs aplati,A_VERIFIER,1.11,1.2400000095367432,1.2599999904632568,43,94,-53,,,0.335999995470047,0.5,12,Céréales / Maïs
+Mil,NON_TROUVE,,,,,,,,,,,,
+Millet commun,NON_TROUVE,,,,,,,,,,,,
+Orge,OK,1.08,1.090000033378601,1.0800000429153442,29,86,-23,,,0.1940000057220459,1,1,Céréales / Orge
+Orge aplatie,A_VERIFIER,1.08,1.090000033378601,1.0800000429153442,29,86,-23,,,0.1940000057220459,0.5,1,Céréales / Orge
+Riz cargo,OK,1.06,1.2799999713897705,1.3200000524520874,28,83,-28,,,0.23000000417232513,1,21,Céréales / Riz cargo
+Riz paddy,A_VERIFIER,0.76,1.0499999523162842,1.0199999809265137,47,98,-34,,,0.2709999978542328,0.33,38,"Coproduits du riz / Farine basse de riz, huile < 5 %, cellulose brute < 5 %"
+Seigle,OK,1.04,1.190000057220459,1.2100000381469727,20,81,-34,,,0.15299999713897705,1,14,Céréales / Seigle
+Sorgho grain,OK,1.08,1.2100000381469727,1.2300000190734863,47,97,-48,,,0.25600001215934753,1,12,Céréales / Sorgho
+Triticale,OK,1.06,1.1699999570846558,1.190000057220459,24,85,-21,,,0.17399999499320984,1,10,Céréales / Triticale
+Manioc,OK,1.08,1.0700000524520874,1.0800000429153442,11,67,-86,,,0.0820000022649765,1,1,"Amidon, racines et tubercules / Manioc, amidon 66-70 % sur brut"
+Son de blé,OK,0.78,0.9100000262260437,0.8500000238418579,37,89,34,,,0.3100000023841858,1,17,Coproduits du blé / Son de blé tendre
+Remoulage de blé,OK,0.9,1.0399999618530273,1.0099999904632568,38,92,36,,,0.2709999978542328,1,16,Coproduits du blé / Remoulage de blé dur
+Issues de blé,A_VERIFIER,0.83,0.800000011920929,0.7300000190734863,27,75,-4,,,0.289000004529953,0.67,4,"Autres coproduits de céréales / Issues de céréales, cellulose brute 5-14 %"
+Farine de blé,OK,1.1,1.2899999618530273,1.3300000429153442,38,98,21,,,0.1469999998807907,1,17,Coproduits du blé / Farine basse de blé dur
+Son de maïs,OK,0.9,1.100000023841858,1.0800000429153442,52,103,-43,,,0.3540000021457672,1,22,Coproduits du maïs / Son de maïs
+Farine de maïs,OK,1.14,1.2699999809265137,1.2899999618530273,48,100,-49,,,0.31299999356269836,1,11,Coproduits du maïs / Farine fourragère de maïs
+Gluten de maïs,OK,1.3,1.0399999618530273,1.0199999809265137,53,107,54,,,0.3089999854564667,1,20,Coproduits du maïs / Corn gluten feed
+DDGS maïs,A_VERIFIER,1.03,1.149999976158142,1.149999976158142,108,162,59,,,0.27799999713897705,0.5,12,"Coproduits du maïs / Drêches de maïs de distillerie avec solubles,  huile < 6 %, déshydratées"
+DDGS blé,A_VERIFIER,1,1.100000023841858,1.059999942779541,93,145,152,,,0.24199999868869781,0.33,10,"Coproduits du blé / Drêches de blé de distillerie, amidon < 7 %"
+Drêches de maïs fraîches,OK,1,1.0399999618530273,1.0099999904632568,30,85,-13,,,0.3240000009536743,1,4,Coproduits du maïs / Drêches d'amidonnerie de maïs
+Drêches de brasserie fraîches,OK,0.87,0.8299999833106995,0.7400000095367432,121,166,34,,,0.5109999775886536,1,5,Autres coproduits de céréales / Drêches d'orge de brasserie déshydratées
+Drêches de brasserie séchées,A_VERIFIER,0.9,0.8299999833106995,0.7400000095367432,121,166,34,,,0.5109999775886536,0.67,8,Autres coproduits de céréales / Drêches d'orge de brasserie déshydratées
+Tourteau de colza,OK,1.05,0.9900000095367432,0.949999988079071,92,144,169,,,0.31299999356269836,1,6,"Tourteaux d'oléagineux / Tourteau de colza, huile < 5 %"
+Tourteau de colza décortiqué,A_VERIFIER,1.12,1.2000000476837158,1.1699999570846558,81,133,138,,,0.31299999356269836,0.67,7,"Tourteaux d'oléagineux / Tourteau de colza, huile 5-20 %"
+Tourteau de soja 44,OK,1.17,1.2599999904632568,1.2799999713897705,163,218,224,,,0.2529999911785126,0.8,8,"Tourteaux d'oléagineux / Tourteau de soja, huile < 5 %, 46 % protéine + huile"
+Tourteau de soja 48,OK,1.23,1.2799999713897705,1.2899999618530273,172,227,244,,,0.2529999911785126,1,4,"Tourteaux d'oléagineux / Tourteau de soja, huile < 5 %, 48 % protéine + huile"
+Tourteau de tournesol,OK,0.82,0.8600000143051147,0.7900000214576721,87,137,216,,,0.32100000977516174,1,5,"Tourteaux d'oléagineux / Tourteau de tournesol, huile < 5 %, décortiqué"
+Tourteau de tournesol décortiqué,OK,0.98,1.0399999618530273,0.9800000190734863,81,131,193,,,0.32100000977516174,1,6,"Tourteaux d'oléagineux / Tourteau de tournesol, huile 5-20 %, décortiqué"
+Tourteau de lin,OK,1.06,1.0299999713897705,0.9900000095367432,135,185,115,,,0.36800000071525574,1,3,"Tourteaux d'oléagineux / Tourteau de lin, huile < 5 %"
+Tourteau de palmiste,OK,1.06,0.9300000071525574,0.8600000143051147,74,123,-13,,,0.4429999887943268,1,12,"Tourteaux d'oléagineux / Tourteau de palmiste, huile 5-20 %"
+Tourteau de coton,OK,0.88,0.949999988079071,0.8799999952316284,136,184,154,,,0.3790000081062317,1,8,"Tourteaux d'oléagineux / Tourteau de coton, huile < 5 %, cellulose brute 15-20 %"
+Tourteau de coprah,OK,1.06,1.0700000524520874,1.0299999713897705,96,146,24,,,0.2199999988079071,1,1,"Tourteaux d'oléagineux / Tourteau de coprah, huile 5-20 %"
+Pois protéagineux,A_VERIFIER,1.17,1.25,1.2799999713897705,40,99,83,,,0.15199999511241913,0.5,7,Graines de légumineuses et d'oléagineux / Pois
+Féverole,OK,1.17,1.25,1.2799999713897705,58,116,142,,,0.17499999701976776,1,7,Graines de légumineuses et d'oléagineux / Féverole à fleurs blanches
+Lupin blanc,OK,1.17,1.4299999475479126,1.4700000286102295,65,124,201,,,0.18199999630451202,1,22,Graines de légumineuses et d'oléagineux / Lupin blanc
+Lupin jaune,A_VERIFIER,1.08,1.340000033378601,1.3700000047683716,67,126,155,,,0.18199999630451202,0.5,24,Graines de légumineuses et d'oléagineux / Lupin bleu
+Luzerne déshydratée,A_VERIFIER,0.75,0.75,0.67,41,89,41,1.01,1.01,,0.5,0,"FOINS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Fané au sol par beau temps / 1er cycle / Début bourgeonnement"
+Pulpe de betterave,OK,0.86,1.0099999904632568,1.0099999904632568,29,88,-54,,,0.31299999356269836,1,17,"Amidon, racines et tubercules / Pulpe de betterave surpressée"
+Pulpe de betterave déshydratée,OK,0.93,1.0399999618530273,1.0299999713897705,33,92,-57,,,0.3089999854564667,1,12,"Amidon, racines et tubercules / Pulpe de betterave déshydratée"
+Pulpe d'agrumes déshydratée,OK,0.9,1.1200000047683716,1.1299999952316284,22,83,-63,,,0.21799999475479126,1,24,Coproduits de fruits et de légumes / Pulpe d'agrumes déshydratée
+Betterave fourragère,NON_TROUVE,,,,,,,,,,,,
+Betterave sucrière,NON_TROUVE,,,,,,,,,,,,
+Pomme de terre,OK,1.08,1.0199999809265137,1.0199999809265137,36,92,-17,,,0.2680000066757202,1,6,"Amidon, racines et tubercules / Purée-pelures de pomme de terre"
+Pomme de terre déshydratée,OK,1.14,1.0800000429153442,1.090000033378601,26,81,-28,,,0.23199999332427979,1,5,"Amidon, racines et tubercules / Pomme de terre entière déshydratée"
+Mélasse de betterave,OK,0.85,0.949999988079071,0.949999988079071,10,70,25,,,0.03799999877810478,1,12,Mélasses et vinasses / Mélasse de betterave
+Mélasse de canne,OK,0.88,0.7900000214576721,0.7599999904632568,2,58,-48,,,0.03799999877810478,1,10,Mélasses et vinasses / Mélasse de canne
+Lactosérum,OK,0.75,1.0399999618530273,1.0700000524520874,6,68,-27,,,0.03799999877810478,1,39,Produits laitiers / Lactosérum acide écrémé déshydraté
+Lactosérum en poudre,A_VERIFIER,0.87,1.0399999618530273,1.0700000524520874,6,68,-27,,,0.03799999877810478,0.5,20,Produits laitiers / Lactosérum acide écrémé déshydraté
+Levure de brasserie,OK,0.95,1.1799999475479126,1.1699999570846558,87,143,278,,,0.14800000190734863,1,24,Produits divers / Levure de brasserie déshydratée
+Farine de sang,NON_TROUVE,0.88,0.8299999833106995,0.7799999713897705,13,68,-71,,,0.2709999978542328,0.5,6,
+Farine de poisson,NON_TROUVE,1.1,1.100000023841858,1.059999942779541,40,89,1,,,0.2709999978542328,0.5,0,
+Urée 46,A_VERIFIER,0,0.25999999046325684,0.20000000298023224,0,71,2557,,,0.22599999606609344,0.67,,Produits divers / Urée
+Foin de prairie,OK,0.72,0.72,0.64,26,75,-9,1.25,1.44,,1,0,"FOINS / PRAIRIES PERMANENTES, MONTAGNE (ALPES NORD) / À base de dicotylédones, Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Épiaison du dactyle"
+Foin de prairie tardif,A_VERIFIER,0.63,0.64,0.54,20,66,-32,1.16,1.29,,0.67,2,"FOINS / PRAIRIES PERMANENTES, DEMI-MONTAGNE (AUVERGNE) / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / 1-10 juillet, floraison"
+Foin de prairie précoce,OK,0.78,0.78,0.7,26,76,-20,1.1,1.18,,1,0,"FOINS / PRAIRIES PERMANENTES, PLAINE (CRAU) / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / 1-10 mai, 1ère coupe précoce"
+Foin de luzerne,OK,0.72,0.72,0.64,40,87,41,0.97,0.95,,1,0,"FOINS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Ventilé / 2e cycle après coupe bourgeonnement / Repousses à tiges de 7 semaines"
+Foin de luzerne 1ère coupe,OK,0.74,0.74,0.66,40,89,43,0.99,0.97,,0.75,0,"FOINS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Fané au sol par beau temps / 2e cycle après coupe bourgeonnement / Repousses à tiges de 6 semaines"
+Foin de ray-grass,OK,0.75,0.75,0.68,21,71,-20,1.1,1.18,,1,0,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, ALTERNATIF / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Début floraison"
+Foin de trèfle,OK,0.7,0.7,0.62,46,92,48,0.98,0.94,,1,0,"FOINS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / Fané au sol / 2e cycle après coupe bourgeonnement / Repousses à tiges de 6 semaines"
+Foin de dactyle,OK,0.68,0.69,0.6,20,68,-18,1.17,1.32,,1,1,"FOINS / GRAMINÉES FOURRAGÈRES, DACTYLE / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Début floraison"
+Foin de fétuque,OK,0.68,0.69,0.61,20,69,-21,1.09,1.17,,1,1,"FOINS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Fané au sol par beau temps / 1er cycle / Fin épiaison"
+Regain de prairie,A_VERIFIER,0.68,0.69,0.6,22,70,-26,1.16,1.29,,0.5,1,"FOINS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Fané au sol par temps de pluie (< 10 jours) / 2e cycle après déprimage / Repousses à tiges de 9 semaines"
+Ensilage maïs,OK,0.87,0.87,0.81,12,59,-29,1.07,1.16,,1,0,"ENSILAGES / CÉRÉALES PLANTES ENTIÈRES, MAÏS / Mauvaises conditions de végétation / Hachage fin sans conservateur / Sécheresse estivale, maïs pauvre en épis"
+Ensilage maïs mûr,OK,0.92,0.96,0.92,12,62,-35,0.95,1.04,,0.8,4,"ENSILAGES / CÉRÉALES PLANTES ENTIÈRES, MAÏS / Conditions normales de végétation / Hachage fin sans conservateur / Vitreux, 35% MS "
+Ensilage maïs plante entière,OK,0.85,0.85,0.78,16,61,-9,1.16,1.26,,1,0,"ENSILAGES / CÉRÉALES PLANTES ENTIÈRES, MAÏS / Mauvaises conditions de végétation / Hachage fin sans conservateur / Gel stade laiteux-pateux, réc. 3 sem. apr. gel"
+Ensilage d'épi de maïs,OK,1.05,1.08,1.05,27,78,-42,0.97,0.9,,1,3,"ENSILAGES / CÉRÉALES PLANTES ENTIÈRES, EPIS COMPLETS DE MAÏS / Hachage fin sans conservateur / Vitreux"
+Ensilage herbe prairie,A_VERIFIER,0.82,0.8,0.72,15,59,6,1.24,1.42,,0.67,2,"ENSILAGES / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Brins courts sans conservateur / 2e cycle après déprimage / Repousses à tiges de 9 semaines"
+Ensilage d'herbe précoce,A_VERIFIER,0.88,0.9,0.84,15,64,-2,1.18,1.31,,0.67,2,"ENSILAGES / GRAMINÉES FOURRAGÈRES, RAY-GRASS ANGLAIS / Brins courts avec conservateur / 1er cycle, variétés précoces / Fin épiaison"
+Ensilage d'herbe tardif,A_VERIFIER,0.74,0.75,0.66,12,56,-1,1.32,1.6,,0.33,1,"ENSILAGES / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Brins courts sans conservateur / 1er cycle / 15-25 juin, floraison, ST = 903°C"
+Ensilage ray-grass,OK,0.88,0.88,0.82,13,62,-13,1.12,1.19,,1,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Brins courts avec conservateur / 1er cycle / Épiaison"
+Ensilage trèfle violet,OK,0.82,0.83,0.76,24,70,44,1.08,1.12,,1,1,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / Brins courts avec conservateur / 1er cycle / Début floraison"
+Ensilage luzerne,OK,0.72,0.71,0.62,20,60,67,1.12,1.21,,1,1,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Brins courts sans conservateur / 2e cycle après coupe bourgeonnement / Repousses à tiges de 9 semaines"
+Ensilage sorgho,A_VERIFIER,0.78,0.78,0.71,15,61,1,1.14,1.26,,0.5,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Brins courts avec conservateur / 1er cycle / Fin épiaison"
+Ensilage seigle,A_VERIFIER,0.85,0.85,0.79,10,55,-12,1.25,1.46,,0.5,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, RAY-GRASS ANGLAIS / Brins courts sans conservateur / 1er cycle, variétés tardives / Fin épiaison"
+Herbe pâturée,NON_TROUVE,,,,,,,,,,,,
+Herbe pâturée précoce,A_VERIFIER,1,0.99,0.96,28,84,6,1.04,1.08,,0.33,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS ANGLAIS / Année d'exploitation, 1er cycle, variétés précoces / Début épiaison"
+Herbe pâturée mi-saison,A_VERIFIER,0.9,0.9,0.87,33,86,13,1.02,1.03,,0.14,0,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, BROME / Année d'exploitation, 3e cycle / Repousses feuillues de 8 semaines"
+Luzerne fraîche,OK,0.75,0.74,0.65,34,81,38,1.01,1.02,,1,1,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / 1er cycle / Floraison"
+Trèfle blanc pâturé,A_VERIFIER,0.95,0.98,0.94,44,98,80,0.97,0.95,,0.67,3,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE BLANC / 2e cycle / Repousses feuillues de 4 semaines, pluviométrie limitante"
+Ray-grass anglais pâturé,OK,0.92,0.91,0.86,34,87,19,1.05,1.09,,0.71,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS ANGLAIS / Année d'exploitation, 3e cycle / Repousses feuillues de 8 semaines"
+Paille de blé,OK,0.37,0.43,0.32,7,48,-55,1.6,1.8,,1,16,"PAILLES, FOURRAGES LIGNIFIÉS / Paille de Blé, Seule / Moyenne"
+Paille d'orge,OK,0.4,0.46,0.35,7,50,-55,1.45,1.6,,1,15,"PAILLES, FOURRAGES LIGNIFIÉS / Paille d'Orge, Seule / Bonne"
+Paille de maïs,OK,0.42,0.63,0.54,10,57,-57,1.3,1.3,,1,50,"PAILLES, FOURRAGES LIGNIFIÉS / Cannes de Maïs, Fraîches"
+Paille de triticale,A_VERIFIER,0.38,0.43,0.32,7,48,-55,1.6,1.8,,0.5,13,"PAILLES, FOURRAGES LIGNIFIÉS / Paille de Blé, Seule / Moyenne"
+Paille de seigle,A_VERIFIER,0.35,0.43,0.32,7,48,-55,1.6,1.8,,0.5,23,"PAILLES, FOURRAGES LIGNIFIÉS / Paille de Blé, Seule / Moyenne"
+Paille de sorgho,OK,0.38,0.56,0.45,9,54,-55,1.18,1.36,,1,47,"PAILLES, FOURRAGES LIGNIFIÉS / Paille de Sorgho, Seule"
+Huile de soja,OK,3.35,3.609999895095825,3.940000057220459,0,0,-14,,,0.2460000067949295,1,8,Huiles et graisses / Huile de soja
+Huile de colza,OK,3.35,3.609999895095825,3.940000057220459,0,0,-14,,,0.2460000067949295,1,8,Huiles et graisses / Huile de colza
+Graisse de palme,OK,3.2,3.609999895095825,3.940000057220459,0,0,-14,,,0.2460000067949295,1,13,Huiles et graisses / Huile de palme
+Acides gras saturés protégés,A_VERIFIER,3,0.8869433761945062,0.8434709480569876,27.626661562499994,80.7672709927888,-29.06775098482624,,,0.3781776,0.25,70,"Fourrages déshydratés et agglomérés / Ray-Grass Italien, 1er cycle, début épiaison"
+Carbonate de calcium,NON_TROUVE,,,,,,,,,,,,
+Phosphate bicalcique,NON_TROUVE,,,,,,,,,,,,
+Phosphate monocalcique,NON_TROUVE,,,,,,,,,,,,
+Chlorure de sodium,NON_TROUVE,,,,,,,,,,,,
+Bicarbonate de sodium,NON_TROUVE,,,,,,,,,,,,
+Oxyde de magnésium,NON_TROUVE,,,,,,,,,,,,
+Marc de raisin déshydraté,OK,0.75,0.41999998688697815,0.30000001192092896,16,55,-47,,,0.6069999933242798,1,44,Coproduits de fruits et de légumes / Marc de raisin déshydraté
+Marc de pomme,OK,0.72,0.7300000190734863,0.6399999856948853,22,70,-53,,,0.4790000021457672,1,1,Coproduits de fruits et de légumes / Marc de pomme déshydraté
+Pulpe de tomate déshydratée,OK,0.78,0.699999988079071,0.5799999833106995,41,84,42,,,0.5199999809265137,1,10,Coproduits de fruits et de légumes / Pulpe de tomate déshydratée
+Tourteau de tournesol partiellement décortiqué,OK,0.9,0.8600000143051147,0.7900000214576721,87,137,216,,,0.32100000977516174,0.75,4,"Tourteaux d'oléagineux / Tourteau de tournesol, huile < 5 %, décortiqué"
+Corn gluten feed,OK,0.95,1.0399999618530273,1.0199999809265137,53,107,54,,,0.3089999854564667,1,9,Coproduits du maïs / Corn gluten feed
+Mélange céréalier,NON_TROUVE,,,,,,,,,,,,
+Foin de sorgho,A_VERIFIER,0.6,0.6,0.49,17,62,-39,1.11,1.2,,0.5,0,"FOINS / PRAIRIES PERMANENTES, MONTAGNE (ALPES NORD) / À base de graminées, Ventilé / 1er cycle / Fructification du dactyle"
+Ensilage de sorgho fourrager,A_VERIFIER,0.76,0.76,0.67,27,72,63,1.03,1.04,,0.5,0,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Brins courts avec conservateur / 2e cycle après coupe bourgeonnement / Repousses à tiges de 8 semaines"
+Prairie naturelle plaine - stade pature,A_VERIFIER,0.96,0.96,0.91,52,104,47,0.97,0.95,,0.4,0,"FOURRAGES VERTS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / 3e cycle / Repousses feuillues de 6 semaines"
+Prairie naturelle plaine - epiaison,OK,0.84,0.84,0.78,38,89,6,1.02,1.03,,0.75,0,"FOINS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Ventilé / 2e cycle après coupe épiaison / Repousses feuillues de 7 semaines"
+Prairie naturelle montagne - pature,A_VERIFIER,1,0.96,0.92,52,105,54,1.02,1.03,,0.5,4,"FOURRAGES VERTS / PRAIRIES PERMANENTES, DEMI-MONTAGNE (AUVERGNE) / 2e cycle après coupe épiaison / Repousses feuillues de 6 semaines"
+Dactyle 1er cycle epi a 10cm,OK,0.93,0.92,0.88,32,85,24,1,1,,0.71,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, DACTYLE / Année d'exploitation, 1er cycle / Début épiaison"
+Dactyle 1er cycle debut epiaison,OK,0.86,0.92,0.88,32,85,24,1,1,,1,7,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, DACTYLE / Année d'exploitation, 1er cycle / Début épiaison"
+Ray-grass anglais 1er cycle epi,OK,1,0.99,0.96,28,84,6,1.04,1.08,,1,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS ANGLAIS / Année d'exploitation, 1er cycle, variétés précoces / Début épiaison"
+Fetuque elevee 1er cycle epi,OK,0.82,0.81,0.76,26,77,3,1.04,1.07,,1,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Année d'exploitation, 1er cycle / Début épiaison"
+Luzerne paturee floraison,A_VERIFIER,0.81,0.78,0.71,36,84,44,1,1,,0.67,4,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / 1er cycle / Début floraison"
+Trefle blanc vegetatif,OK,1.08,1.11,1.11,52,108,92,0.92,0.87,,1,3,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE BLANC / 1er cycle / Végétatif"
+Trefle violet floraison,OK,0.76,0.8,0.73,32,82,26,1.02,1.03,,1,5,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / 1er cycle / Fin floraison"
+Foin de prairie debut epiaison,OK,0.8,0.8,0.73,30,81,-10,1.08,1.13,,1,0,"FOINS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / 15-25 mai, début épiaison, ST = 470°C"
+Foin de prairie epiaison,OK,0.75,0.75,0.67,29,78,-15,1.04,1.07,,1,0,"FOINS / PRAIRIES PERMANENTES, MONTAGNE (ALPES NORD) / À base de graminées, Ventilé / 1er cycle / Épiaison du dactyle"
+Foin de prairie pleine epiaison,OK,0.7,0.72,0.64,26,75,-9,1.25,1.44,,0.75,3,"FOINS / PRAIRIES PERMANENTES, MONTAGNE (ALPES NORD) / À base de dicotylédones, Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Épiaison du dactyle"
+Foin de dactyle epiaison,OK,0.75,0.75,0.67,29,78,-15,1.04,1.07,,1,0,"FOINS / PRAIRIES PERMANENTES, MONTAGNE (ALPES NORD) / À base de graminées, Ventilé / 1er cycle / Épiaison du dactyle"
+Foin de fetuque elevee epiaison,OK,0.66,0.67,0.59,19,67,-24,1.14,1.26,,1,2,"FOINS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Fin épiaison"
+Foin de ray-grass epiaison,OK,0.73,0.73,0.65,14,64,-43,1.12,1.21,,1,0,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Fin épiaison"
+Foin de luzerne debut floraison,OK,0.76,0.7,0.61,39,86,35,0.97,0.95,,1,8,"FOINS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Ventilé / 1er cycle / Début floraison"
+Ensilage de prairie debut epiaison,OK,0.89,0.94,0.89,21,71,12,1.09,1.16,,1,6,"ENSILAGES / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Brins courts avec conservateur / 1er cycle / 15-25 mai, début épiaison, ST = 470°C"
+Ensilage de prairie epiaison,OK,0.83,0.85,0.78,18,66,1,1.17,1.3,,1,2,"ENSILAGES / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Brins courts avec conservateur / 1er cycle / 1-10 juin, épiaison, ST = 685°C"
+Ensilage de dactyle debut epiaison,OK,0.86,0.88,0.83,24,72,41,1.04,1.05,,1,2,"ENSILAGES / GRAMINÉES FOURRAGÈRES, DACTYLE / Préfané coupe fine / 1er cycle / Début épiaison"
+Ensilage de ray-grass epiaison,OK,0.88,0.88,0.82,13,62,-13,1.12,1.19,,1,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Brins courts avec conservateur / 1er cycle / Épiaison"
+Ensilage de luzerne debut floraison,OK,0.73,0.77,0.69,26,71,51,1.03,1.04,,1,5,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Brins courts avec conservateur / 1er cycle / Début floraison"
+Ensilage de mais laiteux,OK,0.84,0.85,0.78,16,61,-9,1.16,1.26,,1,1,"ENSILAGES / CÉRÉALES PLANTES ENTIÈRES, MAÏS / Mauvaises conditions de végétation / Hachage fin sans conservateur / Gel stade laiteux-pateux, réc. 3 sem. apr. gel"
+Ensilage de mais pateux,OK,0.85,0.85,0.78,16,61,-9,1.16,1.26,,1,0,"ENSILAGES / CÉRÉALES PLANTES ENTIÈRES, MAÏS / Mauvaises conditions de végétation / Hachage fin sans conservateur / Gel stade laiteux-pateux, réc. 3 sem. apr. gel"
+Pois proteagineux,A_VERIFIER,1.06,1.25,1.2799999713897705,40,99,83,,,0.15199999511241913,0.5,18,Graines de légumineuses et d'oléagineux / Pois
+Feverole graine,OK,0.95,1.25,1.2799999713897705,58,116,142,,,0.17499999701976776,1,32,Graines de légumineuses et d'oléagineux / Féverole à fleurs blanches
+Lupin blanc,OK,1,1.4299999475479126,1.4700000286102295,65,124,201,,,0.18199999630451202,1,43,Graines de légumineuses et d'oléagineux / Lupin blanc
+Betterave fourragere,NON_TROUVE,,,,,,,,,,,,
+Betterave sucriere,NON_TROUVE,,,,,,,,,,,,
+Prairie naturelle plaine feuille,A_VERIFIER,0.91,0.91,0.86,18,65,16,1.18,1.3,,0.5,0,"ENSILAGES / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Brins courts sans conservateur / 2e cycle après coupe épiaison / Repousses feuillues de 9 semaines"
+Prairie naturelle plaine pre-epiaison,OK,0.9,0.9,0.85,33,85,-9,1.04,1.07,,0.78,0,"FOURRAGES VERTS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / 2e cycle après coupe épiaison / Repousses feuillues de 9 semaines"
+Prairie naturelle plaine post-epiaison,A_VERIFIER,0.84,0.84,0.78,25,77,-17,1.11,1.2,,0.6,0,"FOURRAGES VERTS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / 1er cycle / 1-10 juin, épiaison, ST = 685°C"
+Prairie naturelle montagne feuille,A_VERIFIER,0.95,0.95,0.9,34,88,10,1.05,1.09,,0.5,0,"FOURRAGES VERTS / PRAIRIES PERMANENTES, DEMI-MONTAGNE (AUVERGNE) / 1er cycle / 1-10 juin, début épiaison"
+Prairie naturelle montagne epiaison,OK,0.88,0.87,0.79,15,61,8,1.18,1.29,,0.75,1,"ENSILAGES / PRAIRIES PERMANENTES, DEMI-MONTAGNE (AUVERGNE) / Brins courts sans conservateur / 1er cycle / 15-25 juin, épiaison"
+Fetuque des pres 1er cycle epi 10cm,OK,0.91,0.91,0.86,24,78,-11,1.08,1.14,,0.78,0,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FÉTUQUE DES PRÉS / Année d'exploitation, 1er cycle / Épiaison"
+Fetuque des pres 1er cycle debut epiaison,OK,0.89,0.98,0.95,28,83,0,1.03,1.04,,1,10,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FÉTUQUE DES PRÉS / Année d'exploitation, 1er cycle / Début épiaison"
+Fetuque des pres 1er cycle epiaison,OK,0.85,0.84,0.79,33,84,15,1.02,1.03,,1,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Année d'exploitation, 2e cycle après coupe épiaison / Repousses feuillues de 6 semaines"
+Fetuque elevee 1er cycle debut epiaison,OK,0.9,0.88,0.83,17,61,33,1.18,1.29,,1,2,"ENSILAGES / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Brins courts sans conservateur / 1er cycle / 1 semaine avant le début de l'épiaison"
+Fleole 1er cycle epi 10cm,OK,0.93,0.9,0.87,30,83,-2,1.03,1.06,,0.71,3,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FLÉOLE / Année d'exploitation, 2e cycle après coupe épiaison / Repousses à tiges de 7 semaines"
+Fleole 1er cycle debut epiaison,OK,0.9,0.88,0.83,20,74,-25,1.09,1.17,,1,2,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FLÉOLE / Année d'exploitation, 1er cycle / 1 semaine avant le début de l'épiaison"
+Fleole 1er cycle epiaison,OK,0.86,0.88,0.83,20,74,-25,1.09,1.17,,1,2,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FLÉOLE / Année d'exploitation, 1er cycle / 1 semaine avant le début de l'épiaison"
+Fleole 2e cycle pature,A_VERIFIER,0.93,0.93,0.9,35,89,14,0.98,0.96,,0.67,0,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, FLÉOLE / Année d'exploitation, 2e cycle après déprimage / Repousses à tiges de 5 semaines"
+Ray-grass anglais 1er cycle debut epiaison,OK,0.93,0.94,0.91,24,79,-12,1.06,1.1,,1,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS ANGLAIS / Année d'exploitation, 1er cycle, variétés tardives / 1 semaine avant le début de l'épiaison"
+Ray-grass d'Italie 1er cycle epi 10cm,OK,0.95,0.95,0.91,27,75,67,1.14,1.22,,0.8,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, ALTERNATIF / Brins courts avec conservateur / 1er cycle / Début épiaison"
+Ray-grass d'Italie 1er cycle debut epiaison,OK,0.92,0.92,0.88,23,77,-22,1.02,1.03,,1,0,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Année d'exploitation, 1er cycle / Début épiaison"
+Ray-grass d'Italie 1er cycle epiaison,OK,0.88,0.88,0.83,36,88,22,1,1,,1,0,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Année d'exploitation, 2e cycle après coupe épiaison / Repousses à tiges de 5 semaines"
+Ray-grass d'Italie repousse,OK,0.96,0.96,0.93,36,90,18,0.99,0.98,,1,0,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, ALTERNATIF / Année de semis / 4e cycle / Repousses à tiges de 7 semaines"
+Ray-grass hybride non alternatif epi 10cm,A_VERIFIER,0.94,0.95,0.92,24,79,-18,1.01,1.02,,0.64,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Année d'exploitation, 1er cycle / 1 semaine avant le début de l'épiaison"
+Ray-grass hybride non alternatif debut epiaison,OK,0.91,0.92,0.88,23,77,-22,1.02,1.03,,0.83,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Année d'exploitation, 1er cycle / Début épiaison"
+Sorgho fourrager vegetatif,A_VERIFIER,0.88,0.86,0.81,38,90,43,1.02,1.03,,0.5,2,"FOURRAGES VERTS / CÉRÉALES PLANTES ENTIÈRES, SORGHO FOURRAGER / 1er cycle / Montaison"
+Sorgho fourrager montaison,OK,0.85,0.86,0.81,38,90,43,1.02,1.03,,1,1,"FOURRAGES VERTS / CÉRÉALES PLANTES ENTIÈRES, SORGHO FOURRAGER / 1er cycle / Montaison"
+Sorgho fourrager laiteux-pateux,A_VERIFIER,0.87,0.85,0.78,16,61,-9,1.16,1.26,,0.67,2,"ENSILAGES / CÉRÉALES PLANTES ENTIÈRES, MAÏS / Mauvaises conditions de végétation / Hachage fin sans conservateur / Gel stade laiteux-pateux, réc. 3 sem. apr. gel"
+Seigle fourrage epiaison,OK,0.88,0.89,0.85,22,76,3,1.06,1.12,,1,1,"FOURRAGES VERTS / CÉRÉALES PLANTES ENTIÈRES, SEIGLE / Épiaison"
+Luzerne paturee vegetatif,A_VERIFIER,0.91,0.93,0.88,46,98,79,0.95,0.92,,0.67,2,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / 1er cycle / Végétatif (60 cm de haut)"
+Luzerne paturee debut bouton floral,A_VERIFIER,0.87,0.88,0.82,42,92,65,0.97,0.95,,0.4,1,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / 1er cycle / Début bourgeonnement"
+Luzerne paturee pleine floraison,A_VERIFIER,0.79,0.78,0.71,36,84,44,1,1,,0.5,1,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / 1er cycle / Début floraison"
+Sainfoin pature bourgeonnement,A_VERIFIER,0.9,0.96,0.93,34,88,18,0.94,0.89,,0.67,7,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, SAINFOIN / 1er cycle / Bourgeonnement"
+Sainfoin pature debut floraison,OK,0.87,0.89,0.84,29,82,9,1.01,1.02,,0.75,2,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, SAINFOIN / 1er cycle / Début floraison"
+Sainfoin pature floraison,A_VERIFIER,0.83,0.82,0.76,26,77,3,1.07,1.13,,0.67,1,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, SAINFOIN / 1er cycle / Floraison"
+Trefle blanc floraison,OK,0.92,1.02,0.99,42,97,51,0.93,0.89,,1,11,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE BLANC / 1er cycle / Floraison"
+Trefle violet vegetatif,OK,0.93,1.05,1.04,45,100,68,0.95,0.91,,1,13,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / 1er cycle / Végétatif (30 cm de haut)"
+Trefle violet debut floraison,OK,0.89,0.85,0.8,34,85,30,1.01,1.01,,1,4,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / 1er cycle / Début floraison"
+Mais fourrage vert feuillu,A_VERIFIER,0.88,0.89,0.85,47,99,88,1.06,1.11,,0.67,1,"FOURRAGES VERTS / GRAMINÉES FOURRAGÈRES, DACTYLE / Année de semis / 1re exploitation / Feuillu"
+Mais fourrage vert laiteux,OK,0.91,0.93,0.88,12,66,-41,1.09,1.22,,1,2,"FOURRAGES VERTS / CÉRÉALES PLANTES ENTIÈRES, MAÏS / Laiteux"
+Chou fourrager,OK,0.93,1.07,1.08,37,93,25,0.98,0.97,,1,15,"FOURRAGES VERTS / CRUCIFÈRES, CHOUX / Mille-têtes"
+Colza fourrager vegetatif,A_VERIFIER,0.92,0.9,0.88,35,88,48,1.16,1.31,,0.5,2,"FOURRAGES VERTS / CRUCIFÈRES, COLZA / En culture dérobée / Bourgeonnement"
+Navette fourragere,NON_TROUVE,,,,,,,,,,,,
+Vesce avoine paturee,A_VERIFIER,0.9,0.91,0.86,41,93,69,0.97,0.95,,0.33,1,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, VESCE / Début fructification"
+Meteil pature epiaison,A_VERIFIER,0.87,0.87,0.82,28,79,10,1,1,,0.33,0,"FOURRAGES VERTS / CÉRÉALES PLANTES ENTIÈRES, BLÉ / Début épiaison"
+Foin de prairie plaine 2e coupe,OK,0.71,0.65,0.56,24,70,-22,1.1,1.18,,1,8,"FOINS / PRAIRIES PERMANENTES, PLAINE (CRAU) / Fané au sol par beau temps / 1er cycle / 15-25 mai, 1ère coupe tardive"
+Foin de prairie plaine fin floraison,OK,0.6,0.65,0.56,19,66,-32,1.21,1.4,,0.89,8,"FOINS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / 15-25 juin, floraison, ST = 903°C"
+Foin de prairie montagne debut epiaison,OK,0.72,0.82,0.75,34,85,1,1.04,1.05,,1,14,"FOINS / PRAIRIES PERMANENTES, DEMI-MONTAGNE (AUVERGNE) / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / 1-10 juin, début épiaison"
+Foin de prairie montagne epiaison,OK,0.67,0.72,0.64,26,75,-9,1.25,1.44,,1,7,"FOINS / PRAIRIES PERMANENTES, MONTAGNE (ALPES NORD) / À base de dicotylédones, Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Épiaison du dactyle"
+Foin de prairie montagne fin floraison,OK,0.62,0.64,0.54,20,66,-32,1.16,1.29,,0.89,3,"FOINS / PRAIRIES PERMANENTES, DEMI-MONTAGNE (AUVERGNE) / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / 1-10 juillet, floraison"
+Foin de dactyle debut epiaison,OK,0.73,0.79,0.72,32,82,14,1.06,1.09,,1,8,"FOINS / GRAMINÉES FOURRAGÈRES, DACTYLE / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Début épiaison"
+Foin de dactyle post-epiaison,OK,0.62,0.71,0.63,30,78,3,1.07,1.11,,0.75,15,"FOINS / GRAMINÉES FOURRAGÈRES, DACTYLE / Fané au sol par temps de pluie (< 10 jours) / 2e cycle après coupe épiaison / Repousses feuillues de 8 semaines"
+Foin de dactyle 2e cycle,OK,0.78,0.78,0.7,34,84,12,1.01,1.02,,1,0,"FOINS / GRAMINÉES FOURRAGÈRES, DACTYLE / Fané au sol par beau temps / 2e cycle après coupe épiaison / Repousses feuillues de 6 semaines"
+Foin de fetuque des pres epiaison,OK,0.68,0.71,0.63,27,75,-4,1.09,1.15,,1,4,"FOINS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Fané au sol par temps de pluie (< 10 jours) / 2e cycle après coupe épiaison / Repousses feuillues de 7 semaines"
+Foin de fetuque des pres post-epiaison,OK,0.62,0.71,0.63,27,75,-4,1.09,1.15,,0.8,15,"FOINS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Fané au sol par temps de pluie (< 10 jours) / 2e cycle après coupe épiaison / Repousses feuillues de 7 semaines"
+Foin de fetuque elevee post-epiaison,OK,0.64,0.67,0.59,19,67,-24,1.14,1.26,,0.8,5,"FOINS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Fin épiaison"
+Foin de fleole debut epiaison,OK,0.73,0.72,0.64,25,74,-6,1.1,1.16,,0.75,1,"FOINS / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Début épiaison"
+Foin de fleole epiaison,A_VERIFIER,0.7,0.69,0.61,28,76,3,1.12,1.23,,0.67,1,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, ALTERNATIF / Fané au sol par beau temps / 2e cycle après coupe épiaison / Repousses à tiges de 6 semaines"
+Foin de fleole post-epiaison,A_VERIFIER,0.64,0.66,0.57,21,69,-21,1.1,1.19,,0.5,3,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Fané au sol par temps de pluie (< 10 jours) / 2e cycle après coupe épiaison / Repousses à tiges de 8 semaines"
+Foin de fleole 2e cycle,A_VERIFIER,0.76,0.76,0.68,26,75,-22,1.11,1.2,,0.67,0,"FOINS / PRAIRIES PERMANENTES, PLAINE (NORMANDIE) / Ventilé / 1er cycle / 1-10 juin, épiaison, ST = 685°C"
+Foin de ray-grass d'Italie debut epiaison,OK,0.78,0.79,0.73,41,91,53,1.09,1.14,,1,1,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, ALTERNATIF / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Début épiaison"
+Foin de ray-grass d'Italie epiaison,OK,0.72,0.73,0.65,14,64,-43,1.12,1.21,,1,1,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Fané au sol par temps de pluie (< 10 jours) / 1er cycle / Fin épiaison"
+Foin de ray-grass d'Italie post-epiaison,OK,0.65,0.66,0.57,21,69,-21,1.1,1.19,,0.82,2,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Fané au sol par temps de pluie (< 10 jours) / 2e cycle après coupe épiaison / Repousses à tiges de 8 semaines"
+Foin de luzerne debut bouton,OK,0.75,0.75,0.67,41,89,41,1.01,1.01,,0.75,0,"FOINS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Fané au sol par beau temps / 1er cycle / Début bourgeonnement"
+Foin de luzerne pleine floraison,OK,0.68,0.69,0.59,37,84,32,1.03,1.04,,0.75,1,"FOINS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Fané au sol par beau temps / 1er cycle / Début floraison"
+Foin de sainfoin floraison,A_VERIFIER,0.7,0.7,0.62,12,62,-47,1.18,1.33,,0.67,0,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS ANGLAIS / Fané au sol par temps de pluie (< 10 jours) / 1er cycle, variétés tardives / Début floraison"
+Foin de trefle violet floraison,OK,0.72,0.73,0.65,31,79,6,1.01,1.02,,1,1,"FOINS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / Ventilé / 1er cycle / Floraison"
+Foin de trefle violet pre-floraison,OK,0.75,0.74,0.66,34,82,16,1.01,1.01,,0.89,1,"FOINS / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / Ventilé / 1er cycle / Début floraison"
+Foin de vesce avoine,A_VERIFIER,0.68,0.68,0.59,23,71,-18,1.05,1.1,,0.33,0,"FOINS / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Fané au sol par beau temps / 2e cycle après coupe épiaison / Repousses à tiges de 8 semaines"
+Regain de luzerne,A_VERIFIER,0.82,0.82,0.75,38,88,60,0.97,0.95,,0.5,0,"FOURRAGES VERTS / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / 2e cycle après coupe bourgeonnement / Repousses à tiges de 7 semaines"
+Ensilage de fetuque elevee debut epiaison,OK,0.83,0.84,0.78,19,66,17,1.1,1.16,,1,1,"ENSILAGES / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Brins courts avec conservateur / 1er cycle / Début épiaison"
+Ensilage de fetuque elevee epiaison,OK,0.8,0.8,0.73,17,63,7,1.11,1.19,,1,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Brins courts avec conservateur / 1er cycle / Épiaison"
+Ensilage de fleole debut epiaison,OK,0.84,0.84,0.78,19,66,17,1.1,1.16,,0.75,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Brins courts avec conservateur / 1er cycle / Début épiaison"
+Ensilage de ray-grass d'Italie debut epiaison,OK,0.87,0.88,0.82,16,65,1,1.06,1.08,,1,1,"ENSILAGES / GRAMINÉES FOURRAGÈRES, RAY-GRASS D'ITALIE, NON ALTERNATIF / Préfané coupe fine / 1er cycle / Début épiaison"
+Ensilage de trefle blanc vegetatif,A_VERIFIER,0.88,0.87,0.8,22,67,63,1.05,1.05,,0.5,1,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / Brins courts sans conservateur / 2e cycle après coupe bourgeonnement / Repousses à tiges de 7 semaines"
+Ensilage de sainfoin floraison,A_VERIFIER,0.79,0.78,0.7,21,63,62,1.11,1.17,,0.67,1,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Brins courts sans conservateur / 1er cycle / Début floraison"
+Ensilage de mais feuillu,A_VERIFIER,0.83,0.83,0.76,21,67,20,1.08,1.13,,0.67,0,"ENSILAGES / GRAMINÉES FOURRAGÈRES, FÉTUQUE ÉLEVÉE / Brins courts avec conservateur / 2e cycle après coupe épiaison / Repousses feuillues de 7 semaines"
+Ensilage de trefle violet debut floraison,OK,0.82,0.83,0.76,24,70,44,1.08,1.12,,1,1,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, TRÈFLE VIOLET / Brins courts avec conservateur / 1er cycle / Début floraison"
+Ensilage de prairie montagne epiaison,OK,0.8,0.79,0.71,18,65,8,1.08,1.13,,1,1,"ENSILAGES / PRAIRIES PERMANENTES, DEMI-MONTAGNE (AUVERGNE) / Préfané coupe fine / 1er cycle / 15-25 juin, épiaison"
+Ensilage de vesce avoine,A_VERIFIER,0.82,0.82,0.74,22,65,73,1.1,1.15,,0.33,0,"ENSILAGES / LÉGUMINEUSES FOURRAGÈRES, LUZERNE / Brins courts sans conservateur / 2e cycle après coupe bourgeonnement / Repousses à tiges de 7 semaines"
+Graine de colza,OK,1.22,1.2000000476837158,1.1699999570846558,81,133,138,,,0.31299999356269836,1,2,"Tourteaux d'oléagineux / Tourteau de colza, huile 5-20 %"
+Graine de lin,OK,1.27,1.159999966621399,1.1299999952316284,130,180,108,,,0.36800000071525574,1,9,"Tourteaux d'oléagineux / Tourteau de lin, huile > 5 %"
+Graine de tournesol,OK,1.25,1.0399999618530273,0.9800000190734863,81,131,193,,,0.32100000977516174,1,17,"Tourteaux d'oléagineux / Tourteau de tournesol, huile 5-20 %, décortiqué"
+Graine de soja crue,A_VERIFIER,0.9,1.2599999904632568,1.2799999713897705,163,218,224,,,0.2529999911785126,0.5,40,"Tourteaux d'oléagineux / Tourteau de soja, huile < 5 %, 46 % protéine + huile"
+Graine de soja toastee,OK,1.15,1.5299999713897705,1.5499999523162842,120,171,163,,,0.2709999978542328,1,33,Graines de légumineuses et d'oléagineux / Graine de soja toastée
+Graine de coton,OK,0.95,0.949999988079071,0.8799999952316284,136,184,154,,,0.3790000081062317,1,0,"Tourteaux d'oléagineux / Tourteau de coton, huile < 5 %, cellulose brute 15-20 %"
+Graine de colza extrudee,OK,1.1,2.0199999809265137,2.0799999237060547,81,129,20,,,0.31299999356269836,1,84,Graines de légumineuses et d'oléagineux / Graine de colza extrudée
+Tourteau d'arachide,OK,1.03,1.0499999523162842,1.0099999904632568,153,203,278,,,0.289000004529953,1,2,"Tourteaux d'oléagineux / Tourteau d'arachide, huile < 5 %, cellulose brute > 9 %"
+Corn gluten meal (proteines),OK,1.2,1.6200000047683716,1.6799999475479126,423,470,118,,,0.5019999742507935,0.75,35,Coproduits du maïs / Corn gluten meal
+Vinasse de betterave,OK,0.91,0.949999988079071,0.949999988079071,10,70,25,,,0.03799999877810478,1,4,Mélasses et vinasses / Mélasse de betterave
+Son de riz,OK,0.93,0.8100000023841858,0.7300000190734863,31,74,0.10000000149011612,,,0.27000001072883606,1,13,"Coproduits du riz / Son de riz, huile > 5 %, cellulose brute 11-20 %"
+Pulpe d'agrumes fraiche,OK,0.85,1.1200000047683716,1.1299999952316284,22,83,-63,,,0.21799999475479126,1,32,Coproduits de fruits et de légumes / Pulpe d'agrumes déshydratée
+Farine de gluten de ble,A_VERIFIER,1.05,1.0499999523162842,1.0199999809265137,42,97,41,,,0.23000000417232513,0.6,0,"Coproduits du blé / Gluten feed de blé, type 20 % amidon"
+Pulpe de tomate fraiche,OK,0.6,0.699999988079071,0.5799999833106995,41,84,42,,,0.5199999809265137,1,17,Coproduits de fruits et de légumes / Pulpe de tomate déshydratée
+Levure seche de brasserie,OK,1,1.1799999475479126,1.1699999570846558,87,143,278,,,0.14800000190734863,1,18,Produits divers / Levure de brasserie déshydratée
+Topinambour,NON_TROUVE,,,,,,,,,,,,
+Rutabaga,NON_TROUVE,,,,,,,,,,,,
+Navet fourrager,NON_TROUVE,,,,,,,,,,,,
+Carotte fourragere,NON_TROUVE,,,,,,,,,,,,
+Sorgho grain humide,A_VERIFIER,1.05,1.2300000190734863,1.2599999904632568,24,78,-34,,,0.19900000095367432,0.5,17,Céréales / Maïs humide
+Triticale aplati,A_VERIFIER,1.04,1.1699999570846558,1.190000057220459,24,85,-21,,,0.17399999499320984,0.5,12,Céréales / Triticale
