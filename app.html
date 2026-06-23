@@ -3045,6 +3045,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const hasBaca = hasManualMin || hasAutoMin;
     const minSource = hasManualMin ? 'Saisie manuelle' : 'Calculé depuis la composition de la ration';
     const baca    = hasBaca ? (na*43.5+k*25.6+ca*49.9+mg*82.2)-(cl*28.2+s*62.4) : null;
+    const bacaNeg = hasBaca && baca < -150;
+    const bacaPos = hasBaca && baca > 200;
     const caApport = ca * a.totalMS, mgApport = mg * a.totalMS, naApport = na * a.totalMS;
     let caReq=50, mgReq=15, naReq=8;
     if (b.typeLabel==='vache-laitiere') { caReq=45+prod; mgReq=Math.max(20,0.02*pv+0.15*prod); naReq=Math.max(8,0.015*pv+0.1*prod); }
@@ -3196,9 +3198,6 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         tip('info','Mg','Magnésium : prévention de la tétanie d\'herbage') +
         tip('info','Na','Sodium : appétit, régulation hydrique');
     } else {
-      const bacaOk = baca >= -100 && baca <= 100;
-      const bacaNeg = baca < -150;
-      const bacaPos = baca > 200;
       mResume = `BACA = ${baca.toFixed(0)} mEq/kg MS — ${minSource}`;
       if (bacaNeg && b.typeLabel === 'vache-prepa-velage') {
         mCls='ok'; mBadge='BACA anionique (voulu)'; mBadgeCls='rb-badge-green';
