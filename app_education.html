@@ -2139,7 +2139,7 @@ async function saveExo() {
     is_active: $('exo-is-active').checked,
     due_date: $('exo-due-date').value ? new Date($('exo-due-date').value).toISOString() : null,
     is_graded: $('exo-is-graded').checked,
-    documents: documents.length ? documents : null,
+    documents,
   };
   const supa = getSupa();
   let error;
