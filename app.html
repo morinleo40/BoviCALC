@@ -260,8 +260,8 @@ function openAccountModal() {
   if (adminSection) {
     adminSection.style.display = isOwner ? '' : 'none';
     if (isOwner) {
-      if (typeof loadPromoCodesAdmin === 'function') loadPromoCodesAdmin();
-      if (typeof loadAdminStats === 'function') loadAdminStats();
+      if (typeof window.loadPromoCodesAdmin === 'function') window.loadPromoCodesAdmin();
+      if (typeof window.loadAdminStats === 'function') window.loadAdminStats();
     }
   }
   // Bouton upgrade
@@ -5921,27 +5921,38 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         <div style="font-size:.68rem;color:#64748b;margin-top:2px;line-height:1.3;">${label}</div>
       </div>`;
 
-    // Codes promo (accessible directement, pas besoin de la fonction SQL)
-    const { data: pc } = await supa.from('promo_codes').select('used');
+    // 1. Codes promo — accessible directement sans SQL custom
+    const { data: pc } = await supa.from('promo_codes').select('used, created_at');
     const promoTotal = pc ? pc.length : 0;
     const promoUsed  = pc ? pc.filter(r => r.used).length : 0;
+    const promoMonth = pc ? pc.filter(r => r.created_at && new Date(r.created_at) > new Date(Date.now()-30*864e5)).length : 0;
 
-    // Appel fonction SQL (RETURNS TABLE — plus fiable avec PostgREST)
-    const { data: rows, error } = await supa.rpc('get_admin_stats');
+    // Affiche immédiatement les stats promo (pas besoin d'attendre le SQL)
+    el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px;">
+      ${statBox('…', 'Comptes créés',    '#15803d', '#f0fdf4', '#bbf7d0')}
+      ${statBox('…', 'Utilisateurs Pro', '#1d4ed8', '#eff6ff', '#bfdbfe')}
+      ${statBox(promoUsed, 'Codes Pro activés', '#d97706', '#fefce8', '#fde68a')}
+      ${statBox(promoTotal, 'Codes générés', '#7c3aed', '#fdf4ff', '#e9d5ff')}
+    </div>
+    <div id="admin-stats-user-line" style="font-size:.7rem;color:#94a3b8;text-align:center;">
+      Chargement des stats utilisateurs…
+    </div>`;
 
-    if (error || !rows) {
-      // Affiche l'erreur réelle + SQL à copier
-      el.innerHTML = `
-        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:.78rem;color:#991b1b;margin-bottom:8px;">
-          <strong>Erreur :</strong> ${error ? error.message : 'Réponse vide'}<br>
-          <small style="color:#64748b;">Recréez la fonction SQL ci-dessous (DROP + CREATE) dans Supabase → SQL Editor</small>
-        </div>
-        <details style="font-size:.75rem;">
-          <summary style="cursor:pointer;font-weight:600;color:#374151;padding:6px 0;">📋 Voir le SQL à exécuter</summary>
-          <pre style="margin:6px 0 0;font-size:.65rem;white-space:pre-wrap;line-height:1.5;background:#f8fafc;padding:8px;border-radius:6px;border:1px solid #e2e8f0;">DROP FUNCTION IF EXISTS public.get_admin_stats();
+    // 2. Tente le RPC pour les stats auth.users (nécessite la fonction SQL)
+    try {
+      const { data: rows, error } = await supa.rpc('get_admin_stats');
+      const s = Array.isArray(rows) ? rows[0] : rows;
+      const userLine = $('admin-stats-user-line');
+
+      if (error || !s) {
+        if (userLine) userLine.innerHTML =
+          `<span style="color:#dc2626;">Stats utilisateurs non disponibles</span> —
+           <a href="#" onclick="event.preventDefault();$('admin-sql-help')?.style.setProperty('display','')"
+              style="color:#2563eb;text-decoration:underline;">Créer la fonction SQL</a>
+           <div id="admin-sql-help" style="display:none;margin-top:6px;text-align:left;">
+             <pre style="font-size:.62rem;white-space:pre-wrap;background:#f8fafc;padding:8px;border-radius:6px;border:1px solid #e2e8f0;line-height:1.4;">DROP FUNCTION IF EXISTS public.get_admin_stats();
 CREATE OR REPLACE FUNCTION public.get_admin_stats()
-RETURNS TABLE(total_users int, pro_users int, recent_users int,
-              active_today int, active_week int, promo_total int, promo_used int)
+RETURNS TABLE(total_users int, pro_users int, recent_users int, active_today int, active_week int)
 LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
   RETURN QUERY SELECT
@@ -5949,32 +5960,25 @@ BEGIN
     (SELECT count(*)::int FROM auth.users WHERE raw_user_meta_data->>'plan'='pro' OR raw_app_meta_data->>'plan'='pro'),
     (SELECT count(*)::int FROM auth.users WHERE created_at > now()-interval '30 days'),
     (SELECT count(*)::int FROM auth.users WHERE last_sign_in_at > now()-interval '24 hours'),
-    (SELECT count(*)::int FROM auth.users WHERE last_sign_in_at > now()-interval '7 days'),
-    (SELECT count(*)::int FROM public.promo_codes),
-    (SELECT count(*)::int FROM public.promo_codes WHERE used=true);
+    (SELECT count(*)::int FROM auth.users WHERE last_sign_in_at > now()-interval '7 days');
 END; $$;
 GRANT EXECUTE ON FUNCTION public.get_admin_stats() TO authenticated;</pre>
-        </details>
-        <div style="margin-top:8px;font-size:.75rem;color:#64748b;">
-          📋 Codes promo (direct) : <strong style="color:#374151;">${promoUsed} / ${promoTotal}</strong> utilisés
-        </div>`;
-      return;
+           </div>`;
+        return;
+      }
+
+      // Met à jour les cases utilisateurs et la ligne de résumé
+      const boxes = el.querySelectorAll('div[style*="border-radius:8px"]');
+      if (boxes[0]) boxes[0].querySelector('div').textContent = s.total_users ?? '—';
+      if (boxes[1]) boxes[1].querySelector('div').textContent = s.pro_users ?? '—';
+      if (userLine) userLine.innerHTML =
+        `Inscrits 30j : <strong style="color:#374151;">${s.recent_users ?? '—'}</strong>
+         &nbsp;·&nbsp; Actifs 7j : <strong style="color:#374151;">${s.active_week ?? '—'}</strong>
+         &nbsp;·&nbsp; Connectés 24h : <strong style="color:#374151;">${s.active_today ?? '—'}</strong>`;
+    } catch(e) {
+      const userLine = $('admin-stats-user-line');
+      if (userLine) userLine.textContent = 'Erreur RPC : ' + e.message;
     }
-
-    // RETURNS TABLE → rows est un tableau, on prend la première ligne
-    const s = Array.isArray(rows) ? rows[0] : rows;
-    if (!s) { el.innerHTML = '<p style="color:#64748b;font-size:.8rem;">Aucune donnée retournée.</p>'; return; }
-
-    el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px;">
-      ${statBox(s.total_users,   'Comptes créés',    '#15803d', '#f0fdf4', '#bbf7d0')}
-      ${statBox(s.pro_users,     'Utilisateurs Pro', '#1d4ed8', '#eff6ff', '#bfdbfe')}
-      ${statBox(s.active_today,  'Connectés 24h',    '#d97706', '#fefce8', '#fde68a')}
-      ${statBox(s.active_week,   'Actifs 7 jours',   '#7c3aed', '#fdf4ff', '#e9d5ff')}
-    </div>
-    <div style="font-size:.7rem;color:#94a3b8;text-align:center;">
-      Inscrits 30 jours : <strong style="color:#374151;">${s.recent_users ?? '—'}</strong>
-      &nbsp;·&nbsp; Codes promo : <strong style="color:#374151;">${s.promo_used ?? promoUsed}/${s.promo_total ?? promoTotal}</strong> utilisés
-    </div>`;
   }
 
   initAuth();
