@@ -5946,7 +5946,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const el = $('admin-stats-content'); if (!el) return;
 
     // Tente d'appeler la fonction SQL get_admin_stats() (à créer dans Supabase si pas encore fait)
-    const { data, error } = await supa.rpc('get_admin_stats').single();
+    const { data: _raw, error } = await supa.rpc('get_admin_stats');
+    const data = Array.isArray(_raw) ? _raw[0] : _raw;
 
     if (error) {
       // Fallback : compte depuis promo_codes seulement
