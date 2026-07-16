@@ -6115,15 +6115,18 @@ GRANT EXECUTE ON FUNCTION public.get_admin_stats() TO authenticated;</pre>
 
     <!-- Section admin (propriétaire uniquement) -->
     <div id="acct-admin-section" style="margin-bottom:10px;display:none;">
-      <details>
+      <details id="admin-details" ontoggle="if(this.open && window.loadAdminStats) window.loadAdminStats()">
         <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:#fef9c3;border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid #fde68a;">
           ⚙️ Gérer les codes Pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
         </summary>
         <div style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-card);">
           <!-- Stats utilisateurs -->
-          <div style="font-size:.72rem;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">📊 Statistiques</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;">📊 Statistiques</div>
+            <button onclick="window.loadAdminStats && window.loadAdminStats()" style="font-size:.68rem;color:#64748b;background:none;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;cursor:pointer;">↺ Actualiser</button>
+          </div>
           <div id="admin-stats-content" style="margin-bottom:14px;">
-            <p style="color:#94a3b8;margin:0;font-size:.8rem;font-style:italic;">Chargement…</p>
+            <p style="color:#94a3b8;margin:0;font-size:.8rem;font-style:italic;">Ouvrez ce panneau pour charger les stats.</p>
           </div>
           <!-- Formulaire génération -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
