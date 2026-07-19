@@ -5909,6 +5909,41 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     }).join('');
   }
 
+  async function loadProUsersAdmin() {
+    const ADMINS = ['bovicalc@gmail.com','morinleo40@gmail.com'];
+    if (!currentUser || !ADMINS.includes((currentUser.email||'').toLowerCase())) return;
+    const supa = getSupa(); if (!supa) return;
+    const listEl = $('admin-pro-users-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<p style="color:#94a3b8;margin:0;font-size:.8rem;font-style:italic;">Chargement…</p>';
+    const { data, error } = await supa.rpc('get_pro_users');
+    if (error) {
+      listEl.innerHTML = '<span style="color:#dc2626;">Liste indisponible</span> — ' +
+        '<a href="#" onclick="event.preventDefault();$(\'admin-pro-sql-help\')?.style.setProperty(\'display\',\'\')" ' +
+           'style="color:#2563eb;text-decoration:underline;">Créer la fonction SQL</a>' +
+        '<div id="admin-pro-sql-help" style="display:none;margin-top:6px;text-align:left;">' +
+          '<pre style="font-size:.6rem;white-space:pre-wrap;background:#f8fafc;padding:8px;border-radius:6px;border:1px solid #e2e8f0;line-height:1.4;">DROP FUNCTION IF EXISTS public.get_pro_users();\nCREATE OR REPLACE FUNCTION public.get_pro_users()\nRETURNS TABLE(email text, source text, plan_until timestamptz, promo_code text, created_at timestamptz)\nLANGUAGE plpgsql SECURITY DEFINER AS $$\nBEGIN\n  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = auth.uid() AND lower(email) IN (\x27bovicalc@gmail.com\x27,\x27morinleo40@gmail.com\x27)) THEN\n    RAISE EXCEPTION \x27Access denied\x27;\n  END IF;\n  RETURN QUERY\n  SELECT u.email::text,\n    CASE WHEN pc.code IS NOT NULL THEN \x27promo\x27 WHEN up.plan = \x27pro\x27 THEN \x27paiement\x27 ELSE \x27manuel\x27 END,\n    NULLIF(u.raw_user_meta_data->>\x27plan_until\x27,\x27\x27)::timestamptz,\n    pc.code, u.created_at\n  FROM auth.users u\n  LEFT JOIN promo_codes pc ON pc.used_by = u.id AND pc.used = true\n  LEFT JOIN user_plans up ON up.user_id = u.id AND up.plan = \x27pro\x27\n  WHERE u.raw_user_meta_data->>\x27plan\x27 = \x27pro\x27 OR up.plan = \x27pro\x27\n  ORDER BY u.created_at DESC;\nEND; $$;\nGRANT EXECUTE ON FUNCTION public.get_pro_users() TO authenticated;</pre>' +
+        '</div>';
+      return;
+    }
+    if (!data || !data.length) {
+      listEl.innerHTML = '<p style="color:#64748b;margin:0;font-size:.8rem;">Aucun compte pro.</p>';
+      return;
+    }
+    const srcLabel = s => s === 'promo' ? '🎟️ Code promo' : s === 'paiement' ? '💳 Paiement' : '🛠️ Manuel';
+    const srcColor = s => s === 'promo' ? '#7c3aed' : s === 'paiement' ? '#1d4ed8' : '#64748b';
+    listEl.innerHTML = data.map(u => {
+      const until = u.plan_until ? new Date(u.plan_until).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '';
+      return '<div style="padding:7px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+          '<span style="font-size:.82rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(u.email||'') + '</span>' +
+          '<span style="font-size:.68rem;font-weight:700;color:' + srcColor(u.source) + ';white-space:nowrap;">' + srcLabel(u.source) + '</span>' +
+        '</div>' +
+        (u.source === 'promo' && until ? '<div style="font-size:.7rem;color:#94a3b8;margin-top:1px;">' + (u.promo_code ? '🎫 ' + u.promo_code + ' · ' : '') + 'jusqu\'au ' + until + '</div>' : '') +
+      '</div>';
+    }).join('');
+  }
+
   async function loadAdminStats() {
     const ADMINS = ['bovicalc@gmail.com','morinleo40@gmail.com'];
     if (!currentUser || !ADMINS.includes((currentUser.email||'').toLowerCase())) return;
@@ -6115,7 +6150,7 @@ GRANT EXECUTE ON FUNCTION public.get_admin_stats() TO authenticated;</pre>
 
     <!-- Section admin (propriétaire uniquement) -->
     <div id="acct-admin-section" style="margin-bottom:10px;display:none;">
-      <details id="admin-details" ontoggle="if(this.open && window.loadAdminStats) window.loadAdminStats()">
+      <details id="admin-details" ontoggle="if(this.open){ window.loadAdminStats && window.loadAdminStats(); window.loadProUsersAdmin && window.loadProUsersAdmin(); }">
         <summary style="font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer;padding:10px 14px;background:#fef9c3;border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid #fde68a;">
           ⚙️ Gérer les codes Pro <span style="color:var(--text-muted);font-size:.75rem;">▼</span>
         </summary>
@@ -6150,7 +6185,15 @@ GRANT EXECUTE ON FUNCTION public.get_admin_stats() TO authenticated;</pre>
           </div>
           <!-- Liste historique -->
           <div style="font-size:.72rem;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Historique</div>
-          <div id="admin-promo-list" style="max-height:220px;overflow-y:auto;font-size:.8rem;"></div>
+          <div id="admin-promo-list" style="max-height:220px;overflow-y:auto;font-size:.8rem;margin-bottom:14px;"></div>
+          <!-- Comptes Pro actifs -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;">👥 Comptes Pro actifs</div>
+            <button onclick="window.loadProUsersAdmin && window.loadProUsersAdmin()" style="font-size:.68rem;color:#64748b;background:none;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;cursor:pointer;">↺ Actualiser</button>
+          </div>
+          <div id="admin-pro-users-list" style="max-height:260px;overflow-y:auto;font-size:.8rem;">
+            <p style="color:#94a3b8;margin:0;font-size:.8rem;font-style:italic;">Ouvrez ce panneau pour charger la liste.</p>
+          </div>
         </div>
       </details>
     </div>
