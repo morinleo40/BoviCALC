@@ -5918,9 +5918,9 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     listEl.innerHTML = '<p style="color:#94a3b8;margin:0;font-size:.8rem;font-style:italic;">Chargement…</p>';
     const { data, error } = await supa.rpc('get_pro_users');
     if (error) {
-      listEl.innerHTML = '<span style="color:#dc2626;">Liste indisponible</span> — ' +
+      listEl.innerHTML = '<div style="color:#dc2626;font-size:.72rem;margin-bottom:6px;">Erreur : ' + _esc(error.message || String(error)) + '</div>' +
         '<a href="#" onclick="event.preventDefault();$(\'admin-pro-sql-help\')?.style.setProperty(\'display\',\'\')" ' +
-           'style="color:#2563eb;text-decoration:underline;">Créer la fonction SQL</a>' +
+           'style="color:#2563eb;text-decoration:underline;font-size:.75rem;">Créer / recréer la fonction SQL</a>' +
         '<div id="admin-pro-sql-help" style="display:none;margin-top:6px;text-align:left;">' +
           '<pre style="font-size:.6rem;white-space:pre-wrap;background:#f8fafc;padding:8px;border-radius:6px;border:1px solid #e2e8f0;line-height:1.4;">DROP FUNCTION IF EXISTS public.get_pro_users();\nCREATE OR REPLACE FUNCTION public.get_pro_users()\nRETURNS TABLE(email text, source text, plan_until timestamptz, promo_code text, created_at timestamptz)\nLANGUAGE plpgsql SECURITY DEFINER AS $$\nBEGIN\n  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = auth.uid() AND lower(email) IN (\x27bovicalc@gmail.com\x27,\x27morinleo40@gmail.com\x27)) THEN\n    RAISE EXCEPTION \x27Access denied\x27;\n  END IF;\n  RETURN QUERY\n  SELECT u.email::text,\n    CASE WHEN pc.code IS NOT NULL THEN \x27promo\x27 WHEN up.plan = \x27pro\x27 THEN \x27paiement\x27 ELSE \x27manuel\x27 END,\n    NULLIF(u.raw_user_meta_data->>\x27plan_until\x27,\x27\x27)::timestamptz,\n    pc.code, u.created_at\n  FROM auth.users u\n  LEFT JOIN promo_codes pc ON pc.used_by = u.id AND pc.used = true\n  LEFT JOIN user_plans up ON up.user_id = u.id AND up.plan = \x27pro\x27\n  WHERE u.raw_user_meta_data->>\x27plan\x27 = \x27pro\x27 OR up.plan = \x27pro\x27\n  ORDER BY u.created_at DESC;\nEND; $$;\nGRANT EXECUTE ON FUNCTION public.get_pro_users() TO authenticated;</pre>' +
         '</div>';
