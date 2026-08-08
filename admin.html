@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RumiCORE — Administration</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="./style_conseiller.css">
+<link rel="icon" type="image/png" href="Logo RumiCORE.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
+var SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
+var ADMIN_EMAILS = ['bovicalc@gmail.com', 'morinleo40@gmail.com'];
+var _supa = null, currentUser = null;
+function getSupa() { if (!_supa && window.supabase) _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY); return _supa; }
+function _$(id) { return document.getElementById(id); }
+function togglePwd(id, btn) {
+  var inp = _$(id); if (!inp) return;
+  var show = inp.type === 'password'; inp.type = show ? 'text' : 'password'; btn.textContent = show ? '🙈' : '👁';
+}
+async function submitWall() {
+  var email = (_$('wall-email')||{}).value||''; email = email.trim();
+  var pass = (_$('wall-pass')||{}).value||'';
+  var btn = _$('btn-wall-sub');
+  if (!email || !pass) { showWallErr('Email et mot de passe requis.'); return; }
+  var supa = getSupa(); if (!supa) { showWallErr('Service indisponible.'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  var r = await supa.auth.signInWithPassword({ email: email, password: pass });
+  if (r.error) { showWallErr(r.error.message); if (btn) { btn.disabled = false; btn.textContent = 'Se connecter'; } }
+}
+function showWallErr(m) { var e = _$('wall-err'); if (e) { e.textContent = m; e.style.display = 'block'; } }
+async function initAdminAuth() {
+  _$('auth-wall').style.display = 'flex';
+  var supa = getSupa(); if (!supa) return;
+  var sd = await supa.auth.getSession();
+  if (sd.data && sd.data.session && sd.data.session.user) onAuthed(sd.data.session.user);
+  supa.auth.onAuthStateChange(function(evt, session) {
+    if (session && session.user) onAuthed(session.user);
+    else { currentUser = null; _$('auth-wall').style.display = 'flex'; _$('admin-denied').style.display = 'none'; _$('admin-layout').style.display = 'none'; }
+  });
+}
+function onAuthed(user) {
+  currentUser = user;
+  var isAdmin = ADMIN_EMAILS.indexOf((user.email||'').toLowerCase()) !== -1;
+  _$('auth-wall').style.display = 'none';
+  if (!isAdmin) { _$('admin-denied').style.display = 'flex'; _$('admin-layout').style.display = 'none'; return; }
+  _$('admin-denied').style.display = 'none';
+  _$('admin-layout').style.display = 'block';
+  _$('admin-email').textContent = user.email;
+  loadUsers();
+}
+async function logoutAdmin() { var supa = getSupa(); if (supa) await supa.auth.signOut(); }
+document.addEventListener('DOMContentLoaded', initAdminAuth);
+</script>
+</head>
+<body style="margin:0;background:var(--bg,#f8fafc);">
+
+<!-- ────────── AUTH WALL ────────── -->
+<div id="auth-wall" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2718 100%);align-items:center;justify-content:center;padding:20px;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="Logo RumiCORE.png" alt="Rumicore" onerror="this.style.display='none'">
+      <h1>Rumicore <span style="color:#22c55e;">Admin</span></h1>
+      <p>Accès réservé à l'équipe RumiCORE</p>
+    </div>
+    <input type="email" id="wall-email" class="auth-input" placeholder="votre@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')submitWall()">
+    <div style="position:relative;margin-bottom:12px;">
+      <input type="password" id="wall-pass" class="auth-input" placeholder="••••••••" style="margin-bottom:0;padding-right:44px;" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitWall()">
+      <button type="button" onclick="togglePwd('wall-pass',this)" tabindex="-1" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;font-size:1rem;">👁</button>
+    </div>
+    <div id="wall-err" class="auth-error" style="display:none;"></div>
+    <button id="btn-wall-sub" class="auth-btn" onclick="submitWall()">Se connecter</button>
+    <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #334155;">
+      <a href="./app.html" style="font-size:.78rem;color:#475569;text-decoration:none;">← Retour à RumiCORE</a>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── ACCÈS REFUSÉ ────────── -->
+<div id="admin-denied" style="display:none;position:fixed;inset:0;z-index:99998;background:#0f172a;align-items:center;justify-content:center;padding:20px;flex-direction:column;gap:16px;text-align:center;">
+  <div style="font-size:3rem;">🔒</div>
+  <div style="color:#fff;font-size:1.1rem;font-weight:700;">Accès refusé</div>
+  <div style="color:#94a3b8;font-size:.85rem;max-width:360px;">Ce compte n'a pas les droits administrateur RumiCORE.</div>
+  <button class="btn btn-ghost" onclick="logoutAdmin()">Se déconnecter</button>
+</div>
+
+<!-- ────────── ADMIN LAYOUT ────────── -->
+<div id="admin-layout" style="display:none;max-width:1200px;margin:0 auto;padding:24px 20px 60px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
+    <div>
+      <h1 style="font-size:1.3rem;font-weight:900;color:var(--text);margin:0;">⚙️ Administration RumiCORE</h1>
+      <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px;">Connecté en tant que <strong id="admin-email"></strong></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="loadUsers()">↺ Actualiser</button>
+      <a href="./app.html" class="btn btn-ghost btn-sm" style="text-decoration:none;">🐄 App Éleveur</a>
+      <a href="./app_conseiller.html" class="btn btn-ghost btn-sm" style="text-decoration:none;">🧑‍💼 App Conseiller</a>
+      <button class="btn btn-danger btn-sm" onclick="logoutAdmin()">⏻ Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:24px;" id="admin-metrics">
+    <div class="metric-card"><div class="metric-lbl">Comptes</div><div class="metric-val" id="m-total">—</div></div>
+    <div class="metric-card"><div class="metric-lbl">Comptes Pro</div><div class="metric-val" style="color:#1d4ed8;" id="m-pro">—</div></div>
+    <div class="metric-card"><div class="metric-lbl">Organisations</div><div class="metric-val" style="color:#7c3aed;" id="m-orgs">—</div></div>
+    <div class="metric-card"><div class="metric-lbl">Suspendus</div><div class="metric-val" style="color:#dc2626;" id="m-banned">—</div></div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <input type="search" id="adm-search" class="form-input" placeholder="🔍 Rechercher un email ou une organisation…" style="flex:1;min-width:220px;margin:0;" oninput="renderUsersTable()">
+      <select class="form-select" id="adm-filter-plan" style="width:150px;margin:0;" onchange="renderUsersTable()">
+        <option value="">Tous les plans</option>
+        <option value="pro">Pro</option>
+        <option value="free">Gratuit</option>
+      </select>
+      <select class="form-select" id="adm-filter-banned" style="width:170px;margin:0;" onchange="renderUsersTable()">
+        <option value="">Tous les statuts</option>
+        <option value="active">Actifs</option>
+        <option value="banned">Suspendus</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="adm-table">
+        <thead><tr>
+          <th>Email</th><th>Créé le</th><th>Dernière connexion</th><th>Plan</th><th>Organisation</th>
+          <th>Exploit.</th><th>Sessions</th><th>Statut</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="adm-tbody"><tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="font-size:.72rem;color:#94a3b8;margin-top:16px;">
+    Les colonnes Exploit./Sessions ne concernent que les comptes conseiller (exploitations rattachées). Les comptes éleveur affichent 0.
+  </p>
+</div>
+
+<script>
+async function loadUsers() {
+  const supa = getSupa();
+  const tbody = _$('adm-tbody');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Chargement…</td></tr>';
+  const { data, error } = await supa.rpc('get_admin_users');
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="9" style="padding:24px;color:#dc2626;font-size:.85rem;">Erreur : ${error.message} (exécutez migration_conseiller_v2.sql dans Supabase ?)</td></tr>`;
+    return;
+  }
+  window._adminUsers = data || [];
+  const total = data.length;
+  const pro = data.filter(u => u.plan === 'pro').length;
+  const orgs = new Set(data.map(u => u.organisation).filter(Boolean)).size;
+  const banned = data.filter(u => u.banned_until && new Date(u.banned_until) > new Date()).length;
+  _$('m-total').textContent = total;
+  _$('m-pro').textContent = pro;
+  _$('m-orgs').textContent = orgs;
+  _$('m-banned').textContent = banned;
+  renderUsersTable();
+}
+
+function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderUsersTable() {
+  const tbody = _$('adm-tbody');
+  const all = window._adminUsers || [];
+  const q = (_$('adm-search')?.value || '').toLowerCase().trim();
+  const planF = _$('adm-filter-plan')?.value || '';
+  const bannedF = _$('adm-filter-banned')?.value || '';
+
+  let list = all.filter(u => {
+    if (q && !((u.email||'').toLowerCase().includes(q) || (u.organisation||'').toLowerCase().includes(q))) return false;
+    if (planF && (u.plan||'free') !== planF) return false;
+    const isBanned = u.banned_until && new Date(u.banned_until) > new Date();
+    if (bannedF === 'active' && isBanned) return false;
+    if (bannedF === 'banned' && !isBanned) return false;
+    return true;
+  });
+
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun compte trouvé.</td></tr>'; return; }
+
+  tbody.innerHTML = list.map(u => {
+    const isPro = u.plan === 'pro';
+    const isBanned = u.banned_until && new Date(u.banned_until) > new Date();
+    const created = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—';
+    const lastLogin = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('fr-FR') : '—';
+    const planBadge = isPro
+      ? `<span class="badge badge-blue">⭐ Pro${u.plan_until?' jusqu\'au '+new Date(u.plan_until).toLocaleDateString('fr-FR'):''}</span>`
+      : `<span class="badge badge-gray">Gratuit</span>`;
+    return `<tr>
+      <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(u.email)}</td>
+      <td style="white-space:nowrap;">${created}</td>
+      <td style="white-space:nowrap;">${lastLogin}</td>
+      <td>${planBadge}</td>
+      <td>
+        <span id="org-${u.id}" style="font-size:.82rem;">${esc(u.organisation||'—')}</span>
+      </td>
+      <td style="text-align:center;">${u.nb_exploitations||0}</td>
+      <td style="text-align:center;">${u.nb_sessions||0}</td>
+      <td>${isBanned ? '<span class="badge badge-red">Suspendu</span>' : '<span class="badge badge-green">Actif</span>'}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="togglePlan('${u.id}','${u.email}',${isPro})">${isPro?'⬇️ Repasser gratuit':'⭐ Passer pro'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="editOrganisation('${u.id}')">🏢 Organisation</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleBanned('${u.id}','${u.email}',${isBanned})">${isBanned?'✅ Réactiver':'🚫 Suspendre'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUserAdmin('${u.id}','${u.email}')">🗑️ Supprimer</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function togglePlan(id, email, isPro) {
+  const supa = getSupa();
+  if (isPro) {
+    if (!confirm(`Repasser ${email} en compte gratuit ?`)) return;
+    const { error } = await supa.rpc('admin_set_plan', { p_user_id: id, p_plan: 'free', p_until: null });
+    if (error) { alert('Erreur : ' + error.message); return; }
+  } else {
+    const days = prompt(`Passer ${email} en pro pour combien de jours ?`, '365');
+    if (!days) return;
+    const until = new Date(Date.now() + parseInt(days,10) * 86400000).toISOString();
+    const { error } = await supa.rpc('admin_set_plan', { p_user_id: id, p_plan: 'pro', p_until: until });
+    if (error) { alert('Erreur : ' + error.message); return; }
+  }
+  loadUsers();
+}
+
+async function editOrganisation(id) {
+  const u = (window._adminUsers||[]).find(x => x.id === id);
+  const org = prompt('Organisation pour ce compte (ex: NatUp) — laisser vide pour retirer :', (u && u.organisation) || '');
+  if (org === null) return;
+  const supa = getSupa();
+  const { error } = await supa.rpc('admin_set_organisation', { p_user_id: id, p_organisation: org.trim() });
+  if (error) { alert('Erreur : ' + error.message); return; }
+  loadUsers();
+}
+
+async function toggleBanned(id, email, isBanned) {
+  const action = isBanned ? 'réactiver' : 'suspendre';
+  if (!confirm(`Confirmer : ${action} le compte ${email} ?`)) return;
+  const supa = getSupa();
+  const { error } = await supa.rpc('admin_set_banned', { p_user_id: id, p_banned: !isBanned });
+  if (error) { alert('Erreur : ' + error.message + '\n(votre projet Supabase a-t-il la colonne auth.users.banned_until ?)'); return; }
+  loadUsers();
+}
+
+async function deleteUserAdmin(id, email) {
+  if (!confirm(`⚠️ Supprimer définitivement le compte ${email} ?\nCette action est irréversible (compte + données associées).`)) return;
+  if (!confirm(`Dernière confirmation : supprimer ${email} ?`)) return;
+  const supa = getSupa();
+  const { error } = await supa.rpc('admin_delete_user', { p_user_id: id });
+  if (error) { alert('Erreur : ' + error.message); return; }
+  loadUsers();
+}
+</script>
+</body>
+</html>

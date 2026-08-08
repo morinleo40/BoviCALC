@@ -231,11 +231,11 @@ function setTheme(t) {
 
   <!-- SIDEBAR -->
   <nav class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <img src="Logo RumiCORE.png" alt="" onerror="this.style.display='none'">
+    <div class="sidebar-logo" id="sidebar-logo-wrap">
+      <img src="Logo RumiCORE.png" alt="" id="sidebar-logo-img" onerror="this.style.display='none'">
       <div class="sidebar-logo-text">
         <div class="sidebar-logo-title">Rumicore</div>
-        <div class="sidebar-logo-sub">Conseiller</div>
+        <div class="sidebar-logo-sub" id="sidebar-logo-sub">Conseiller</div>
       </div>
       <button onclick="toggleSidebar()" style="background:none;border:none;cursor:pointer;color:#64748b;padding:4px;margin-left:auto;" title="Masquer">☰</button>
     </div>
@@ -249,8 +249,14 @@ function setTheme(t) {
         <span class="si-icon">🏠</span> Mes exploitations
         <span class="si-badge" id="sb-exp-count">0</span>
       </button>
+      <button class="sidebar-item" id="nav-agenda" onclick="showPage('agenda')">
+        <span class="si-icon">📅</span> Agenda
+      </button>
       <button class="sidebar-item" id="nav-rapports" onclick="showPage('rapports')">
         <span class="si-icon">📄</span> Rapports
+      </button>
+      <button class="sidebar-item" onclick="openAssistantModal()">
+        <span class="si-icon">🤖</span> Assistant portefeuille
       </button>
       <button class="sidebar-item" id="nav-settings" onclick="showPage('settings')">
         <span class="si-icon">⚙️</span> Paramètres
@@ -363,10 +369,24 @@ function setTheme(t) {
         </div>
       </div>
 
-      <!-- Section alertes -->
-      <div id="dash-alerts" style="display:none;margin-top:28px;">
-        <h2 style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:14px;">⚠️ Exploitations à surveiller</h2>
-        <div id="dash-alerts-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      <!-- Priorisation du portefeuille -->
+      <div id="dash-priorities" style="display:none;margin-top:28px;">
+        <h2 style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:4px;">🎯 Vos priorités du jour</h2>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:16px;">RumiCORE classe automatiquement vos exploitations selon l'urgence d'intervention.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+          <div class="card" style="margin-bottom:0;border-top:3px solid #dc2626;">
+            <div class="card-header"><div class="card-title">🔴 Priorité 1 <span id="pri-1-count" style="color:#94a3b8;font-weight:600;"></span></div></div>
+            <div id="pri-1-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+          <div class="card" style="margin-bottom:0;border-top:3px solid #d97706;">
+            <div class="card-header"><div class="card-title">🟠 Priorité 2 <span id="pri-2-count" style="color:#94a3b8;font-weight:600;"></span></div></div>
+            <div id="pri-2-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+          <div class="card" style="margin-bottom:0;border-top:3px solid #16a34a;">
+            <div class="card-header"><div class="card-title">🟢 Situation normale <span id="pri-3-count" style="color:#94a3b8;font-weight:600;"></span></div></div>
+            <div id="pri-3-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -405,6 +425,9 @@ function setTheme(t) {
         </div>
       </div>
 
+      <!-- FICHE SYNTHÈSE INTELLIGENTE -->
+      <div id="exp-fiche-synthese" style="margin-bottom:20px;"></div>
+
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('tab-ration',this)">🌾 Ration & Bilan</button>
         <button class="tab-btn" onclick="switchTab('tab-couts',this)">💰 Coûts</button>
@@ -412,6 +435,7 @@ function setTheme(t) {
         <button class="tab-btn" onclick="switchTab('tab-historique',this)">🕐 Historique</button>
         <button class="tab-btn" onclick="switchTab('tab-notes',this)">📝 Visites</button>
         <button class="tab-btn" onclick="switchTab('tab-rapport',this)">📄 Rapport</button>
+        <button class="tab-btn" onclick="switchTab('tab-strategie',this)">🗓️ Stratégie 12 mois</button>
       </div>
 
       <!-- TAB: RATION -->
@@ -576,28 +600,26 @@ function setTheme(t) {
 
             <!-- Bilan résultat -->
             <div id="bilan-result-wrap" style="display:none;">
-              <div class="card" style="margin-bottom:16px;">
+              <div class="card" style="margin-bottom:12px;">
                 <div class="card-header">
                   <div class="card-title">📊 Bilan nutritionnel</div>
-                  <button class="btn btn-ghost btn-sm" id="btn-compare" onclick="showComparePanel()" style="display:none;">🔄 Comparer</button>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button class="btn btn-ghost btn-sm" id="btn-compare" onclick="showComparePanel()" style="display:none;">🔄 Comparer</button>
+                    <button class="btn btn-ghost btn-sm" onclick="startSandbox()">🧪 Dupliquer en simulation</button>
+                    <button class="btn btn-ghost btn-sm" id="btn-sandbox-compare" onclick="compareSandbox()" style="display:none;">⚖️ Comparer à la référence</button>
+                  </div>
                 </div>
                 <div id="bilan-result"></div>
+                <div id="glucides-wrap"></div>
               </div>
-              <div id="glucides-wrap"></div>
-              <!-- Score qualité -->
-              <div id="bilan-score"></div>
+              <!-- Score ABCD + score multicritère, fusionnés en un seul bloc -->
+              <div id="bilan-score" style="margin-bottom:12px;"></div>
+              <!-- Pourquoi (diagnostic actionnable) + 3 pistes de ration + coût du litre -->
+              <div id="bilan-advanced" style="margin-bottom:12px;"></div>
               <!-- Indicateurs cliquables -->
-              <div id="bilan-indicateurs" style="margin-bottom:16px;"></div>
+              <div id="bilan-indicateurs" style="margin-bottom:12px;"></div>
               <!-- Comparaison session précédente -->
-              <div id="compare-wrap" style="display:none;margin-bottom:16px;"></div>
-              <!-- Optimiseur -->
-              <div class="card" style="margin-bottom:16px;">
-                <div class="card-header">
-                  <div class="card-title">🔧 Suggestions d'ajustement</div>
-                  <button class="btn btn-primary btn-sm" onclick="runOptimizer()">Analyser</button>
-                </div>
-                <div id="bilan-optimizer" style="color:var(--text-muted);font-size:.85rem;padding:8px 0;">Cliquez sur "Analyser" après avoir calculé le bilan.</div>
-              </div>
+              <div id="compare-wrap" style="display:none;margin-bottom:12px;"></div>
             </div>
           </div>
         </div>
@@ -616,6 +638,7 @@ function setTheme(t) {
               <div class="form-group"><label>Nb animaux</label><input type="number" class="form-input" id="cout-nb-vl" value="50" min="1"></div>
               <div class="form-group"><label>Production (L/an)</label><input type="number" class="form-input" id="cout-ref-lait" value="9000" min="0"></div>
               <div class="form-group"><label>Durée ration (jours)</label><input type="number" class="form-input" id="cout-duree" value="180" min="1"></div>
+              <div class="form-group"><label>Prix du lait (€/L)</label><input type="number" class="form-input" id="cout-prix-lait" value="0.40" min="0" step="0.01"></div>
             </div>
             <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="calcCouts()">💰 Calculer le coût</button>
           </div>
@@ -651,6 +674,7 @@ function setTheme(t) {
           <button class="bf-btn" id="bfbtn-troupeau" onclick="bfSwitch('troupeau',this)">🐄 Troupeau</button>
           <button class="bf-btn" id="bfbtn-resultat" onclick="bfSwitch('resultat',this)">📊 Résultat</button>
           <button class="bf-btn" id="bfbtn-silo" onclick="bfSwitch('silo',this)">📐 Calculateur silo</button>
+          <button class="bf-btn" id="bfbtn-analyses" onclick="bfSwitch('analyses',this)">📸 Analyses</button>
         </div>
 
         <div id="bf-stocks">
@@ -725,6 +749,39 @@ function setTheme(t) {
             <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="transferTmsToStock()">↳ Ajouter aux stocks</button>
           </div>
         </div>
+
+        <div id="bf-analyses" style="display:none;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📸 Nouvelle analyse de fourrage</div></div>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;">Prenez en photo le bulletin du laboratoire et saisissez les valeurs ci-dessous (la reconnaissance automatique n'est pas encore disponible — saisie manuelle assistée).</p>
+            <div class="form-grid">
+              <div class="form-group"><label>Nom de l'aliment</label><input type="text" class="form-input" id="af-nom" placeholder="Ex: Ensilage maïs 2025"></div>
+              <div class="form-group"><label>Type</label>
+                <select class="form-select" id="af-type">
+                  <option>Ensilage maïs</option><option>Ensilage herbe</option><option>Enrubannage</option>
+                  <option>Foin</option><option>Paille</option><option>Autre</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Laboratoire</label><input type="text" class="form-input" id="af-labo" placeholder="Ex: Auxival, Labo Interbev…"></div>
+              <div class="form-group"><label>Date d'analyse</label><input type="date" class="form-input" id="af-date"></div>
+              <div class="form-group"><label>MS (%)</label><input type="number" step="0.1" class="form-input" id="af-ms"></div>
+              <div class="form-group"><label>MAT (%)</label><input type="number" step="0.1" class="form-input" id="af-mat"></div>
+              <div class="form-group"><label>CB (%)</label><input type="number" step="0.1" class="form-input" id="af-cb"></div>
+              <div class="form-group"><label>NDF (%)</label><input type="number" step="0.1" class="form-input" id="af-ndf"></div>
+              <div class="form-group"><label>Amidon (%)</label><input type="number" step="0.1" class="form-input" id="af-amidon"></div>
+              <div class="form-group"><label>MAT digestible (%)</label><input type="number" step="0.1" class="form-input" id="af-matdig"></div>
+              <div class="form-group"><label>UFL/kg MS</label><input type="number" step="0.01" class="form-input" id="af-ufl"></div>
+              <div class="form-group"><label>PDI (g/kg MS)</label><input type="number" step="1" class="form-input" id="af-pdi"></div>
+              <div class="form-group" style="grid-column:1/-1;"><label>📷 Photo du bulletin</label><input type="file" accept="image/*" class="form-input" id="af-photo"></div>
+            </div>
+            <div id="af-err" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:8px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
+            <button class="btn btn-primary btn-sm" id="af-save-btn" onclick="saveAnalyseFourrage()">💾 Enregistrer l'analyse</button>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;margin-top:16px;">
+            <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-weight:700;color:var(--text);">Analyses enregistrées pour cette exploitation</div>
+            <div id="af-list"><div style="padding:24px;text-align:center;color:var(--text-muted);">Aucune analyse enregistrée.</div></div>
+          </div>
+        </div>
       </div>
 
       <!-- TAB: HISTORIQUE -->
@@ -768,13 +825,42 @@ function setTheme(t) {
               <label>Objet / titre</label>
               <input type="text" class="form-input" id="note-titre" placeholder="Ex : Bilan fourrager hivernal">
             </div>
+            <div class="form-group">
+              <label>Refus au cornadis</label>
+              <select class="form-select" id="note-refus">
+                <option value="">—</option>
+                <option value="baisse">↓ Baisse</option>
+                <option value="stable">→ Stable</option>
+                <option value="hausse">↑ Hausse</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ingestion estimée</label>
+              <select class="form-select" id="note-ingestion">
+                <option value="">—</option>
+                <option value="baisse">↓ Baisse</option>
+                <option value="stable">→ Stable</option>
+                <option value="hausse">↑ Hausse</option>
+              </select>
+            </div>
             <div class="form-group" style="grid-column:1/-1;">
               <label>Observations</label>
               <textarea class="form-textarea" id="note-content" rows="4" placeholder="État du troupeau, problèmes identifiés, recommandations…"></textarea>
             </div>
+            <div class="form-group">
+              <label>📷 Photo (silo, auge, refus…)</label>
+              <input type="file" accept="image/*" class="form-input" id="note-photo">
+            </div>
+            <div class="form-group">
+              <label>🎙️ Note vocale</label>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button type="button" class="btn btn-ghost btn-sm" id="note-audio-btn" onclick="toggleAudioRecording()">⏺ Enregistrer</button>
+                <span id="note-audio-status" style="font-size:.78rem;color:var(--text-muted);">Aucun enregistrement</span>
+              </div>
+            </div>
           </div>
           <div id="note-err" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:8px;padding:7px 10px;background:#fee2e2;border-radius:6px;"></div>
-          <button class="btn btn-primary btn-sm" onclick="saveVisitNote()">💾 Enregistrer la note</button>
+          <button class="btn btn-primary btn-sm" id="note-save-btn" onclick="saveVisitNote()">💾 Enregistrer la note</button>
         </div>
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-weight:700;color:var(--text);">Historique des visites</div>
@@ -799,9 +885,10 @@ function setTheme(t) {
             </div>
             <div class="form-group">
               <label>Observations / recommandations</label>
-              <textarea class="form-textarea" id="rp-obs" rows="4" placeholder="Vos commentaires pour l'éleveur…"></textarea>
+              <textarea class="form-textarea" id="rp-obs" rows="8" placeholder="Vos commentaires pour l'éleveur…"></textarea>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="generateCompteRendu()">✨ Générer automatiquement</button>
               <button class="btn btn-primary" onclick="printRapport()">🖨 Imprimer / PDF</button>
               <button class="btn btn-ghost btn-sm" onclick="previewRapport()">👁 Aperçu</button>
             </div>
@@ -813,6 +900,34 @@ function setTheme(t) {
           </div>
         </div>
       </div>
+
+      <!-- TAB: STRATÉGIE 12 MOIS -->
+      <div class="tab-content" id="tab-strategie">
+        <div class="card">
+          <div class="card-header"><div class="card-title">🗓️ Stratégie alimentaire annuelle</div></div>
+          <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px;">Génère un calendrier indicatif des grandes phases de conduite alimentaire sur 12 mois, à partir du profil de vêlage de l'exploitation. Un outil de préparation de visite, pas une prévision chiffrée.</p>
+          <div class="form-grid" style="margin-bottom:10px;">
+            <div class="form-group">
+              <label>Profil de vêlage</label>
+              <select class="form-select" id="strat-profil" onchange="onStratProfilChange()">
+                <option value="groupe">Groupé (période de vêlages concentrée)</option>
+                <option value="etale">Étalé (vêlages toute l'année)</option>
+              </select>
+            </div>
+            <div class="form-group" id="strat-mois-group">
+              <label>Mois principal des vêlages</label>
+              <select class="form-select" id="strat-mois">
+                <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option>
+                <option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option>
+                <option value="7">Juillet</option><option value="8">Août</option><option value="9" selected>Septembre</option>
+                <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="genererStrategie()">🗓️ Générer le calendrier</button>
+        </div>
+        <div id="strat-result" style="margin-top:16px;"></div>
+      </div>
     </div>
 
     <!-- ══ PAGE: RAPPORTS ══ -->
@@ -822,6 +937,21 @@ function setTheme(t) {
         <div id="rapports-list" style="color:var(--text-muted);text-align:center;padding:48px;">
           <div style="font-size:2rem;margin-bottom:12px;">📄</div>
           <p>Ouvrez une exploitation et enregistrez des sessions pour voir vos rapports ici.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: AGENDA ══ -->
+    <div class="page-content hidden" id="page-agenda">
+      <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:20px;">📅 Agenda</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header"><div class="card-title">📌 Visites planifiées</div></div>
+          <div id="agenda-planned"></div>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header"><div class="card-title">⏰ Élevages non vus depuis longtemps</div></div>
+          <div id="agenda-overdue"></div>
         </div>
       </div>
     </div>
@@ -887,6 +1017,32 @@ function setTheme(t) {
           </div>
         </div>
         <button class="btn btn-primary btn-sm" onclick="saveAlertSettings()">💾 Sauvegarder</button>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header"><div class="card-title">🏢 Mon organisation</div></div>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Personnalisez RumiCORE aux couleurs de votre coopérative/organisme (ex: NatUp). Ça s'applique à la barre latérale et aux rapports PDF envoyés aux éleveurs.</p>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div class="form-group"><label>Nom de l'organisation</label><input type="text" class="form-input" id="org-nom" placeholder="Ex: NatUp"></div>
+          <div class="form-group"><label>Couleur principale</label><input type="color" class="form-input" id="org-couleur" value="#15803d" style="height:38px;padding:2px;"></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>URL du logo (optionnel)</label><input type="text" class="form-input" id="org-logo" placeholder="https://…/logo-natup.png"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveAdvisorProfile()">💾 Enregistrer</button>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header"><div class="card-title">🏭 Base aliments & prix centralisés</div></div>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Vos prix de référence, partagés entre toutes vos exploitations. Ils servent de base pour le module Coûts (à sélectionner manuellement pour l'instant — auto-remplissage à venir).</p>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div class="form-group"><label>Nom de l'aliment</label><input type="text" class="form-input" id="ca-nom" placeholder="Ex: Tourteau de colza NatUp"></div>
+          <div class="form-group"><label>Prix (€/t)</label><input type="number" step="0.1" class="form-input" id="ca-prix" placeholder="345"></div>
+          <div class="form-group"><label>UFL/kg MS</label><input type="number" step="0.01" class="form-input" id="ca-ufl" placeholder="1.10"></div>
+          <div class="form-group"><label>PDI (g/kg MS)</label><input type="number" step="1" class="form-input" id="ca-pdi" placeholder="180"></div>
+          <div class="form-group"><label>MS (%)</label><input type="number" step="0.1" class="form-input" id="ca-ms" placeholder="88"></div>
+          <div class="form-group"><label>Fournisseur</label><input type="text" class="form-input" id="ca-fournisseur" placeholder="NatUp"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addConseillerAliment()" style="margin-bottom:14px;">➕ Ajouter / mettre à jour</button>
+        <div id="ca-list" style="border-top:1px solid var(--border);padding-top:10px;"></div>
       </div>
     </div>
 
@@ -967,6 +1123,14 @@ function setTheme(t) {
       <label>Nom de la session</label>
       <input type="text" class="form-input" id="sm-name" placeholder="Ex: Ration été 2025">
     </div>
+    <div class="form-group">
+      <label>Objectif de cette modification</label>
+      <input type="text" class="form-input" id="sm-objectif" placeholder="Ex: Augmenter la production, réduire le coût…">
+    </div>
+    <div class="form-group">
+      <label>Motif du changement (optionnel)</label>
+      <textarea class="form-textarea" id="sm-motif" rows="2" placeholder="Ex: TB en baisse, prix du tourteau en hausse…"></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeSessionModal()">Annuler</button>
       <button class="btn btn-primary" onclick="confirmSaveSession()">Sauvegarder</button>
@@ -1009,6 +1173,60 @@ function setTheme(t) {
       <button class="btn btn-ghost" onclick="closeImportCodeModal()">Annuler</button>
       <button class="btn btn-primary" onclick="confirmImportCode()">Importer</button>
     </div>
+  </div>
+</div>
+
+<!-- ────────── MODAL: OBJECTIFS DE SUIVI ────────── -->
+<div class="modal-overlay hidden" id="objectifs-modal" onclick="if(event.target===this)closeObjectifsModal()">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <h3>🎯 Objectifs de suivi</h3>
+      <button class="modal-close" onclick="closeObjectifsModal()">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Lait cible (L/j)</label>
+        <input type="number" step="0.1" class="form-input" id="obj-lait" placeholder="Ex: 32">
+      </div>
+      <div class="form-group">
+        <label>TB cible (%)</label>
+        <input type="number" step="0.01" class="form-input" id="obj-tb" placeholder="Ex: 4.10">
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Score minimum souhaité</label>
+        <select class="form-select" id="obj-score">
+          <option value="">—</option>
+          <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeObjectifsModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveObjectifs()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── MODAL: ASSISTANT CONSEILLER (RECHERCHE PORTEFEUILLE) ────────── -->
+<div class="modal-overlay hidden" id="assistant-modal" onclick="if(event.target===this)closeAssistantModal()">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>🤖 Assistant — Recherche dans mon portefeuille</h3>
+      <button class="modal-close" onclick="closeAssistantModal()">×</button>
+    </div>
+    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px;">Choisissez une question type — RumiCORE interroge vos exploitations en temps réel (pas d'IA générative : réponses calculées sur vos vraies données).</p>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+      <button class="btn btn-ghost btn-sm" style="text-align:left;" onclick="runAssistantQuery('cout-hausse')">📈 Élevages dont le coût alimentaire a augmenté de +5% depuis la dernière visite</button>
+      <button class="btn btn-ghost btn-sm" style="text-align:left;" onclick="runAssistantQuery('tb-baisse')">📉 Élevages avec un TB en baisse sur les 2 dernières sessions</button>
+      <button class="btn btn-ghost btn-sm" style="text-align:left;" onclick="runAssistantQuery('score-d')">🔴 Élevages en score D actuellement</button>
+      <button class="btn btn-ghost btn-sm" style="text-align:left;" onclick="runAssistantQuery('non-vus')">⏰ Élevages non vus depuis plus de 60 jours</button>
+      <button class="btn btn-ghost btn-sm" style="text-align:left;" onclick="runAssistantQuery('objectifs-non-atteints')">🎯 Élevages n'atteignant pas leurs objectifs</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:4px;border-top:1px solid var(--border);padding-top:12px;">
+      <input type="text" id="assistant-freetext" class="form-input" style="margin:0;flex:1;" placeholder="Ou tapez votre question (ex: quels élevages ont un coût en hausse ?)" onkeydown="if(event.key==='Enter')askAssistantFreeText()">
+      <button class="btn btn-primary btn-sm" onclick="askAssistantFreeText()">Demander</button>
+    </div>
+    <div id="assistant-result" style="padding-top:12px;max-height:320px;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -1417,6 +1635,8 @@ async function onSignIn() {
   // Init bilan fourrager avec 3 lignes de stock
   addBfStock(); addBfStock(); addBfStock();
   await loadExploitations();
+  loadAdvisorProfile();
+  loadConseillerAliments();
   showPage('dashboard');
 }
 
@@ -1477,12 +1697,12 @@ function updateSidebarUser() {
 
 /* ══ NAVIGATION ══ */
 function showPage(page) {
-  const pages = ['dashboard','exploitations','exp-detail','rapports','settings'];
+  const pages = ['dashboard','exploitations','exp-detail','rapports','settings','agenda'];
   pages.forEach(p => {
     const el = document.getElementById('page-'+p);
     if (el) el.classList.toggle('hidden', p !== page);
   });
-  const navs = ['dashboard','exploitations','rapports','settings'];
+  const navs = ['dashboard','exploitations','rapports','settings','agenda'];
   navs.forEach(n => {
     const el = document.getElementById('nav-'+n);
     if(el) el.classList.toggle('active', n===page);
@@ -1492,7 +1712,8 @@ function showPage(page) {
     'exploitations':'Mes exploitations',
     'exp-detail': currentExp ? currentExp.nom : 'Exploitation',
     'rapports':'Rapports',
-    'settings':'Paramètres'
+    'settings':'Paramètres',
+    'agenda':'Agenda'
   };
   document.getElementById('page-title').textContent = titles[page] || '';
 
@@ -1506,7 +1727,8 @@ function showPage(page) {
     tba.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openExpModal(null)">+ Nouvelle exploitation</button>`;
   }
 
-  if (page === 'settings') loadAlertSettingsUI();
+  if (page === 'settings') { loadAlertSettingsUI(); loadConseillerAliments(); }
+  if (page === 'agenda') loadAgenda();
   if (page !== 'exp-detail') prevPage = page;
 }
 
@@ -1520,6 +1742,7 @@ function switchTab(tabId, btn) {
   if (btn) btn.classList.add('active');
   if (tabId === 'tab-historique') loadSessionsForCurrentExp();
   if (tabId === 'tab-notes') { loadVisitNotes(); if (_$('note-date') && !_$('note-date').value) _$('note-date').value = new Date().toISOString().slice(0,10); }
+  if (tabId === 'tab-strategie') loadStrategie();
 }
 
 function toggleSidebar() {
@@ -2113,6 +2336,8 @@ async function openExp(id) {
     (currentExp.type||'lait') + (currentExp.contact_nom?' · '+currentExp.contact_nom:'') +
     (currentExp.adresse?' · '+currentExp.adresse:'');
 
+  renderFicheSynthese();
+
   // Restore last session data if any
   if (currentExp.last_ration_data) {
     try { restoreRationData(JSON.parse(currentExp.last_ration_data)); } catch(e) {}
@@ -2502,7 +2727,8 @@ function calcBilan() {
   document.getElementById('glucides-wrap').innerHTML = renderGlucides(a);
   document.getElementById('bilan-result-wrap').style.display = '';
 
-  renderQualityScore(a, b);
+  renderScorePanel(a, b);
+  renderAdvancedInsights(a, b);
   renderIndicateurs(a, b);
 
   // Afficher bouton comparer + reset panneau si exploitation chargée
@@ -2676,6 +2902,8 @@ function saveSession() {
   if (!currentExp) { showToast('Ouvrez d\'abord une exploitation.', 'warn'); return; }
   const now = new Date();
   document.getElementById('sm-name').value = `Session du ${now.toLocaleDateString('fr-FR')}`;
+  document.getElementById('sm-objectif').value = '';
+  document.getElementById('sm-motif').value = '';
   document.getElementById('session-modal').classList.remove('hidden');
 }
 function closeSessionModal() { document.getElementById('session-modal').classList.add('hidden'); }
@@ -2697,6 +2925,10 @@ async function confirmSaveSession() {
       lastBesoins.bPDI>0?lastApports.totalPDI/lastBesoins.bPDI:0,
       lastApports.totalUFL>0?lastApports.totalPDI/lastApports.totalUFL:0
     ) : '—',
+    coutJour: (typeof window._lastCoutJour === 'number') ? window._lastCoutJour : null,
+    objectif: (document.getElementById('sm-objectif')?.value||'').trim() || null,
+    motif: (document.getElementById('sm-motif')?.value||'').trim() || null,
+    auteur_email: currentUser?.email || null,
   };
   try {
     const { error } = await supa.from('exploitation_sessions').insert({
@@ -2726,20 +2958,25 @@ async function loadSessionsForCurrentExp() {
       return;
     }
     renderScoreChart(data);
+    const totalV = data.length;
     list.innerHTML = `<table class="data-table">
-      <thead><tr><th>Date</th><th>Nom</th><th>Score</th><th>UFL</th><th>PDI</th><th>Actions</th></tr></thead>
-      <tbody>${data.map(s=>{
+      <thead><tr><th>Version</th><th>Date</th><th>Nom / Objectif</th><th>Score</th><th>UFL</th><th>PDI</th><th>Coût</th><th>Auteur</th><th>Actions</th></tr></thead>
+      <tbody>${data.map((s,i)=>{
         const d=s.data||{};
         const score=d.score||'—';
         const sc='badge-'+(score==='A'||score==='B'?'green':score==='C'?'amber':score==='D'?'red':'gray');
         const ufl=d.apports?.totalUFL?d.apports.totalUFL.toFixed(2):'—';
         const pdi=d.apports?.totalPDI?d.apports.totalPDI.toFixed(0)+'g':'—';
-        return `<tr>
+        const cout=(typeof d.coutJour==='number')?d.coutJour.toFixed(2)+' €':'—';
+        return `<tr title="${d.motif?escHtml(d.motif):''}">
+          <td style="font-weight:700;color:#64748b;">V${totalV-i}</td>
           <td>${new Date(s.date).toLocaleDateString('fr-FR')}</td>
-          <td>${escHtml(s.name||'')}</td>
+          <td>${escHtml(s.name||'')}${d.objectif?`<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">🎯 ${escHtml(d.objectif)}</div>`:''}</td>
           <td><span class="badge ${sc}">${score}</span></td>
           <td style="color:#f97316;font-weight:600;">${ufl}</td>
           <td style="color:#2563eb;font-weight:600;">${pdi}</td>
+          <td style="font-weight:600;">${cout}</td>
+          <td style="font-size:.75rem;color:var(--text-muted);">${escHtml((d.auteur_email||'—').split('@')[0])}</td>
           <td><button class="btn btn-ghost btn-sm" onclick="restoreSession(${s.id})">Restaurer</button>
               <button class="btn btn-danger btn-sm" onclick="deleteSession(${s.id})">🗑</button></td>
         </tr>`;}).join('')}
@@ -2877,6 +3114,56 @@ function previewRapport() {
   preview.innerHTML = buildRapportBody();
 }
 
+// ══ COMPTE-RENDU AUTOMATIQUE DE VISITE ════════════════════════════
+async function generateCompteRendu() {
+  if (!currentExp) { showToast('Ouvrez une exploitation.', 'warn'); return; }
+  const supa = getSupa();
+  const { data, error } = await supa.from('exploitation_sessions')
+    .select('*').eq('exploitation_id', currentExp.id).order('date', { ascending: false }).limit(2);
+  if (error || !data || !data.length) { showToast('Aucune session disponible pour générer un compte-rendu.', 'warn'); return; }
+
+  const cur = data[0].data || {};
+  const prev = data.length > 1 ? data[1].data : null;
+  const cAnim = cur.animalParams || {}, pAnim = prev?.animalParams || {};
+
+  const constat = [], decisions = [], surveiller = [], objectifsList = [];
+
+  if (prev) {
+    const dProd = (cAnim.prod||0) - (pAnim.prod||0);
+    if (Math.abs(dProd) >= 0.3) constat.push(`Production : ${pAnim.prod} → ${cAnim.prod} L/j (${dProd>0?'+':''}${dProd.toFixed(1)} L)`);
+    const dTb = (cAnim.tb||0) - (pAnim.tb||0);
+    if (Math.abs(dTb) >= 0.05) constat.push(`TB : ${pAnim.tb} → ${cAnim.tb} % (${dTb>0?'+':''}${dTb.toFixed(2)} pt)`);
+    if (typeof cur.coutJour === 'number' && typeof prev.coutJour === 'number') {
+      const dC = cur.coutJour - prev.coutJour;
+      if (Math.abs(dC) >= 0.03) constat.push(`Coût alimentaire : ${prev.coutJour.toFixed(2)} → ${cur.coutJour.toFixed(2)} €/VL/j (${dC>0?'+':''}${dC.toFixed(2)} €)`);
+    }
+    if (cur.score && prev.score && cur.score !== prev.score) constat.push(`Score de couverture : ${prev.score} → ${cur.score}`);
+    if (!constat.length) constat.push('Situation stable depuis la dernière visite.');
+  } else {
+    constat.push('Première session enregistrée pour cette exploitation.');
+  }
+
+  if (cur.score === 'D') surveiller.push('Ration fortement déséquilibrée (score D) — correction prioritaire');
+  else if (cur.score === 'C') surveiller.push('Ration à ajuster (score C) — marge de progression');
+
+  if (cur.motif) decisions.push(cur.motif);
+  if (cur.objectif) objectifsList.push(cur.objectif);
+
+  const o = currentExp.objectifs;
+  if (o) {
+    if (o.lait && cAnim.prod != null && cAnim.prod < o.lait) objectifsList.push(`Atteindre ${o.lait} L/j (actuellement ${cAnim.prod} L/j)`);
+    if (o.tb && cAnim.tb != null && cAnim.tb < o.tb) objectifsList.push(`Atteindre ${o.tb} % de TB (actuellement ${cAnim.tb} %)`);
+  }
+
+  let text = 'CONSTAT\n' + constat.map(c => '• ' + c).join('\n') + '\n\n';
+  if (decisions.length) text += 'DÉCISIONS\n' + decisions.map(d => '• ' + d).join('\n') + '\n\n';
+  text += 'À SURVEILLER\n' + (surveiller.length ? surveiller.map(s => '• ' + s).join('\n') : '• Aucun point d\'alerte particulier.') + '\n\n';
+  if (objectifsList.length) text += 'OBJECTIFS PROCHAINE VISITE\n' + objectifsList.map(x => '• ' + x).join('\n');
+
+  _$('rp-obs').value = text.trim();
+  showToast('Compte-rendu généré — relisez et ajustez avant envoi.', 'success', 4000);
+}
+
 function printRapport() {
   const body = buildRapportBody();
   const w = window.open('', '_blank');
@@ -2913,18 +3200,21 @@ function buildRapportBody() {
 
   let h = '';
 
-  // ── EN-TÊTE ───────────────────────────────────────────
+  // ── EN-TÊTE (couleurs/logo de l'organisme si configuré) ────
+  const orgP = window._advisorProfile;
+  const rpLogoText = orgP?.organisation ? 'Rumicore <span style="opacity:.7;font-size:.75em;">× '+escHtml(orgP.organisation)+'</span>' : 'Rumicore <span style="opacity:.7;font-size:.75em;">Conseiller</span>';
+  const rpAccent = orgP?.couleur_primaire || '';
   if (a && b) {
     const q = computeQualityScore(a,b);
     const gc = scoreColor(q.grade);
-    h += '<div class="rp-header">'
-      + '<div class="rp-logo">Rumicore <span style="opacity:.7;font-size:.75em;">Conseiller</span></div>'
+    h += '<div class="rp-header"'+(rpAccent?' style="border-bottom:3px solid '+rpAccent+';"':'')+'>'
+      + '<div class="rp-logo">'+rpLogoText+'</div>'
       + '<div class="rp-title-block"><div class="rp-title">'+escHtml(titre)+'</div>'
       + '<div class="rp-subtitle">'+escHtml(animalLabel)+(exp.nom?' — '+escHtml(exp.nom):'')+' · '+date+'</div></div>'
       + '<div class="rp-grade-badge" style="color:'+gc+';">'+q.grade+'<span class="rp-grade-sub">'+q.total+'/100</span></div>'
       + '</div>';
   } else {
-    h += '<div class="rp-header"><div class="rp-logo">Rumicore Conseiller</div>'
+    h += '<div class="rp-header"'+(rpAccent?' style="border-bottom:3px solid '+rpAccent+';"':'')+'><div class="rp-logo">'+rpLogoText+'</div>'
       + '<div class="rp-title-block"><div class="rp-title">'+escHtml(titre)+'</div><div class="rp-subtitle">'+date+'</div></div></div>';
   }
 
@@ -3175,30 +3465,316 @@ function computeQualityScore(a,b) {
   return {total,grade,eS,pS,bS,aS,cS};
 }
 
-function renderQualityScore(a,b) {
-  const q=computeQualityScore(a,b);
+// Panneau fusionné : score ABCD + score multicritère (Performance/Économie/Autonomie/
+// Sécurité/Environnement), en un seul bloc compact. Le détail ABCD est replié par défaut.
+async function renderScorePanel(a, b) {
+  const cont = document.getElementById('bilan-score'); if (!cont) return;
+  const q = computeQualityScore(a,b);
+
+  let medCout = null;
+  if (currentExp) {
+    try {
+      const peers = exploitations.filter(x => x.id !== currentExp.id && (x.type||'lait') === (currentExp.type||'lait'));
+      if (peers.length >= 2) {
+        const supa = getSupa();
+        const { data: sess } = await supa.from('exploitation_sessions')
+          .select('exploitation_id, date, data').in('exploitation_id', peers.map(p=>p.id)).order('date',{ascending:false});
+        const latest = {};
+        (sess||[]).forEach(s => { if(!latest[s.exploitation_id]) latest[s.exploitation_id]=s; });
+        const vals = Object.values(latest).map(s=>s.data?.coutJour).filter(v=>v!=null).sort((x,y)=>x-y);
+        if (vals.length) medCout = vals.length%2 ? vals[(vals.length-1)/2] : (vals[vals.length/2-1]+vals[vals.length/2])/2;
+      }
+    } catch(e) {}
+  }
+  const ms = computeMultiScore(a, b, medCout);
+
   const colors={A:'#15803d',B:'#0369a1',C:'#b45309',D:'#b91c1c'};
   const bg={A:'#dcfce7',B:'#dbeafe',C:'#fef3c7',D:'#fee2e2'};
   const msgs={A:'Ration excellente — tous les indicateurs sont dans les cibles optimales.',B:'Bonne ration — quelques ajustements mineurs amélioreraient encore l\'équilibre.',C:'Ration acceptable — des déséquilibres notables nécessitent des corrections.',D:'Ration à revoir — des déficits ou excès importants peuvent nuire aux performances.'};
-  const cont=document.getElementById('bilan-score'); if(!cont)return;
   const bar=(s,m,c)=>`<div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:2px;"><div style="width:${(s/m*100).toFixed(0)}%;height:100%;background:${c};border-radius:3px;"></div></div>`;
-  cont.innerHTML=`<div class="quality-card" style="border-left:5px solid ${colors[q.grade]};background:${bg[q.grade]};margin-bottom:12px;">
-    <div class="quality-main">
+  const axisCol = v => v>=75?'#15803d':v>=50?'#d97706':'#dc2626';
+  const axis = (label, val, icon) => `<div style="text-align:center;">
+      <div style="font-size:.63rem;font-weight:800;color:#64748b;text-transform:uppercase;">${icon} ${label}</div>
+      <div style="font-size:1.1rem;font-weight:900;color:${axisCol(val)};margin-top:1px;">${val}</div>
+      <div style="height:4px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:3px;"><div style="width:${val}%;height:100%;background:${axisCol(val)};"></div></div>
+    </div>`;
+
+  cont.innerHTML=`<div class="quality-card" style="border-left:5px solid ${colors[q.grade]};background:${bg[q.grade]};">
+    <div class="quality-main" style="align-items:flex-start;">
       <div class="quality-grade" style="color:${colors[q.grade]};">${q.grade}</div>
       <div class="quality-info" style="flex:1;">
         <div class="quality-title">Score global : <strong>${q.total}/100</strong></div>
         <div class="quality-msg">${msgs[q.grade]}</div>
-        <div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden;margin-top:8px;"><div style="width:${q.total}%;height:100%;background:${colors[q.grade]};border-radius:4px;transition:width .7s;"></div></div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;padding-left:10px;border-left:1px solid rgba(0,0,0,.08);">
+        <div style="font-size:.62rem;font-weight:800;color:#64748b;text-transform:uppercase;">Multicritère</div>
+        <div style="font-size:1.5rem;font-weight:900;color:${axisCol(ms.global)};line-height:1;">${ms.global}</div>
       </div>
     </div>
-    <div class="quality-breakdown">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 0;border-top:1px solid rgba(0,0,0,.08);margin-top:6px;">
+      ${axis('Perf.', ms.perf, '🧬')}${axis('Éco.', ms.eco, '💰')}${axis('Autonomie', ms.autonomie, '🌱')}${axis('Sécurité', ms.secu, '🐄')}${axis('Environ.', ms.env, '🌍')}
+    </div>
+    <div style="cursor:pointer;font-size:.72rem;font-weight:700;color:${colors[q.grade]};padding-top:4px;border-top:1px solid rgba(0,0,0,.08);" onclick="const d=this.nextElementSibling;const open=d.style.display!=='none';d.style.display=open?'none':'';this.textContent=open?'Détail du score ABCD ▾':'Détail du score ABCD ▴';">Détail du score ABCD ▾</div>
+    <div class="quality-breakdown" style="display:none;margin-top:8px;">
       <div class="qb-item"><span>⚡ Énergie</span><span>${q.eS}/30</span>${bar(q.eS,30,colors[q.grade])}</div>
       <div class="qb-item"><span>🧬 Protéines</span><span>${q.pS}/30</span>${bar(q.pS,30,colors[q.grade])}</div>
       <div class="qb-item"><span>⚖️ Équilibre</span><span>${q.bS}/20</span>${bar(q.bS,20,colors[q.grade])}</div>
       <div class="qb-item"><span>🔥 Acidose</span><span>${q.aS}/10</span>${bar(q.aS,10,colors[q.grade])}</div>
       <div class="qb-item"><span>🐄 Ingestion</span><span>${q.cS}/10</span>${bar(q.cS,10,colors[q.grade])}</div>
     </div>
+    <p style="font-size:.66rem;color:#94a3b8;margin-top:8px;margin-bottom:0;">${!ms.hasCoutRef?'Économie estimée par défaut (calculez le coût et ajoutez d\'autres exploitations du même type pour affiner). ':''}Environnement = estimation simplifiée (excédent azoté), pas un vrai bilan GES.</p>
   </div>`;
+}
+
+/* ══ SCORE MULTICRITÈRE + POURQUOI + COÛT DU LITRE SUPPLÉMENTAIRE ══ */
+const FOURRAGE_KEYWORDS = ['ensilage','foin','herbe','paille','enrubann','pâture','pature','maïs plante','mais plante','pulpe','betterave fourr','luzerne désh','luzerne desh','regain','ray-grass','dactyle'];
+function isFourrageFood(nom) {
+  const n = (nom||'').toLowerCase();
+  return FOURRAGE_KEYWORDS.some(k => n.includes(k));
+}
+
+function computeMultiScore(a, b, medCout) {
+  const rUFL = b.bUFL>0 ? a.totalUFL/b.bUFL : 0;
+  const rPDI = b.bPDI>0 ? a.totalPDI/b.bPDI : 0;
+
+  const perf = Math.max(0, Math.round(100 - Math.min(50,Math.abs(rUFL-1)*250) - Math.min(50,Math.abs(rPDI-1)*200)));
+
+  let eco = 70;
+  const curCout = (typeof window._lastCoutJour === 'number') ? window._lastCoutJour : null;
+  if (curCout!=null && medCout) eco = Math.max(0, Math.min(100, Math.round(100 - ((curCout-medCout)/medCout)*200)));
+
+  const msFourrage = a.items.filter(i=>isFourrageFood(i.nom)).reduce((s,i)=>s+i.qty,0);
+  const autonomie = a.totalMS>0 ? Math.round(msFourrage/a.totalMS*100) : 0;
+
+  const pctConc = a.totalMS>0 ? (1-msFourrage/a.totalMS)*100 : 0;
+  let secu = 100;
+  if (b.ingestionCapacite>0 && a.totalMS > b.ingestionCapacite) secu -= Math.min(50,(a.totalMS-b.ingestionCapacite)/b.ingestionCapacite*100);
+  if (pctConc>50) secu -= Math.min(30, pctConc-50);
+  secu = Math.max(0, Math.round(secu));
+
+  let env = 100;
+  if (rPDI>1.05) env -= Math.min(70,(rPDI-1.05)*400);
+  env = Math.max(0, Math.round(env));
+
+  const global = Math.round((perf+eco+autonomie+secu+env)/5);
+  return { perf, eco, autonomie, secu, env, global, hasCoutRef: curCout!=null && !!medCout };
+}
+
+function computePourquoi(a, b) {
+  const rUFL = b.bUFL>0 ? a.totalUFL/b.bUFL : 1;
+  const rPDI = b.bPDI>0 ? a.totalPDI/b.bPDI : 1;
+  if (rUFL>=0.95 && rUFL<=1.1 && rPDI>=0.95 && rPDI<=1.15) return null;
+
+  const defUFL = b.bUFL - a.totalUFL;
+  const defPDI = b.bPDI - a.totalPDI;
+  let limitant, deficitTxt, cause;
+  const energyIsWorse = Math.abs(1-rUFL) >= Math.abs(1-rPDI);
+
+  if (rUFL < 0.95 && energyIsWorse) {
+    limitant = 'l\'énergie';
+    deficitTxt = `${defUFL.toFixed(2)} UFL/j de déficit`;
+    const foragekgMS = a.items.filter(i=>isFourrageFood(i.nom)).reduce((s,i)=>s+i.qty,0);
+    cause = (foragekgMS/(a.totalMS||1)) > 0.55
+      ? 'proportion importante de fourrage à faible densité énergétique'
+      : 'apport énergétique global insuffisant au regard des besoins';
+  } else if (rPDI < 0.95) {
+    limitant = 'les protéines (PDI)';
+    deficitTxt = `${defPDI.toFixed(0)} g PDI/j de déficit`;
+    cause = 'apport insuffisant en sources protéiques (tourteaux, correcteurs azotés)';
+  } else if (rUFL > 1.1) {
+    limitant = 'un excès d\'énergie';
+    deficitTxt = `${(a.totalUFL-b.bUFL).toFixed(2)} UFL/j en excès`;
+    cause = 'quantité de concentrés énergétiques supérieure aux besoins';
+  } else {
+    limitant = 'un excès de PDI';
+    deficitTxt = `${(a.totalPDI-b.bPDI).toFixed(0)} g PDI/j en excès`;
+    cause = 'sur-couverture azotée, risque de gaspillage et de rejet azoté';
+  }
+
+  const isExces = limitant.startsWith('un excès');
+  const bestEnergy = a.items.length ? [...a.items].sort((x,y)=>(y.ufl/y.qty)-(x.ufl/x.qty))[0] : null;
+  const bestProtein = a.items.length ? [...a.items].sort((x,y)=>(y.pdi/y.qty)-(x.pdi/x.qty))[0] : null;
+  const solutions = [];
+
+  if (!isExces && limitant === 'l\'énergie' && bestEnergy) {
+    const uPerKg = bestEnergy.ufl/bestEnergy.qty;
+    const dq = Math.min(2, Math.abs(defUFL)/(uPerKg||1));
+    solutions.push({ label:'Solution A', detail:`+${dq.toFixed(1)} kg MS de "${bestEnergy.nom}"`, ufl:`+${(dq*uPerKg).toFixed(2)} UFL`, note:'Correction directe, autonomie peu affectée si déjà utilisé', feed:bestEnergy.nom, sign:'+', qty:dq.toFixed(1) });
+  }
+  if (!isExces && bestProtein) {
+    solutions.push({ label:solutions.length?'Solution B':'Solution A', detail:`+0.5 kg MS de "${bestProtein.nom}"`, ufl:`+${(0.5*(bestProtein.ufl/bestProtein.qty)).toFixed(2)} UFL`, note:'Renforce aussi l\'énergie, à surveiller si PDI déjà suffisant', feed:bestProtein.nom, sign:'+', qty:'0.5' });
+  }
+  if (limitant === 'un excès d\'énergie') {
+    const worst = a.items.length ? [...a.items].sort((x,y)=>(y.ufl/y.qty)-(x.ufl/x.qty))[0] : null;
+    if (worst) {
+      const dq = Math.min(worst.qty*0.4, Math.abs(a.totalUFL-b.bUFL)/((worst.ufl/worst.qty)||1)).toFixed(1);
+      solutions.push({ label:'Solution A', detail:`-${dq} kg MS de "${worst.nom}"`, ufl:`-${(dq*(worst.ufl/worst.qty)).toFixed(2)} UFL`, note:'Réduction directe de l\'excès énergétique', feed:worst.nom, sign:'-', qty:dq });
+    }
+  }
+  if (limitant === 'un excès de PDI') {
+    const worstP = a.items.length ? [...a.items].sort((x,y)=>(y.pdi/y.qty)-(x.pdi/x.qty))[0] : null;
+    if (worstP) {
+      const dq = Math.min(worstP.qty*0.3, Math.abs(a.totalPDI-b.bPDI)/((worstP.pdi/worstP.qty)||1)).toFixed(1);
+      solutions.push({ label:'Solution A', detail:`-${dq} kg MS de "${worstP.nom}"`, ufl:null, note:'Réduit le risque de gaspillage azoté et le coût', feed:worstP.nom, sign:'-', qty:dq });
+    }
+  }
+  solutions.push({ label:solutions.length?(solutions.length===1?'Solution B':'Solution C'):'Solution A', detail:'Revoir la qualité du fourrage principal (analyse récente conseillée)', ufl:null, note:'Aucun coût immédiat mais nécessite une analyse de fourrage à jour', feed:null, sign:null, qty:null });
+
+  return { limitant, deficitTxt, cause, solutions: solutions.slice(0,3) };
+}
+
+// Optimiseur combinatoire : part de la ration actuelle et fait converger itérativement
+// UFL/PDI vers ~100% des besoins, en choisissant à chaque étape l'aliment le plus adapté
+// à la stratégie (performance = meilleure densité, économie = moins cher, autonomie = fourrage).
+// Coût projeté = uniquement si TOUS les aliments utilisés ont un prix connu (base aliments
+// du conseiller) — sinon affiché "non estimable" plutôt que fabriqué.
+function computeRationVariant(a, b, strategy) {
+  const priceMap = {};
+  (window._conseillerAliments||[]).forEach(x => { if (x.nom && x.prix!=null) priceMap[x.nom.toLowerCase()] = x.prix; });
+
+  let items = a.items.map(i => ({ nom: i.nom, qty: i.qty, uflPerKg: i.qty>0?i.ufl/i.qty:0, pdiPerKg: i.qty>0?i.pdi/i.qty:0 }));
+  const origQty = {}; a.items.forEach(i => origQty[i.nom] = i.qty);
+
+  const totals = () => ({
+    totalUFL: items.reduce((s,i)=>s+i.qty*i.uflPerKg,0),
+    totalPDI: items.reduce((s,i)=>s+i.qty*i.pdiPerKg,0),
+    totalMS: items.reduce((s,i)=>s+i.qty,0),
+  });
+
+  const pickCandidate = (forEnergy) => {
+    let pool = items.slice();
+    if (strategy === 'autonomie') { const forage = pool.filter(i=>isFourrageFood(i.nom)); if (forage.length) pool = forage; }
+    if (strategy === 'economie')  { const priced = pool.filter(i=>priceMap[i.nom.toLowerCase()]!=null); if (priced.length) pool = priced; }
+    pool.sort((x,y) => forEnergy ? y.uflPerKg-x.uflPerKg : y.pdiPerKg-x.pdiPerKg);
+    return pool[0] || items[0] || null;
+  };
+
+  for (let iter=0; iter<10; iter++) {
+    const t = totals();
+    const rUFL = b.bUFL>0 ? t.totalUFL/b.bUFL : 1;
+    const rPDI = b.bPDI>0 ? t.totalPDI/b.bPDI : 1;
+    if (rUFL>=0.97 && rUFL<=1.06 && rPDI>=0.95 && rPDI<=1.12) break;
+    if (b.ingestionCapacite>0 && t.totalMS > b.ingestionCapacite*1.05 && rUFL>=0.95) break;
+    if (Math.abs(1-rUFL) >= Math.abs(1-rPDI)) {
+      const c = pickCandidate(true); if (!c) break;
+      const step = (b.bUFL - t.totalUFL >= 0 ? 1 : -1) * (strategy==='economie' ? 0.3 : 0.5);
+      c.qty = Math.max(0, +(c.qty + step).toFixed(2));
+    } else {
+      const c = pickCandidate(false); if (!c) break;
+      const step = (b.bPDI - t.totalPDI >= 0 ? 1 : -1) * (strategy==='economie' ? 0.2 : 0.3);
+      c.qty = Math.max(0, +(c.qty + step).toFixed(2));
+    }
+  }
+
+  const t = totals();
+  const rUFL = b.bUFL>0 ? t.totalUFL/b.bUFL : 0;
+  const rPDI = b.bPDI>0 ? t.totalPDI/b.bPDI : 0;
+  const msFourrage = items.filter(i=>isFourrageFood(i.nom)).reduce((s,i)=>s+i.qty,0);
+  const autonomiePct = t.totalMS>0 ? Math.round(msFourrage/t.totalMS*100) : 0;
+
+  let cost = 0, costKnown = true;
+  items.forEach(i => {
+    const p = priceMap[i.nom.toLowerCase()];
+    if (p==null) { costKnown = false; return; }
+    cost += i.qty * p / 1000;
+  });
+
+  const changes = [];
+  items.forEach(i => {
+    const d = i.qty - (origQty[i.nom]||0);
+    if (Math.abs(d) > 0.05) changes.push(`${d>0?'+':''}${d.toFixed(1)} kg MS "${i.nom}"`);
+  });
+
+  return { rUFL, rPDI, totalMS: t.totalMS, autonomiePct, cost: costKnown ? cost : null, changes };
+}
+
+function computeOptimizerVariants(a, b) {
+  const eu = UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
+  const strategies = [
+    { key:'performance', icon:'🥇', label:'PERFORMANCE' },
+    { key:'economie',    icon:'🥈', label:'ÉCONOMIE' },
+    { key:'autonomie',   icon:'🥉', label:'AUTONOMIE' },
+  ];
+  return strategies.map(s => {
+    const v = computeRationVariant(a, b, s.key);
+    const metric = `${(v.rUFL*100).toFixed(0)}% ${eu} · ${(v.rPDI*100).toFixed(0)}% PDI · ${v.autonomiePct}% autonomie`
+      + (v.cost!=null ? ` · ${v.cost.toFixed(2)} €/VL/j` : '');
+    const detail = v.changes.length ? v.changes.join(', ') : 'Ration actuelle déjà optimale sur cet axe.';
+    return { icon:s.icon, label:s.label, metric, detail, costKnown: v.cost!=null };
+  });
+}
+
+async function renderAdvancedInsights(a, b) {
+  const cont = _$('bilan-advanced');
+  if (!cont) return;
+
+  const pourquoi = computePourquoi(a, b);
+  let html = '';
+
+  if (pourquoi) {
+    html += `<div class="card" style="margin-bottom:10px;border-left:4px solid #d97706;">
+      <div class="card-header"><div class="card-title">💡 Pourquoi cette ration est limitée ?</div></div>
+      <p style="font-size:.82rem;margin-bottom:10px;">⚠️ Limitée principalement par ${pourquoi.limitant} — <strong>${pourquoi.deficitTxt}</strong>. Cause probable : ${pourquoi.cause}.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;">
+        ${pourquoi.solutions.map(s => `<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:9px 10px;">
+          <div style="font-weight:800;font-size:.74rem;color:#d97706;margin-bottom:3px;">${s.label}</div>
+          <div style="font-size:.8rem;font-weight:600;">${s.detail}</div>
+          ${s.ufl?`<div style="font-size:.74rem;color:#15803d;margin-top:2px;">${s.ufl}</div>`:''}
+          <div style="font-size:.7rem;color:var(--text-muted);margin-top:3px;">${s.note}</div>
+          ${s.feed?`<button class="btn btn-primary btn-sm" style="margin-top:6px;width:100%;" onclick="applySuggestionQty('${s.feed.replace(/'/g,"\\'")}','${s.sign}','${s.qty}',this)">Appliquer</button>`:''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  const variants = computeOptimizerVariants(a, b);
+  const anyCostUnknown = variants.some(v => !v.costKnown);
+  html += `<div class="card" style="margin-bottom:10px;">
+    <div class="card-header"><div class="card-title">🔀 Optimiseur — 3 rations recalculées</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin-bottom:6px;">
+      ${variants.map(v => `<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px;">
+        <div style="font-weight:800;font-size:.78rem;margin-bottom:3px;">${v.icon} ${v.label}</div>
+        <div style="font-size:.74rem;color:#15803d;font-weight:700;margin-bottom:4px;">${v.metric}</div>
+        <div style="font-size:.72rem;color:var(--text);">${escHtml(v.detail)}</div>
+      </div>`).join('')}
+    </div>
+    <p style="font-size:.68rem;color:#94a3b8;margin:0;">Convergence vers ~100% UFL/PDI en priorisant : densité (Performance), aliments tarifés (Économie), fourrages (Autonomie).${anyCostUnknown?' Coût non estimable si un aliment n\'a pas de prix dans votre base (Paramètres → Base aliments).':''} Pas de prévision de litrage de lait.</p>
+  </div>`;
+
+  const base = window._sandboxBase;
+  if (base && typeof base.coutJour === 'number' && typeof window._lastCoutJour === 'number') {
+    const dCout = window._lastCoutJour - base.coutJour;
+    const dLait = gN('r-prod') - (base.animalParams?.prod||0);
+    if (Math.abs(dLait) > 0.05) {
+      const coutParL = dCout/dLait;
+      const prixLait = parseFloat(_$('cout-prix-lait')?.value) || 0.40;
+      const margeParL = prixLait - coutParL;
+      const nbVLc = parseInt(_$('cout-nb-vl')?.value) || 1;
+      const margeAnnuelleTroupeau = margeParL * dLait * nbVLc * 365;
+      html += `<div class="card" style="margin-bottom:10px;">
+        <div class="card-header"><div class="card-title">💧 Coût du litre supplémentaire</div></div>
+        <p style="font-size:.78rem;margin-bottom:6px;">Réf. : ${base.coutJour.toFixed(2)} €/VL/j pour ${base.animalParams?.prod||'—'} L → Simu. : ${window._lastCoutJour.toFixed(2)} €/VL/j pour ${gN('r-prod')} L (${dLait>0?'+':''}${dLait.toFixed(1)} L).</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;">
+          <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+            <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Coût du litre suppl.</div>
+            <div style="font-size:1.05rem;font-weight:900;color:${coutParL<0.30?'#15803d':'#d97706'};">${coutParL>=0?'+':''}${coutParL.toFixed(2)} €/L</div>
+          </div>
+          <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+            <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Marge (lait ${prixLait.toFixed(2)} €/L)</div>
+            <div style="font-size:1.05rem;font-weight:900;color:${margeParL>=0?'#15803d':'#dc2626'};">${margeParL>=0?'+':''}${margeParL.toFixed(2)} €/L</div>
+          </div>
+          <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+            <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Troupeau (${nbVLc} VL/an)</div>
+            <div style="font-size:1.05rem;font-weight:900;color:${margeAnnuelleTroupeau>=0?'#15803d':'#dc2626'};">${margeAnnuelleTroupeau>=0?'+':''}${Math.round(margeAnnuelleTroupeau).toLocaleString('fr-FR')} €/an</div>
+          </div>
+        </div>
+      </div>`;
+    }
+  } else {
+    html += `<p style="font-size:.75rem;color:var(--text-muted);margin:0 0 10px;">💧 Démarrez une simulation (🧪 ci-dessus) puis recalculez le coût pour voir le coût du litre supplémentaire et la marge.</p>`;
+  }
+
+  cont.innerHTML = html;
 }
 
 /* ══ INDICATEURS CLIQUABLES ══ */
@@ -3369,6 +3945,33 @@ function renderIndicateurs(a,b) {
     card('ue','📦','Encombrement réel (UE)',ueCls,ueBadge,ueBadgeCls,ueResume,ueDetail);
 }
 
+/* ══ BAC À SABLE / SIMULATEUR WHAT-IF ══ */
+function startSandbox() {
+  if (!lastApports || !lastBesoins) { showToast('Calculez d\'abord un bilan.', 'warn'); return; }
+  window._sandboxBase = {
+    apports: lastApports,
+    besoins: lastBesoins,
+    rows: getRationRows(),
+    score: computeScore(
+      lastBesoins.bUFL>0?lastApports.totalUFL/lastBesoins.bUFL:0,
+      lastBesoins.bPDI>0?lastApports.totalPDI/lastBesoins.bPDI:0,
+      lastApports.totalUFL>0?lastApports.totalPDI/lastApports.totalUFL:0),
+    animalParams: { prod: gN('r-prod'), tb: gN('r-tb') },
+    coutJour: (typeof window._lastCoutJour === 'number') ? window._lastCoutJour : null,
+    label: 'référence (' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) + ')',
+  };
+  const btn = _$('btn-sandbox-compare'); if (btn) btn.style.display = '';
+  showToast('🧪 Simulation démarrée — modifiez librement la ration puis cliquez "Comparer à la référence".', 'info', 5000);
+}
+function compareSandbox() {
+  if (!window._sandboxBase) { showToast('Démarrez d\'abord une simulation.', 'warn'); return; }
+  if (!lastApports || !lastBesoins) { showToast('Recalculez le bilan de la nouvelle ration.', 'warn'); return; }
+  const b = window._sandboxBase;
+  const wrap = document.getElementById('compare-wrap');
+  wrap.style.display = '';
+  wrap.innerHTML = renderCompare(b.apports, b.besoins, b.rows, b.score, b.label, b.animalParams);
+}
+
 /* ══ COMPARAISON SESSIONS ══ */
 async function showComparePanel() {
   const wrap = document.getElementById('compare-wrap');
@@ -3394,15 +3997,17 @@ async function showComparePanel() {
       return;
     }
     const s = data[0];
-    wrap.innerHTML = renderCompare(s.data.apports, s.data.besoins, s.data.rows || [], s.data.score || '—', new Date(s.date).toLocaleDateString('fr-FR'));
+    wrap.innerHTML = renderCompare(s.data.apports, s.data.besoins, s.data.rows || [], s.data.score || '—', new Date(s.date).toLocaleDateString('fr-FR'), s.data.animalParams || {});
   } catch(e) {
     wrap.innerHTML = `<div class="card" style="padding:16px;color:#dc2626;">Erreur : ${e.message}</div>`;
   }
 }
 
-function renderCompare(pA, pB, pRows, pScore, pDate) {
+function renderCompare(pA, pB, pRows, pScore, pDate, pAnimal) {
   const cA = lastApports, cB = lastBesoins;
   const eu = UFV_TYPES.includes(cB.typeLabel) ? 'UFV' : 'UFL';
+  pAnimal = pAnimal || {};
+  const cAnimal = { prod: gN('r-prod'), tb: gN('r-tb') };
 
   const pRUFL = pB.bUFL > 0 ? pA.totalUFL / pB.bUFL : 0;
   const pRPDI = pB.bPDI > 0 ? pA.totalPDI / pB.bPDI : 0;
@@ -3465,10 +4070,48 @@ function renderCompare(pA, pB, pRows, pScore, pDate) {
   const pDens = pA.totalMS > 0 ? pA.totalUFL / pA.totalMS : 0;
   const cDens = cA.totalMS > 0 ? cA.totalUFL / cA.totalMS : 0;
 
+  // Synthèse texte automatique
+  let narrative = '';
+  {
+    const dProd = (cAnimal.prod||0) - (pAnimal.prod||0);
+    const parts = [];
+    if (pAnimal.prod && Math.abs(dProd) >= 0.3) {
+      parts.push(`la production est passée de ${pAnimal.prod} à ${cAnimal.prod} L/j (${dProd>0?'+':''}${dProd.toFixed(1)} L)`);
+    } else if (pAnimal.prod) {
+      parts.push('la production est restée stable');
+    }
+    const dTb = (cAnimal.tb||0) - (pAnimal.tb||0);
+    if (pAnimal.tb && Math.abs(dTb) >= 0.05) {
+      parts.push(`le TB est passé de ${pAnimal.tb} à ${cAnimal.tb} % (${dTb>0?'+':''}${dTb.toFixed(2)} pt)`);
+    }
+    const dCov = (cRUFL - pRUFL) * 100;
+    if (Math.abs(dCov) >= 2) {
+      parts.push(`la couverture énergétique est passée de ${(pRUFL*100).toFixed(0)}% à ${(cRUFL*100).toFixed(0)}% des besoins`);
+    }
+
+    let verdict;
+    if (scoreImproved && dProd >= 0) {
+      verdict = `Évolution positive : le changement de ration a amélioré l'équilibre nutritionnel${dProd>0.3?' et soutenu la production':''}.`;
+    } else if (!scoreSame && !scoreImproved) {
+      verdict = `Vigilance : l'équilibre nutritionnel s'est dégradé depuis la dernière visite${dProd<-0.3?', en cohérence avec la baisse de production observée':''}.`;
+    } else if (scoreSame && Math.abs(dProd) < 0.3) {
+      verdict = 'Situation stable depuis la dernière visite.';
+    } else {
+      verdict = 'Évolution mitigée entre production et équilibre nutritionnel — à surveiller.';
+    }
+
+    const intro = parts.length ? `Depuis la dernière visite du ${pDate}, ${parts.join(', ')}. ` : `Depuis la dernière visite du ${pDate} : `;
+    narrative = intro + verdict;
+  }
+
   return `<div class="card" style="margin-bottom:0;border-left:4px solid #6366f1;">
     <div class="card-header">
       <div class="card-title">🔄 Comparaison — session du ${pDate}</div>
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('compare-wrap').style.display='none'">✕</button>
+    </div>
+
+    <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.85rem;color:#3730a3;line-height:1.5;">
+      💬 ${narrative}
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -3508,65 +4151,28 @@ function renderCompare(pA, pB, pRows, pScore, pDate) {
   </div>`;
 }
 
-/* ══ OPTIMISEUR ══ */
-function runOptimizer() {
-  if(!lastApports||!lastBesoins){showToast('Calculez d\'abord le bilan.', 'warn');return;}
-  const a=lastApports,b=lastBesoins;
-  const eu=UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
-  const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:1;
-  const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:1;
-  const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
-  const suggs=[];
-
-  function bestExisting(fn){return [...a.items].sort((x,y)=>fn(y)-fn(x))[0];}
-  function bestFromDB(filter,fn){return alimentsDb.filter(filter).sort((x,y)=>fn(y)-fn(x))[0];}
-
-  if(rUFL<0.90){const d=b.bUFL-a.totalUFL;const f=bestExisting(x=>x.ufl/x.qty);const alt=bestFromDB(x=>x.uflPerKgMS>1.0,x=>x.uflPerKgMS);const feed=f||alt;if(feed){const u=f?f.ufl/f.qty:alt.uflPerKgMS;const dq=Math.min(d/u,3);suggs.push({icon:'⚡',tag:'Énergie',sev:'bad',title:`Augmenter "${feed.nom||alt?.nom}"`,qty:`+${dq.toFixed(1)} kg MS/j`,effect:`Énergie : ${((a.totalUFL+dq*u)/b.bUFL*100).toFixed(0)}% des besoins`,feed:feed.nom||alt?.nom,sign:'+'});}}
-  if(rUFL>1.15){const f=bestExisting(x=>x.ufl/x.qty);if(f){const dq=Math.min(f.qty*0.4,(a.totalUFL-b.bUFL)/(f.ufl/f.qty));suggs.push({icon:'✂️',tag:'Énergie',sev:'warn',title:`Réduire "${f.nom}"`,qty:`-${dq.toFixed(1)} kg MS/j`,effect:`Énergie : ${((a.totalUFL-dq*(f.ufl/f.qty))/b.bUFL*100).toFixed(0)}% des besoins`,feed:f.nom,sign:'-'});}}
-  if(rPDI<0.90){const d=b.bPDI-a.totalPDI;const f=bestExisting(x=>x.pdi/x.qty);const alt=bestFromDB(x=>x.pdiPerKgMS>200,x=>x.pdiPerKgMS);const feed=f||alt;if(feed){const p=f?f.pdi/f.qty:alt?.pdiPerKgMS;const dq=Math.min(d/p,2);suggs.push({icon:'🧬',tag:'Protéines',sev:'bad',title:`Augmenter "${feed.nom||alt?.nom}"`,qty:`+${dq.toFixed(1)} kg MS/j`,effect:`PDI : ${((a.totalPDI+dq*p)/b.bPDI*100).toFixed(0)}% des besoins`,feed:feed.nom||alt?.nom,sign:'+'});}}
-  if(rPDI>1.20){const f=bestExisting(x=>x.pdi/x.qty);if(f){const dq=Math.min(f.qty*0.3,(a.totalPDI-b.bPDI)/(f.pdi/f.qty));suggs.push({icon:'✂️',tag:'Protéines',sev:'warn',title:`Réduire "${f.nom}"`,qty:`-${dq.toFixed(1)} kg MS/j`,effect:`PDI : ${((a.totalPDI-dq*(f.pdi/f.qty))/b.bPDI*100).toFixed(0)}%`,feed:f.nom,sign:'-'});}}
-  if(ppu<82&&rUFL>=0.88)suggs.push({icon:'⚖️',tag:'Équilibre',sev:'warn',title:'Ajouter un tourteau protéique',qty:'+0.5 kg MS/j',effect:`PDI/${eu} : ${((a.totalPDI+0.5*230)/a.totalUFL).toFixed(0)} g/${eu}`,feed:'Colza (tourteau)',sign:'+'});
-  if(ppu>115&&rPDI>=0.95)suggs.push({icon:'⚖️',tag:'Équilibre',sev:'warn',title:'Ajouter un aliment énergétique',qty:'+0.5 kg MS/j',effect:`Ratio PDI/${eu} amélioré`,feed:'Maïs grain',sign:'+'});
-  if(b.ingestionCapacite>0&&a.totalMS>b.ingestionCapacite*1.08){const f=bestExisting(x=>x.qty);if(f){const dq=Math.min(a.totalMS-b.ingestionCapacite,f.qty*0.4);suggs.push({icon:'🫁',tag:'Ingestion',sev:'bad',title:`Réduire "${f.nom}"`,qty:`-${dq.toFixed(1)} kg MS/j`,effect:`MS : ${(a.totalMS-dq).toFixed(1)} kg (max ${b.ingestionCapacite.toFixed(1)} kg)`,feed:f.nom,sign:'-'});}}
-  if((a.totalAR||0)>0||(a.totalSS||0)>0){const arKg=(a.totalAR||0)/(a.totalMS||1),ssKg=(a.totalSS||0)/(a.totalMS||1);if(arKg+ssKg>200){const fast=a.items.filter(i=>{const f=findFood(i.nom);return f&&(f.ar_gkgms||0)>100;}).sort((x,y)=>y.qty-x.qty)[0];if(fast)suggs.push({icon:'🔥',tag:'Acidose',sev:'bad',title:`Réduire "${fast.nom}"`,qty:`-${(fast.qty*0.25).toFixed(1)} kg MS/j`,effect:'AR+SS estimé < 200 g/kg MS',feed:fast.nom,sign:'-'});}}
-
-  const cont=document.getElementById('bilan-optimizer'); if(!cont)return;
-  const sc=s=>s==='bad'?'#dc2626':s==='warn'?'#d97706':'#16a34a';
-  const sb=s=>s==='bad'?'#fef2f2':s==='warn'?'#fffbeb':'#f0fdf4';
-  if(!suggs.length){cont.innerHTML=`<div style="padding:14px;color:#16a34a;font-weight:700;">✅ Ration bien équilibrée — aucun ajustement nécessaire.</div>`;return;}
-  cont.innerHTML=`<div style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px;">${suggs.length} suggestion${suggs.length>1?'s':''} d'ajustement :</div>`+
-    suggs.map((s,i)=>`<div class="opti-row" id="opti-row-${i}" style="border-left:4px solid ${sc(s.sev)};background:${sb(s.sev)};">
-      <span style="font-size:1.3rem;">${s.icon}</span>
-      <div style="flex:1;">
-        <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:${sc(s.sev)};margin-bottom:3px;">${s.tag}</div>
-        <div style="font-weight:700;font-size:.88rem;">${s.title} <span style="font-weight:400;color:#0369a1;">${s.qty}</span></div>
-        <div style="font-size:.78rem;color:#16a34a;font-weight:600;">→ ${s.effect}</div>
-      </div>
-      ${s.feed&&s.sign?`<button class="btn btn-primary btn-sm" onclick="applyOpt(${i},'${s.feed.replace(/'/g,'')}','${s.sign}','${(parseFloat(s.qty)||0.5).toFixed(1)}')">Appliquer</button>`:''}
-    </div>`).join('');
-}
-
-function applyOpt(i,feed,sign,qtyStr) {
-  const qty=parseFloat(qtyStr);
-  const rows=document.querySelectorAll('#ration-rows .ration-row');
-  let applied=false;
-  for(const row of rows){
-    const nom=row.querySelector('.ration-input-nom')?.value||'';
-    if(nom.toLowerCase().includes(feed.toLowerCase())){
-      const inp=row.querySelector('.ration-input-qty');
-      const cur=parseFloat(inp?.value)||0;
-      if(inp)inp.value=Math.max(0,sign==='+'?cur+qty:cur-qty).toFixed(1);
-      applied=true;break;
+/* ══ APPLICATION D'UNE SUGGESTION (bouton "Appliquer" du bloc Pourquoi) ══ */
+function applySuggestionQty(feed, sign, qtyStr, btn) {
+  const qty = parseFloat(qtyStr);
+  const rows = document.querySelectorAll('#ration-rows .ration-row');
+  let applied = false;
+  for (const row of rows) {
+    const nom = row.querySelector('.ration-input-nom')?.value || '';
+    if (nom.toLowerCase().includes(feed.toLowerCase())) {
+      const inp = row.querySelector('.ration-input-qty');
+      const cur = parseFloat(inp?.value) || 0;
+      if (inp) inp.value = Math.max(0, sign === '+' ? cur + qty : cur - qty).toFixed(1);
+      applied = true; break;
     }
   }
-  if(!applied&&sign==='+'){
+  if (!applied && sign === '+') {
     addRationRow();
-    const rows2=document.querySelectorAll('#ration-rows .ration-row');
-    const last=rows2[rows2.length-1];
-    if(last){last.querySelector('.ration-input-nom').value=feed;last.querySelector('.ration-input-qty').value=qty.toFixed(1);}
-    applied=true;
+    const rows2 = document.querySelectorAll('#ration-rows .ration-row');
+    const last = rows2[rows2.length - 1];
+    if (last) { last.querySelector('.ration-input-nom').value = feed; last.querySelector('.ration-input-qty').value = qty.toFixed(1); }
+    applied = true;
   }
-  if(applied){const row=document.getElementById('opti-row-'+i);if(row){row.style.opacity='.5';const btn=row.querySelector('button');if(btn){btn.textContent='✅ Appliqué';btn.disabled=true;}}}
+  if (applied && btn) { btn.textContent = '✅ Appliqué'; btn.disabled = true; showToast('Quantité mise à jour — recalculez le bilan.', 'success'); }
 }
 
 /* ══ COÛTS ══ */
@@ -3598,6 +4204,7 @@ function calcCouts() {
   const refLait=parseInt(document.getElementById('cout-ref-lait')?.value)||9000;
   const duree=parseInt(document.getElementById('cout-duree')?.value)||180;
   const totalMS=(lastApports?.totalMS||0);
+  window._lastCoutJour = totalCoutJour;
   document.getElementById('cout-vl-jour').textContent=totalCoutJour.toFixed(2)+' €';
   document.getElementById('cout-kg-ms').textContent=totalMS>0?(totalCoutJour/totalMS*1000).toFixed(0)+' €/t MS':'-';
   document.getElementById('cout-1000l').textContent=refLait>0?(totalCoutJour/(refLait/365)*1000).toFixed(2)+' €':'-';
@@ -3610,11 +4217,12 @@ function calcCouts() {
 
 /* ══ BILAN FOURRAGER ══ */
 function bfSwitch(tab,btn) {
-  ['stocks','troupeau','resultat','silo'].forEach(t=>{
+  ['stocks','troupeau','resultat','silo','analyses'].forEach(t=>{
     const el=document.getElementById('bf-'+t); if(el)el.style.display=t===tab?'':'none';
   });
   document.querySelectorAll('.bf-btn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  if (tab==='analyses') loadAnalysesFourrage();
 }
 
 let _bfStocks=[];
@@ -3651,6 +4259,15 @@ function calcBilanFourrager() {
   const solde=totalTMS-besoinTMS;
   const pct=besoinTMS>0?(totalTMS/besoinTMS*100).toFixed(0):0;
   const ok=solde>=0;
+
+  // Simulateur d'autonomie : date d'épuisement + options
+  const dailyConsoTMS=(nbVL*consoVL+nbBV*consoBV)/1000;
+  const totalHeads=nbVL+nbBV;
+  const autonomyDays=dailyConsoTMS>0?Math.floor(totalTMS/dailyConsoTMS):null;
+  const depletionDate=autonomyDays!=null?new Date(Date.now()+autonomyDays*86400000):null;
+  const avgConsoPerHead=totalHeads>0?(nbVL*consoVL+nbBV*consoBV)/totalHeads:0;
+  const maxHeadsForDuree=avgConsoPerHead>0?Math.floor(totalTMS*1000/(duree*avgConsoPerHead)):null;
+
   const cont=document.getElementById('bf-resultat-content');
   cont.innerHTML=`
     <div class="grid-4" style="margin-bottom:20px;">
@@ -3662,6 +4279,27 @@ function calcBilanFourrager() {
     <div style="padding:12px 16px;border-radius:8px;background:${ok?'#f0fdf4':'#fef2f2'};border:1px solid ${ok?'#16a34a':'#dc2626'};font-size:.88rem;font-weight:600;color:${ok?'#15803d':'#dc2626'};margin-bottom:16px;">
       ${ok?`✅ Stocks suffisants — excédent de ${solde.toFixed(1)} t MS`:`⚠️ Stocks insuffisants — déficit de ${Math.abs(solde).toFixed(1)} t MS à combler`}
     </div>
+    ${depletionDate ? `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header"><div class="card-title">🔥 Simulateur d'autonomie</div></div>
+      <p style="font-size:.85rem;margin-bottom:10px;">${ok
+        ? `Avec ${totalHeads} animaux à ce rythme, votre stock actuel couvre <strong>${autonomyDays} jours</strong> (jusqu'au <strong>${depletionDate.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}</strong>).`
+        : `⚠️ Avec votre rythme actuel (${totalHeads} animaux), votre stock sera <strong style="color:#dc2626;">épuisé le ${depletionDate.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}</strong> — soit ${autonomyDays} jours, avant la fin de la période de ${duree} jours visée.`}</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+        <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px 12px;">
+          <div style="font-size:.72rem;font-weight:800;color:#64748b;text-transform:uppercase;">Option 1 — cheptel actuel</div>
+          <div style="font-size:.85rem;margin-top:4px;"><strong>${totalHeads} animaux</strong> pendant <strong>${autonomyDays} j</strong></div>
+        </div>
+        ${maxHeadsForDuree!=null ? `<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px 12px;">
+          <div style="font-size:.72rem;font-weight:800;color:#64748b;text-transform:uppercase;">Option 2 — durée cible (${duree} j)</div>
+          <div style="font-size:.85rem;margin-top:4px;"><strong>${maxHeadsForDuree} animaux</strong> max sur ${duree} j</div>
+        </div>` : ''}
+        <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px 12px;">
+          <div style="font-size:.72rem;font-weight:800;color:#64748b;text-transform:uppercase;">Option 3 — réduire les achats</div>
+          <div style="font-size:.85rem;margin-top:4px;">Réduire le concentré et augmenter l'autonomie fourragère (à ajuster manuellement dans la ration)</div>
+        </div>
+      </div>
+    </div>` : ''}
     <div class="card" style="padding:0;overflow:hidden;">
       <table class="data-table">
         <thead><tr><th>Fourrage</th><th>t brutes</th><th>% MS</th><th>TMS</th><th>% stock</th></tr></thead>
@@ -3764,19 +4402,54 @@ async function loadVisitNotes() {
     list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune note de visite.</div>';
     return;
   }
+  const indBadge = (val, label) => {
+    if (!val) return '';
+    const col = val==='hausse' ? '#dc2626' : val==='baisse' ? '#d97706' : '#15803d';
+    const icon = val==='hausse' ? '↑' : val==='baisse' ? '↓' : '→';
+    return `<span style="font-size:.7rem;font-weight:700;color:${col};background:${col}18;padding:2px 7px;border-radius:20px;margin-right:6px;">${icon} ${label}</span>`;
+  };
   list.innerHTML = data.map(n => `
     <div style="border-bottom:1px solid var(--border);padding:16px 20px;">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
         <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
             <span style="font-size:.75rem;font-weight:700;color:var(--text-muted);">📅 ${new Date(n.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span>
             ${n.titre ? `<span style="font-weight:700;color:var(--text);font-size:.9rem;">${escHtml(n.titre)}</span>` : ''}
+            ${indBadge(n.refus,'Refus')}${indBadge(n.ingestion,'Ingestion')}
           </div>
           <div style="font-size:.87rem;color:var(--text);white-space:pre-wrap;line-height:1.65;">${escHtml(n.content||'')}</div>
+          ${n.photo_url ? `<a href="${n.photo_url}" target="_blank" rel="noopener"><img src="${n.photo_url}" style="max-width:220px;border-radius:8px;margin-top:8px;border:1px solid var(--border);"></a>` : ''}
+          ${n.audio_url ? `<audio controls src="${n.audio_url}" style="display:block;margin-top:8px;max-width:280px;height:32px;"></audio>` : ''}
         </div>
         <button class="btn btn-danger btn-sm" style="flex-shrink:0;" onclick="deleteVisitNote(${n.id})">🗑</button>
       </div>
     </div>`).join('');
+}
+
+let _audioRecorder = null, _audioChunks = [], _audioBlob = null;
+async function toggleAudioRecording() {
+  const btn = _$('note-audio-btn'), status = _$('note-audio-status');
+  if (_audioRecorder && _audioRecorder.state === 'recording') {
+    _audioRecorder.stop();
+    btn.textContent = '⏺ Enregistrer';
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    _audioChunks = [];
+    _audioRecorder = new MediaRecorder(stream);
+    _audioRecorder.ondataavailable = e => _audioChunks.push(e.data);
+    _audioRecorder.onstop = () => {
+      _audioBlob = new Blob(_audioChunks, { type: 'audio/webm' });
+      status.textContent = '🎙️ Note vocale prête (' + Math.round(_audioBlob.size/1024) + ' Ko)';
+      stream.getTracks().forEach(t => t.stop());
+    };
+    _audioRecorder.start();
+    btn.textContent = '⏹ Arrêter';
+    status.textContent = 'Enregistrement en cours…';
+  } catch (e) {
+    showToast('Micro indisponible ou refusé par le navigateur.', 'error');
+  }
 }
 
 async function saveVisitNote() {
@@ -3787,16 +4460,50 @@ async function saveVisitNote() {
   if (!content) { errEl.textContent = 'Le contenu est requis.'; errEl.style.display = 'block'; return; }
   const date = _$('note-date')?.value || new Date().toISOString().slice(0,10);
   const supa = getSupa();
+  const saveBtn = _$('note-save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Enregistrement…'; }
+
+  let photo_url = null, audio_url = null;
+  try {
+    const photoFile = _$('note-photo')?.files?.[0];
+    if (photoFile) {
+      const path = `${currentExp.id}/${Date.now()}_${photoFile.name}`;
+      const up = await supa.storage.from('visite-media').upload(path, photoFile);
+      if (up.error) throw new Error('Photo : ' + up.error.message);
+      photo_url = supa.storage.from('visite-media').getPublicUrl(path).data.publicUrl;
+    }
+    if (_audioBlob) {
+      const path = `${currentExp.id}/${Date.now()}_note.webm`;
+      const up = await supa.storage.from('visite-media').upload(path, _audioBlob);
+      if (up.error) throw new Error('Audio : ' + up.error.message);
+      audio_url = supa.storage.from('visite-media').getPublicUrl(path).data.publicUrl;
+    }
+  } catch (e) {
+    errEl.textContent = e.message + ' (bucket "visite-media" créé dans Supabase Storage ?)';
+    errEl.style.display = 'block';
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Enregistrer la note'; }
+    return;
+  }
+
   const { error } = await supa.from('visit_notes').insert({
     exploitation_id: currentExp.id,
     advisor_id: currentUser.id,
     date, titre: (_$('note-titre')?.value || '').trim() || null,
     content,
+    refus: _$('note-refus')?.value || null,
+    ingestion: _$('note-ingestion')?.value || null,
+    photo_url, audio_url,
   });
-  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Enregistrer la note'; }
+  if (error) { errEl.textContent = error.message + ' (colonnes photo_url/audio_url/refus/ingestion créées dans Supabase ?)'; errEl.style.display = 'block'; return; }
   _$('note-content').value = '';
   _$('note-titre').value = '';
   _$('note-date').value = '';
+  _$('note-refus').value = '';
+  _$('note-ingestion').value = '';
+  if (_$('note-photo')) _$('note-photo').value = '';
+  _audioBlob = null;
+  _$('note-audio-status').textContent = 'Aucun enregistrement';
   showToast('Note enregistrée.', 'success');
   await loadVisitNotes();
 }
@@ -3864,68 +4571,742 @@ function renderScoreChart(sessions) {
   svg.innerHTML = svgContent;
 }
 
-// ══ ALERTES DASHBOARD ════════════════════════════
+// ══ PRIORISATION DU PORTEFEUILLE ════════════════════════════
 
 async function loadDashboardAlerts(exps) {
   if (!exps || !exps.length) return;
   const supa = getSupa();
-  const alertsEl = _$('dash-alerts');
-  const listEl = _$('dash-alerts-list');
-  if (!alertsEl || !listEl) return;
+  const wrapEl = _$('dash-priorities');
+  if (!wrapEl) return;
 
-  // Get latest session per exploitation
+  // Dernière session par exploitation
   const ids = exps.map(e => e.id);
   const { data: sessions } = await supa.from('exploitation_sessions')
     .select('exploitation_id, date, data').in('exploitation_id', ids)
     .order('date', { ascending: false });
 
-  const latestByExp = {};
-  (sessions || []).forEach(s => {
-    if (!latestByExp[s.exploitation_id]) latestByExp[s.exploitation_id] = s;
-  });
+  const byExp = {};
+  (sessions || []).forEach(s => { (byExp[s.exploitation_id] = byExp[s.exploitation_id]||[]).push(s); });
 
   const _as = getAlertSettings();
-  const thirtyDaysAgo = new Date(Date.now() - (_as.inactiveDays||30) * 86400000);
-  const sevenDaysAgo  = new Date(Date.now() - (_as.newExpDays||7)   * 86400000);
-  const alerts = [];
+  const inactiveDays = _as.inactiveDays || 30;
+  const newExpDays = _as.newExpDays || 7;
+  const inactiveAgo = new Date(Date.now() - inactiveDays * 86400000);
+  const halfInactiveAgo = new Date(Date.now() - Math.round(inactiveDays/2) * 86400000);
+  const newExpAgo = new Date(Date.now() - newExpDays * 86400000);
 
-  exps.forEach(exp => {
-    const latest = latestByExp[exp.id];
+  const items = exps.map(exp => {
+    const expSessions = byExp[exp.id] || [];
+    const latest = expSessions[0], previous = expSessions[1];
     const createdAt = new Date(exp.created_at);
+
     if (!latest) {
-      // Signaler seulement si l'exploitation a plus de 7 jours sans session
-      if (createdAt < sevenDaysAgo) {
-        alerts.push({ exp, type: 'no-session', msg: 'Aucune session enregistrée' });
+      if (createdAt < newExpAgo) {
+        return { exp, tier: 1, reason: `Aucun bilan enregistré depuis la création (${createdAt.toLocaleDateString('fr-FR')})` };
       }
-    } else {
-      const lastDate = new Date(latest.date || latest.created_at);
-      const score = latest.data?.score;
-      if (score === 'D') {
-        alerts.push({ exp, type: 'score-d', msg: `Dernier score D — ${lastDate.toLocaleDateString('fr-FR')}` });
-      } else if (lastDate < thirtyDaysAgo) {
-        alerts.push({ exp, type: 'inactive', msg: `Pas de bilan depuis ${Math.round((Date.now()-lastDate.getTime())/86400000)} jours` });
+      return { exp, tier: 3, reason: 'Exploitation récente — premier bilan à venir' };
+    }
+
+    const lastDate = new Date(latest.date || latest.created_at);
+    const score = latest.data?.score;
+    const daysSince = Math.round((Date.now() - lastDate.getTime()) / 86400000);
+
+    // Détection d'anomalie : coût en forte hausse alors que la production stagne/baisse
+    if (previous && typeof latest.data?.coutJour === 'number' && typeof previous.data?.coutJour === 'number' && previous.data.coutJour > 0) {
+      const pctCout = (latest.data.coutJour - previous.data.coutJour) / previous.data.coutJour;
+      const dProd = (latest.data?.animalParams?.prod||0) - (previous.data?.animalParams?.prod||0);
+      if (pctCout >= 0.08 && dProd <= 0.2) {
+        return { exp, tier: 1, reason: `Coût alimentaire +${(pctCout*100).toFixed(0)}% sans gain de production` };
+      }
+      if (pctCout >= 0.05) {
+        return { exp, tier: 2, reason: `Coût alimentaire en hausse de ${(pctCout*100).toFixed(0)}% depuis la dernière visite` };
       }
     }
+
+    if (score === 'D') {
+      return { exp, tier: 1, reason: `Dernier score D — ration déséquilibrée (bilan du ${lastDate.toLocaleDateString('fr-FR')})` };
+    }
+    if (lastDate < inactiveAgo) {
+      return { exp, tier: 1, reason: `Pas de bilan depuis ${daysSince} jours` };
+    }
+    if (score === 'C') {
+      return { exp, tier: 2, reason: `Score C — marge de progression (bilan du ${lastDate.toLocaleDateString('fr-FR')})` };
+    }
+    if (lastDate < halfInactiveAgo) {
+      return { exp, tier: 2, reason: `Pas de bilan depuis ${daysSince} jours` };
+    }
+    return { exp, tier: 3, reason: `Score ${score||'—'} — suivi à jour (bilan du ${lastDate.toLocaleDateString('fr-FR')})` };
   });
 
-  if (!alerts.length) { alertsEl.style.display = 'none'; return; }
-  alertsEl.style.display = '';
-  const alertColors = { 'no-session': '#f8fafc', 'score-d': '#fef2f2', 'inactive': '#fffbeb' };
-  const alertBorders = { 'no-session': '#e2e8f0', 'score-d': '#fecaca', 'inactive': '#fde68a' };
-  const alertIcons = { 'no-session': '📋', 'score-d': '🔴', 'inactive': '⏰' };
-  listEl.innerHTML = alerts.map(a => `
-    <div style="display:flex;align-items:center;gap:14px;background:${alertColors[a.type]};border:1.5px solid ${alertBorders[a.type]};border-radius:12px;padding:12px 16px;cursor:pointer;" onclick="openExpById('${a.exp.id}')">
-      <span style="font-size:1.4rem;">${alertIcons[a.type]}</span>
-      <div style="flex:1;">
-        <div style="font-weight:700;color:var(--text);font-size:.9rem;">${escHtml(a.exp.nom)}</div>
-        <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">${a.msg}</div>
+  items.sort((a, b) => a.tier - b.tier);
+  wrapEl.style.display = '';
+
+  const renderList = (tier) => items.filter(i => i.tier === tier).map(i => `
+    <div style="display:flex;align-items:center;gap:10px;background:var(--bg-app,#f8fafc);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;" onclick="openExpById('${i.exp.id}')">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;color:var(--text);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(i.exp.nom)}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">${i.reason}</div>
       </div>
-      <span style="font-size:.8rem;color:#15803d;font-weight:700;">Voir →</span>
-    </div>`).join('');
+      <span style="font-size:.75rem;color:#15803d;font-weight:700;flex-shrink:0;">→</span>
+    </div>`).join('') || '<div style="font-size:.8rem;color:var(--text-muted);padding:8px 0;">Aucune exploitation.</div>';
+
+  _$('pri-1-count').textContent = '(' + items.filter(i=>i.tier===1).length + ')';
+  _$('pri-2-count').textContent = '(' + items.filter(i=>i.tier===2).length + ')';
+  _$('pri-3-count').textContent = '(' + items.filter(i=>i.tier===3).length + ')';
+  _$('pri-1-list').innerHTML = renderList(1);
+  _$('pri-2-list').innerHTML = renderList(2);
+  _$('pri-3-list').innerHTML = renderList(3);
 }
 
 function openExpById(id) {
   if (id) openExp(id);
+}
+
+// ══ FICHE EXPLOITATION INTELLIGENTE ════════════════════════════
+async function renderFicheSynthese() {
+  const el = _$('exp-fiche-synthese');
+  if (!el || !currentExp) return;
+  const e = currentExp;
+
+  let lastNoteHtml = '';
+  try {
+    const supa = getSupa();
+    const { data: notes } = await supa.from('visit_notes')
+      .select('titre, content, date').eq('exploitation_id', e.id).order('date', { ascending: false }).limit(1);
+    if (notes && notes.length) {
+      const n = notes[0];
+      lastNoteHtml = `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;margin-top:16px;font-size:.82rem;color:#92400e;">
+        ⚠️ Lors de votre dernière visite (${new Date(n.date).toLocaleDateString('fr-FR')})${n.titre?' — '+escHtml(n.titre):''} : ${escHtml((n.content||'').slice(0,180))}${(n.content||'').length>180?'…':''}
+      </div>`;
+    }
+  } catch(err) {}
+
+  const benchmarkHtml = await benchmarkBlockHtml(e, anim);
+  const crossBenchHtml = await crossBenchmarkHtml(e, anim);
+
+  let anim = {};
+  try { anim = e.last_ration_data ? JSON.parse(e.last_ration_data) : {}; } catch(err) { anim = {}; }
+
+  const score = e.last_score || null;
+  const lastDate = e.last_session_date ? new Date(e.last_session_date) : null;
+  const daysSince = lastDate ? Math.round((Date.now() - lastDate.getTime()) / 86400000) : null;
+  const _as = getAlertSettings();
+  const inactiveDays = _as.inactiveDays || 30;
+
+  const SC = { A:'#15803d', B:'#0369a1', C:'#b45309', D:'#dc2626' };
+  const scoreColor = SC[score] || '#94a3b8';
+
+  // Points à traiter / points positifs — dérivés du score et de l'activité récente
+  const bad = [], good = [];
+  if (!score) bad.push('Aucun bilan enregistré pour cette exploitation');
+  else if (score === 'D') bad.push('Déséquilibre important (score D) — intervention recommandée');
+  else if (score === 'C') bad.push('Ration à revoir (score C) — marge de progression');
+  else if (score === 'B') good.push('Bon équilibre global (score B)');
+  else if (score === 'A') good.push('Ration bien équilibrée (score A)');
+
+  if (daysSince !== null && daysSince > inactiveDays) bad.push(`Pas de nouveau bilan depuis ${daysSince} jours`);
+  else if (lastDate) good.push('Suivi à jour');
+
+  if (anim.prod) good.push(`Production suivie : ${anim.prod} L/j`);
+
+  const chip = (label, val) => val ? `
+    <div style="background:var(--bg-app,#f8fafc);border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:.66rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;">${label}</div>
+      <div style="font-size:1.1rem;font-weight:800;color:var(--text);margin-top:2px;">${val}</div>
+    </div>` : '';
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:0;border-left:4px solid ${scoreColor};">
+      <div class="card-header"><div class="card-title">🧩 Fiche synthèse</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:14px;">
+        ${chip('Score', score || '—')}
+        ${chip('Lait', anim.prod ? anim.prod + ' L/j' : null)}
+        ${chip('TB', anim.tb ? anim.tb + ' %' : null)}
+        ${chip('UFL/UFV', e.last_ufl || null)}
+        ${chip('PDI', e.last_pdi || null)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+        <div>
+          <div style="font-size:.72rem;font-weight:800;color:#dc2626;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">🔴 À traiter</div>
+          ${bad.length ? bad.map(b=>`<div style="font-size:.82rem;color:var(--text);padding:3px 0;">• ${escHtml(b)}</div>`).join('') : '<div style="font-size:.82rem;color:var(--text-muted);">Rien à signaler.</div>'}
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">🟢 Points positifs</div>
+          ${good.length ? good.map(g=>`<div style="font-size:.82rem;color:var(--text);padding:3px 0;">• ${escHtml(g)}</div>`).join('') : '<div style="font-size:.82rem;color:var(--text-muted);">—</div>'}
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;border-top:1px solid var(--border);padding-top:12px;font-size:.82rem;">
+        <div><strong style="color:var(--text-muted);font-weight:700;">Dernière visite :</strong> ${lastDate ? lastDate.toLocaleDateString('fr-FR') + ` (il y a ${daysSince} j)` : 'aucune'}</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <strong style="color:var(--text-muted);font-weight:700;">Prochaine visite :</strong>
+          <input type="date" id="fiche-prochaine-visite" class="form-input" style="padding:4px 8px;font-size:.8rem;width:150px;" value="${e.prochaine_visite||''}" onchange="saveProchaineVisite(this.value)">
+        </div>
+      </div>
+    </div>
+    ${objectifsBlockHtml(e, anim, score)}
+    ${benchmarkHtml}
+    ${crossBenchHtml}
+    ${lastNoteHtml}`;
+}
+
+// ══ BENCHMARK INTER-ORGANISMES (anonymisé, réel) ════════════════════════════
+// Agrège les données de TOUS les conseillers via une fonction SQL SECURITY DEFINER
+// qui ne renvoie que des médianes (jamais de ligne individuelle), et seulement si
+// au moins 3 organismes distincts contribuent — sinon le résultat est masqué.
+async function crossBenchmarkHtml(e, anim) {
+  const supa = getSupa();
+  try {
+    const { data, error } = await supa.rpc('get_cross_benchmark', { p_type: e.type||'lait', p_exclude_exp: e.id });
+    if (error) throw error;
+    const r = Array.isArray(data) ? data[0] : data;
+    if (!r || (r.nb_organismes||0) < 3) {
+      return `<div class="card" style="margin-bottom:0;margin-top:16px;">
+        <div class="card-header"><div class="card-title">🌍 Benchmark inter-organismes</div></div>
+        <div style="font-size:.82rem;color:var(--text-muted);">Pas encore assez de données partagées entre organismes pour comparer anonymement (minimum 3 organismes distincts requis${r?', actuellement '+(r.nb_organismes||0):''}). Ce compteur grandit automatiquement à mesure que d'autres conseillers utilisent RumiCORE.</div>
+      </div>`;
+    }
+    const row = (label, cur, med, unit, higherBetter) => {
+      if (med==null || cur==null) return '';
+      const better = higherBetter ? cur>=med : cur<=med;
+      const col = better?'#15803d':'#dc2626';
+      return `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;">
+        <span style="color:var(--text-muted);">${label}</span>
+        <span><strong style="color:${col};">${cur}${unit}</strong> <span style="color:#94a3b8;">vs médiane ${(+med).toFixed(1)}${unit}</span></span>
+      </div>`;
+    };
+    return `<div class="card" style="margin-bottom:0;margin-top:16px;">
+      <div class="card-header"><div class="card-title">🌍 Benchmark inter-organismes</div></div>
+      <p style="font-size:.72rem;color:#94a3b8;margin-bottom:8px;">Données anonymisées · ${r.nb_exploitations} exploitations · ${r.nb_organismes} organismes distincts</p>
+      ${row('🥛 Lait', anim.prod, r.med_lait, ' L/j', true)}
+      ${row('🧈 TB', anim.tb, r.med_tb, ' %', true)}
+      ${row('💰 Coût', (typeof window._lastCoutJour==='number'?window._lastCoutJour:null), r.med_cout, ' €/VL/j', false)}
+    </div>`;
+  } catch(err) {
+    return `<div class="card" style="margin-bottom:0;margin-top:16px;">
+      <div class="card-header"><div class="card-title">🌍 Benchmark inter-organismes</div></div>
+      <div style="font-size:.78rem;color:#dc2626;">Fonction indisponible (exécutez migration_conseiller_v2.sql ?) : ${escHtml(err.message||String(err))}</div>
+    </div>`;
+  }
+}
+
+// ══ BENCHMARK INTERNE AU PORTEFEUILLE ════════════════════════════
+// Compare l'exploitation aux autres exploitations DU MÊME CONSEILLER, de même type.
+// ⚠️ Ce n'est pas un benchmark inter-organismes (NatUp) : cela nécessiterait des données
+// agrégées et anonymisées de plusieurs conseillers, qui n'existent pas dans cette base.
+async function benchmarkBlockHtml(e, anim) {
+  const peers = exploitations.filter(x => x.id !== e.id && (x.type||'lait') === (e.type||'lait'));
+  if (peers.length < 2) {
+    return `<div class="card" style="margin-bottom:0;margin-top:16px;">
+      <div class="card-header"><div class="card-title">🏆 Comparaison au portefeuille</div></div>
+      <div style="font-size:.82rem;color:var(--text-muted);">Pas assez d'exploitations de type "${e.type||'lait'}" dans votre portefeuille pour comparer (minimum 3).</div>
+    </div>`;
+  }
+  const supa = getSupa();
+  const ids = peers.map(p => p.id);
+  const { data: sessions } = await supa.from('exploitation_sessions')
+    .select('exploitation_id, date, data').in('exploitation_id', ids).order('date', { ascending: false });
+  const latestByPeer = {};
+  (sessions||[]).forEach(s => { if (!latestByPeer[s.exploitation_id]) latestByPeer[s.exploitation_id] = s; });
+
+  const median = arr => { if (!arr.length) return null; const s=[...arr].sort((a,b)=>a-b); const m=Math.floor(s.length/2); return s.length%2?s[m]:(s[m-1]+s[m])/2; };
+  const laitVals = Object.values(latestByPeer).map(s=>s.data?.animalParams?.prod).filter(v=>v!=null);
+  const coutVals = Object.values(latestByPeer).map(s=>s.data?.coutJour).filter(v=>v!=null);
+  const tbVals = Object.values(latestByPeer).map(s=>s.data?.animalParams?.tb).filter(v=>v!=null);
+
+  const medLait = median(laitVals), medCout = median(coutVals), medTb = median(tbVals);
+  if (medLait==null && medCout==null && medTb==null) {
+    return `<div class="card" style="margin-bottom:0;margin-top:16px;">
+      <div class="card-header"><div class="card-title">🏆 Comparaison au portefeuille</div></div>
+      <div style="font-size:.82rem;color:var(--text-muted);">Pas encore assez de bilans enregistrés chez vos autres exploitations "${e.type||'lait'}" pour comparer.</div>
+    </div>`;
+  }
+  const row = (label, cur, med, unit, higherBetter) => {
+    if (med == null || cur == null) return '';
+    const better = higherBetter ? cur >= med : cur <= med;
+    const col = better ? '#15803d' : '#dc2626';
+    return `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;">
+      <span style="color:var(--text-muted);">${label}</span>
+      <span><strong style="color:${col};">${cur}${unit}</strong> <span style="color:#94a3b8;">vs médiane ${med.toFixed?med.toFixed(1):med}${unit} (${peers.length} élevages)</span></span>
+    </div>`;
+  };
+  return `<div class="card" style="margin-bottom:0;margin-top:16px;">
+    <div class="card-header"><div class="card-title">🏆 Comparaison au portefeuille</div></div>
+    <p style="font-size:.72rem;color:#94a3b8;margin-bottom:8px;">vs élevages "${e.type||'lait'}" de votre propre portefeuille (pas un benchmark inter-organismes)</p>
+    ${row('🥛 Lait', anim.prod, medLait, ' L/j', true)}
+    ${row('🧈 TB', anim.tb, medTb, ' %', true)}
+    ${row('💰 Coût', (typeof window._lastCoutJour==='number'?window._lastCoutJour:null), medCout, ' €/VL/j', false)}
+  </div>`;
+}
+
+async function saveProchaineVisite(val) {
+  if (!currentExp) return;
+  const supa = getSupa();
+  try {
+    const { error } = await supa.from('exploitations').update({ prochaine_visite: val || null }).eq('id', currentExp.id);
+    if (error) throw error;
+    currentExp.prochaine_visite = val || null;
+    showToast('Prochaine visite enregistrée.', 'success');
+  } catch(e) {
+    showToast('Erreur : ' + (e.message||e) + ' (colonne prochaine_visite créée dans Supabase ?)', 'error', 6000);
+  }
+}
+
+// ══ STRATÉGIE ALIMENTAIRE 12 MOIS ════════════════════════════
+// Calendrier indicatif de phases de conduite, basé sur des règles zootechniques standard
+// (cycle 305j lactation / 60j tarissement, ou conduite saisonnière si vêlages étalés).
+// Ce n'est PAS une prévision chiffrée par exploitation — un support de préparation de visite.
+const STRAT_MOIS_NOMS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+function genererCalendrierGroupe(moisVelage) {
+  const phases = [
+    { offset:0, label:'Vêlages', desc:"Pic des vêlages. Ration de transition post-vêlage, surveiller fièvre de lait et acétonémie." },
+    { offset:1, label:'Pic de lactation', desc:"Montée en production : ration à forte densité énergétique et PDI, ingestion maximale." },
+    { offset:2, label:'Pic de lactation', desc:"Surveiller la couverture énergétique — risque de déficit en début de lactation." },
+    { offset:3, label:'Lactation confirmée', desc:"Production stabilisée. Ration d'entretien renforcé." },
+    { offset:4, label:'Lactation confirmée', desc:'' },
+    { offset:5, label:'Lactation confirmée', desc:"Ajuster selon évolution TB/TP et note d'état corporel." },
+    { offset:6, label:'Milieu de lactation', desc:"Reconstitution des réserves corporelles, surveiller la NEC." },
+    { offset:7, label:'Fin de lactation', desc:"Réduction progressive des apports concentrés." },
+    { offset:8, label:'Fin de lactation', desc:'' },
+    { offset:9, label:'Tarissement', desc:"Ration de tarissement : faible énergie, apport calcique maîtrisé." },
+    { offset:10, label:'Tarissement / Préparation vêlage', desc:"Transition vers la ration de préparation au vêlage (3 semaines avant)." },
+    { offset:11, label:'Préparation vêlage', desc:"Prévention des troubles métaboliques (fièvre de lait, acidose)." },
+  ];
+  return phases.map(p => ({ mois: ((moisVelage-1+p.offset)%12)+1, label:p.label, desc:p.desc }));
+}
+
+function genererCalendrierEtale() {
+  return [
+    { mois:1, label:'Ration hivernale', desc:"Fourrages conservés (ensilage, foin). Vêlages dispersés : ajuster individuellement." },
+    { mois:2, label:'Ration hivernale', desc:'' },
+    { mois:3, label:'Transition', desc:"Préparer la transition vers l'herbe si mise à l'herbe prévue (durée min. 3 semaines)." },
+    { mois:4, label:"Mise à l'herbe", desc:"Risque d'acidose/tétanie d'herbage sur herbe jeune — fibres et magnésium." },
+    { mois:5, label:'Pâturage', desc:"Ration pâturage + complémentation selon pousse d'herbe." },
+    { mois:6, label:'Pâturage', desc:'' },
+    { mois:7, label:'Pâturage / stress thermique', desc:"Surveiller l'ingestion en cas de fortes chaleurs, accès à l'eau." },
+    { mois:8, label:'Pâturage', desc:"Anticiper la baisse de pousse d'herbe estivale." },
+    { mois:9, label:'Transition', desc:'Retour progressif à la ration hivernale si nécessaire.' },
+    { mois:10, label:'Rentrée en bâtiment', desc:"Vérifier les stocks de fourrages pour l'hiver (bilan fourrager)." },
+    { mois:11, label:'Ration hivernale', desc:'' },
+    { mois:12, label:'Ration hivernale', desc:"Bilan de fin d'année, ajuster selon état corporel du troupeau." },
+  ];
+}
+
+function onStratProfilChange() {
+  const g = _$('strat-mois-group');
+  if (g) g.style.display = _$('strat-profil')?.value === 'groupe' ? '' : 'none';
+}
+
+async function genererStrategie() {
+  if (!currentExp) return;
+  const profil = _$('strat-profil')?.value || 'groupe';
+  const mois = parseInt(_$('strat-mois')?.value) || 9;
+  const phases = profil === 'groupe' ? genererCalendrierGroupe(mois) : genererCalendrierEtale();
+
+  _$('strat-result').innerHTML = `<div class="card">
+    <div class="card-header"><div class="card-title">📅 Calendrier ${profil==='groupe'?'— vêlages groupés':'— vêlages étalés'}</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
+      ${phases.map(p => `<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px 12px;border-left:3px solid #15803d;">
+        <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;">${STRAT_MOIS_NOMS[p.mois-1]}</div>
+        <div style="font-weight:700;font-size:.85rem;margin:2px 0 4px;color:#15803d;">${p.label}</div>
+        ${p.desc?`<div style="font-size:.75rem;color:var(--text-muted);">${p.desc}</div>`:''}
+      </div>`).join('')}
+    </div>
+    <p style="font-size:.72rem;color:#94a3b8;margin-top:10px;margin-bottom:0;">Calendrier indicatif basé sur des règles zootechniques standard — à adapter à chaque exploitation, pas une prévision chiffrée.</p>
+  </div>`;
+
+  const supa = getSupa();
+  try {
+    const strategie = { profil, mois };
+    await supa.from('exploitations').update({ strategie }).eq('id', currentExp.id);
+    currentExp.strategie = strategie;
+  } catch(e) {}
+}
+
+function loadStrategie() {
+  if (!currentExp) return;
+  const s = currentExp.strategie;
+  if (s) {
+    if (_$('strat-profil')) _$('strat-profil').value = s.profil || 'groupe';
+    if (_$('strat-mois') && s.mois) _$('strat-mois').value = s.mois;
+  }
+  onStratProfilChange();
+  if (s) genererStrategie(); else if (_$('strat-result')) _$('strat-result').innerHTML = '';
+}
+
+// ══ AGENDA ════════════════════════════
+function loadAgenda() {
+  const plannedEl = _$('agenda-planned'), overdueEl = _$('agenda-overdue');
+  if (!plannedEl || !overdueEl) return;
+
+  const planned = exploitations.filter(e => e.prochaine_visite)
+    .sort((a,b) => new Date(a.prochaine_visite) - new Date(b.prochaine_visite));
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  plannedEl.innerHTML = planned.length ? planned.map(e => {
+    const d = new Date(e.prochaine_visite);
+    const late = d < today;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="openExpById('${e.id}')">
+      <div style="font-weight:800;color:${late?'#dc2626':'#15803d'};font-size:.8rem;min-width:80px;">${d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}${late?' ⚠️':''}</div>
+      <div style="flex:1;font-weight:600;font-size:.85rem;">${escHtml(e.nom)}</div>
+      <span style="color:#15803d;">→</span>
+    </div>`;
+  }).join('') : '<div style="padding:16px;color:var(--text-muted);font-size:.85rem;">Aucune visite planifiée. Ajoutez une date dans la fiche synthèse de chaque exploitation.</div>';
+
+  const cutoff = Date.now() - 60*86400000;
+  const overdue = exploitations.filter(e => {
+    const last = e.last_session_date ? new Date(e.last_session_date).getTime() : new Date(e.created_at).getTime();
+    return last < cutoff;
+  }).sort((a,b) => {
+    const la = a.last_session_date ? new Date(a.last_session_date).getTime() : new Date(a.created_at).getTime();
+    const lb = b.last_session_date ? new Date(b.last_session_date).getTime() : new Date(b.created_at).getTime();
+    return la - lb;
+  });
+
+  overdueEl.innerHTML = overdue.length ? overdue.map(e => {
+    const last = e.last_session_date ? new Date(e.last_session_date) : new Date(e.created_at);
+    const days = Math.round((Date.now()-last.getTime())/86400000);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="openExpById('${e.id}')">
+      <div style="font-weight:800;color:#d97706;font-size:.8rem;min-width:80px;">${days} j</div>
+      <div style="flex:1;font-weight:600;font-size:.85rem;">${escHtml(e.nom)}</div>
+      <span style="color:#15803d;">→</span>
+    </div>`;
+  }).join('') : '<div style="padding:16px;color:var(--text-muted);font-size:.85rem;">✅ Tous les élevages ont été vus récemment.</div>';
+}
+
+// ══ ORGANISATION / CO-BRANDING (ex: NatUp) ════════════════════════════
+async function loadAdvisorProfile() {
+  if (!currentUser) return;
+  const supa = getSupa();
+  const { data, error } = await supa.from('advisor_profiles').select('*').eq('advisor_id', currentUser.id).maybeSingle();
+  if (error) return; // table pas encore créée : on ignore silencieusement, pas de branding par défaut
+  window._advisorProfile = data || null;
+  if (_$('org-nom')) _$('org-nom').value = data?.organisation || '';
+  if (_$('org-couleur')) _$('org-couleur').value = data?.couleur_primaire || '#15803d';
+  if (_$('org-logo')) _$('org-logo').value = data?.logo_url || '';
+  applyBranding(data);
+}
+
+async function saveAdvisorProfile() {
+  const supa = getSupa();
+  const payload = {
+    advisor_id: currentUser.id,
+    organisation: (_$('org-nom')?.value||'').trim() || null,
+    couleur_primaire: _$('org-couleur')?.value || null,
+    logo_url: (_$('org-logo')?.value||'').trim() || null,
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supa.from('advisor_profiles').upsert(payload, { onConflict: 'advisor_id' });
+  if (error) { showToast('Erreur : ' + error.message + ' (exécutez migration_conseiller_v2.sql ?)', 'error', 6000); return; }
+  window._advisorProfile = payload;
+  applyBranding(payload);
+  showToast('Organisation enregistrée.', 'success');
+}
+
+function applyBranding(profile) {
+  const sub = _$('sidebar-logo-sub');
+  if (sub) sub.textContent = profile?.organisation ? `Conseiller × ${profile.organisation}` : 'Conseiller';
+  const img = _$('sidebar-logo-img');
+  if (img && profile?.logo_url) img.src = profile.logo_url;
+  const wrap = _$('sidebar-logo-wrap');
+  if (wrap && profile?.couleur_primaire) wrap.style.borderBottom = `3px solid ${profile.couleur_primaire}`;
+  if (profile?.couleur_primaire) {
+    document.querySelectorAll('.sidebar-item.active').forEach(el => el.style.color = profile.couleur_primaire);
+  }
+}
+
+// ══ BASE ALIMENTS + PRIX CENTRALISÉS ════════════════════════════
+async function loadConseillerAliments() {
+  if (!currentUser) return;
+  const supa = getSupa();
+  const { data, error } = await supa.from('conseiller_aliments')
+    .select('*').eq('advisor_id', currentUser.id).order('nom');
+  if (!error) window._conseillerAliments = data || [];
+  const listEl = _$('ca-list');
+  if (!listEl) return;
+  if (error) {
+    listEl.innerHTML = `<div style="padding:12px;color:#dc2626;font-size:.82rem;">Table indisponible : ${error.message} (exécutez migration_conseiller_v2.sql dans Supabase)</div>`;
+    return;
+  }
+  if (!data || !data.length) { listEl.innerHTML = '<div style="padding:12px;color:var(--text-muted);font-size:.82rem;">Aucun aliment enregistré.</div>'; return; }
+  listEl.innerHTML = `<table class="data-table"><thead><tr><th>Nom</th><th>Prix €/t</th><th>UFL</th><th>PDI</th><th>MS %</th><th>Fournisseur</th><th></th></tr></thead>
+    <tbody>${data.map(a => `<tr>
+      <td style="font-weight:600;">${escHtml(a.nom)}</td>
+      <td>${a.prix ?? '—'}</td><td>${a.ufl ?? '—'}</td><td>${a.pdi ?? '—'}</td><td>${a.ms ?? '—'}</td>
+      <td>${escHtml(a.fournisseur||'—')}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteConseillerAliment('${a.id}')">🗑</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+async function addConseillerAliment() {
+  const nom = (_$('ca-nom')?.value||'').trim();
+  if (!nom) { showToast('Nom requis.', 'warn'); return; }
+  const supa = getSupa();
+  const payload = {
+    advisor_id: currentUser.id, nom,
+    prix: parseFloat(_$('ca-prix').value)||null,
+    ufl: parseFloat(_$('ca-ufl').value)||null,
+    pdi: parseFloat(_$('ca-pdi').value)||null,
+    ms: parseFloat(_$('ca-ms').value)||null,
+    fournisseur: (_$('ca-fournisseur').value||'').trim()||null,
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supa.from('conseiller_aliments').insert(payload);
+  if (error) { showToast('Erreur : ' + error.message, 'error', 5000); return; }
+  ['ca-nom','ca-prix','ca-ufl','ca-pdi','ca-ms','ca-fournisseur'].forEach(id => { if(_$(id)) _$(id).value=''; });
+  showToast('Aliment enregistré.', 'success');
+  loadConseillerAliments();
+}
+async function deleteConseillerAliment(id) {
+  rbConfirm('Supprimer cet aliment de votre base ?', async function() {
+    const supa = getSupa();
+    const { error } = await supa.from('conseiller_aliments').delete().eq('id', id);
+    if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+    showToast('Aliment supprimé.', 'info');
+    loadConseillerAliments();
+  }, 'Supprimer', true);
+}
+
+// ══ ANALYSES DE FOURRAGE ════════════════════════════
+async function saveAnalyseFourrage() {
+  if (!currentExp) { showToast('Ouvrez une exploitation.', 'warn'); return; }
+  const errEl = _$('af-err'); errEl.style.display = 'none';
+  const nom = (_$('af-nom')?.value||'').trim();
+  if (!nom) { errEl.textContent = 'Le nom est requis.'; errEl.style.display = 'block'; return; }
+  const supa = getSupa();
+  const saveBtn = _$('af-save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Enregistrement…'; }
+
+  let photo_url = null;
+  try {
+    const file = _$('af-photo')?.files?.[0];
+    if (file) {
+      const path = `${currentExp.id}/analyses/${Date.now()}_${file.name}`;
+      const up = await supa.storage.from('visite-media').upload(path, file);
+      if (up.error) throw new Error('Photo : ' + up.error.message);
+      photo_url = supa.storage.from('visite-media').getPublicUrl(path).data.publicUrl;
+    }
+  } catch(e) {
+    errEl.textContent = e.message + ' (bucket "visite-media" créé dans Supabase Storage ?)';
+    errEl.style.display = 'block';
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Enregistrer l\'analyse'; }
+    return;
+  }
+
+  const num = id => { const v = parseFloat(_$(id)?.value); return isFinite(v) ? v : null; };
+  const { error } = await supa.from('analyses_fourrage').insert({
+    exploitation_id: currentExp.id, advisor_id: currentUser.id,
+    nom, type: _$('af-type')?.value||null, laboratoire: (_$('af-labo')?.value||'').trim()||null,
+    date_analyse: _$('af-date')?.value||null,
+    ms: num('af-ms'), mat: num('af-mat'), cb: num('af-cb'), ndf: num('af-ndf'), amidon: num('af-amidon'),
+    mat_dig: num('af-matdig'), ufl: num('af-ufl'), pdi: num('af-pdi'), photo_url,
+  });
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Enregistrer l\'analyse'; }
+  if (error) { errEl.textContent = error.message + ' (exécutez migration_conseiller_v2.sql ?)'; errEl.style.display = 'block'; return; }
+  ['af-nom','af-labo','af-date','af-ms','af-mat','af-cb','af-ndf','af-amidon','af-matdig','af-ufl','af-pdi'].forEach(id=>{ if(_$(id)) _$(id).value=''; });
+  if (_$('af-photo')) _$('af-photo').value = '';
+  showToast('Analyse enregistrée.', 'success');
+  loadAnalysesFourrage();
+}
+
+async function loadAnalysesFourrage() {
+  if (!currentExp) return;
+  const listEl = _$('af-list');
+  if (!listEl) return;
+  const supa = getSupa();
+  const { data, error } = await supa.from('analyses_fourrage')
+    .select('*').eq('exploitation_id', currentExp.id).order('date_analyse', { ascending: false });
+  if (error) { listEl.innerHTML = `<div style="padding:16px;color:#dc2626;font-size:.82rem;">${error.message}</div>`; return; }
+  window._loadedAnalyses = data || [];
+  if (!data || !data.length) { listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">Aucune analyse enregistrée.</div>'; return; }
+  listEl.innerHTML = data.map(x => `
+    <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start;">
+      ${x.photo_url ? `<a href="${x.photo_url}" target="_blank" rel="noopener"><img src="${x.photo_url}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0;"></a>` : ''}
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:.88rem;">${escHtml(x.nom)} ${x.type?`<span style="font-weight:500;color:var(--text-muted);">— ${escHtml(x.type)}</span>`:''}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin:2px 0 6px;">${x.laboratoire?escHtml(x.laboratoire)+' · ':''}${x.date_analyse?new Date(x.date_analyse).toLocaleDateString('fr-FR'):''}</div>
+        <div style="font-size:.78rem;color:var(--text);display:flex;flex-wrap:wrap;gap:10px;">
+          ${x.ms!=null?`MS ${x.ms}%`:''} ${x.mat!=null?`· MAT ${x.mat}%`:''} ${x.ufl!=null?`· UFL ${x.ufl}`:''} ${x.pdi!=null?`· PDI ${x.pdi}g`:''}
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addAnalyseToBase('${x.id}')">➕ Ajouter à ma base</button>
+    </div>`).join('');
+}
+
+async function addAnalyseToBase(id) {
+  const x = (window._loadedAnalyses||[]).find(a => a.id === id);
+  if (!x) return;
+  const supa = getSupa();
+  const { error } = await supa.from('conseiller_aliments').insert({
+    advisor_id: currentUser.id, nom: x.nom, ufl: x.ufl, pdi: x.pdi, ms: x.ms,
+  });
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+  showToast('Aliment ajouté à votre base.', 'success');
+}
+
+// ══ OBJECTIFS DE SUIVI ════════════════════════════
+function objectifsBlockHtml(e, anim, score) {
+  const o = e.objectifs || {};
+  const hasAny = o.lait || o.tb || o.score;
+  const scoreVal = { A:4, B:3, C:2, D:1 };
+  const row = (label, curVal, unit, target, higherBetter, isScore) => {
+    if (target === undefined || target === null || target === '') return '';
+    let icon = '◯', color = '#94a3b8';
+    if (curVal !== null && curVal !== undefined && curVal !== '') {
+      const ok = isScore ? (scoreVal[curVal]||0) >= (scoreVal[target]||0) : (higherBetter ? curVal >= target : curVal <= target);
+      icon = ok ? '✅' : '⚠️'; color = ok ? '#15803d' : '#dc2626';
+    }
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.82rem;">
+      <span style="color:var(--text-muted);">${label}</span>
+      <span style="font-weight:700;color:${color};">${icon} ${curVal!==null&&curVal!==undefined&&curVal!==''?curVal+unit:'—'} <span style="color:#94a3b8;font-weight:500;">→ cible ${target}${unit}</span></span>
+    </div>`;
+  };
+  const body = hasAny ? [
+    row('🥛 Lait', anim.prod||null, ' L/j', o.lait, true, false),
+    row('🧈 TB', anim.tb||null, ' %', o.tb, true, false),
+    row('🏆 Score', score||null, '', o.score, true, true),
+  ].join('') : '<div style="font-size:.8rem;color:var(--text-muted);">Aucun objectif défini pour cette exploitation.</div>';
+  return `<div class="card" style="margin-bottom:0;margin-top:16px;">
+    <div class="card-header">
+      <div class="card-title">🎯 Objectifs de suivi</div>
+      <button class="btn btn-ghost btn-sm" onclick="openObjectifsModal()">✏️ Définir</button>
+    </div>
+    ${body}
+  </div>`;
+}
+function openObjectifsModal() {
+  if (!currentExp) return;
+  const o = currentExp.objectifs || {};
+  _$('obj-lait').value = o.lait || '';
+  _$('obj-tb').value = o.tb || '';
+  _$('obj-score').value = o.score || '';
+  _$('objectifs-modal').classList.remove('hidden');
+}
+function closeObjectifsModal() { _$('objectifs-modal').classList.add('hidden'); }
+async function saveObjectifs() {
+  if (!currentExp) return;
+  const objectifs = {
+    lait: parseFloat(_$('obj-lait').value) || null,
+    tb: parseFloat(_$('obj-tb').value) || null,
+    score: _$('obj-score').value || null,
+  };
+  const supa = getSupa();
+  try {
+    const { error } = await supa.from('exploitations').update({ objectifs }).eq('id', currentExp.id);
+    if (error) throw error;
+    currentExp.objectifs = objectifs;
+    closeObjectifsModal();
+    showToast('Objectifs enregistrés.', 'success');
+    renderFicheSynthese();
+  } catch(e) {
+    showToast('Erreur : ' + (e.message||e) + ' (colonne objectifs créée dans Supabase ?)', 'error', 6000);
+  }
+}
+
+// ══ ASSISTANT CONSEILLER — RECHERCHE PORTEFEUILLE ════════════════════════════
+function openAssistantModal() {
+  _$('assistant-modal').classList.remove('hidden');
+  _$('assistant-result').innerHTML = '<div style="font-size:.82rem;color:var(--text-muted);text-align:center;padding:20px;">Choisissez une question ci-dessus, ou tapez la vôtre.</div>';
+  if (_$('assistant-freetext')) _$('assistant-freetext').value = '';
+}
+function closeAssistantModal() { _$('assistant-modal').classList.add('hidden'); }
+
+// Reconnaissance par mots-clés (pas d'IA générative) : associe la question tapée
+// à l'une des requêtes calculées existantes. Transparence côté utilisateur si aucun match.
+function matchAssistantQuestion(text) {
+  const t = text.toLowerCase();
+  if (/co(û|u)t|prix|cher|dépense/.test(t)) return 'cout-hausse';
+  if (/\btb\b|taux butyreux|matière grasse/.test(t)) return 'tb-baisse';
+  if (/score d\b|déséquilibr|mauvais/.test(t)) return 'score-d';
+  if (/pas vu|non vu|depuis longtemps|inactif|visite/.test(t)) return 'non-vus';
+  if (/objectif/.test(t)) return 'objectifs-non-atteints';
+  return null;
+}
+async function askAssistantFreeText() {
+  const text = (_$('assistant-freetext')?.value || '').trim();
+  if (!text) return;
+  const kind = matchAssistantQuestion(text);
+  if (!kind) {
+    _$('assistant-result').innerHTML = `<div style="padding:16px;color:var(--text-muted);font-size:.82rem;">Je ne sais pas encore répondre à cette question précise. Essayez avec les mots : coût, TB, score, visite, objectif — ou utilisez les boutons ci-dessus.<br><span style="color:#94a3b8;">(Moteur de requêtes calculées sur vos données, pas une IA générative.)</span></div>`;
+    return;
+  }
+  await runAssistantQuery(kind);
+}
+
+async function runAssistantQuery(kind) {
+  const resEl = _$('assistant-result');
+  resEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);">⏳ Analyse du portefeuille…</div>';
+  const supa = getSupa();
+  const ids = exploitations.map(e => e.id);
+  if (!ids.length) { resEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);">Aucune exploitation.</div>'; return; }
+
+  const { data: sessions } = await supa.from('exploitation_sessions')
+    .select('exploitation_id, date, data').in('exploitation_id', ids)
+    .order('date', { ascending: false });
+
+  const byExp = {};
+  (sessions||[]).forEach(s => { (byExp[s.exploitation_id] = byExp[s.exploitation_id]||[]).push(s); });
+
+  let results = [];
+
+  if (kind === 'score-d') {
+    results = exploitations.filter(e => e.last_score === 'D')
+      .map(e => ({ e, msg: 'Dernier score D' }));
+  } else if (kind === 'non-vus') {
+    const cutoff = Date.now() - 60*86400000;
+    results = exploitations.filter(e => {
+      const last = e.last_session_date ? new Date(e.last_session_date).getTime() : new Date(e.created_at).getTime();
+      return last < cutoff;
+    }).map(e => {
+      const days = Math.round((Date.now() - (e.last_session_date?new Date(e.last_session_date).getTime():new Date(e.created_at).getTime()))/86400000);
+      return { e, msg: `Non vu depuis ${days} jours` };
+    });
+  } else if (kind === 'tb-baisse') {
+    exploitations.forEach(e => {
+      const s = (byExp[e.id]||[]).slice(0,2);
+      if (s.length === 2) {
+        const tbNow = s[0].data?.animalParams?.tb, tbPrev = s[1].data?.animalParams?.tb;
+        if (tbNow != null && tbPrev != null && tbNow < tbPrev - 0.03) {
+          results.push({ e, msg: `TB : ${tbPrev} → ${tbNow} %` });
+        }
+      }
+    });
+  } else if (kind === 'cout-hausse') {
+    // Nécessite un coût sauvegardé dans les sessions (disponible pour les sessions enregistrées après la mise à jour du module Coûts)
+    exploitations.forEach(e => {
+      const s = (byExp[e.id]||[]).slice(0,2);
+      if (s.length === 2) {
+        const cNow = s[0].data?.coutJour, cPrev = s[1].data?.coutJour;
+        if (cNow != null && cPrev != null && cPrev > 0 && (cNow-cPrev)/cPrev >= 0.05) {
+          results.push({ e, msg: `Coût : ${cPrev.toFixed(2)} → ${cNow.toFixed(2)} €/VL/j (+${(((cNow-cPrev)/cPrev)*100).toFixed(0)}%)` });
+        }
+      }
+    });
+  } else if (kind === 'objectifs-non-atteints') {
+    const scoreVal = { A:4, B:3, C:2, D:1 };
+    exploitations.forEach(e => {
+      const o = e.objectifs; if (!o) return;
+      const anim = (byExp[e.id]||[])[0]?.data?.animalParams || {};
+      const fails = [];
+      if (o.lait && anim.prod != null && anim.prod < o.lait) fails.push(`Lait ${anim.prod} < ${o.lait} L`);
+      if (o.tb && anim.tb != null && anim.tb < o.tb) fails.push(`TB ${anim.tb} < ${o.tb} %`);
+      if (o.score && (scoreVal[e.last_score]||0) < (scoreVal[o.score]||0)) fails.push(`Score ${e.last_score||'—'} < ${o.score}`);
+      if (fails.length) results.push({ e, msg: fails.join(' · ') });
+    });
+  }
+
+  if (!results.length) {
+    resEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);text-align:center;">✅ Aucun élevage concerné.</div>';
+    return;
+  }
+  resEl.innerHTML = `<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:8px;">${results.length} élevage(s) trouvé(s)${kind==='cout-hausse'?' — nécessite des sessions avec coût enregistré':''} :</div>` +
+    results.map(r => `
+    <div style="display:flex;align-items:center;gap:10px;background:var(--bg-app,#f8fafc);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:6px;cursor:pointer;" onclick="closeAssistantModal();openExpById('${r.e.id}')">
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:.85rem;">${escHtml(r.e.nom)}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">${escHtml(r.msg)}</div>
+      </div>
+      <span style="color:#15803d;font-weight:700;">→</span>
+    </div>`).join('');
 }
 
 // ── Suggestions ─────────────────────────────────────
