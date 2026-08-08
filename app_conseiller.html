@@ -1301,29 +1301,29 @@ function setTheme(t) {
    ALIMENTS DATABASE (compact — clés identiques à app.html)
 ══════════════════════════════════════════════ */
 const RB_CSV = `
-Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS,PDIA,BPR,UEL,UEB,Cl,S
-Avoine,87.6,0.87,88,1.1,3.3,0.2,1.4,4.5,1.7,3.7,220,170,15,20,-14,0.3100000023841858,0.3100000023841858,0.9,1.9
+Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS,PDIA,BPR,UEL,UEB,Cl,S,NDF,ADF,ADL,CF
+Avoine,87.6,0.87,88,1.1,3.3,0.2,1.4,4.5,1.7,3.7,220,170,15,20,-14,0.3100000023841858,0.3100000023841858,0.9,1.9,357,163,0,131
 Avoine décortiquée,85.7,1.00,100,0.7,3.8,0.2,1.2,4.2,2.0,4.2,240,180,15,25,-6,0.1469999998807907,0.1469999998807907,0.8,1.6
 Avoine floconnée,87.6,0.90,90,1.1,3.3,0.2,1.4,4.5,1.7,3.7,180,220,15,24,-15,0.32199999690055847,0.32199999690055847,0.9,1.9
-Blé dur,87.8,1.06,105,0.5,3.8,0.2,1.2,4.0,1.8,3.0,30,610,25,36,16,0.1469999998807907,0.1469999998807907,0.9,1.9
-Blé tendre,86.9,1.04,90,0.5,3.4,0.1,1.3,4.2,1.7,2.8,30,580,25,28,-13,0.15299999713897705,0.15299999713897705,0.9,1.7
+Blé dur,87.8,1.06,105,0.5,3.8,0.2,1.2,4.0,1.8,3.0,30,610,25,36,16,0.1469999998807907,0.1469999998807907,0.9,1.9,159,42,0,30
+Blé tendre,86.9,1.04,90,0.5,3.4,0.1,1.3,4.2,1.7,2.8,30,580,25,28,-13,0.15299999713897705,0.15299999713897705,0.9,1.7,147,38,0,27
 Blé aplati,87.0,1.06,95,0.5,3.5,0.1,1.3,4.2,1.7,2.9,20,600,25,28,-13,0.15299999713897705,0.15299999713897705,0.9,1.7
-Maïs,86.3,1.11,82,0.4,2.9,0.1,1.1,3.5,2.0,2.7,650,0,15,43,-53,0.335999995470047,0.335999995470047,0.6,1.3
+Maïs,86.3,1.11,82,0.4,2.9,0.1,1.1,3.5,2.0,2.7,650,0,15,43,-53,0.335999995470047,0.335999995470047,0.6,1.3,124,31,0,26
 Maïs extrudé,86.3,1.15,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,350,300,15,52,-69,0.23000000417232513,0.23000000417232513,0.6,1.3
 Maïs floconné,86.3,1.13,95,0.4,3.0,0.1,1.1,3.6,2.0,2.8,300,350,15,52,-74,0.18799999356269836,0.18799999356269836,0.6,1.3
 Maïs humide,67.0,1.12,85,0.4,3.0,0.1,1.1,3.5,2.0,2.7,650,0,20,24,-34,0.19900000095367432,0.19900000095367432,0,1.3
 Maïs aplati,86.3,1.11,85,0.4,2.9,0.1,1.1,3.5,2.0,2.7,550,100,15,43,-53,0.335999995470047,0.335999995470047,0.6,1.3
 Mil,89.6,1.18,97,0.4,3.5,0.2,1.6,3.8,2.2,3.0,200,350,10,,,,,,
 Millet commun,90.6,1.10,90,0.4,3.2,0.2,1.6,4.0,2.0,2.8,180,330,10,,,,,,
-Orge,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,30,530,20,29,-23,0.1940000057220459,0.1940000057220459,1.2,1.5
+Orge,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,30,530,20,29,-23,0.1940000057220459,0.1940000057220459,1.2,1.5,215,65,0,54
 Orge aplatie,87.2,1.08,95,0.6,3.6,0.2,1.2,5.0,1.7,3.5,20,540,20,29,-23,0.1940000057220459,0.1940000057220459,1.2,1.5
 Riz cargo,88.0,1.06,71,0.3,3.5,0.2,1.2,2.5,2.5,3.8,600,20,5,28,-28,0.23000000417232513,0.23000000417232513,0.2,1.1
 Riz paddy,88.0,0.76,59,0.4,2.8,0.2,1.1,2.8,1.8,3.2,550,10,5,47,-34,0.2709999978542328,0.2709999978542328,0,0
-Seigle,87.0,1.04,88,0.8,3.4,0.2,1.2,5.0,1.7,3.0,20,570,40,20,-34,0.15299999713897705,0.15299999713897705,0.7,1.4
-Sorgho grain,87.0,1.08,82,0.3,3.0,0.1,1.5,3.5,1.8,2.5,320,300,10,47,-48,0.25600001215934753,0.25600001215934753,0.6,1
-Triticale,87.0,1.06,95,0.6,3.5,0.2,1.2,4.5,1.8,3.2,30,550,20,24,-21,0.17399999499320984,0.17399999499320984,0.7,1.7
+Seigle,87.0,1.04,88,0.8,3.4,0.2,1.2,5.0,1.7,3.0,20,570,40,20,-34,0.15299999713897705,0.15299999713897705,0.7,1.4,148,33,0,23
+Sorgho grain,87.0,1.08,82,0.3,3.0,0.1,1.5,3.5,1.8,2.5,320,300,10,47,-48,0.25600001215934753,0.25600001215934753,0.6,1,111,43,0,28
+Triticale,87.0,1.06,95,0.6,3.5,0.2,1.2,4.5,1.8,3.2,30,550,20,24,-21,0.17399999499320984,0.17399999499320984,0.7,1.7,150,38,0,29
 Manioc,86.0,1.08,28,1.2,1.0,0.2,0.8,7.0,0.3,0.5,670,0,35,11,-86,0.0820000022649765,0.0820000022649765,0.3,3.1
-Son de blé,87.0,0.78,115,1.4,11.0,0.3,4.8,13.0,1.8,4.5,20,130,50,37,34,0.3100000023841858,0.3100000023841858,0.9,2.1
+Son de blé,87.0,0.78,115,1.4,11.0,0.3,4.8,13.0,1.8,4.5,20,130,50,37,34,0.3100000023841858,0.3100000023841858,0.9,2.1,452,134,38,104
 Remoulage de blé,87.0,0.90,110,1.5,9.0,0.3,4.0,10.0,1.8,4.0,30,200,45,38,36,0.2709999978542328,0.2709999978542328,0.9,0
 Issues de blé,87.0,0.83,105,1.4,9.5,0.3,4.5,12.0,1.8,4.2,25,165,48,27,-4,0.289000004529953,0.289000004529953,1.4,1.9
 Farine de blé,87.0,1.10,90,0.2,2.8,0.1,0.5,1.5,1.8,3.0,10,650,20,38,21,0.1469999998807907,0.1469999998807907,0.7,1.7
@@ -1335,11 +1335,11 @@ DDGS blé,88.0,1.00,230,1.5,8.0,0.8,3.5,10.0,5.0,7.0,10,20,30,93,152,0.241999998
 Drêches de maïs fraîches,35.0,1.00,215,0.8,3.5,0.4,2.0,4.0,5.0,6.5,10,0,20,30,-13,0.3240000009536743,0.3240000009536743,0,0
 Drêches de brasserie fraîches,22.0,0.87,200,3.5,5.5,0.5,2.0,1.5,5.0,8.0,5,0,25,121,34,0.5109999775886536,0.5109999775886536,1.1,2.4
 Drêches de brasserie séchées,90.0,0.90,210,4.0,6.0,0.5,2.2,1.6,5.2,8.5,5,0,25,121,34,0.5109999775886536,0.5109999775886536,1.1,2.4
-Tourteau de colza,88.0,1.05,230,7.2,11.0,0.8,4.5,12.0,7.0,17.5,0,5,55,92,169,0.31299999356269836,0.31299999356269836,0.7,8.3
+Tourteau de colza,88.0,1.05,230,7.2,11.0,0.8,4.5,12.0,7.0,17.5,0,5,55,92,169,0.31299999356269836,0.31299999356269836,0.7,8.3,316,207,97,143
 Tourteau de colza décortiqué,88.0,1.12,260,8.0,11.5,0.8,4.5,12.5,7.5,19.0,0,5,55,81,138,0.31299999356269836,0.31299999356269836,0.8,8.3
-Tourteau de soja 44,88.0,1.17,285,3.3,6.5,0.5,3.0,20.0,6.1,27.2,0,25,75,163,224,0.2529999911785126,0.2529999911785126,0.5,0
-Tourteau de soja 48,89.0,1.23,315,3.3,7.0,0.5,3.0,22.0,6.5,29.0,0,25,80,172,244,0.2529999911785126,0.2529999911785126,0.3,4.6
-Tourteau de tournesol,90.0,0.82,215,3.5,10.0,0.5,4.0,11.0,6.0,12.0,0,5,40,87,216,0.32100000977516174,0.32100000977516174,1.4,4.9
+Tourteau de soja 44,88.0,1.17,285,3.3,6.5,0.5,3.0,20.0,6.1,27.2,0,25,75,163,224,0.2529999911785126,0.2529999911785126,0.5,0,148,89,8,72
+Tourteau de soja 48,89.0,1.23,315,3.3,7.0,0.5,3.0,22.0,6.5,29.0,0,25,80,172,244,0.2529999911785126,0.2529999911785126,0.3,4.6,142,84,6,68
+Tourteau de tournesol,90.0,0.82,215,3.5,10.0,0.5,4.0,11.0,6.0,12.0,0,5,40,87,216,0.32100000977516174,0.32100000977516174,1.4,4.9,464,332,112,291
 Tourteau de tournesol décortiqué,90.0,0.98,265,4.0,11.0,0.5,4.5,12.0,6.5,14.0,0,5,40,81,193,0.32100000977516174,0.32100000977516174,0,3.9
 Tourteau de lin,88.0,1.06,235,4.0,8.5,0.5,4.5,12.0,5.0,10.0,0,5,45,135,115,0.36800000071525574,0.36800000071525574,0.7,4.1
 Tourteau de palmiste,91.0,1.06,155,2.4,5.5,0.3,2.5,7.0,2.5,6.0,0,5,40,74,-13,0.4429999887943268,0.4429999887943268,1.6,2.4
@@ -1351,7 +1351,7 @@ Lupin blanc,87.0,1.17,190,2.0,4.0,0.2,1.8,7.0,1.8,14.5,0,0,55,65,201,0.181999996
 Lupin jaune,87.0,1.08,210,1.5,4.5,0.2,2.0,7.5,1.8,14.0,0,0,50,67,155,0.18199999630451202,0.18199999630451202,0.5,2.5
 Luzerne déshydratée,90.0,0.75,120,17.0,2.8,0.5,3.5,22.0,3.5,11.0,0,0,30,41,41,1.01,1.01,4,0.7
 Pulpe de betterave,22.0,0.86,50,7.0,0.9,0.9,2.0,1.0,0.7,2.5,0,0,170,29,-54,0.31299999356269836,0.31299999356269836,1.3,1.9
-Pulpe de betterave déshydratée,90.0,0.93,55,8.0,1.0,1.0,2.2,1.2,0.8,2.8,0,0,175,33,-57,0.3089999854564667,0.3089999854564667,0.5,2.4
+Pulpe de betterave déshydratée,90.0,0.93,55,8.0,1.0,1.0,2.2,1.2,0.8,2.8,0,0,175,33,-57,0.3089999854564667,0.3089999854564667,0.5,2.4,471,238,27,194
 Pulpe d'agrumes déshydratée,90.0,0.90,55,15.0,1.0,0.5,1.5,10.0,1.0,2.0,0,0,130,22,-63,0.21799999475479126,0.21799999475479126,0.3,1.2
 Betterave fourragère,17.0,1.04,45,1.0,2.0,0.5,1.5,20.0,0.5,1.5,0,0,125,,,,,,
 Betterave sucrière,23.0,1.08,50,0.7,1.5,0.4,1.2,18.0,0.5,1.5,0,0,180,,,,,,
@@ -1368,18 +1368,18 @@ Urée 46,98.0,0.00,1443,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,2557,0.2259999960660
 Foin de prairie,86.0,0.72,68,6.5,2.8,1.2,2.0,18.0,1.5,3.5,0,0,50,26,-9,1.25,1.44,4.1,1.3
 Foin de prairie tardif,86.0,0.63,52,5.0,2.2,1.0,1.5,14.0,1.2,2.8,0,0,35,20,-32,1.16,1.29,7.6,3.3
 Foin de prairie précoce,86.0,0.78,80,7.0,3.0,1.5,2.2,20.0,1.8,4.0,0,0,65,26,-20,1.1,1.18,8,1.7
-Foin de luzerne,86.0,0.72,107,14.5,2.6,0.5,2.5,22.0,2.5,7.0,0,0,25,40,41,0.97,0.95,4.1,0.9
+Foin de luzerne,86.0,0.72,107,14.5,2.6,0.5,2.5,22.0,2.5,7.0,0,0,25,40,41,0.97,0.95,4.1,0.9,448,334,76,289
 Foin de luzerne 1ère coupe,87.0,0.74,112,15.0,2.7,0.5,2.6,23.0,2.6,7.5,0,0,25,40,43,0.99,0.97,4.9,1.1
 Foin de ray-grass,86.0,0.75,80,6.0,3.0,1.0,2.0,20.0,1.8,4.2,0,0,60,21,-20,1.1,1.18,4.3,1.6
 Foin de trèfle,86.0,0.70,95,12.0,2.8,1.2,2.5,20.0,2.0,5.5,0,0,55,46,48,0.98,0.94,0,1.4
-Foin de dactyle,86.0,0.68,65,5.5,2.5,1.0,1.8,18.0,1.5,3.2,0,0,45,20,-18,1.17,1.32,6.6,1.3
+Foin de dactyle,86.0,0.68,65,5.5,2.5,1.0,1.8,18.0,1.5,3.2,0,0,45,20,-18,1.17,1.32,6.6,1.3,637,365,45,302
 Foin de fétuque,86.0,0.68,63,5.0,2.5,1.0,1.8,17.0,1.5,3.0,0,0,45,20,-21,1.09,1.17,6.6,1.6
 Regain de prairie,86.0,0.68,70,7.0,2.8,1.2,2.0,19.0,1.5,3.5,0,0,40,22,-26,1.16,1.29,4.3,1.4
-Ensilage maïs,33.0,0.87,62,2.0,2.2,0.2,1.8,12.0,1.8,2.5,290,0,25,12,-29,1.07,1.16,3,0.7
+Ensilage maïs,33.0,0.87,62,2.0,2.2,0.2,1.8,12.0,1.8,2.5,290,0,25,12,-29,1.07,1.16,3,0.7,443,233,27,202
 Ensilage maïs mûr,35.0,0.92,58,1.8,2.0,0.2,1.6,11.0,1.8,2.4,320,0,20,12,-35,0.95,1.04,3,0.7
 Ensilage maïs plante entière,30.0,0.85,60,2.2,2.0,0.2,1.7,12.0,1.8,2.5,270,0,25,16,-9,1.16,1.26,3,0.7
 Ensilage d'épi de maïs,55.0,1.05,80,1.2,2.8,0.2,1.5,8.0,2.0,2.8,500,0,20,27,-42,0.97,0.9,0.5,1.3
-Ensilage herbe prairie,20.0,0.82,85,5.5,3.5,1.5,2.0,22.0,2.0,5.0,0,0,70,15,6,1.24,1.42,4.4,2
+Ensilage herbe prairie,20.0,0.82,85,5.5,3.5,1.5,2.0,22.0,2.0,5.0,0,0,70,15,6,1.24,1.42,4.4,2,562,369,37,346
 Ensilage d'herbe précoce,18.0,0.88,95,6.0,3.8,1.5,2.2,25.0,2.2,5.5,0,0,90,15,-2,1.18,1.31,7.6,1.4
 Ensilage d'herbe tardif,22.0,0.74,72,5.0,3.2,1.2,1.8,20.0,1.8,4.5,0,0,50,12,-1,1.32,1.6,6,2.5
 Ensilage ray-grass,18.0,0.88,92,6.5,3.8,1.5,2.2,25.0,2.2,5.5,0,0,85,13,-13,1.12,1.19,6.2,1.8
@@ -1393,7 +1393,7 @@ Herbe pâturée mi-saison,18.0,0.90,95,6.0,3.5,1.5,2.0,27.0,2.0,5.8,0,0,110,33,1
 Luzerne fraîche,22.0,0.75,112,17.0,2.8,0.5,2.8,25.0,2.5,7.5,0,0,35,34,38,1.01,1.02,5,1.3
 Trèfle blanc pâturé,18.0,0.95,120,12.5,3.5,1.2,2.5,22.0,2.2,6.5,0,0,130,44,80,0.97,0.95,4,1.3
 Ray-grass anglais pâturé,18.0,0.92,105,6.5,3.8,1.5,2.2,28.0,2.2,6.0,0,0,140,34,19,1.05,1.09,8,2
-Paille de blé,87.0,0.37,27,3.8,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10,7,-55,1.6,1.8,2.5,0.6
+Paille de blé,87.0,0.37,27,3.8,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10,7,-55,1.6,1.8,2.5,0.6,775,500,72,415
 Paille d'orge,87.0,0.40,27,3.8,0.9,0.8,0.9,12.0,0.8,1.5,0,0,12,7,-55,1.45,1.6,2.5,0.6
 Paille de maïs,86.0,0.42,18,3.0,0.6,0.5,0.8,8.0,0.5,1.0,0,0,8,10,-57,1.3,1.3,4,0.8
 Paille de triticale,87.0,0.38,27,3.5,0.7,0.7,0.8,10.0,0.8,1.5,0,0,10,7,-55,1.6,1.8,2.5,0.6
@@ -1571,6 +1571,10 @@ function parseCsv(csv) {
       ueb_gkgms:   parseFloat(c[17])||0,
       cl_gkgms:    parseFloat(c[18])||0,
       s_gkgms:     parseFloat(c[19])||0,
+      ndf_gkgms:   parseFloat(c[20])||0,
+      adf_gkgms:   parseFloat(c[21])||0,
+      adl_gkgms:   parseFloat(c[22])||0,
+      cf_gkgms:    parseFloat(c[23])||0,
     });
   }
   return db;
@@ -2628,12 +2632,16 @@ function parseRation() {
       const useUFV = lastBesoins && UFV_TYPES.includes(lastBesoins.typeLabel);
       const ueVal = useUFV ? (f.ueb_gkgms||f.uel_gkgms||0) : (f.uel_gkgms||f.ueb_gkgms||0);
       items.push({
-        nom:f.nom, qty,
+        nom:f.nom, qty, ms:f.ms,
         ufl:f.uflPerKgMS*qty, pdi:f.pdiPerKgMS*qty,
         al:(f.al_gkgms||0)*qty, ar:(f.ar_gkgms||0)*qty, ss:(f.ss_gkgms||0)*qty,
         bpr:(f.bprPerKgMS||0)*qty, ue:ueVal*qty, hasUE:!!(f.uel_gkgms||f.ueb_gkgms),
         ca:(f.ca_gkgms||0)*qty, p:(f.p_gkgms||0)*qty, na:(f.na_gkgms||0)*qty,
         mg:(f.mg_gkgms||0)*qty, k:(f.k_gkgms||0)*qty, cl:(f.cl_gkgms||0)*qty, s:(f.s_gkgms||0)*qty,
+        met:(f.met_gkgms||0)*qty, lys:(f.lys_gkgms||0)*qty, pdia:(f.pdiaPerKgMS||0)*qty,
+        isFourrage: getFeedCategory(f.nom)==='fourrage',
+        ndf:(f.ndf_gkgms||0)*qty, adf:(f.adf_gkgms||0)*qty, adl:(f.adl_gkgms||0)*qty, cf:(f.cf_gkgms||0)*qty,
+        hasFibre:!!(f.ndf_gkgms||f.adf_gkgms),
       });
     }
   });
@@ -2655,6 +2663,16 @@ function parseRation() {
     totalK:   items.reduce((s,i)=>s+i.k,0),
     totalCl:  items.reduce((s,i)=>s+i.cl,0),
     totalS:   items.reduce((s,i)=>s+i.s,0),
+    totalMet: items.reduce((s,i)=>s+i.met,0),
+    totalLys: items.reduce((s,i)=>s+i.lys,0),
+    totalPDIA: items.reduce((s,i)=>s+i.pdia,0),
+    msFourrage: items.filter(i=>i.isFourrage).reduce((s,i)=>s+i.qty,0),
+    pdiFourrage: items.filter(i=>i.isFourrage).reduce((s,i)=>s+i.pdi,0),
+    totalNDF: items.reduce((s,i)=>s+i.ndf,0),
+    totalADF: items.reduce((s,i)=>s+i.adf,0),
+    totalADL: items.reduce((s,i)=>s+i.adl,0),
+    totalCF:  items.reduce((s,i)=>s+i.cf,0),
+    msAvecFibre: items.filter(i=>i.hasFibre).reduce((s,i)=>s+i.qty,0),
   };
 }
 
@@ -2716,13 +2734,32 @@ function calcBilan() {
         <div style="font-size:.7rem;color:var(--text-muted);">Équilibre global</div>
       </div>
     </div>
-    <table class="data-table" style="font-size:.8rem;">
-      <thead><tr><th>Aliment</th><th>kg MS</th><th style="color:#f97316;">${eu}</th><th style="color:#2563eb;">PDI (g)</th></tr></thead>
+    <div style="overflow-x:auto;">
+    <table class="data-table" style="font-size:.78rem;white-space:nowrap;">
+      <thead><tr>
+        <th>Aliment</th><th>kg MS</th><th>MS %</th>
+        <th style="color:#f97316;">${eu}</th><th style="color:#2563eb;">PDI (g)</th><th>PDIA (g)</th>
+        <th>Ca (g)</th><th>P (g)</th><th>UE</th><th>NDF %MS</th>
+      </tr></thead>
       <tbody>
-        ${a.items.map(i=>`<tr><td>${escHtml(i.nom)}</td><td>${i.qty.toFixed(1)}</td><td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
-        <tr style="font-weight:700;"><td>Total</td><td>${a.totalMS.toFixed(1)}</td><td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td></tr>
+        ${a.items.map(i=>`<tr>
+          <td>${escHtml(i.nom)}</td><td>${i.qty.toFixed(1)}</td><td style="color:var(--text-muted);">${i.ms?i.ms.toFixed(0):'—'}%</td>
+          <td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td>
+          <td style="color:var(--text-muted);">${i.pdia?i.pdia.toFixed(0):'—'}</td>
+          <td style="color:var(--text-muted);">${i.ca?i.ca.toFixed(1):'—'}</td><td style="color:var(--text-muted);">${i.p?i.p.toFixed(1):'—'}</td>
+          <td style="color:var(--text-muted);">${i.hasUE?i.ue.toFixed(2):'—'}</td>
+          <td style="color:var(--text-muted);">${i.hasFibre?(i.ndf/i.qty/10).toFixed(0):'—'}</td>
+        </tr>`).join('')}
+        <tr style="font-weight:700;">
+          <td>Total</td><td>${a.totalMS.toFixed(1)}</td><td></td>
+          <td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td>
+          <td>${(a.totalPDIA||0).toFixed(0)}</td><td>${(a.totalCa||0).toFixed(1)}</td><td>${(a.totalP||0).toFixed(1)}</td>
+          <td>${(a.totalUE||0).toFixed(2)}</td>
+          <td>${a.totalMS>0?((a.totalNDF||0)/a.totalMS/10).toFixed(0):'—'}</td>
+        </tr>
       </tbody>
-    </table>`;
+    </table>
+    </div>`;
 
   document.getElementById('glucides-wrap').innerHTML = renderGlucides(a);
   document.getElementById('bilan-result-wrap').style.display = '';
@@ -3814,7 +3851,11 @@ function renderIndicateurs(a,b) {
   let caReq=50,mgReq=15,naReq=8;
   if(b.typeLabel==='vache-laitiere'){caReq=45+prod;mgReq=Math.max(20,0.02*pv+0.15*prod);naReq=Math.max(8,0.015*pv+0.1*prod);}
   else if(UFV_TYPES.includes(b.typeLabel)){caReq=30;mgReq=10;naReq=6;}
-  const metApport=gN('aa-met'),lysApport=gN('aa-lys');
+  const aaManualMet=gN('aa-met'),aaManualLys=gN('aa-lys');
+  const aaHasManual=!!(aaManualMet||aaManualLys);
+  const metApport=aaManualMet||(a.totalMet||0);
+  const lysApport=aaManualLys||(a.totalLys||0);
+  const aaSource=aaHasManual?'Saisie manuelle':'Calculé depuis la composition de la ration';
   const metPct=a.totalPDI>0&&metApport>0?metApport/a.totalPDI*100:0;
   const lysPct=a.totalPDI>0&&lysApport>0?lysApport/a.totalPDI*100:0;
 
@@ -3875,8 +3916,8 @@ function renderIndicateurs(a,b) {
 
   // 6. ACIDES AMINÉS
   let aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail;
-  if(!metApport&&!lysApport){aaCls='info';aaBadge='Non renseigné';aaBadgeCls='rb-badge-gray';aaResume='Saisir Met et Lys (g/j)';aaDetail=adv('Renseignez Met et Lys pour évaluer les AA limitants — essentiel pour les vaches hautes productrices.')+tip('info','Met','Méthionine : 1er AA limitant')+tip('info','Lys','Lysine : 2e AA limitant')+tip('info','📊','Cibles INRA : Met ≥ 2.4% PDI — Lys ≥ 7.2% PDI');}
-  else{const metOk=!metApport||metPct>=2.0,lysOk=!lysApport||lysPct>=6.5;aaCls=metOk&&lysOk?'ok':'bad';aaBadge=metOk&&lysOk?'Équilibré':'À corriger';aaBadgeCls=metOk&&lysOk?'rb-badge-green':'rb-badge-red';aaResume=[metApport?`Met ${metPct.toFixed(1)}%`:'',lysApport?`Lys ${lysPct.toFixed(1)}%`:''].filter(Boolean).join(' / ')+' du PDI';aaDetail=adv('Les AA limitants chez la vache laitière sont la Méthionine et la Lysine.');if(metApport){const st=metPct>=2.4?'ok':metPct>=2.0?'warn':'danger';aaDetail+=tip(st,'Met',`Met : ${metApport.toFixed(0)} g/j = ${metPct.toFixed(1)}% PDI (cible ≥ 2.4%) — ${metPct>=2.4?'✅ Optimal':metPct>=2.0?'Correct':'⚠️ Déficit'}`);}if(lysApport){const st=lysPct>=7.2?'ok':lysPct>=6.5?'warn':'danger';aaDetail+=tip(st,'Lys',`Lys : ${lysApport.toFixed(0)} g/j = ${lysPct.toFixed(1)}% PDI (cible ≥ 7.2%) — ${lysPct>=7.2?'✅ Optimal':lysPct>=6.5?'Correct':'⚠️ Déficit'}`);}}
+  if(!metApport&&!lysApport){aaCls='info';aaBadge='Non renseigné';aaBadgeCls='rb-badge-gray';aaResume='Aucun aliment avec Met/Lys connues';aaDetail=adv('Les acides aminés Met/Lys sont calculés automatiquement depuis la base d\'aliments — aucun aliment de cette ration n\'en a. Vous pouvez aussi saisir des valeurs manuelles ci-dessus.')+tip('info','Met','Méthionine : 1er AA limitant')+tip('info','Lys','Lysine : 2e AA limitant')+tip('info','📊','Cibles INRA : Met ≥ 2.4% PDI — Lys ≥ 7.2% PDI');}
+  else{const metOk=!metApport||metPct>=2.0,lysOk=!lysApport||lysPct>=6.5;aaCls=metOk&&lysOk?'ok':'bad';aaBadge=metOk&&lysOk?'Équilibré':'À corriger';aaBadgeCls=metOk&&lysOk?'rb-badge-green':'rb-badge-red';aaResume=[metApport?`Met ${metPct.toFixed(1)}%`:'',lysApport?`Lys ${lysPct.toFixed(1)}%`:''].filter(Boolean).join(' / ')+` du PDI — ${aaSource}`;aaDetail=adv('Les AA limitants chez la vache laitière sont la Méthionine et la Lysine.');if(metApport){const st=metPct>=2.4?'ok':metPct>=2.0?'warn':'danger';aaDetail+=tip(st,'Met',`Met : ${metApport.toFixed(0)} g/j = ${metPct.toFixed(1)}% PDI (cible ≥ 2.4%) — ${metPct>=2.4?'✅ Optimal':metPct>=2.0?'Correct':'⚠️ Déficit'}`);}if(lysApport){const st=lysPct>=7.2?'ok':lysPct>=6.5?'warn':'danger';aaDetail+=tip(st,'Lys',`Lys : ${lysApport.toFixed(0)} g/j = ${lysPct.toFixed(1)}% PDI (cible ≥ 7.2%) — ${lysPct>=7.2?'✅ Optimal':lysPct>=6.5?'Correct':'⚠️ Déficit'}`);}if(metApport&&lysApport){const ratio=lysApport/metApport;const rOk=ratio>=2.5&&ratio<=3.3;aaDetail+=tip(rOk?'ok':'warn','Lys:Met',`Ratio Lys:Met = ${ratio.toFixed(1)}:1 (cible indicative ≈ 3:1) — ${rOk?'✅ Équilibré':'⚠️ À surveiller'}`);}aaDetail+=tip('info','📊',`Source : ${aaSource}${aaHasManual?'':' (à partir des teneurs Met/Lys des aliments de la base — pas tous les aliments en disposent)'}.`);}
 
   // 7. INGESTION / SATURATION RUMINALE
   let ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail;
@@ -3930,6 +3971,75 @@ function renderIndicateurs(a,b) {
     else{ueCls='ok';ueBadge='Marge confortable';ueBadgeCls='rb-badge-green';ueDetail=adv(`La ration occupe ${(ratioUE*100).toFixed(0)}% de la capacité d'ingestion en UE — marge confortable. L'encombrement réel des aliments (et non un simple poids de MS) est pris en compte.`)+tip('ok','✅','Capacité d\'ingestion non limitante avec cette ration');}
     if(ueCoverage<0.9)ueDetail+=tip('info','ℹ️',`${(ueCoverage*100).toFixed(0)}% seulement de la MS dispose d'une valeur d'encombrement connue — estimation partielle.`);}
 
+  // 12. AUTONOMIE FOURRAGÈRE & PROTÉIQUE
+  let autoCls,autoBadge,autoBadgeCls,autoResume,autoDetail;
+  const pctFourrageMS=a.totalMS>0?(a.msFourrage||0)/a.totalMS*100:0;
+  const pctFourragePDI=a.totalPDI>0?(a.pdiFourrage||0)/a.totalPDI*100:0;
+  autoResume=`${pctFourrageMS.toFixed(0)}% MS · ${pctFourragePDI.toFixed(0)}% PDI issus des fourrages`;
+  if(pctFourrageMS>=70){autoCls='ok';autoBadge='Forte autonomie';autoBadgeCls='rb-badge-green';autoDetail=adv(`${pctFourrageMS.toFixed(0)}% de la MS et ${pctFourragePDI.toFixed(0)}% du PDI proviennent de fourrages. Ration peu dépendante des achats de concentrés.`)+tip('ok','✅','Bonne autonomie alimentaire');}
+  else if(pctFourrageMS>=50){autoCls='warn';autoBadge='Autonomie moyenne';autoBadgeCls='rb-badge-orange';autoDetail=adv(`${pctFourrageMS.toFixed(0)}% de la MS issue de fourrages — dépendance modérée aux concentrés achetés.`);}
+  else{autoCls='bad';autoBadge='Faible autonomie';autoBadgeCls='rb-badge-red';autoDetail=adv(`Seulement ${pctFourrageMS.toFixed(0)}% de la MS issue de fourrages — forte dépendance aux concentrés achetés, ration sensible au prix des matières premières.`)+tip('warn','🌾','Augmenter la part de fourrages si la qualité le permet');}
+  autoDetail+=tip('info','🧬',`Autonomie protéique : ${pctFourragePDI.toFixed(0)}% du PDI vient des fourrages, le reste des concentrés/tourteaux.`);
+  autoDetail+=tip('info','📖','Classement fourrage/concentré basé sur le nom de l\'aliment (ensilage, foin, herbe, pâturage… vs céréales, tourteaux) — vérifiez la cohérence si un aliment est mal classé.');
+
+  // 13. PDIA — PROTÉINES NON DÉGRADABLES
+  let pdiaCls,pdiaBadge,pdiaBadgeCls,pdiaResume,pdiaDetail;
+  const pdiaPct=a.totalPDI>0?(a.totalPDIA||0)/a.totalPDI*100:0;
+  if(!a.totalPDIA){pdiaCls='info';pdiaBadge='Non disponible';pdiaBadgeCls='rb-badge-gray';pdiaResume='PDIA non calculable';pdiaDetail=adv('Le PDIA (protéines alimentaires non dégradées dans le rumen, digérées directement dans l\'intestin) nécessite des aliments avec cette donnée renseignée dans la base.');}
+  else{pdiaResume=`${(a.totalPDIA||0).toFixed(0)} g/j — ${pdiaPct.toFixed(0)}% du PDI total`;pdiaCls='info';pdiaBadge=`${pdiaPct.toFixed(0)}% du PDI`;pdiaBadgeCls='rb-badge-gray';
+    pdiaDetail=adv(`PDIA = ${(a.totalPDIA||0).toFixed(0)} g/j, soit ${pdiaPct.toFixed(0)}% du PDI total. Le PDIA représente la part de protéines alimentaires non dégradées dans le rumen, digérées directement dans l'intestin — un complément aux protéines microbiennes qui forment le reste du PDI.`)
+      +tip('info','📖','Une part de PDIA plus élevée peut être recherchée chez les vaches à très forte production, où les protéines microbiennes seules ne suffisent pas à couvrir les besoins en acides aminés — à examiner au cas par cas avec le BPR et les indicateurs Met/Lys, aucun seuil universel simple n\'existe.');}
+
+  // 14. GLUCIDES TOTAUX / STRUCTURE AMIDON
+  let glCls,glBadge,glBadgeCls,glResume,glDetail;
+  const alKgGl=(a.totalAL||0)/(a.totalMS||1),arKgGl=(a.totalAR||0)/(a.totalMS||1),ssKgGl=(a.totalSS||0)/(a.totalMS||1);
+  const glucidesTotaux=alKgGl+arKgGl+ssKgGl;
+  if(!glucidesTotaux){glCls='info';glBadge='Non disponible';glBadgeCls='rb-badge-gray';glResume='Données glucidiques absentes';glDetail=adv('Composition en amidon lent (AL), amidon rapide (AR) et sucres solubles (SS) non disponible pour les aliments de cette ration.');}
+  else{glResume=`${glucidesTotaux.toFixed(0)} g glucides/kg MS (AL ${alKgGl.toFixed(0)} + AR ${arKgGl.toFixed(0)} + SS ${ssKgGl.toFixed(0)})`;glCls='info';glBadge=`${glucidesTotaux.toFixed(0)} g/kg MS`;glBadgeCls='rb-badge-gray';
+    glDetail=adv(`Total glucides fermentescibles : ${glucidesTotaux.toFixed(0)} g/kg MS, dont ${alKgGl.toFixed(0)} g d'amidon lent (AL), ${arKgGl.toFixed(0)} g d'amidon rapide (AR) et ${ssKgGl.toFixed(0)} g de sucres solubles (SS).`)
+      +tip('info','🌽',`Part rapide (AR+SS) : ${(arKgGl+ssKgGl).toFixed(0)} g/kg MS — voir l'indicateur Fermentescibilité pour le risque SARA associé.`)
+      +tip('info','🌾',`Part lente (AL) : ${alKgGl.toFixed(0)} g/kg MS — fermentation plus progressive, moins de risque acidogène.`);}
+
+  // 15b. STRUCTURE & FIBRES (NDF/ADF) — INRAE-CIRAD-AFZ (Feedipedia)
+  let ndfCls,ndfBadge,ndfBadgeCls,ndfResume,ndfDetail;
+  const fibreCoverage=a.totalMS>0?(a.msAvecFibre||0)/a.totalMS:0;
+  if(fibreCoverage<0.3){ndfCls='info';ndfBadge='Données insuffisantes';ndfBadgeCls='rb-badge-gray';ndfResume=`NDF/ADF connus pour ${(fibreCoverage*100).toFixed(0)}% de la ration seulement`;ndfDetail=adv(`Les valeurs NDF/ADF (source INRAE-CIRAD-AFZ / Feedipedia) ne sont renseignées que pour une partie des aliments de la base RumiCORE — ${(fibreCoverage*100).toFixed(0)}% de la MS de cette ration est couverte, c'est insuffisant pour un calcul fiable.`)+tip('info','📖','NDF (fibres totales) et ADF (fibres peu digestibles) complètent l\'indicateur Acidose en évaluant la structure physique de la ration.');}
+  else{const ndfPct=(a.totalNDF||0)/(a.totalMS||1)/10,adfPct=(a.totalADF||0)/(a.totalMS||1)/10;
+    ndfResume=`NDF ${ndfPct.toFixed(0)}% MS · ADF ${adfPct.toFixed(0)}% MS`;
+    if(ndfPct>=28&&ndfPct<=45){ndfCls='ok';ndfBadge='Structure correcte';ndfBadgeCls='rb-badge-green';ndfDetail=adv(`NDF = ${ndfPct.toFixed(0)}% de la MS — dans la fourchette usuelle pour une ration bovine équilibrée (cible indicative 28-45%).`)+tip('ok','✅','Bon compromis structure/densité énergétique');}
+    else if(ndfPct<28){ndfCls='warn';ndfBadge='NDF faible';ndfBadgeCls='rb-badge-orange';ndfDetail=adv(`NDF = ${ndfPct.toFixed(0)}% de la MS — ration peu fibreuse. Risque de manque de fibre efficace pour stimuler la rumination, à recouper avec l'indicateur Acidose.`)+tip('warn','🌾','Vérifier l\'apport en fourrages grossiers/fibre longue');}
+    else{ndfCls='warn';ndfBadge='NDF élevé';ndfBadgeCls='rb-badge-orange';ndfDetail=adv(`NDF = ${ndfPct.toFixed(0)}% de la MS — ration très fibreuse, risque de limiter l'ingestion et la densité énergétique chez les fortes productrices.`)+tip('warn','📦','Vérifier la capacité d\'ingestion et la densité énergétique');}
+    ndfDetail+=tip('info','📊',`ADF = ${adfPct.toFixed(0)}% de la MS (fraction peu digestible : cellulose + lignine) — plus l'ADF est élevé, plus la digestibilité de la fibre baisse.`);
+    if(fibreCoverage<0.9)ndfDetail+=tip('info','ℹ️',`${(fibreCoverage*100).toFixed(0)}% seulement de la MS dispose de valeurs NDF/ADF connues (base partiellement enrichie) — estimation partielle, à affiner à mesure que la base s'enrichit.`);
+    ndfDetail+=tip('info','📖','Source : tables INRAE-CIRAD-AFZ (Feedipedia), valeurs moyennes par famille d\'aliment — vos analyses de fourrage propres restent plus précises si disponibles.');}
+
+  // 16. MSCA — MARGE SUR COÛT ALIMENTAIRE (indicateur de référence filière lait)
+  let mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail;
+  const prixLaitMsca=parseFloat(_$('cout-prix-lait')?.value)||0;
+  const coutRationMsca=(typeof window._lastCoutJour==='number')?window._lastCoutJour:null;
+  if(!prod||!prixLaitMsca||coutRationMsca===null){mscaCls='info';mscaBadge='Non disponible';mscaBadgeCls='rb-badge-gray';mscaResume='Prix du lait et coût ration requis';mscaDetail=adv('La MSCA (Marge sur Coût Alimentaire) nécessite la production laitière, le prix du lait (onglet Coûts) et le coût de la ration calculé (onglet Coûts). Renseignez-les pour l\'activer.')+tip('info','📖','MSCA = (Lait × Prix du lait) − Coût de la ration, en €/vache/jour — l\'indicateur de référence utilisé par les organismes de conseil en élevage laitier pour piloter la rentabilité.');}
+  else{const msca=prod*prixLaitMsca-coutRationMsca;mscaResume=`${msca>=0?'+':''}${msca.toFixed(2)} €/vache/j`;
+    if(msca>=4){mscaCls='ok';mscaBadge='Bonne marge';mscaBadgeCls='rb-badge-green';mscaDetail=adv(`MSCA = ${prod.toFixed(1)} L × ${prixLaitMsca.toFixed(2)} €/L − ${coutRationMsca.toFixed(2)} € de ration = ${msca.toFixed(2)} €/vache/j. Marge confortable.`)+tip('ok','✅','Conduite alimentaire rentable');}
+    else if(msca>=2){mscaCls='warn';mscaBadge='Marge moyenne';mscaBadgeCls='rb-badge-orange';mscaDetail=adv(`MSCA = ${msca.toFixed(2)} €/vache/j — marge correcte mais avec de la marge de progression.`);}
+    else{mscaCls='bad';mscaBadge='Marge faible';mscaBadgeCls='rb-badge-red';mscaDetail=adv(`MSCA = ${msca.toFixed(2)} €/vache/j — marge faible${msca<0?' voire négative':''}. La ration coûte cher au regard du produit lait généré.`)+tip('warn','💰','Comparer au coût de la ration et chercher des leviers d\'économie (optimiseur, autonomie fourragère)');}
+    mscaDetail+=tip('info','📖','MSCA (Marge sur Coût Alimentaire) : indicateur de référence des organismes de conseil en élevage laitier pour piloter la rentabilité — produit lait moins coût alimentaire de la ration, en €/vache/jour.');}
+
+  // 17. IC — INDICE DE CONSOMMATION (efficience alimentaire)
+  let icCls,icBadge,icBadgeCls,icResume,icDetail;
+  if(!prod||!a.totalMS){icCls='info';icBadge='Non disponible';icBadgeCls='rb-badge-gray';icResume='Production et MS requises';icDetail=adv('L\'indice de consommation nécessite la production laitière et la MS totale de la ration.');}
+  else{const ic=prod/a.totalMS;icResume=`${ic.toFixed(2)} L de lait / kg MS ingérée`;icCls='info';icBadge=`IC = ${ic.toFixed(2)}`;icBadgeCls='rb-badge-gray';
+    icDetail=adv(`Indice de consommation (efficience alimentaire) = ${prod.toFixed(1)} L / ${a.totalMS.toFixed(1)} kg MS = ${ic.toFixed(2)} L de lait par kg de MS ingérée.`)
+      +tip('info','📖','Deux vaches sur la même ration peuvent avoir un IC différent (variabilité individuelle) — cet indicateur est surtout utile suivi dans le temps, pour une même exploitation, via l\'onglet Comparaison entre visites.')
+      +tip('info','📊','Pas de seuil universel fiable à afficher ici — la référence est l\'évolution de CET élevage dans le temps, pas une valeur absolue.');}
+
+  // 15. DIVERSITÉ DE LA RATION
+  let divCls,divBadge,divBadgeCls,divResume,divDetail;
+  const nbAliments=a.items.length,nbFourrages=a.items.filter(i=>i.isFourrage).length,nbConcentres=nbAliments-nbFourrages;
+  divResume=`${nbAliments} aliment${nbAliments>1?'s':''} (${nbFourrages} fourrage${nbFourrages>1?'s':''}, ${nbConcentres} concentré${nbConcentres>1?'s':''})`;
+  if(nbAliments<=2){divCls='warn';divBadge='Peu diversifiée';divBadgeCls='rb-badge-orange';divDetail=adv(`Seulement ${nbAliments} aliment(s) dans la ration. Une ration très simple peut manquer de robustesse face aux variations de qualité d'un seul lot, et limiter certains apports (minéraux, acides aminés).`)+tip('warn','🌱','Envisager de diversifier les sources si possible');}
+  else if(nbFourrages===0){divCls='bad';divBadge='Aucun fourrage';divBadgeCls='rb-badge-red';divDetail=adv('Aucun aliment classé comme fourrage dans cette ration — vérifiez que la composition est correcte, une ration bovine repose normalement sur une base fourragère.')+tip('danger','🚨','Vérifier la composition de la ration');}
+  else{divCls='ok';divBadge='Diversifiée';divBadgeCls='rb-badge-green';divDetail=adv(`${nbAliments} aliments dont ${nbFourrages} fourrage(s) et ${nbConcentres} concentré(s) — bonne diversité de sources.`)+tip('ok','✅','Diversité correcte');}
+
   const container=document.getElementById('bilan-indicateurs'); if(!container)return;
   container.innerHTML=`<div style="margin-bottom:10px;font-size:.82rem;color:var(--text-muted);">🔍 Cliquez sur une carte pour afficher les conseils</div>`+
     card('energie','⚡','Énergie',eCls,eBadge,eBadgeCls,`${a.totalUFL.toFixed(2)} / ${b.bUFL.toFixed(2)} ${eu} — ${(rUFL*100).toFixed(0)}%`,eDetail)+
@@ -3942,7 +4052,14 @@ function renderIndicateurs(a,b) {
     card('ferment','🌾','Fermentescibilité (SARA)',fCls,fBadge,fBadgeCls,fResume,fDetail)+
     card('densite','📊','Densité énergétique',dCls,dBadge,dBadgeCls,dResume,dDetail)+
     card('bpr','🧪','Balance Protéique du Rumen',bprCls,bprBadge,bprBadgeCls,`${bprPerKg.toFixed(0)} g/kg MS`,bprDetail)+
-    card('ue','📦','Encombrement réel (UE)',ueCls,ueBadge,ueBadgeCls,ueResume,ueDetail);
+    card('ue','📦','Encombrement réel (UE)',ueCls,ueBadge,ueBadgeCls,ueResume,ueDetail)+
+    card('autonomie','🌱','Autonomie fourragère & protéique',autoCls,autoBadge,autoBadgeCls,autoResume,autoDetail)+
+    card('pdia','🧬','PDIA — protéines non dégradables',pdiaCls,pdiaBadge,pdiaBadgeCls,pdiaResume,pdiaDetail)+
+    card('glucides','🌽','Glucides totaux (AL+AR+SS)',glCls,glBadge,glBadgeCls,glResume,glDetail)+
+    card('ndf','🧵','Structure & fibres (NDF/ADF)',ndfCls,ndfBadge,ndfBadgeCls,ndfResume,ndfDetail)+
+    card('diversite','🔀','Diversité de la ration',divCls,divBadge,divBadgeCls,divResume,divDetail)+
+    card('msca','💶','Marge sur Coût Alimentaire (MSCA)',mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail)+
+    card('ic','⚖️','Indice de Consommation (IC)',icCls,icBadge,icBadgeCls,icResume,icDetail);
 }
 
 /* ══ BAC À SABLE / SIMULATEUR WHAT-IF ══ */
