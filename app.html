@@ -338,9 +338,12 @@ function openStripeCheckout() {
 }
 function stripeCheckout(period) {
   var email = currentUser ? (currentUser.email || '') : '';
+  var uid = currentUser ? currentUser.id : '';
   var url = period === 'annual' ? STRIPE_ANNUAL : STRIPE_MONTHLY;
-  if (email && url.indexOf('?') === -1) url += '?prefilled_email=' + encodeURIComponent(email);
-  else if (email) url += '&prefilled_email=' + encodeURIComponent(email);
+  var params = [];
+  if (email) params.push('prefilled_email=' + encodeURIComponent(email));
+  if (uid) params.push('client_reference_id=' + encodeURIComponent(uid));
+  if (params.length) url += (url.indexOf('?') === -1 ? '?' : '&') + params.join('&');
   window.open(url, '_blank');
 }
 async function deleteAccount() {
