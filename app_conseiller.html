@@ -595,6 +595,7 @@ function setTheme(t) {
                 <button class="btn btn-ghost btn-sm" onclick="openRationLibrary()">📚 Modèles</button>
                 <button class="btn btn-ghost btn-sm" onclick="saveToLibrary()">💾 Sauver modèle</button>
                 <button class="btn btn-ghost btn-sm" onclick="openImportCodeModal()">📥 Code éleveur</button>
+                <button class="btn btn-ghost btn-sm" onclick="openAlimentsBrowser()">🔍 Base aliments</button>
                 <button class="btn btn-ghost btn-sm" onclick="clearRation()">🗑 Vider</button>
               </div>
             </div>
@@ -1067,6 +1068,16 @@ function setTheme(t) {
         <button class="btn btn-primary btn-sm" onclick="saveAlertSettings()">💾 Sauvegarder</button>
       </div>
 
+      <div class="card" style="margin-top:20px;" id="ind-select-list-card">
+        <div class="card-header"><div class="card-title">📋 Indicateurs affichés dans le bilan</div></div>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:10px;">Tous les indicateurs sont affichés par défaut. Décochez ceux que vous ne souhaitez pas voir dans le bilan de ration — ce réglage est propre à cet appareil/navigateur.</p>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button class="btn btn-ghost btn-sm" onclick="document.querySelectorAll('#ind-select-list input[type=checkbox]').forEach(c=>c.checked=true);saveIndicateursMasques();">Tout sélectionner</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.querySelectorAll('#ind-select-list input[type=checkbox]').forEach(c=>c.checked=false);saveIndicateursMasques();">Tout désélectionner</button>
+        </div>
+        <div id="ind-select-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px 14px;"></div>
+      </div>
+
       <div class="card" style="margin-top:20px;">
         <div class="card-header"><div class="card-title">🏢 Mon organisation</div></div>
         <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Personnalisez RumiCORE aux couleurs de votre coopérative/organisme (ex: NatUp). Ça s'applique à la barre latérale et aux rapports PDF envoyés aux éleveurs.</p>
@@ -1080,7 +1091,7 @@ function setTheme(t) {
 
       <div class="card" style="margin-top:20px;">
         <div class="card-header"><div class="card-title">🏭 Base aliments & prix centralisés</div></div>
-        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Vos prix de référence, partagés entre toutes vos exploitations. Ils servent de base pour le module Coûts (à sélectionner manuellement pour l'instant — auto-remplissage à venir).</p>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Vos aliments et prix de référence, partagés entre toutes vos exploitations. Avec UFL et PDI renseignés, un aliment devient utilisable directement dans la composition de ration (onglet Ration, tapez son nom) — son prix sert aussi automatiquement au calcul de la MSCA et de l'optimiseur, sans passer par l'onglet Coûts.</p>
         <div class="form-grid" style="margin-bottom:10px;">
           <div class="form-group"><label>Nom de l'aliment</label><input type="text" class="form-input" id="ca-nom" placeholder="Ex: Tourteau de colza NatUp"></div>
           <div class="form-group"><label>Prix (€/t)</label><input type="number" step="0.1" class="form-input" id="ca-prix" placeholder="345"></div>
@@ -1237,6 +1248,10 @@ function setTheme(t) {
         <input type="number" step="0.1" class="form-input" id="obj-lait" placeholder="Ex: 32">
       </div>
       <div class="form-group">
+        <label>Lait standard cible (L/j, 4% MG)</label>
+        <input type="number" step="0.1" class="form-input" id="obj-lait-std" placeholder="Ex: 30">
+      </div>
+      <div class="form-group">
         <label>TB cible (%)</label>
         <input type="number" step="0.01" class="form-input" id="obj-tb" placeholder="Ex: 4.10">
       </div>
@@ -1262,7 +1277,7 @@ function setTheme(t) {
       <h3>🤖 Assistant — Recherche dans mon portefeuille</h3>
       <button class="modal-close" onclick="closeAssistantModal()">×</button>
     </div>
-    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px;">Choisissez une question type — RumiCORE interroge vos exploitations en temps réel (pas d'IA générative : réponses calculées sur vos vraies données).</p>
+    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px;">Questions type ci-dessous : réponses calculées instantanément sur vos vraies données. Question libre : répondue par l'assistant IA (Claude), toujours à partir des données réelles de votre portefeuille — jamais inventées.</p>
     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
       <button class="btn btn-ghost btn-sm" style="text-align:left;" onclick="runAssistantQuery('cout-hausse')">📈 Élevages dont le coût alimentaire a augmenté de +5% depuis la dernière visite</button>
       <button class="btn btn-ghost btn-sm" style="text-align:left;" onclick="runAssistantQuery('tb-baisse')">📉 Élevages avec un TB en baisse sur les 2 dernières sessions</button>
@@ -1275,6 +1290,19 @@ function setTheme(t) {
       <button class="btn btn-primary btn-sm" onclick="askAssistantFreeText()">Demander</button>
     </div>
     <div id="assistant-result" style="padding-top:12px;max-height:320px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ────────── MODAL: BASE ALIMENTS (consultation) ────────── -->
+<div class="modal-overlay hidden" id="aliments-browser-modal" onclick="if(event.target===this)closeAlimentsBrowser()">
+  <div class="modal-box" style="max-width:720px;">
+    <div class="modal-header">
+      <h3>🔍 Base aliments</h3>
+      <button class="modal-close" onclick="closeAlimentsBrowser()">×</button>
+    </div>
+    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px;">Base RumiCORE (INRA 2018, ~240 aliments) + vos aliments personnalisés (Paramètres → Base aliments & prix). Les aliments personnalisés sans UFL/PDI renseignés ne peuvent pas être utilisés dans une ration.</p>
+    <input type="text" id="ab-search" class="form-input" placeholder="Rechercher un aliment…" style="margin-bottom:10px;" oninput="filterAlimentsBrowser()">
+    <div id="ab-results" style="max-height:420px;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -1633,7 +1661,16 @@ const alimentNames = alimentsDb.map(a=>a.nom);
 
 function findFood(nom) {
   const n = nom.toLowerCase().trim();
-  return alimentsDb.find(a=>a.nom.toLowerCase()===n)||alimentsDb.find(a=>a.nom.toLowerCase().includes(n));
+  const std = alimentsDb.find(a=>a.nom.toLowerCase()===n)||alimentsDb.find(a=>a.nom.toLowerCase().includes(n));
+  if (std) return std;
+  // Aliments personnalisés du conseiller (Paramètres → Base aliments) : utilisables dans une
+  // ration seulement si UFL et PDI sont renseignés. Les autres valeurs (minéraux, AA, fibres...)
+  // ne sont pas disponibles pour ces aliments — les indicateurs concernés le signalent déjà
+  // honnêtement ("données insuffisantes") plutôt que d'inventer une valeur.
+  const custom = (window._conseillerAliments||[]).find(a=>(a.nom||'').toLowerCase().trim()===n && a.ufl!=null && a.pdi!=null)
+    || (window._conseillerAliments||[]).find(a=>(a.nom||'').toLowerCase().includes(n) && a.ufl!=null && a.pdi!=null);
+  if (custom) return { nom: custom.nom, ms: custom.ms||88, uflPerKgMS: custom.ufl, pdiPerKgMS: custom.pdi };
+  return null;
 }
 
 /* ══ STATE ══ */
@@ -1779,7 +1816,7 @@ function showPage(page) {
     tba.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openExpModal(null)">+ Nouvelle exploitation</button>`;
   }
 
-  if (page === 'settings') { loadAlertSettingsUI(); loadConseillerAliments(); }
+  if (page === 'settings') { loadAlertSettingsUI(); loadConseillerAliments(); loadIndicateursSelectUI(); }
   if (page === 'agenda') loadAgenda();
   if (page !== 'exp-detail') prevPage = page;
 }
@@ -2355,6 +2392,52 @@ function loadAlertSettingsUI() {
   if(el2) el2.value = s.newExpDays || 7;
 }
 
+// ══ INDICATEURS SÉLECTIONNABLES (bilan) ══════════════════════════════
+// Liste des indicateurs affichables dans le bilan. Par défaut, tous sont affichés —
+// seuls ceux explicitement décochés par le conseiller sont masqués (préférence locale,
+// par appareil, pas partagée entre conseillers).
+const INDICATEURS_LIST = [
+  {id:'production',label:'🥛 Niveau de production'},
+  {id:'energie',label:'⚡ Énergie'},
+  {id:'proteines',label:'🧬 Protéines (PDI)'},
+  {id:'equilibre',label:'⚖️ Équilibre E/P'},
+  {id:'acidose',label:'🔥 Risque Acidose'},
+  {id:'mineraux',label:'⚗️ Minéraux & BACA'},
+  {id:'aa',label:'🔬 Acides aminés'},
+  {id:'ingestion',label:'🐄 Ingestion / Saturation'},
+  {id:'ferment',label:'🌾 Fermentescibilité (SARA)'},
+  {id:'densite',label:'📊 Densité énergétique'},
+  {id:'bpr',label:'🧪 Balance Protéique du Rumen'},
+  {id:'ue',label:'📦 Encombrement réel (UE)'},
+  {id:'autonomie',label:'🌱 Autonomie fourragère & protéique'},
+  {id:'pdia',label:'🧬 PDIA'},
+  {id:'glucides',label:'🌽 Glucides totaux'},
+  {id:'ndf',label:'🧵 Structure & fibres (NDF/ADF)'},
+  {id:'diversite',label:'🔀 Diversité de la ration'},
+  {id:'msca',label:'💶 MSCA'},
+  {id:'ic',label:'⚖️ Indice de Consommation (IC)'},
+];
+const IND_LS_KEY = 'rumi-conseiller-indicateurs-masques';
+function getIndicateursMasques() {
+  try { return JSON.parse(localStorage.getItem(IND_LS_KEY)||'[]'); } catch { return []; }
+}
+function saveIndicateursMasques() {
+  const masked = INDICATEURS_LIST.filter(i => !document.getElementById('ind-sel-'+i.id)?.checked).map(i=>i.id);
+  localStorage.setItem(IND_LS_KEY, JSON.stringify(masked));
+  showToast('Sélection des indicateurs enregistrée.', 'success');
+  if (lastApports && lastBesoins) renderIndicateurs(lastApports, lastBesoins);
+}
+function loadIndicateursSelectUI() {
+  const cont = document.getElementById('ind-select-list');
+  if (!cont) return;
+  const masked = getIndicateursMasques();
+  cont.innerHTML = INDICATEURS_LIST.map(i => `
+    <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;padding:4px 0;cursor:pointer;">
+      <input type="checkbox" id="ind-sel-${i.id}" ${masked.includes(i.id)?'':'checked'} onchange="saveIndicateursMasques()">
+      ${i.label}
+    </label>`).join('');
+}
+
 function updateDashMetrics() {
   const total = exploitations.length;
   const good = exploitations.filter(e=>e.last_score==='A'||e.last_score==='B').length;
@@ -2643,12 +2726,12 @@ function calcBesoins() {
 }
 
 /* ══ RATION ROWS ══ */
-function addRationRow() {
+function addRationRow(prefillNom) {
   const cont = document.getElementById('ration-rows');
   const row = document.createElement('div');
   row.className = 'ration-row';
   row.innerHTML = `
-    <input type="text" list="aliments-list" placeholder="Aliment…" class="ration-input-nom">
+    <input type="text" list="aliments-list" placeholder="Aliment…" class="ration-input-nom" value="${prefillNom?escHtml(prefillNom):''}">
     <input type="number" min="0" step="0.1" placeholder="0" class="ration-input-qty">
     <button type="button" onclick="this.closest('.ration-row').remove()" style="background:#fee2e2;border:none;border-radius:6px;width:36px;height:36px;cursor:pointer;color:#dc2626;font-size:.9rem;">✕</button>`;
   cont.appendChild(row);
@@ -2664,10 +2747,42 @@ function clearRation() {
 function buildDatalist() {
   const cont = document.getElementById('ration-datalist-container');
   if (!cont) return;
+  cont.innerHTML = '';
   const dl = document.createElement('datalist');
   dl.id = 'aliments-list';
-  alimentNames.forEach(n => { const o=document.createElement('option'); o.value=n; dl.appendChild(o); });
+  const customNames = (window._conseillerAliments||[])
+    .filter(a=>a.ufl!=null && a.pdi!=null).map(a=>a.nom);
+  const allNames = alimentNames.concat(customNames.filter(n=>!alimentNames.includes(n)));
+  allNames.forEach(n => { const o=document.createElement('option'); o.value=n; dl.appendChild(o); });
   cont.appendChild(dl);
+}
+
+// ══ EXPLORATEUR DE LA BASE ALIMENTS (consultation, base RB_CSV + personnalisés) ══
+function openAlimentsBrowser() {
+  _$('aliments-browser-modal').classList.remove('hidden');
+  if (_$('ab-search')) _$('ab-search').value = '';
+  filterAlimentsBrowser();
+  setTimeout(()=>_$('ab-search')?.focus(),80);
+}
+function closeAlimentsBrowser() { _$('aliments-browser-modal').classList.add('hidden'); }
+function filterAlimentsBrowser() {
+  const q = (_$('ab-search')?.value||'').toLowerCase().trim();
+  const cont = _$('ab-results'); if (!cont) return;
+  const std = alimentsDb.map(a => ({ nom:a.nom, ms:a.ms, ufl:a.uflPerKgMS, pdi:a.pdiPerKgMS, ca:a.ca_gkgms, p:a.p_gkgms, custom:false }));
+  const custom = (window._conseillerAliments||[]).map(a => ({ nom:a.nom, ms:a.ms, ufl:a.ufl, pdi:a.pdi, prix:a.prix, custom:true }));
+  let rows = custom.concat(std);
+  if (q) rows = rows.filter(r => (r.nom||'').toLowerCase().includes(q));
+  rows = rows.slice(0, 400);
+  if (!rows.length) { cont.innerHTML = '<p style="font-size:.82rem;color:var(--text-muted);text-align:center;padding:20px;">Aucun aliment ne correspond à cette recherche.</p>'; return; }
+  cont.innerHTML = `<table class="data-table"><thead><tr><th>Aliment</th><th>MS %</th><th>UFL/kg MS</th><th>PDI g/kg MS</th><th></th></tr></thead>
+    <tbody>${rows.map(r => `<tr>
+      <td style="font-weight:600;">${escHtml(r.nom)}${r.custom?' <span class="badge badge-gray" style="font-size:.62rem;">perso</span>':''}</td>
+      <td>${r.ms!=null?r.ms:'—'}</td>
+      <td>${r.ufl!=null?(typeof r.ufl==='number'?r.ufl.toFixed(2):r.ufl):'—'}</td>
+      <td>${r.pdi!=null?(typeof r.pdi==='number'?r.pdi.toFixed(0):r.pdi):'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="closeAlimentsBrowser();addRationRow('${r.nom.replace(/'/g,"\\'")}')">+ Ajouter à la ration</button></td>
+    </tr>`).join('')}</tbody></table>
+    ${rows.length>=400?'<p style="font-size:.72rem;color:#94a3b8;text-align:center;padding:8px;">Affichage limité aux 400 premiers résultats — affinez votre recherche.</p>':''}`;
 }
 
 function parseRation() {
@@ -2725,6 +2840,25 @@ function parseRation() {
   };
 }
 
+// Schéma visuel de la composition de ration (barre empilée par part de MS) — vient
+// remplacer la lecture "tableau de chiffres" par un coup d'œil direct sur les proportions.
+function renderCompositionChart(a) {
+  if (!a.items.length) return '';
+  const total = a.totalMS||1;
+  const palette = ['#15803d','#2563eb','#d97706','#dc2626','#7c3aed','#0891b2','#be185d','#65a30d','#c2410c','#4338ca'];
+  const segs = a.items.map((i,idx)=>({nom:i.nom, pct: total>0?i.qty/total*100:0, color: palette[idx%palette.length]}));
+  const bar = segs.map(s=>`<div title="${escHtml(s.nom)} — ${s.pct.toFixed(0)}%" style="width:${s.pct.toFixed(2)}%;background:${s.color};height:100%;"></div>`).join('');
+  const legend = segs.map(s=>`<div style="display:flex;align-items:center;gap:5px;font-size:.72rem;overflow:hidden;">
+      <span style="width:10px;height:10px;border-radius:2px;background:${s.color};display:inline-block;flex-shrink:0;"></span>
+      <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.nom)}</span><span style="color:var(--text-muted);flex-shrink:0;">${s.pct.toFixed(0)}%</span>
+    </div>`).join('');
+  return `<div style="margin-bottom:14px;">
+    <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:6px;">Composition de la ration (part de MS)</div>
+    <div style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin-bottom:8px;">${bar}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px 12px;">${legend}</div>
+  </div>`;
+}
+
 function calcBilan() {
   const a = parseRation();
   if (!a.items.length) { showToast('Ajoutez au moins un aliment.', 'warn'); return; }
@@ -2779,10 +2913,11 @@ function calcBilan() {
       </div>
       <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">
         <div style="font-size:.68rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Score</div>
-        <div style="font-size:1.3rem;font-weight:800;color:${getScoreColor(rUFL,rPDI,ppu)};">${computeScore(rUFL,rPDI,ppu)}</div>
+        <div style="font-size:1.3rem;font-weight:800;color:${getScoreColor(a,b)};">${computeScore(a,b)}</div>
         <div style="font-size:.7rem;color:var(--text-muted);">Équilibre global</div>
       </div>
     </div>
+    ${renderCompositionChart(a)}
     <div style="overflow-x:auto;">
     <table class="data-table" style="font-size:.78rem;white-space:nowrap;">
       <thead><tr>
@@ -2824,26 +2959,25 @@ function calcBilan() {
   if (_cmpWrap) _cmpWrap.style.display = 'none';
 
   // Persist score
-  if (currentExp) updateExpScore(rUFL, rPDI, ppu, a);
+  if (currentExp) updateExpScore(a, b);
 }
 
-function computeScore(rUFL,rPDI,ppu) {
-  const ok = r=>r>=0.9&&r<=1.1;
-  if(ok(rUFL)&&ok(rPDI)&&ppu>=90&&ppu<=110) return 'A';
-  if(ok(rUFL)&&ok(rPDI)) return 'B';
-  const def = r=>r<0.85;
-  if(def(rUFL)||def(rPDI)) return 'D';
-  return 'C';
+// Source unique de vérité pour le score ABCD : délègue à computeQualityScore (grille
+// pondérée sur 100 pts) pour que le badge affiché dans le bilan, la classification
+// enregistrée sur l'exploitation, et l'historique utilisent TOUJOURS le même calcul.
+function computeScore(a,b) {
+  if (!a || !b) return '—';
+  return computeQualityScore(a,b).grade;
 }
-function getScoreColor(rUFL,rPDI,ppu) {
-  const s=computeScore(rUFL,rPDI,ppu);
+function getScoreColor(a,b) {
+  const s=computeScore(a,b);
   return {A:'#16a34a',B:'#22c55e',C:'#d97706',D:'#dc2626'}[s]||'#64748b';
 }
 
-async function updateExpScore(rUFL,rPDI,ppu,a) {
+async function updateExpScore(a,b) {
   if (!currentExp) return;
-  const score = computeScore(rUFL,rPDI,ppu);
-  const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(lastBesoins.typeLabel)?'UFV':'UFL';
+  const score = computeScore(a,b);
+  const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
   const rationData = JSON.stringify({
     type: document.getElementById('r-type-animal').value,
     pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), gmq: gN('r-gmq'),
@@ -3006,11 +3140,7 @@ async function confirmSaveSession() {
       activite: document.getElementById('r-activite').value,
     },
     rows: getRationRows(),
-    score: lastBesoins ? computeScore(
-      lastBesoins.bUFL>0?lastApports.totalUFL/lastBesoins.bUFL:0,
-      lastBesoins.bPDI>0?lastApports.totalPDI/lastBesoins.bPDI:0,
-      lastApports.totalUFL>0?lastApports.totalPDI/lastApports.totalUFL:0
-    ) : '—',
+    score: lastBesoins ? computeScore(lastApports, lastBesoins) : '—',
     coutJour: (typeof window._lastCoutJour === 'number') ? window._lastCoutJour : null,
     objectif: (document.getElementById('sm-objectif')?.value||'').trim() || null,
     motif: (document.getElementById('sm-motif')?.value||'').trim() || null,
@@ -3597,8 +3727,15 @@ async function renderScorePanel(a, b) {
         <div style="font-size:1.5rem;font-weight:900;color:${axisCol(ms.global)};line-height:1;">${ms.global}</div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 0;border-top:1px solid rgba(0,0,0,.08);margin-top:6px;">
-      ${axis('Perf.', ms.perf, '🧬')}${axis('Éco.', ms.eco, '💰')}${axis('Autonomie', ms.autonomie, '🌱')}${axis('Sécurité', ms.secu, '🐄')}${axis('Environ.', ms.env, '🌍')}
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(0,0,0,.08);margin-top:6px;">
+      <div style="flex:0 0 auto;">${svgRadarChart([
+        {label:'Perf.',icon:'🧬',val:ms.perf},{label:'Éco.',icon:'💰',val:ms.eco},
+        {label:'Autonomie',icon:'🌱',val:ms.autonomie},{label:'Sécurité',icon:'🐄',val:ms.secu},
+        {label:'Environ.',icon:'🌍',val:ms.env},
+      ])}</div>
+      <div style="flex:1;min-width:160px;display:grid;grid-template-columns:repeat(2,1fr);gap:4px 10px;">
+        ${axis('Perf.', ms.perf, '🧬')}${axis('Éco.', ms.eco, '💰')}${axis('Autonomie', ms.autonomie, '🌱')}${axis('Sécurité', ms.secu, '🐄')}${axis('Environ.', ms.env, '🌍')}
+      </div>
     </div>
     <div style="cursor:pointer;font-size:.72rem;font-weight:700;color:${colors[q.grade]};padding-top:4px;border-top:1px solid rgba(0,0,0,.08);" onclick="const d=this.nextElementSibling;const open=d.style.display!=='none';d.style.display=open?'none':'';this.textContent=open?'Détail du score ABCD ▾':'Détail du score ABCD ▴';">Détail du score ABCD ▾</div>
     <div class="quality-breakdown" style="display:none;margin-top:8px;">
@@ -3610,6 +3747,25 @@ async function renderScorePanel(a, b) {
     </div>
     <p style="font-size:.66rem;color:#94a3b8;margin-top:8px;margin-bottom:0;">${!ms.hasCoutRef?'Économie estimée par défaut (calculez le coût et ajoutez d\'autres exploitations du même type pour affiner). ':''}Environnement = estimation simplifiée (excédent azoté), pas un vrai bilan GES.</p>
   </div>`;
+}
+
+// Radar SVG pur (aucune librairie externe) pour visualiser le score multicritère
+// à 5 axes en un coup d'œil plutôt qu'en une liste de nombres.
+function svgRadarChart(axes) {
+  const cx=95, cy=88, maxR=60, n=axes.length;
+  const angleFor = i => -Math.PI/2 + i*(2*Math.PI/n);
+  const pt = (i, r) => [cx + r*Math.cos(angleFor(i)), cy + r*Math.sin(angleFor(i))];
+  const gridPolys = [0.25,0.5,0.75,1].map(lv => axes.map((_,i)=>pt(i, maxR*lv).map(v=>v.toFixed(1)).join(',')).join(' '));
+  const valuePoly = axes.map((ax,i)=>pt(i, maxR*Math.max(0,Math.min(100,ax.val))/100).map(v=>v.toFixed(1)).join(',')).join(' ');
+  const axisLines = axes.map((_,i)=>{const p=pt(i,maxR);return `<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="#e2e8f0" stroke-width="1"/>`;}).join('');
+  const labels = axes.map((ax,i)=>{const p=pt(i,maxR+18);return `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" font-size="9" font-weight="700" fill="#64748b" text-anchor="middle" dominant-baseline="middle">${ax.icon} ${ax.label}</text>`;}).join('');
+  const gridSvg = gridPolys.map(p=>`<polygon points="${p}" fill="none" stroke="#e2e8f0" stroke-width="1"/>`).join('');
+  const dots = axes.map((ax,i)=>{const p=pt(i,maxR*Math.max(0,Math.min(100,ax.val))/100);return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" fill="#15803d"/>`;}).join('');
+  return `<svg viewBox="0 0 190 200" style="width:100%;max-width:230px;display:block;margin:0 auto;">
+    ${gridSvg}${axisLines}
+    <polygon points="${valuePoly}" fill="rgba(21,128,61,.25)" stroke="#15803d" stroke-width="2"/>
+    ${dots}${labels}
+  </svg>`;
 }
 
 /* ══ SCORE MULTICRITÈRE + POURQUOI + COÛT DU LITRE SUPPLÉMENTAIRE ══ */
@@ -3873,7 +4029,7 @@ function toggleInd(id) {
 
 function renderIndicateurs(a,b) {
   const eu=UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
-  const pv=gN('r-pv'), prod=gN('r-prod');
+  const pv=gN('r-pv'), prod=gN('r-prod'), tb=gN('r-tb');
   const rUFL=b.bUFL>0?a.totalUFL/b.bUFL:0;
   const rPDI=b.bPDI>0?a.totalPDI/b.bPDI:0;
   const ppu=a.totalUFL>0?a.totalPDI/a.totalUFL:0;
@@ -3920,6 +4076,28 @@ function renderIndicateurs(a,b) {
       </div>
       <div class="rb-ind-detail"><div class="rb-ind-detail-inner">${detail}</div></div>
     </div>`;
+  }
+
+  // 0. NIVEAU DE PRODUCTION DE LA RATION — à quel niveau (L/j, lait standard 4% MG) ce bilan est calculé
+  let prodCls,prodBadge,prodBadgeCls,prodResume,prodDetail;
+  const laitStdInd = (prod&&tb) ? (prod*tb/40) : null;
+  const objLaitInd = currentExp?.objectifs?.lait, objLaitStdInd = currentExp?.objectifs?.laitStandard;
+  if(!prod){prodCls='info';prodBadge='Non renseigné';prodBadgeCls='rb-badge-gray';prodResume='Production non saisie';prodDetail=adv('Renseignez la production laitière visée (onglet Ration) pour que le bilan soit calculé au bon niveau de production.');}
+  else{
+    prodResume=`${prod.toFixed(1)} L/j${tb?` · TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?` · lait standard ${laitStdInd.toFixed(1)} L/j`:''}`;
+    prodBadge=`${prod.toFixed(1)} L/j`;prodBadgeCls='rb-badge-gray';prodCls='info';
+    prodDetail=adv(`Cette ration est calculée pour une production de <strong>${prod.toFixed(1)} L/j</strong>${tb?`, TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?`, soit <strong>${laitStdInd.toFixed(1)} L/j de lait standard (4% MG)</strong> — la référence utilisée pour comparer des vaches ou périodes différentes.`:''}`);
+    if(objLaitInd||objLaitStdInd){
+      const gapLait = objLaitInd!=null?prod-objLaitInd:null;
+      const gapStd = (objLaitStdInd!=null&&laitStdInd!=null)?laitStdInd-objLaitStdInd:null;
+      const sousObjectif = (gapLait!=null&&gapLait<0)||(gapStd!=null&&gapStd<0);
+      if(sousObjectif){prodCls='warn';prodBadge='Sous objectif';prodBadgeCls='rb-badge-orange';
+        prodDetail+=tip('warn','🎯',`Objectif${objLaitInd!=null?` lait ${objLaitInd} L/j`:''}${objLaitStdInd!=null?`${objLaitInd!=null?' /':''} lait standard ${objLaitStdInd} L/j`:''} non atteint actuellement.`);}
+      else{prodCls='ok';prodBadge='Objectif atteint';prodBadgeCls='rb-badge-green';
+        prodDetail+=tip('ok','✅','Production au niveau de l\'objectif fixé pour cette exploitation.');}
+    } else {
+      prodDetail+=tip('info','📖','Définissez un objectif de production (bouton "🎯 Objectifs" sur la fiche exploitation) pour comparer ce niveau à une cible.');
+    }
   }
 
   // 1. ÉNERGIE
@@ -4064,11 +4242,21 @@ function renderIndicateurs(a,b) {
 
   // 16. MSCA — MARGE SUR COÛT ALIMENTAIRE (indicateur de référence filière lait)
   let mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail;
-  const prixLaitMsca=parseFloat(_$('cout-prix-lait')?.value)||0;
-  const coutRationMsca=(typeof window._lastCoutJour==='number')?window._lastCoutJour:null;
-  if(!prod||!prixLaitMsca||coutRationMsca===null){mscaCls='info';mscaBadge='Non disponible';mscaBadgeCls='rb-badge-gray';mscaResume='Prix du lait et coût ration requis';mscaDetail=adv('La MSCA (Marge sur Coût Alimentaire) nécessite la production laitière, le prix du lait (onglet Coûts) et le coût de la ration calculé (onglet Coûts). Renseignez-les pour l\'activer.')+tip('info','📖','MSCA = (Lait × Prix du lait) − Coût de la ration, en €/vache/jour — l\'indicateur de référence utilisé par les organismes de conseil en élevage laitier pour piloter la rentabilité.');}
-  else{const msca=prod*prixLaitMsca-coutRationMsca;mscaResume=`${msca>=0?'+':''}${msca.toFixed(2)} €/vache/j`;
-    if(msca>=4){mscaCls='ok';mscaBadge='Bonne marge';mscaBadgeCls='rb-badge-green';mscaDetail=adv(`MSCA = ${prod.toFixed(1)} L × ${prixLaitMsca.toFixed(2)} €/L − ${coutRationMsca.toFixed(2)} € de ration = ${msca.toFixed(2)} €/vache/j. Marge confortable.`)+tip('ok','✅','Conduite alimentaire rentable');}
+  const prixLaitMsca=parseFloat(_$('cout-prix-lait')?.value)||0.40;
+  let coutRationMsca=(typeof window._lastCoutJour==='number')?window._lastCoutJour:null;
+  let coutMscaEstime=false;
+  if(coutRationMsca===null){
+    // Pas de coût calculé via l'onglet Coûts : on estime directement depuis les prix de la
+    // Base aliments du conseiller (Paramètres), uniquement si TOUS les aliments de la ration
+    // ont un prix connu — sinon on n'invente rien, l'indicateur reste "Non disponible".
+    const priceMapMsca={};
+    (window._conseillerAliments||[]).forEach(x=>{if(x.nom&&x.prix!=null)priceMapMsca[x.nom.toLowerCase()]=x.prix;});
+    const known=a.items.length>0&&a.items.every(i=>priceMapMsca[i.nom.toLowerCase()]!=null);
+    if(known){coutRationMsca=a.items.reduce((s,i)=>s+i.qty*priceMapMsca[i.nom.toLowerCase()]/1000,0);coutMscaEstime=true;}
+  }
+  if(!prod||!prixLaitMsca||coutRationMsca===null){mscaCls='info';mscaBadge='Non disponible';mscaBadgeCls='rb-badge-gray';mscaResume='Prix du lait et coût ration requis';mscaDetail=adv('La MSCA (Marge sur Coût Alimentaire) nécessite la production laitière (onglet Ration), le prix du lait (ci-dessus ou onglet Coûts) et le coût de la ration — calculé dans l\'onglet Coûts, ou estimé automatiquement si tous les aliments de la ration ont un prix dans votre Base aliments (Paramètres → Base aliments & prix).')+tip('info','📖','MSCA = (Lait × Prix du lait) − Coût de la ration, en €/vache/jour — l\'indicateur de référence utilisé par les organismes de conseil en élevage laitier pour piloter la rentabilité.');}
+  else{const msca=prod*prixLaitMsca-coutRationMsca;mscaResume=`${msca>=0?'+':''}${msca.toFixed(2)} €/vache/j${coutMscaEstime?' (coût estimé)':''}`;
+    if(msca>=4){mscaCls='ok';mscaBadge='Bonne marge';mscaBadgeCls='rb-badge-green';mscaDetail=adv(`MSCA = ${prod.toFixed(1)} L × ${prixLaitMsca.toFixed(2)} €/L − ${coutRationMsca.toFixed(2)} € de ration${coutMscaEstime?' (estimé depuis votre Base aliments)':''} = ${msca.toFixed(2)} €/vache/j. Marge confortable.`)+tip('ok','✅','Conduite alimentaire rentable');}
     else if(msca>=2){mscaCls='warn';mscaBadge='Marge moyenne';mscaBadgeCls='rb-badge-orange';mscaDetail=adv(`MSCA = ${msca.toFixed(2)} €/vache/j — marge correcte mais avec de la marge de progression.`);}
     else{mscaCls='bad';mscaBadge='Marge faible';mscaBadgeCls='rb-badge-red';mscaDetail=adv(`MSCA = ${msca.toFixed(2)} €/vache/j — marge faible${msca<0?' voire négative':''}. La ration coûte cher au regard du produit lait généré.`)+tip('warn','💰','Comparer au coût de la ration et chercher des leviers d\'économie (optimiseur, autonomie fourragère)');}
     mscaDetail+=tip('info','📖','MSCA (Marge sur Coût Alimentaire) : indicateur de référence des organismes de conseil en élevage laitier pour piloter la rentabilité — produit lait moins coût alimentaire de la ration, en €/vache/jour.');}
@@ -4090,25 +4278,28 @@ function renderIndicateurs(a,b) {
   else{divCls='ok';divBadge='Diversifiée';divBadgeCls='rb-badge-green';divDetail=adv(`${nbAliments} aliments dont ${nbFourrages} fourrage(s) et ${nbConcentres} concentré(s) — bonne diversité de sources.`)+tip('ok','✅','Diversité correcte');}
 
   const container=document.getElementById('bilan-indicateurs'); if(!container)return;
-  container.innerHTML=`<div style="margin-bottom:10px;font-size:.82rem;color:var(--text-muted);">🔍 Cliquez sur une carte pour afficher les conseils</div>`+
-    card('energie','⚡','Énergie',eCls,eBadge,eBadgeCls,`${a.totalUFL.toFixed(2)} / ${b.bUFL.toFixed(2)} ${eu} — ${(rUFL*100).toFixed(0)}%`,eDetail)+
-    card('proteines','🧬','Protéines (PDI)',pCls,pBadge,pBadgeCls,`${a.totalPDI.toFixed(0)} / ${b.bPDI.toFixed(0)} g/j — ${(rPDI*100).toFixed(0)}%`,pDetail)+
-    card('equilibre','⚖️',`Équilibre E/P`,eCls2,eBadge2,eBadgeCls2,`PDI/${eu} = ${ppu.toFixed(0)} g/${eu}`,eDetail2)+
-    card('acidose','🔥','Risque Acidose',aCls,aBadge,aBadgeCls,`${pctConc.toFixed(0)}% concentrés / ${pctFourrage.toFixed(0)}% fourrages`,aDetail)+
-    card('mineraux','⚗️','Minéraux & BACA',mCls,mBadge,mBadgeCls,mResume,mDetail)+
-    card('aa','🔬','Acides aminés',aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail)+
-    card('ingestion','🐄','Ingestion / Saturation',ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail)+
-    card('ferment','🌾','Fermentescibilité (SARA)',fCls,fBadge,fBadgeCls,fResume,fDetail)+
-    card('densite','📊','Densité énergétique',dCls,dBadge,dBadgeCls,dResume,dDetail)+
-    card('bpr','🧪','Balance Protéique du Rumen',bprCls,bprBadge,bprBadgeCls,`${bprPerKg.toFixed(0)} g/kg MS`,bprDetail)+
-    card('ue','📦','Encombrement réel (UE)',ueCls,ueBadge,ueBadgeCls,ueResume,ueDetail)+
-    card('autonomie','🌱','Autonomie fourragère & protéique',autoCls,autoBadge,autoBadgeCls,autoResume,autoDetail)+
-    card('pdia','🧬','PDIA — protéines non dégradables',pdiaCls,pdiaBadge,pdiaBadgeCls,pdiaResume,pdiaDetail)+
-    card('glucides','🌽','Glucides totaux (AL+AR+SS)',glCls,glBadge,glBadgeCls,glResume,glDetail)+
-    card('ndf','🧵','Structure & fibres (NDF/ADF)',ndfCls,ndfBadge,ndfBadgeCls,ndfResume,ndfDetail)+
-    card('diversite','🔀','Diversité de la ration',divCls,divBadge,divBadgeCls,divResume,divDetail)+
-    card('msca','💶','Marge sur Coût Alimentaire (MSCA)',mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail)+
-    card('ic','⚖️','Indice de Consommation (IC)',icCls,icBadge,icBadgeCls,icResume,icDetail);
+  const maskedInd = getIndicateursMasques();
+  const mask = (id,html) => maskedInd.includes(id) ? '' : html;
+  container.innerHTML=`<div style="margin-bottom:10px;font-size:.82rem;color:var(--text-muted);">🔍 Cliquez sur une carte pour afficher les conseils · <a href="#" onclick="showPage('settings');setTimeout(()=>document.getElementById('ind-select-list')?.scrollIntoView({behavior:'smooth'}),100);return false;" style="color:#15803d;">choisir les indicateurs affichés</a></div>`+
+    mask('production',card('production','🥛','Niveau de production',prodCls,prodBadge,prodBadgeCls,prodResume,prodDetail))+
+    mask('energie',card('energie','⚡','Énergie',eCls,eBadge,eBadgeCls,`${a.totalUFL.toFixed(2)} / ${b.bUFL.toFixed(2)} ${eu} — ${(rUFL*100).toFixed(0)}%`,eDetail))+
+    mask('proteines',card('proteines','🧬','Protéines (PDI)',pCls,pBadge,pBadgeCls,`${a.totalPDI.toFixed(0)} / ${b.bPDI.toFixed(0)} g/j — ${(rPDI*100).toFixed(0)}%`,pDetail))+
+    mask('equilibre',card('equilibre','⚖️',`Équilibre E/P`,eCls2,eBadge2,eBadgeCls2,`PDI/${eu} = ${ppu.toFixed(0)} g/${eu}`,eDetail2))+
+    mask('acidose',card('acidose','🔥','Risque Acidose',aCls,aBadge,aBadgeCls,`${pctConc.toFixed(0)}% concentrés / ${pctFourrage.toFixed(0)}% fourrages`,aDetail))+
+    mask('mineraux',card('mineraux','⚗️','Minéraux & BACA',mCls,mBadge,mBadgeCls,mResume,mDetail))+
+    mask('aa',card('aa','🔬','Acides aminés',aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail))+
+    mask('ingestion',card('ingestion','🐄','Ingestion / Saturation',ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail))+
+    mask('ferment',card('ferment','🌾','Fermentescibilité (SARA)',fCls,fBadge,fBadgeCls,fResume,fDetail))+
+    mask('densite',card('densite','📊','Densité énergétique',dCls,dBadge,dBadgeCls,dResume,dDetail))+
+    mask('bpr',card('bpr','🧪','Balance Protéique du Rumen',bprCls,bprBadge,bprBadgeCls,`${bprPerKg.toFixed(0)} g/kg MS`,bprDetail))+
+    mask('ue',card('ue','📦','Encombrement réel (UE)',ueCls,ueBadge,ueBadgeCls,ueResume,ueDetail))+
+    mask('autonomie',card('autonomie','🌱','Autonomie fourragère & protéique',autoCls,autoBadge,autoBadgeCls,autoResume,autoDetail))+
+    mask('pdia',card('pdia','🧬','PDIA — protéines non dégradables',pdiaCls,pdiaBadge,pdiaBadgeCls,pdiaResume,pdiaDetail))+
+    mask('glucides',card('glucides','🌽','Glucides totaux (AL+AR+SS)',glCls,glBadge,glBadgeCls,glResume,glDetail))+
+    mask('ndf',card('ndf','🧵','Structure & fibres (NDF/ADF)',ndfCls,ndfBadge,ndfBadgeCls,ndfResume,ndfDetail))+
+    mask('diversite',card('diversite','🔀','Diversité de la ration',divCls,divBadge,divBadgeCls,divResume,divDetail))+
+    mask('msca',card('msca','💶','Marge sur Coût Alimentaire (MSCA)',mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail))+
+    mask('ic',card('ic','⚖️','Indice de Consommation (IC)',icCls,icBadge,icBadgeCls,icResume,icDetail));
 }
 
 /* ══ BAC À SABLE / SIMULATEUR WHAT-IF ══ */
@@ -4118,10 +4309,7 @@ function startSandbox() {
     apports: lastApports,
     besoins: lastBesoins,
     rows: getRationRows(),
-    score: computeScore(
-      lastBesoins.bUFL>0?lastApports.totalUFL/lastBesoins.bUFL:0,
-      lastBesoins.bPDI>0?lastApports.totalPDI/lastBesoins.bPDI:0,
-      lastApports.totalUFL>0?lastApports.totalPDI/lastApports.totalUFL:0),
+    score: computeScore(lastApports, lastBesoins),
     animalParams: { prod: gN('r-prod'), tb: gN('r-tb') },
     coutJour: (typeof window._lastCoutJour === 'number') ? window._lastCoutJour : null,
     label: 'référence (' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) + ')',
@@ -4179,7 +4367,7 @@ function renderCompare(pA, pB, pRows, pScore, pDate, pAnimal) {
   const pRPDI = pB.bPDI > 0 ? pA.totalPDI / pB.bPDI : 0;
   const cRUFL = cB.bUFL > 0 ? cA.totalUFL / cB.bUFL : 0;
   const cRPDI = cB.bPDI > 0 ? cA.totalPDI / cB.bPDI : 0;
-  const cScore = computeScore(cRUFL, cRPDI, cA.totalUFL > 0 ? cA.totalPDI / cA.totalUFL : 0);
+  const cScore = computeScore(cA, cB);
   const scoreVal = { A:4, B:3, C:2, D:1 };
   const scoreImproved = (scoreVal[cScore]||0) > (scoreVal[pScore]||0);
   const scoreSame = cScore === pScore;
@@ -4847,11 +5035,11 @@ async function renderFicheSynthese() {
     }
   } catch(err) {}
 
-  const benchmarkHtml = await benchmarkBlockHtml(e, anim);
-  const crossBenchHtml = await crossBenchmarkHtml(e, anim);
-
   let anim = {};
   try { anim = e.last_ration_data ? JSON.parse(e.last_ration_data) : {}; } catch(err) { anim = {}; }
+
+  const benchmarkHtml = await benchmarkBlockHtml(e, anim);
+  const crossBenchHtml = await crossBenchmarkHtml(e, anim);
 
   const score = e.last_score || null;
   const lastDate = e.last_session_date ? new Date(e.last_session_date) : null;
@@ -5411,6 +5599,7 @@ async function loadConseillerAliments() {
   const { data, error } = await supa.from('conseiller_aliments')
     .select('*').eq('advisor_id', currentUser.id).order('nom');
   if (!error) window._conseillerAliments = data || [];
+  buildDatalist();
   const listEl = _$('ca-list');
   if (!listEl) return;
   if (error) {
@@ -5429,20 +5618,27 @@ async function loadConseillerAliments() {
 async function addConseillerAliment() {
   const nom = (_$('ca-nom')?.value||'').trim();
   if (!nom) { showToast('Nom requis.', 'warn'); return; }
+  const ufl = parseFloat(_$('ca-ufl').value)||null;
+  const pdi = parseFloat(_$('ca-pdi').value)||null;
+  if (ufl==null || pdi==null) showToast('UFL et PDI non renseignés — cet aliment sera enregistré mais ne pourra pas être utilisé dans une ration tant que ces deux valeurs manquent.', 'warn', 6000);
   const supa = getSupa();
   const payload = {
     advisor_id: currentUser.id, nom,
     prix: parseFloat(_$('ca-prix').value)||null,
-    ufl: parseFloat(_$('ca-ufl').value)||null,
-    pdi: parseFloat(_$('ca-pdi').value)||null,
+    ufl, pdi,
     ms: parseFloat(_$('ca-ms').value)||null,
     fournisseur: (_$('ca-fournisseur').value||'').trim()||null,
     updated_at: new Date().toISOString(),
   };
-  const { error } = await supa.from('conseiller_aliments').insert(payload);
+  // "Ajouter / mettre à jour" : si un aliment du même nom existe déjà pour ce conseiller,
+  // on le met à jour plutôt que de créer un doublon.
+  const existing = (window._conseillerAliments||[]).find(a => (a.nom||'').toLowerCase().trim() === nom.toLowerCase());
+  const { error } = existing
+    ? await supa.from('conseiller_aliments').update(payload).eq('id', existing.id)
+    : await supa.from('conseiller_aliments').insert(payload);
   if (error) { showToast('Erreur : ' + error.message, 'error', 5000); return; }
   ['ca-nom','ca-prix','ca-ufl','ca-pdi','ca-ms','ca-fournisseur'].forEach(id => { if(_$(id)) _$(id).value=''; });
-  showToast('Aliment enregistré.', 'success');
+  showToast(existing ? 'Aliment mis à jour.' : 'Aliment enregistré.', 'success');
   loadConseillerAliments();
 }
 async function deleteConseillerAliment(id) {
@@ -5535,7 +5731,7 @@ async function addAnalyseToBase(id) {
 // ══ OBJECTIFS DE SUIVI ════════════════════════════
 function objectifsBlockHtml(e, anim, score) {
   const o = e.objectifs || {};
-  const hasAny = o.lait || o.tb || o.score;
+  const hasAny = o.lait || o.laitStandard || o.tb || o.score;
   const scoreVal = { A:4, B:3, C:2, D:1 };
   const row = (label, curVal, unit, target, higherBetter, isScore) => {
     if (target === undefined || target === null || target === '') return '';
@@ -5546,12 +5742,17 @@ function objectifsBlockHtml(e, anim, score) {
     }
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.82rem;">
       <span style="color:var(--text-muted);">${label}</span>
-      <span style="font-weight:700;color:${color};">${icon} ${curVal!==null&&curVal!==undefined&&curVal!==''?curVal+unit:'—'} <span style="color:#94a3b8;font-weight:500;">→ cible ${target}${unit}</span></span>
+      <span style="font-weight:700;color:${color};">${icon} ${curVal!==null&&curVal!==undefined&&curVal!==''?curVal.toFixed?curVal.toFixed(1):curVal:'—'}${unit} <span style="color:#94a3b8;font-weight:500;">→ cible ${target}${unit}</span></span>
     </div>`;
   };
+  // Lait standard (4% MG) = production brute × TB / 4 — même formule que le calcul de besoins
+  // INRA (onglet Ration). anim.tb est stocké en ‰ (ex: 40 = 4,0%), d'où /40 et non /4.
+  const laitStdActuel = (anim.prod && anim.tb) ? (anim.prod*anim.tb/40) : null;
+  const tbPctActuel = anim.tb!=null ? anim.tb/10 : null; // ‰ → % pour comparaison à l'objectif (saisi en %)
   const body = hasAny ? [
     row('🥛 Lait', anim.prod||null, ' L/j', o.lait, true, false),
-    row('🧈 TB', anim.tb||null, ' %', o.tb, true, false),
+    row('🥛 Lait standard (4% MG)', laitStdActuel, ' L/j', o.laitStandard, true, false),
+    row('🧈 TB', tbPctActuel, ' %', o.tb, true, false),
     row('🏆 Score', score||null, '', o.score, true, true),
   ].join('') : '<div style="font-size:.8rem;color:var(--text-muted);">Aucun objectif défini pour cette exploitation.</div>';
   return `<div class="card" style="margin-bottom:0;margin-top:16px;">
@@ -5566,6 +5767,7 @@ function openObjectifsModal() {
   if (!currentExp) return;
   const o = currentExp.objectifs || {};
   _$('obj-lait').value = o.lait || '';
+  _$('obj-lait-std').value = o.laitStandard || '';
   _$('obj-tb').value = o.tb || '';
   _$('obj-score').value = o.score || '';
   _$('objectifs-modal').classList.remove('hidden');
@@ -5575,6 +5777,7 @@ async function saveObjectifs() {
   if (!currentExp) return;
   const objectifs = {
     lait: parseFloat(_$('obj-lait').value) || null,
+    laitStandard: parseFloat(_$('obj-lait-std').value) || null,
     tb: parseFloat(_$('obj-tb').value) || null,
     score: _$('obj-score').value || null,
   };
@@ -5614,11 +5817,39 @@ async function askAssistantFreeText() {
   const text = (_$('assistant-freetext')?.value || '').trim();
   if (!text) return;
   const kind = matchAssistantQuestion(text);
-  if (!kind) {
-    _$('assistant-result').innerHTML = `<div style="padding:16px;color:var(--text-muted);font-size:.82rem;">Je ne sais pas encore répondre à cette question précise. Essayez avec les mots : coût, TB, score, visite, objectif — ou utilisez les boutons ci-dessus.<br><span style="color:#94a3b8;">(Moteur de requêtes calculées sur vos données, pas une IA générative.)</span></div>`;
-    return;
+  if (kind) { await runAssistantQuery(kind); return; }
+  // Pas de requête calculée prédéfinie qui correspond : on passe la question à l'assistant IA
+  // (Claude), qui répond uniquement à partir des vraies données du portefeuille — jamais
+  // à partir de ce qu'il "croit savoir" par ailleurs.
+  await askAssistantAI(text);
+}
+
+async function askAssistantAI(question) {
+  const resEl = _$('assistant-result');
+  resEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);">🤖 L\'assistant IA analyse votre portefeuille…</div>';
+  if (!exploitations.length) { resEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);">Aucune exploitation dans votre portefeuille.</div>'; return; }
+  try {
+    const supa = getSupa();
+    // Contexte compact envoyé à l'IA : uniquement des données déjà calculées et stockées,
+    // jamais de données inventées. On limite les champs et le nombre d'exploitations pour
+    // rester léger et rapide.
+    const context = exploitations.slice(0, 300).map(e => ({
+      nom: e.nom, type: e.type||'lait', score: e.last_score||null,
+      dernier_bilan: e.last_session_date||null,
+      lait: (() => { try { return JSON.parse(e.last_ration_data||'{}').prod||null; } catch { return null; } })(),
+      tb: (() => { try { return JSON.parse(e.last_ration_data||'{}').tb||null; } catch { return null; } })(),
+      objectifs: e.objectifs||null,
+      prochaine_visite: e.prochaine_visite||null,
+    }));
+    const { data, error } = await supa.functions.invoke('ai-assistant', { body: { question, exploitations: context } });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    const answer = data?.answer || 'Réponse vide.';
+    resEl.innerHTML = `<div style="padding:12px 14px;background:var(--bg-app,#f8fafc);border-radius:10px;font-size:.85rem;line-height:1.5;white-space:pre-wrap;">${escHtml(answer)}</div>
+      <p style="font-size:.68rem;color:#94a3b8;margin:8px 2px 0;">🤖 Réponse générée par IA (Claude) à partir des données réelles de votre portefeuille — vérifiez les points chiffrés importants avant de les communiquer.</p>`;
+  } catch (e) {
+    resEl.innerHTML = `<div style="padding:16px;color:#dc2626;font-size:.82rem;">L'assistant IA n'est pas disponible pour le moment (${escHtml(e.message||String(e))}). Essayez avec les mots : coût, TB, score, visite, objectif — ou utilisez les boutons ci-dessus.</div>`;
   }
-  await runAssistantQuery(kind);
 }
 
 async function runAssistantQuery(kind) {
@@ -5677,7 +5908,11 @@ async function runAssistantQuery(kind) {
       const anim = (byExp[e.id]||[])[0]?.data?.animalParams || {};
       const fails = [];
       if (o.lait && anim.prod != null && anim.prod < o.lait) fails.push(`Lait ${anim.prod} < ${o.lait} L`);
-      if (o.tb && anim.tb != null && anim.tb < o.tb) fails.push(`TB ${anim.tb} < ${o.tb} %`);
+      if (o.laitStandard && anim.prod != null && anim.tb != null) {
+        const laitStd = anim.prod*anim.tb/40;
+        if (laitStd < o.laitStandard) fails.push(`Lait standard ${laitStd.toFixed(1)} < ${o.laitStandard} L`);
+      }
+      if (o.tb && anim.tb != null && (anim.tb/10) < o.tb) fails.push(`TB ${(anim.tb/10).toFixed(2)} < ${o.tb} %`);
       if (o.score && (scoreVal[e.last_score]||0) < (scoreVal[o.score]||0)) fails.push(`Score ${e.last_score||'—'} < ${o.score}`);
       if (fails.length) results.push({ e, msg: fails.join(' · ') });
     });
