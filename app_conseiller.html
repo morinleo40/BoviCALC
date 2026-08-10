@@ -458,13 +458,15 @@ function setTheme(t) {
                     <option value="genisse">Génisse laitière (renouvellement)</option>
                     <option value="genisse-engrais">Génisse laitière (viande)</option>
                     <option value="vache-reforme">Vache réforme</option>
-                    <option value="veau">Veau de lait</option>
+                    <option value="veau">Veau post-sevrage</option>
                   </optgroup>
                   <optgroup label="Élevage viande (UFV)">
                     <option value="taurillon">Taurillon (JB)</option>
                     <option value="boeuf-engrais">Bœuf</option>
                     <option value="vache-allaitante">Vache allaitante (nourrisse)</option>
-                    <option value="genisse-viande">Génisse viande</option>
+                    <option value="vache-allaitante-prepa">Génisse/Vache allaitante (prépa vêlage)</option>
+                    <option value="genisse-viande">Génisse en croissance (viande)</option>
+                    <option value="genisse-engraissement">Génisse d'engraissement</option>
                     <option value="broutard">Broutard / Jeune bovin</option>
                   </optgroup>
                 </select>
@@ -528,7 +530,8 @@ function setTheme(t) {
                 <div class="form-group">
                   <label>Activité</label>
                   <select class="form-select" id="r-activite">
-                    <option value="stabulation">Stabulation</option>
+                    <option value="stabulation">Stabulation entravée</option>
+                    <option value="libre">Stabulation libre</option>
                     <option value="paturage">Pâturage</option>
                   </select>
                 </div>
@@ -547,6 +550,33 @@ function setTheme(t) {
                 <div class="form-group" id="rg-gmq" style="display:none;">
                   <label>GMQ (kg/j)</label>
                   <input type="number" class="form-input" id="r-gmq" min="0" max="2" step="0.1" placeholder="1.0">
+                </div>
+              </div>
+              <div style="cursor:pointer;font-size:.76rem;font-weight:700;color:#15803d;margin:2px 0 8px;" onclick="const d=document.getElementById('rg-profil-detail');const open=d.style.display!=='none';d.style.display=open?'none':'';this.textContent=open?'▾ Profil détaillé (optionnel)':'▴ Profil détaillé (optionnel)';">▾ Profil détaillé (optionnel)</div>
+              <div class="form-grid" id="rg-profil-detail" style="display:none;">
+                <div class="form-group" id="rg-parite">
+                  <label>Parité</label>
+                  <select class="form-select" id="r-parite">
+                    <option value="">Non précisé</option>
+                    <option value="primipare">Primipare</option>
+                    <option value="multipare">Multipare</option>
+                  </select>
+                </div>
+                <div class="form-group" id="rg-stade-lact">
+                  <label>Stade de lactation (semaines)</label>
+                  <input type="number" class="form-input" id="r-stade-lact" min="0" max="60" step="1" placeholder="Ex: 12">
+                </div>
+                <div class="form-group" id="rg-semaines-velage">
+                  <label>Semaines avant vêlage</label>
+                  <input type="number" class="form-input" id="r-semaines-velage" min="0" max="20" step="1" placeholder="Ex: 3">
+                </div>
+                <div class="form-group">
+                  <label>NEC actuelle (0-5)</label>
+                  <input type="number" class="form-input" id="r-nec-actuelle" min="0" max="5" step="0.25" placeholder="Ex: 2.75">
+                </div>
+                <div class="form-group">
+                  <label>NEC objectif (0-5)</label>
+                  <input type="number" class="form-input" id="r-nec-objectif" min="0" max="5" step="0.25" placeholder="Ex: 3.0">
                 </div>
               </div>
               <button class="btn btn-primary" style="width:100%;" onclick="calcBesoins()">Calculer les besoins →</button>
@@ -655,6 +685,8 @@ function setTheme(t) {
             <div class="metric-card"><div class="metric-lbl">Coût / kg MS</div><div class="metric-val" id="cout-kg-ms">—</div></div>
             <div class="metric-card"><div class="metric-lbl">Coût / 1000 L</div><div class="metric-val" id="cout-1000l">—</div></div>
             <div class="metric-card"><div class="metric-lbl">Coût total troupeau/j</div><div class="metric-val" id="cout-troupeau">—</div></div>
+            <div class="metric-card"><div class="metric-lbl">Marge sur coût alim. / 1000 L</div><div class="metric-val" id="cout-marge-1000l">—</div></div>
+            <div class="metric-card"><div class="metric-lbl">Marge sur coût alim. / animal / j</div><div class="metric-val" id="cout-marge-jour">—</div></div>
           </div>
           <div class="card" style="margin-top:16px;padding:0;overflow:hidden;">
             <table class="data-table" id="cout-detail-table">
@@ -897,6 +929,7 @@ function setTheme(t) {
               <button class="btn btn-secondary btn-sm" onclick="generateCompteRendu()">✨ Générer automatiquement</button>
               <button class="btn btn-primary" onclick="printRapport()">🖨 Imprimer / PDF</button>
               <button class="btn btn-ghost btn-sm" onclick="previewRapport()">👁 Aperçu</button>
+              <button class="btn btn-ghost btn-sm" onclick="printRapportComparatif()">🖨 Édition comparative (2-3 rations)</button>
             </div>
           </div>
           <div class="card" style="flex:2;min-width:320px;" id="rapport-preview">
@@ -1096,6 +1129,7 @@ function setTheme(t) {
       <div class="card" style="margin-top:20px;">
         <div class="card-header"><div class="card-title">🏭 Base aliments & prix centralisés</div></div>
         <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Vos aliments et prix de référence, partagés entre toutes vos exploitations. Avec UFL et PDI renseignés, un aliment devient utilisable directement dans la composition de ration (onglet Ration, tapez son nom) — son prix sert aussi automatiquement au calcul de la MSCA et de l'optimiseur, sans passer par l'onglet Coûts.</p>
+        <input type="hidden" id="ca-edit-id">
         <div class="form-grid" style="margin-bottom:10px;">
           <div class="form-group"><label>Nom de l'aliment</label><input type="text" class="form-input" id="ca-nom" placeholder="Ex: Tourteau de colza NatUp"></div>
           <div class="form-group"><label>Prix (€/t)</label><input type="number" step="0.1" class="form-input" id="ca-prix" placeholder="345"></div>
@@ -1104,7 +1138,12 @@ function setTheme(t) {
           <div class="form-group"><label>MS (%)</label><input type="number" step="0.1" class="form-input" id="ca-ms" placeholder="88"></div>
           <div class="form-group"><label>Fournisseur</label><input type="text" class="form-input" id="ca-fournisseur" placeholder="NatUp"></div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="addConseillerAliment()" style="margin-bottom:14px;">➕ Ajouter / mettre à jour</button>
+        <button class="btn btn-primary btn-sm" id="ca-save-btn" onclick="addConseillerAliment()" style="margin-bottom:6px;">➕ Ajouter</button>
+        <button class="btn btn-ghost btn-sm" id="ca-cancel-btn" onclick="cancelEditConseillerAliment()" style="margin-bottom:14px;display:none;">Annuler la modification</button>
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:10px;">
+          <label class="btn btn-ghost btn-sm" style="cursor:pointer;">📥 Importer un CSV<input type="file" accept=".csv,text/csv" style="display:none;" onchange="importConseillerAlimentsCsv(event)"></label>
+          <span style="font-size:.7rem;color:#94a3b8;margin-left:8px;">Colonnes : nom, prix, ufl, pdi, ms, fournisseur (en-tête requis)</span>
+        </div>
         <div id="ca-list" style="border-top:1px solid var(--border);padding-top:10px;"></div>
       </div>
     </div>
@@ -1314,6 +1353,22 @@ function setTheme(t) {
 
     <input type="text" id="ab-search" class="form-input" placeholder="Rechercher un aliment…" style="margin-bottom:10px;" oninput="filterAlimentsBrowser()">
     <div id="ab-results" style="max-height:420px;overflow-y:auto;"></div>
+
+    <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:10px;">
+      <div style="cursor:pointer;font-size:.78rem;font-weight:700;color:#15803d;" onclick="toggleMelangeUI()" id="melange-toggle">🧪 Créer un mélange d'aliments ▾</div>
+      <div id="melange-ui" style="display:none;margin-top:10px;">
+        <p style="font-size:.72rem;color:#94a3b8;margin-bottom:8px;">Combinez plusieurs aliments avec leurs proportions pour obtenir les valeurs moyennes du mélange (pondérées par %) — utile pour un mélange fermier ou une ration mélangée type.</p>
+        <div id="melange-rows"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addMelangeRow()" style="margin-bottom:8px;">+ Aliment</button>
+        <button class="btn btn-secondary btn-sm" onclick="renderMelangeResult()" style="margin-bottom:8px;margin-left:6px;">Calculer</button>
+        <div id="melange-result"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+          <input type="text" id="melange-nom" class="form-input" placeholder="Nom du mélange" style="margin:0;flex:1;">
+          <button class="btn btn-primary btn-sm" onclick="saveMelange()">💾 Enregistrer</button>
+        </div>
+        <p style="font-size:.68rem;color:#94a3b8;margin-top:6px;">Enregistré dans votre Base aliments (Paramètres), partagée entre vos exploitations.</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2416,6 +2471,8 @@ function loadAlertSettingsUI() {
 // par appareil, pas partagée entre conseillers).
 const INDICATEURS_LIST = [
   {id:'production',label:'🥛 Niveau de production'},
+  {id:'profil',label:'🐮 Profil physiologique'},
+  {id:'eau',label:'💧 Besoins en eau'},
   {id:'energie',label:'⚡ Énergie'},
   {id:'proteines',label:'🧬 Protéines (PDI)'},
   {id:'equilibre',label:'⚖️ Équilibre E/P'},
@@ -2637,10 +2694,10 @@ function showRaceImage(selectId, previewId) {
 }
 
 const UFV_TYPES = ['genisse','genisse-engrais','vache-reforme','veau',
-                   'taurillon','boeuf-engrais','vache-allaitante','genisse-viande','broutard'];
-const LAIT_TYPES = ['vache-laitiere','vache-tarie','vache-prepa-velage','vache-allaitante'];
+                   'taurillon','boeuf-engrais','vache-allaitante','genisse-viande','genisse-engraissement','broutard'];
+const LAIT_TYPES = ['vache-laitiere','vache-tarie','vache-prepa-velage','vache-allaitante','vache-allaitante-prepa'];
 const GMQ_TYPES  = ['genisse','genisse-engrais','vache-reforme','veau',
-                    'taurillon','boeuf-engrais','genisse-viande','broutard'];
+                    'taurillon','boeuf-engrais','genisse-viande','genisse-engraissement','broutard'];
 
 function updateUfBadge(selectId, badgeId) {
   const v = document.getElementById(selectId)?.value;
@@ -2660,9 +2717,14 @@ function onAnimalTypeChange() {
   updateUfBadge('r-type-animal','uf-badge-cons');
 }
 
+// Coefficient d'activité INRA (majoration du besoin d'entretien selon le mode de logement/pâturage) :
+// 1.0 en stabulation entravée (référence), 1.1 en stabulation libre, 1.2 au pâturage.
+function activityCoef(activite) {
+  return activite==='paturage' ? 1.2 : activite==='libre' ? 1.1 : 1;
+}
 function computeBesoins(pv,prod,activite,tb,type,gmq) {
   const pv075n = Math.pow(pv,0.75);
-  const coef = activite==='paturage'?1.1:1;
+  const coef = activityCoef(activite);
   let bUFL=0, bPDI=0, lait=0, cap=0;
   switch(type) {
     case 'vache-laitiere':
@@ -2673,7 +2735,10 @@ function computeBesoins(pv,prod,activite,tb,type,gmq) {
       break;
     case 'vache-tarie':
       bUFL = (0.054*pv075n+2.5)*coef; bPDI=(95+0.5*pv+150)*coef; cap=pv*0.018*coef; break;
-    case 'vache-prepa-velage':
+    case 'vache-prepa-velage': case 'vache-allaitante-prepa':
+      // Prépa vêlage : besoins pilotés par le stade physiologique (fin de gestation, préparation
+      // vêlage/colostrum), pas par la filière lait/viande — même formule que la vache laitière
+      // en prépa vêlage, réutilisée ici pour les génisses/vaches allaitantes.
       bUFL = (0.054*pv075n+1.5)*coef; bPDI=(95+0.5*pv+180)*coef; cap=pv*0.02*coef; break;
     case 'genisse': case 'genisse-engrais': {
       const g=gmq||0.7;
@@ -2702,6 +2767,13 @@ function computeBesoins(pv,prod,activite,tb,type,gmq) {
     case 'genisse-viande': {
       const g=gmq||0.85;
       bUFL=(0.041*pv075n+4.5*g)*coef; bPDI=(2.5*pv075n+310*g)*coef; cap=pv*0.025*coef; break;
+    }
+    case 'genisse-engraissement': {
+      // Phase de finition : même famille de formule INRA que les autres catégories en
+      // croissance/engraissement de l'application (boeuf-engrais notamment), avec un GMQ
+      // de finition par défaut plus modéré (génisses finissant à poids plus faible).
+      const g=gmq||0.85;
+      bUFL=(0.041*pv075n+5.0*g)*coef; bPDI=(2.5*pv075n+260*g)*coef; cap=pv*0.020*coef; break;
     }
     case 'broutard': {
       const g=gmq||1.0;
@@ -2795,6 +2867,7 @@ function renderExpAlimentsSection() {
   }
   cont.innerHTML = `
     <div style="font-size:.78rem;font-weight:800;color:#15803d;text-transform:uppercase;margin-bottom:8px;">🌾 Aliments propres à ${escHtml(currentExp.nom)}</div>
+    <input type="hidden" id="ea-edit-id">
     <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin-bottom:8px;">
       <input type="text" class="form-input" id="ea-nom" placeholder="Nom" style="margin:0;">
       <input type="number" step="0.1" class="form-input" id="ea-prix" placeholder="Prix €/t" style="margin:0;">
@@ -2803,14 +2876,35 @@ function renderExpAlimentsSection() {
       <input type="number" step="0.1" class="form-input" id="ea-ms" placeholder="MS %" style="margin:0;">
       <input type="text" class="form-input" id="ea-fournisseur" placeholder="Fournisseur" style="margin:0;">
     </div>
-    <button class="btn btn-primary btn-sm" onclick="addExpAliment()" style="margin-bottom:10px;">➕ Ajouter / mettre à jour</button>
+    <button class="btn btn-primary btn-sm" id="ea-save-btn" onclick="addExpAliment()" style="margin-bottom:6px;">➕ Ajouter</button>
+    <button class="btn btn-ghost btn-sm" id="ea-cancel-btn" onclick="cancelEditExpAliment()" style="margin-bottom:10px;display:none;">Annuler la modification</button>
+    <div style="margin-bottom:10px;">
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer;">📥 Importer un CSV<input type="file" accept=".csv,text/csv" style="display:none;" onchange="importExpAlimentsCsv(event)"></label>
+      <span style="font-size:.68rem;color:#94a3b8;margin-left:8px;">Colonnes : nom, prix, ufl, pdi, ms, fournisseur</span>
+    </div>
     <div id="ea-list"></div>`;
   renderExpAlimentsUI();
 }
 function closeAlimentsBrowser() { _$('aliments-browser-modal').classList.add('hidden'); }
+// Estimation INRA 2007 à partir de la valeur INRA 2018 — PAS une vraie table 2007 par
+// aliment (on ne l'a pas et on ne la fabrique pas), mais une estimation fondée sur des
+// écarts moyens réellement documentés par la presse technique française lors de la
+// transition 2018 (Chambre d'agriculture de Bretagne, Réussir Lait, SEMAE/GNIS 2019) :
+// - Fourrages : l'UFL 2018 est relevée de +0.03 à +0.05 point en moyenne par rapport à 2007
+//   (ex. ensilage de maïs : seuil "riche" passé de 0.94 UFL en 2007 à 0.98 en 2018).
+// - Concentrés (céréales, tourteaux, pulpes) : quasiment aucun impact documenté du
+//   changement de système sur l'UFL — valeur 2007 assimilée à la valeur 2018.
+// - PDI : le PDI 2018 remplace le PDIE 2007 et lui est très proche pour les fourrages ;
+//   affiché sans correction, en approximation.
+function estimateUFL2007(nom, ufl2018) {
+  if (ufl2018 == null || typeof ufl2018 !== 'number') return null;
+  const isFourrage = getFeedCategory(nom) === 'fourrage';
+  return isFourrage ? Math.round((ufl2018 - 0.04) * 100) / 100 : ufl2018;
+}
 function filterAlimentsBrowser() {
   const q = (_$('ab-search')?.value||'').toLowerCase().trim();
   const cont = _$('ab-results'); if (!cont) return;
+  const show2007 = _$('ab-show-2007')?.checked;
   const std = alimentsDb.map(a => ({ nom:a.nom, ms:a.ms, ufl:a.uflPerKgMS, pdi:a.pdiPerKgMS, ca:a.ca_gkgms, p:a.p_gkgms, tag:null }));
   const custom = (window._conseillerAliments||[]).map(a => ({ nom:a.nom, ms:a.ms, ufl:a.ufl, pdi:a.pdi, prix:a.prix, tag:'perso' }));
   const exp = (window._expAliments||[]).map(a => ({ nom:a.nom, ms:a.ms, ufl:a.ufl, pdi:a.pdi, prix:a.prix, tag:'ferme' }));
@@ -2818,15 +2912,103 @@ function filterAlimentsBrowser() {
   if (q) rows = rows.filter(r => (r.nom||'').toLowerCase().includes(q));
   rows = rows.slice(0, 400);
   if (!rows.length) { cont.innerHTML = '<p style="font-size:.82rem;color:var(--text-muted);text-align:center;padding:20px;">Aucun aliment ne correspond à cette recherche.</p>'; return; }
-  cont.innerHTML = `<table class="data-table"><thead><tr><th>Aliment</th><th>MS %</th><th>UFL/kg MS</th><th>PDI g/kg MS</th><th></th></tr></thead>
+  cont.innerHTML = `<label style="display:flex;align-items:center;gap:6px;font-size:.74rem;color:#64748b;margin-bottom:6px;cursor:pointer;"><input type="checkbox" id="ab-show-2007" ${show2007?'checked':''} onchange="filterAlimentsBrowser()"> Afficher une estimation UFL INRA 2007 (approximative — voir note ci-dessous)</label>
+    <table class="data-table"><thead><tr><th>Aliment</th><th>MS %</th><th>UFL/kg MS (2018)</th>${show2007?'<th>UFL (~2007 est.)</th>':''}<th>PDI g/kg MS</th><th></th></tr></thead>
     <tbody>${rows.map(r => `<tr>
       <td style="font-weight:600;">${escHtml(r.nom)}${r.tag==='ferme'?' <span class="badge badge-green" style="font-size:.62rem;">ferme</span>':r.tag==='perso'?' <span class="badge badge-gray" style="font-size:.62rem;">perso</span>':''}</td>
       <td>${r.ms!=null?r.ms:'—'}</td>
       <td>${r.ufl!=null?(typeof r.ufl==='number'?r.ufl.toFixed(2):r.ufl):'—'}</td>
+      ${show2007?`<td style="color:#64748b;">${(()=>{const e=estimateUFL2007(r.nom,r.ufl);return e!=null?e.toFixed(2):'—';})()}</td>`:''}
       <td>${r.pdi!=null?(typeof r.pdi==='number'?r.pdi.toFixed(0):r.pdi):'—'}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="closeAlimentsBrowser();addRationRow('${r.nom.replace(/'/g,"\\'")}')">+ Ajouter à la ration</button></td>
     </tr>`).join('')}</tbody></table>
-    ${rows.length>=400?'<p style="font-size:.72rem;color:#94a3b8;text-align:center;padding:8px;">Affichage limité aux 400 premiers résultats — affinez votre recherche.</p>':''}`;
+    ${rows.length>=400?'<p style="font-size:.72rem;color:#94a3b8;text-align:center;padding:8px;">Affichage limité aux 400 premiers résultats — affinez votre recherche.</p>':''}
+    ${show2007?'<p style="font-size:.68rem;color:#94a3b8;margin-top:8px;">Estimation, pas une vraie table INRA 2007 : fourrages = UFL 2018 − 0.04 (écart moyen documenté lors de la transition, ±0.01) ; concentrés = quasi identique à 2018 (changement de système sans impact significatif documenté sur ces aliments). Ne pas utiliser pour un calcul de ration précis en système 2007 — à titre de repère de comparaison uniquement.</p>':''}`;
+}
+
+// ── Mélanges d'aliments/fourrages : valeurs moyennes pondérées par proportion ──
+function toggleMelangeUI() {
+  const el = _$('melange-ui'); if (!el) return;
+  const opening = el.style.display==='none';
+  el.style.display = opening ? '' : 'none';
+  if(_$('melange-toggle'))_$('melange-toggle').textContent = opening ? '🧪 Créer un mélange d\'aliments ▴' : '🧪 Créer un mélange d\'aliments ▾';
+  if (opening && !_$('melange-rows').children.length) { addMelangeRow(); addMelangeRow(); }
+}
+function addMelangeRow() {
+  const cont = _$('melange-rows'); if (!cont) return;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 90px 28px;gap:6px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = `<input type="text" list="aliments-list" class="form-input melange-aliment-nom" placeholder="Aliment…" style="margin:0;">
+    <input type="number" class="form-input melange-pct" placeholder="%" min="0" max="100" step="1" style="margin:0;">
+    <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2;border:none;border-radius:6px;height:36px;cursor:pointer;color:#dc2626;">✕</button>`;
+  cont.appendChild(row);
+}
+function computeMelange() {
+  const rows = Array.from(document.querySelectorAll('#melange-rows > div'));
+  const items = rows.map(r => ({
+    nom: r.querySelector('.melange-aliment-nom')?.value?.trim(),
+    pct: parseFloat(r.querySelector('.melange-pct')?.value)||0,
+  })).filter(i=>i.nom && i.pct>0);
+  if (!items.length) return null;
+  const totalPct = items.reduce((s,i)=>s+i.pct,0);
+  const priceMap = {};
+  (window._conseillerAliments||[]).forEach(x=>{if(x.nom&&x.prix!=null)priceMap[x.nom.toLowerCase()]=x.prix;});
+  (window._expAliments||[]).forEach(x=>{if(x.nom&&x.prix!=null)priceMap[x.nom.toLowerCase()]=x.prix;});
+  let ufl=0,pdi=0,msSum=0,msWeight=0,prixSum=0,prixWeight=0,allFound=true;
+  const details = [];
+  items.forEach(i => {
+    const f = findFood(i.nom);
+    const w = i.pct/totalPct;
+    if (!f) { allFound=false; details.push({nom:i.nom,pct:i.pct,found:false}); return; }
+    ufl += (f.uflPerKgMS||0)*w;
+    pdi += (f.pdiPerKgMS||0)*w;
+    if (f.ms) { msSum += f.ms*w; msWeight += w; }
+    const p = priceMap[i.nom.toLowerCase()];
+    if (p!=null) { prixSum += p*w; prixWeight += w; }
+    details.push({nom:i.nom, pct:i.pct, found:true});
+  });
+  return { details, totalPct, allFound, ufl, pdi, ms: msWeight>0?msSum/msWeight:null, prix: prixWeight>0?prixSum/prixWeight:null };
+}
+function renderMelangeResult() {
+  const res = computeMelange();
+  const cont = _$('melange-result'); if (!cont) return;
+  window._lastMelange = res;
+  if (!res) { cont.innerHTML='<p style="font-size:.78rem;color:var(--text-muted);">Ajoutez au moins un aliment avec une proportion.</p>'; return; }
+  let warn = '';
+  if (Math.abs(res.totalPct-100)>1) warn += `<p style="font-size:.76rem;color:#d97706;margin:4px 0;">⚠️ Total des proportions : ${res.totalPct.toFixed(0)}% (pas 100%) — les valeurs ci-dessous sont recalculées au prorata, mais vérifiez vos saisies.</p>`;
+  if (!res.allFound) warn += `<p style="font-size:.76rem;color:#dc2626;margin:4px 0;">⚠️ Introuvable(s) dans la base (vérifiez l'orthographe, utilisez l'autocomplétion) : ${res.details.filter(d=>!d.found).map(d=>escHtml(d.nom)).join(', ')}</p>`;
+  cont.innerHTML = warn + `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:6px;">
+    <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:.62rem;color:#64748b;font-weight:800;text-transform:uppercase;">UFL/kg MS</div><div style="font-size:1.05rem;font-weight:900;">${res.ufl.toFixed(2)}</div></div>
+    <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:.62rem;color:#64748b;font-weight:800;text-transform:uppercase;">PDI g/kg MS</div><div style="font-size:1.05rem;font-weight:900;">${res.pdi.toFixed(0)}</div></div>
+    <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:.62rem;color:#64748b;font-weight:800;text-transform:uppercase;">MS %</div><div style="font-size:1.05rem;font-weight:900;">${res.ms!=null?res.ms.toFixed(0):'—'}</div></div>
+    <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:.62rem;color:#64748b;font-weight:800;text-transform:uppercase;">Prix €/t</div><div style="font-size:1.05rem;font-weight:900;">${res.prix!=null?res.prix.toFixed(0):'—'}</div></div>
+  </div>`;
+}
+async function saveMelange() {
+  const res = window._lastMelange;
+  if (!res) { showToast('Cliquez sur "Calculer" avant d\'enregistrer.', 'warn'); return; }
+  if (!res.allFound) { showToast('Corrigez les aliments introuvables avant d\'enregistrer.', 'error'); return; }
+  const nom = (_$('melange-nom')?.value||'').trim();
+  if (!nom) { showToast('Donnez un nom au mélange.', 'warn'); return; }
+  const supa = getSupa();
+  const payload = {
+    advisor_id: currentUser.id, nom,
+    prix: res.prix!=null ? Math.round(res.prix*10)/10 : null,
+    ufl: Math.round(res.ufl*100)/100,
+    pdi: Math.round(res.pdi),
+    ms: res.ms!=null ? Math.round(res.ms*10)/10 : null,
+    fournisseur: 'Mélange : '+res.details.map(d=>`${d.nom} ${d.pct}%`).join(', '),
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supa.from('conseiller_aliments').insert(payload);
+  if (error) { showToast('Erreur : ' + error.message, 'error', 6000); return; }
+  showToast('Mélange enregistré dans votre Base aliments.', 'success');
+  if(_$('melange-nom'))_$('melange-nom').value='';
+  if(_$('melange-rows'))_$('melange-rows').innerHTML='';
+  if(_$('melange-result'))_$('melange-result').innerHTML='';
+  window._lastMelange=null;
+  addMelangeRow(); addMelangeRow();
+  loadConseillerAliments();
 }
 
 function parseRation() {
@@ -2903,6 +3085,33 @@ function renderCompositionChart(a) {
   </div>`;
 }
 
+// Synthèse des quantités à distribuer pour l'ensemble du troupeau (brut + MS), en plus du
+// détail par animal déjà présent dans le tableau de composition ci-dessus.
+function renderSyntheseTroupeau(a) {
+  if (!a.items.length) return '';
+  const defaultNb = currentExp?.structure?.troupeau?.nbVL || '';
+  return `<div style="margin-top:14px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;">Synthèse pour le troupeau</div>
+      <input type="number" id="synthese-nb-animaux" class="form-input" style="width:90px;margin:0;padding:4px 8px;font-size:.8rem;" min="1" value="${defaultNb}" placeholder="Nb animaux" oninput="updateSyntheseTroupeau()">
+      <span style="font-size:.75rem;color:var(--text-muted);">animaux recevant cette ration</span>
+    </div>
+    <div id="synthese-troupeau-content"></div>
+  </div>`;
+}
+function updateSyntheseTroupeau() {
+  const nb = parseInt(_$('synthese-nb-animaux')?.value)||0;
+  const cont = _$('synthese-troupeau-content'); if (!cont) return;
+  const a = lastApports;
+  if (!nb || !a?.items?.length) { cont.innerHTML = nb?'':'<p style="font-size:.76rem;color:var(--text-muted);margin:0;">Indiquez le nombre d\'animaux recevant cette ration pour voir les quantités totales à préparer chaque jour.</p>'; return; }
+  const allMs = a.items.every(i=>i.ms);
+  cont.innerHTML = `<div style="overflow-x:auto;"><table class="data-table" style="font-size:.78rem;">
+    <thead><tr><th>Aliment</th><th>kg MS/j (troupeau)</th><th>kg brut/j (troupeau)</th></tr></thead>
+    <tbody>${a.items.map(i=>`<tr><td>${escHtml(i.nom)}</td><td>${(i.qty*nb).toFixed(0)}</td><td>${i.ms?((i.qty/(i.ms/100))*nb).toFixed(0):'—'}</td></tr>`).join('')}
+    <tr style="font-weight:700;"><td>Total / jour</td><td>${(a.totalMS*nb).toFixed(0)} kg MS</td><td>${allMs?(a.items.reduce((s,x)=>s+x.qty/(x.ms/100),0)*nb).toFixed(0)+' kg':'—'}</td></tr>
+    </tbody></table></div>`;
+}
+
 function calcBilan() {
   const a = parseRation();
   if (!a.items.length) { showToast('Ajoutez au moins un aliment.', 'warn'); return; }
@@ -2965,13 +3174,15 @@ function calcBilan() {
     <div style="overflow-x:auto;">
     <table class="data-table" style="font-size:.78rem;white-space:nowrap;">
       <thead><tr>
-        <th>Aliment</th><th>kg MS</th><th>MS %</th>
+        <th>Aliment</th><th>kg MS</th><th>kg brut</th><th>MS %</th>
         <th style="color:#f97316;">${eu}</th><th style="color:#2563eb;">PDI (g)</th><th>PDIA (g)</th>
         <th>Ca (g)</th><th>P (g)</th><th>UE</th><th>NDF %MS</th>
       </tr></thead>
       <tbody>
         ${a.items.map(i=>`<tr>
-          <td>${escHtml(i.nom)}</td><td>${i.qty.toFixed(1)}</td><td style="color:var(--text-muted);">${i.ms?i.ms.toFixed(0):'—'}%</td>
+          <td>${escHtml(i.nom)}</td><td>${i.qty.toFixed(1)}</td>
+          <td style="color:var(--text-muted);">${i.ms?(i.qty/(i.ms/100)).toFixed(1):'—'}</td>
+          <td style="color:var(--text-muted);">${i.ms?i.ms.toFixed(0):'—'}%</td>
           <td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td>
           <td style="color:var(--text-muted);">${i.pdia?i.pdia.toFixed(0):'—'}</td>
           <td style="color:var(--text-muted);">${i.ca?i.ca.toFixed(1):'—'}</td><td style="color:var(--text-muted);">${i.p?i.p.toFixed(1):'—'}</td>
@@ -2979,7 +3190,8 @@ function calcBilan() {
           <td style="color:var(--text-muted);">${i.hasFibre?(i.ndf/i.qty/10).toFixed(0):'—'}</td>
         </tr>`).join('')}
         <tr style="font-weight:700;">
-          <td>Total</td><td>${a.totalMS.toFixed(1)}</td><td></td>
+          <td>Total</td><td>${a.totalMS.toFixed(1)}</td>
+          <td>${a.items.every(i=>i.ms)?a.items.reduce((s,i)=>s+i.qty/(i.ms/100),0).toFixed(1):'—'}</td><td></td>
           <td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td>
           <td>${(a.totalPDIA||0).toFixed(0)}</td><td>${(a.totalCa||0).toFixed(1)}</td><td>${(a.totalP||0).toFixed(1)}</td>
           <td>${(a.totalUE||0).toFixed(2)}</td>
@@ -2987,10 +3199,12 @@ function calcBilan() {
         </tr>
       </tbody>
     </table>
-    </div>`;
+    </div>
+    ${renderSyntheseTroupeau(a)}`;
 
   document.getElementById('glucides-wrap').innerHTML = renderGlucides(a);
   document.getElementById('bilan-result-wrap').style.display = '';
+  updateSyntheseTroupeau();
 
   renderScorePanel(a, b);
   renderAdvancedInsights(a, b);
@@ -3025,6 +3239,8 @@ async function updateExpScore(a,b) {
   const rationData = JSON.stringify({
     type: document.getElementById('r-type-animal').value,
     pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), tp: gN('r-tp'), gmq: gN('r-gmq'),
+    parite: document.getElementById('r-parite')?.value||'', stadeLact: gN('r-stade-lact')||null,
+    semainesVelage: gN('r-semaines-velage')||null, necActuelle: gN('r-nec-actuelle')||null, necObjectif: gN('r-nec-objectif')||null,
     activite: document.getElementById('r-activite').value,
     rows: getRationRows(),
   });
@@ -3065,6 +3281,11 @@ function restoreRationData(data) {
   if (data.tp) document.getElementById('r-tp').value = data.tp;
   if (data.gmq) document.getElementById('r-gmq').value = data.gmq;
   if (data.activite) document.getElementById('r-activite').value = data.activite;
+  if (data.parite && document.getElementById('r-parite')) document.getElementById('r-parite').value = data.parite;
+  if (data.stadeLact && document.getElementById('r-stade-lact')) document.getElementById('r-stade-lact').value = data.stadeLact;
+  if (data.semainesVelage && document.getElementById('r-semaines-velage')) document.getElementById('r-semaines-velage').value = data.semainesVelage;
+  if (data.necActuelle && document.getElementById('r-nec-actuelle')) document.getElementById('r-nec-actuelle').value = data.necActuelle;
+  if (data.necObjectif && document.getElementById('r-nec-objectif')) document.getElementById('r-nec-objectif').value = data.necObjectif;
   onAnimalTypeChange();
   if (data.rows && data.rows.length) {
     const cont = document.getElementById('ration-rows');
@@ -3182,6 +3403,8 @@ async function confirmSaveSession() {
     animalParams: {
       type: document.getElementById('r-type-animal').value,
       pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), tp: gN('r-tp'), gmq: gN('r-gmq'),
+    parite: document.getElementById('r-parite')?.value||'', stadeLact: gN('r-stade-lact')||null,
+    semainesVelage: gN('r-semaines-velage')||null, necActuelle: gN('r-nec-actuelle')||null, necObjectif: gN('r-nec-objectif')||null,
       activite: document.getElementById('r-activite').value,
     },
     rows: getRationRows(),
@@ -3262,6 +3485,11 @@ function restoreSession(id) {
     document.getElementById('r-tp').value = p.tp||'';
     document.getElementById('r-gmq').value = p.gmq||'';
     document.getElementById('r-activite').value = p.activite||'stabulation';
+    if (document.getElementById('r-parite')) document.getElementById('r-parite').value = p.parite||'';
+    if (document.getElementById('r-stade-lact')) document.getElementById('r-stade-lact').value = p.stadeLact||'';
+    if (document.getElementById('r-semaines-velage')) document.getElementById('r-semaines-velage').value = p.semainesVelage||'';
+    if (document.getElementById('r-nec-actuelle')) document.getElementById('r-nec-actuelle').value = p.necActuelle||'';
+    if (document.getElementById('r-nec-objectif')) document.getElementById('r-nec-objectif').value = p.necObjectif||'';
     onAnimalTypeChange();
   }
   if (d.rows&&d.rows.length) {
@@ -3299,9 +3527,10 @@ async function deleteSession(id) {
 const ANIMAL_LABELS = {
   'vache-laitiere':'Vache laitière','vache-tarie':'Vache tarie','vache-prepa-velage':'Prépa vêlage',
   'genisse':'Génisse laitière','genisse-engrais':'Génisse laitière (engrais)',
-  'vache-reforme':'Vache réforme','veau':'Veau de lait',
+  'vache-reforme':'Vache réforme','veau':'Veau post-sevrage',
   'taurillon':'Taurillon (JB)','boeuf-engrais':'Bœuf à l\'engrais',
-  'vache-allaitante':'Vache allaitante','genisse-viande':'Génisse viande','broutard':'Broutard'
+  'vache-allaitante':'Vache allaitante','vache-allaitante-prepa':'Génisse/Vache allaitante (prépa vêlage)',
+  'genisse-viande':'Génisse en croissance (viande)','genisse-engraissement':'Génisse d\'engraissement','broutard':'Broutard'
 };
 function scoreColor(g){return{A:'#15803d',B:'#0369a1',C:'#b45309',D:'#b91c1c'}[g]||'#64748b';}
 function rpStatus(r){return r>=0.9&&r<=1.1?'ok':r<0.9?'bad':'warn';}
@@ -3440,6 +3669,67 @@ function printRapport() {
   setTimeout(()=>{ w.print(); }, 700);
 }
 
+// Édition comparative imprimable : ration actuelle + jusqu'à 2 sessions précédemment
+// sauvegardées pour cette exploitation (2 à 3 rations côte à côte).
+async function printRapportComparatif() {
+  if (!currentExp) { showToast('Ouvrez une exploitation.', 'warn'); return; }
+  if (!lastApports || !lastBesoins) { showToast('Calculez d\'abord un bilan.', 'warn'); return; }
+  const supa = getSupa();
+  let sessions = [];
+  try {
+    const { data, error } = await supa.from('exploitation_sessions')
+      .select('*').eq('exploitation_id', currentExp.id)
+      .order('date', { ascending: false }).limit(2);
+    if (error) throw error;
+    sessions = (data||[]).filter(s => s.data?.apports && s.data?.besoins);
+  } catch(e) { showToast('Erreur chargement historique : ' + e.message, 'error'); return; }
+
+  const cols = [{
+    label: 'Actuelle', dateLabel: new Date().toLocaleDateString('fr-FR'),
+    a: lastApports, b: lastBesoins, score: computeScore(lastApports, lastBesoins),
+    cout: (typeof window._lastCoutJour==='number') ? window._lastCoutJour : null,
+    animal: { prod: gN('r-prod'), tb: gN('r-tb') },
+  }].concat(sessions.map(s => ({
+    label: new Date(s.date).toLocaleDateString('fr-FR'),
+    dateLabel: new Date(s.date).toLocaleDateString('fr-FR'),
+    a: s.data.apports, b: s.data.besoins, score: s.data.score||'—',
+    cout: (typeof s.data.coutJour==='number') ? s.data.coutJour : null,
+    animal: s.data.animalParams||{},
+  })));
+
+  const kv2=(l,vals)=>'<tr><td class="rp-kv-label" style="padding:6px 10px;">'+l+'</td>'+vals.map(v=>'<td class="rp-num" style="padding:6px 10px;">'+v+'</td>').join('')+'</tr>';
+  const eu0 = UFV_TYPES.includes(cols[0].b.typeLabel) ? 'UFV' : 'UFL';
+  let h = '<div class="rp-header"><div class="rp-logo">Rumicore <span style="opacity:.7;font-size:.75em;">Conseiller</span></div>'
+    + '<div class="rp-title-block"><div class="rp-title">Édition comparative</div><div class="rp-subtitle">'+escHtml(currentExp.nom||'')+' · '+new Date().toLocaleDateString('fr-FR')+'</div></div></div>'
+    + '<div class="rp-body"><div class="rp-section"><table class="rp-table"><thead><tr><th>Date</th>'+cols.map(c=>'<th class="rp-num">'+c.label+'</th>').join('')+'</tr></thead><tbody>'
+    + kv2('Score', cols.map(c=>c.score))
+    + kv2('Énergie ('+eu0+'/j)', cols.map(c=>c.a.totalUFL.toFixed(2)+' / '+c.b.bUFL.toFixed(2)))
+    + kv2('Couverture énergie', cols.map(c=>c.b.bUFL>0?(c.a.totalUFL/c.b.bUFL*100).toFixed(0)+'%':'—'))
+    + kv2('PDI (g/j)', cols.map(c=>c.a.totalPDI.toFixed(0)+' / '+c.b.bPDI.toFixed(0)))
+    + kv2('Couverture PDI', cols.map(c=>c.b.bPDI>0?(c.a.totalPDI/c.b.bPDI*100).toFixed(0)+'%':'—'))
+    + kv2('MS totale (kg/j)', cols.map(c=>c.a.totalMS.toFixed(1)))
+    + kv2('Production (L/j)', cols.map(c=>c.animal?.prod?c.animal.prod+' L':'—'))
+    + kv2('Coût (€/animal/j)', cols.map(c=>c.cout!=null?c.cout.toFixed(2)+' €':'—'))
+    + '</tbody></table></div>'
+    + '<div class="rp-section"><div class="rp-section-title">Composition comparée</div><table class="rp-table"><thead><tr><th>Aliment</th>'+cols.map(c=>'<th class="rp-num">'+c.label+' (kg MS)</th>').join('')+'</tr></thead><tbody>'
+    + Array.from(new Set(cols.flatMap(c=>c.a.items.map(i=>i.nom)))).map(nom =>
+        '<tr><td>'+escHtml(nom)+'</td>'+cols.map(c=>{const it=c.a.items.find(i=>i.nom===nom);return '<td class="rp-num">'+(it?it.qty.toFixed(1):'—')+'</td>';}).join('')+'</tr>'
+      ).join('')
+    + '</tbody></table></div></div>'
+    + '<div class="rp-footer"><span>Rumicore Conseiller · Rumicore.com</span><span>'+new Date().toLocaleDateString('fr-FR')+'</span></div>';
+
+  const w = window.open('', '_blank');
+  if (!w) { showToast('Autorisez les popups pour générer le PDF.', 'warn'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head>
+    <meta charset="UTF-8"><title>Comparaison — Rumicore Conseiller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>${RP_CSS}</style>
+  </head><body>${h}</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{ w.print(); }, 700);
+}
+
 function buildRapportBody() {
   const exp = currentExp||{};
   const titre = document.getElementById('rp-titre')?.value || 'Bilan nutritionnel';
@@ -3456,14 +3746,15 @@ function buildRapportBody() {
   const tb    = document.getElementById('r-tb')?.value||'';
   const tp    = document.getElementById('r-tp')?.value||'';
   const gmq   = document.getElementById('r-gmq')?.value||'';
-  const acti  = document.getElementById('r-activite')?.value==='paturage'?'Pâturage':'Stabulation';
+  const actiVal = document.getElementById('r-activite')?.value||'stabulation';
+  const acti  = actiVal==='paturage'?'Pâturage':actiVal==='libre'?'Stabulation libre':'Stabulation entravée';
 
   // Lait permis par la ration (voir renderIndicateurs pour le détail de la méthode) —
   // affiché en tête du rapport, aussi mis en avant qu'à l'écran.
   let laitPermisBrutRp = null, laitPermisLimitantRp = null;
   if (a && b && b.typeLabel==='vache-laitiere' && parseFloat(poids)>0) {
     const pvRp = parseFloat(poids);
-    const coefRp = acti==='Pâturage'?1.1:1;
+    const coefRp = activityCoef(actiVal);
     const lpUFL = (a.totalUFL/coefRp - (1.4+0.006*pvRp)) / 0.44;
     const lpPDI = (a.totalPDI/coefRp - (95+0.5*pvRp)) / 48;
     const lpStd = Math.max(0, Math.min(lpUFL, lpPDI));
@@ -3572,15 +3863,29 @@ function buildRapportBody() {
     + '</div></div></div>';
 
   // ── 3. RATION ─────────────────────────────────────────
-  h += '<div class="rp-section"><div class="rp-section-title">3 — Composition de la ration</div>'
+  const allMsRp = a.items.every(i=>i.ms);
+  const nbTroupeauRp = currentExp?.structure?.troupeau?.nbVL || null;
+  h += '<div class="rp-section"><div class="rp-section-title">3 — Composition de la ration (par animal)</div>'
     + renderCompositionChart(a)
-    + '<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j</th><th class="rp-num">% MS</th><th class="rp-num">'+eu+'</th><th class="rp-num">PDI g</th></tr></thead><tbody>'
+    + '<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j</th><th class="rp-num">kg brut/j</th><th class="rp-num">% MS</th><th class="rp-num">'+eu+'</th><th class="rp-num">PDI g</th></tr></thead><tbody>'
     + a.items.map(i=>'<tr><td>'+escHtml(i.nom)+'</td><td class="rp-num">'+i.qty.toFixed(1)+'</td>'
+      +'<td class="rp-num">'+(i.ms?(i.qty/(i.ms/100)).toFixed(1):'—')+'</td>'
       +'<td class="rp-num">'+(a.totalMS>0?(i.qty/a.totalMS*100).toFixed(0)+'%':'')+'</td>'
       +'<td class="rp-num">'+i.ufl.toFixed(2)+'</td><td class="rp-num">'+i.pdi.toFixed(0)+'</td></tr>').join('')
-    + '<tr class="rp-total"><td>TOTAL</td><td class="rp-num">'+a.totalMS.toFixed(1)+'</td><td class="rp-num">100%</td>'
+    + '<tr class="rp-total"><td>TOTAL</td><td class="rp-num">'+a.totalMS.toFixed(1)+'</td>'
+    + '<td class="rp-num">'+(allMsRp?a.items.reduce((s,i)=>s+i.qty/(i.ms/100),0).toFixed(1):'—')+'</td><td class="rp-num">100%</td>'
     + '<td class="rp-num">'+a.totalUFL.toFixed(2)+'</td><td class="rp-num">'+a.totalPDI.toFixed(0)+'</td></tr>'
     + '</tbody></table></div>';
+
+  if (nbTroupeauRp) {
+    h += '<div class="rp-section"><div class="rp-section-title">3b — Synthèse pour le troupeau ('+nbTroupeauRp+' animaux)</div>'
+      + '<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j (troupeau)</th><th class="rp-num">kg brut/j (troupeau)</th></tr></thead><tbody>'
+      + a.items.map(i=>'<tr><td>'+escHtml(i.nom)+'</td><td class="rp-num">'+(i.qty*nbTroupeauRp).toFixed(0)+'</td><td class="rp-num">'+(i.ms?((i.qty/(i.ms/100))*nbTroupeauRp).toFixed(0):'—')+'</td></tr>').join('')
+      + '<tr class="rp-total"><td>TOTAL / jour</td><td class="rp-num">'+(a.totalMS*nbTroupeauRp).toFixed(0)+' kg MS</td><td class="rp-num">'+(allMsRp?(a.items.reduce((s,i)=>s+i.qty/(i.ms/100),0)*nbTroupeauRp).toFixed(0)+' kg':'—')+'</td></tr>'
+      + '</tbody></table>'
+      + '<p style="font-size:.7rem;color:#94a3b8;margin-top:6px;">Effectif issu de la fiche "Structure exploitation" ('+nbTroupeauRp+' VL) — à ajuster si tous les animaux ne reçoivent pas exactement cette ration.</p>'
+      + '</div>';
+  }
 
   // ── 4. BILAN ──────────────────────────────────────────
   h += '<div class="rp-section"><div class="rp-section-title">4 — Bilan nutritionnel</div>'
@@ -4120,7 +4425,7 @@ function renderIndicateurs(a,b) {
   const objLaitInd = currentExp?.objectifs?.lait, objLaitStdInd = currentExp?.objectifs?.laitStandard;
   let laitPermisStd=null, laitPermisBrut=null, laitPermisLimitant=null;
   if(b.typeLabel==='vache-laitiere'&&pv>0){
-    const coefLait = (document.getElementById('r-activite')?.value==='paturage')?1.1:1;
+    const coefLait = activityCoef(document.getElementById('r-activite')?.value);
     const laitPermisUFL = (a.totalUFL/coefLait - (1.4+0.006*pv)) / 0.44;
     const laitPermisPDI = (a.totalPDI/coefLait - (95+0.5*pv)) / 48;
     laitPermisStd = Math.max(0, Math.min(laitPermisUFL, laitPermisPDI));
@@ -4160,6 +4465,60 @@ function renderIndicateurs(a,b) {
         prodDetail+=tip('ok','✅','Production au niveau de l\'objectif fixé pour cette exploitation.');}
     } else {
       prodDetail+=tip('info','📖','Définissez un objectif de production (bouton "🎯 Objectifs" sur la fiche exploitation) pour comparer ce niveau à une cible.');
+    }
+  }
+
+  // 0b. PROFIL PHYSIOLOGIQUE — parité, stade de lactation, semaines avant vêlage, NEC.
+  // Purement informatif/comparatif : ces données ne modifient pas les calculs UFL/PDI
+  // (aucun coefficient de correction NEC vérifié disponible) — elles sont affichées pour
+  // le suivi du conseiller, pas pour ajuster automatiquement la ration.
+  let profilCls,profilBadge,profilBadgeCls,profilResume,profilDetail;
+  const parite = document.getElementById('r-parite')?.value||'';
+  const stadeLact = gN('r-stade-lact');
+  const semainesVelage = gN('r-semaines-velage');
+  const necActuelle = gN('r-nec-actuelle');
+  const necObjectif = gN('r-nec-objectif');
+  const hasProfil = parite||stadeLact||semainesVelage||necActuelle||necObjectif;
+  if(!hasProfil){profilCls='info';profilBadge='Non renseigné';profilBadgeCls='rb-badge-gray';profilResume='Parité, stade de lactation, NEC non saisis';profilDetail=adv('Renseignez le profil détaillé de l\'animal (bouton "▾ Profil détaillé" au-dessus de la ration) pour suivre parité, stade de lactation, semaines avant vêlage et note d\'état corporel.');}
+  else{
+    const parts=[];
+    if(parite)parts.push(parite==='primipare'?'Primipare':'Multipare');
+    if(stadeLact)parts.push(`${stadeLact} sem. de lactation`);
+    if(semainesVelage)parts.push(`${semainesVelage} sem. avant vêlage`);
+    if(necActuelle)parts.push(`NEC ${necActuelle}${necObjectif?'/'+necObjectif:''}`);
+    profilResume=parts.join(' · ');
+    profilCls='info';profilBadge='Renseigné';profilBadgeCls='rb-badge-gray';
+    profilDetail=adv(`Profil : ${parts.join(', ')}.`);
+    if(parite)profilDetail+=tip('info','🐄',`Parité : ${parite==='primipare'?'primipare (1ère lactation — besoins de croissance en plus de la production, capacité d\'ingestion souvent plus limitée)':'multipare'}.`);
+    if(stadeLact)profilDetail+=tip('info','📅',`Stade de lactation : ${stadeLact} semaines.`);
+    if(semainesVelage)profilDetail+=tip('info','🤰',`${semainesVelage} semaines avant le vêlage prévu.`);
+    if(necActuelle&&necObjectif){
+      const ecartNec=necActuelle-necObjectif;
+      if(Math.abs(ecartNec)<0.25){profilDetail+=tip('ok','✅',`NEC actuelle (${necActuelle}) conforme à l'objectif (${necObjectif}).`);}
+      else{profilCls='warn';profilBadge=ecartNec<0?'NEC sous objectif':'NEC au-dessus';profilBadgeCls='rb-badge-orange';
+        profilDetail+=tip('warn','⚠️',`NEC actuelle (${necActuelle}) ${ecartNec<0?'inférieure':'supérieure'} à l'objectif (${necObjectif}) de ${Math.abs(ecartNec).toFixed(2)} point(s) — à recouper avec le niveau énergétique de la ration.`);}
+    } else if(necActuelle){profilDetail+=tip('info','📏',`NEC actuelle : ${necActuelle}/5 — définissez une NEC objectif pour comparer.`);}
+    profilDetail+=tip('info','📖','Ces informations sont affichées à titre de suivi — elles ne modifient pas automatiquement les besoins UFL/PDI calculés (aucune formule de correction NEC vérifiée n\'est appliquée).');
+  }
+
+  // 0c. BESOINS EN EAU — estimation indicative (pas de formule INRA 2018 unique publiée pour
+  // ce paramètre ; deux règles usuelles de la presse technique/vulgarisation professionnelle
+  // française sont utilisées ici en repères croisés, pas une valeur unique présentée comme précise).
+  let eauCls,eauBadge,eauBadgeCls,eauResume,eauDetail;
+  {
+    const eauMsLow=a.totalMS*4, eauMsHigh=a.totalMS*5;
+    const isLaitiere=b.typeLabel==='vache-laitiere'&&prod>0;
+    const eauLaitLow=isLaitiere?prod*5:null, eauLaitHigh=isLaitiere?prod*10:null;
+    if(!a.totalMS){eauCls='info';eauBadge='Non disponible';eauBadgeCls='rb-badge-gray';eauResume='Ration requise';eauDetail=adv('Calculez le bilan de ration pour estimer le besoin en eau.');}
+    else{
+      eauCls='info';eauBadgeCls='rb-badge-gray';
+      eauResume=`≈ ${eauMsLow.toFixed(0)}-${eauMsHigh.toFixed(0)} L/j (via MS ingérée)${isLaitiere?` · ${eauLaitLow.toFixed(0)}-${eauLaitHigh.toFixed(0)} L/j (via lait)`:''}`;
+      eauBadge=`≈ ${eauMsLow.toFixed(0)}-${eauMsHigh.toFixed(0)} L/j`;
+      eauDetail=adv(`Estimation indicative du besoin en eau de boisson (hors eau contenue dans les aliments), croisant deux repères usuels :`)
+        +tip('info','💧',`Via la MS ingérée (${a.totalMS.toFixed(1)} kg/j) : 4 à 5 L d'eau par kg de MS ingérée → <strong>${eauMsLow.toFixed(0)} à ${eauMsHigh.toFixed(0)} L/j</strong>.`)
+        +(isLaitiere?tip('info','🥛',`Via la production laitière (${prod.toFixed(1)} L/j) : 5 à 10 L d'eau par L de lait → <strong>${eauLaitLow.toFixed(0)} à ${eauLaitHigh.toFixed(0)} L/j</strong>.`):'')
+        +tip('info','📊','Repère de terrain généralement cité pour une vache laitière adulte : 60 à 140 L/j bus, moyenne 80-100 L/j (varie fortement avec température, MS de la ration et stade physiologique).')
+        +tip('info','📖','Aucune formule INRA 2018 unique et publiée n\'a été trouvée pour ce paramètre — ces repères sont ceux couramment utilisés par la presse technique française (Réussir Lait, Web-agri, Institut de l\'Élevage). Assurez un accès à l\'eau propre à volonté plutôt que de rationner sur cette base.');
     }
   }
 
@@ -4415,6 +4774,8 @@ function renderIndicateurs(a,b) {
   const mask = (id,html) => maskedInd.includes(id) ? '' : html;
   container.innerHTML=`<div style="margin-bottom:10px;font-size:.82rem;color:var(--text-muted);">🔍 Cliquez sur une carte pour afficher les conseils · <a href="#" onclick="showPage('settings');setTimeout(()=>document.getElementById('ind-select-list')?.scrollIntoView({behavior:'smooth'}),100);return false;" style="color:#15803d;">choisir les indicateurs affichés</a></div>`+
     mask('production',card('production','🥛','Niveau de production',prodCls,prodBadge,prodBadgeCls,prodResume,prodDetail))+
+    mask('profil',card('profil','🐮','Profil physiologique',profilCls,profilBadge,profilBadgeCls,profilResume,profilDetail))+
+    mask('eau',card('eau','💧','Besoins en eau (estimation)',eauCls,eauBadge,eauBadgeCls,eauResume,eauDetail))+
     mask('energie',card('energie','⚡','Énergie',eCls,eBadge,eBadgeCls,`${a.totalUFL.toFixed(2)} / ${b.bUFL.toFixed(2)} ${eu} — ${(rUFL*100).toFixed(0)}%`,eDetail))+
     mask('proteines',card('proteines','🧬','Protéines (PDI)',pCls,pBadge,pBadgeCls,`${a.totalPDI.toFixed(0)} / ${b.bPDI.toFixed(0)} g/j — ${(rPDI*100).toFixed(0)}%`,pDetail))+
     mask('equilibre',card('equilibre','⚖️',`Équilibre E/P`,eCls2,eBadge2,eBadgeCls2,`PDI/${eu} = ${ppu.toFixed(0)} g/${eu}`,eDetail2))+
@@ -4673,6 +5034,13 @@ function calcCouts() {
   document.getElementById('cout-kg-ms').textContent=totalMS>0?(totalCoutJour/totalMS*1000).toFixed(0)+' €/t MS':'-';
   document.getElementById('cout-1000l').textContent=refLait>0?(totalCoutJour/(refLait/365)*1000).toFixed(2)+' €':'-';
   document.getElementById('cout-troupeau').textContent=(totalCoutJour*nbVL).toFixed(0)+' €/j';
+  const prixLaitC=parseFloat(document.getElementById('cout-prix-lait')?.value)||0.40;
+  const coutPar1000l=refLait>0?(totalCoutJour/(refLait/365)*1000):null;
+  const margeC=document.getElementById('cout-marge-1000l');
+  if(margeC)margeC.textContent=coutPar1000l!=null?((prixLaitC*1000-coutPar1000l).toFixed(2)+' €'):'-';
+  const prodC=gN('r-prod');
+  const margeJourC=document.getElementById('cout-marge-jour');
+  if(margeJourC)margeJourC.textContent=prodC>0?((prodC*prixLaitC-totalCoutJour).toFixed(2)+' €'):'-';
   document.getElementById('cout-resultats').style.display='';
   const tbody=document.getElementById('cout-detail-body');
   tbody.innerHTML=rows.map(r=>`<tr><td>${escHtml(r.nom)}</td><td>${r.qty.toFixed(1)}</td><td>${r.prix}</td><td>${r.coutJ.toFixed(2)} €</td><td>${totalCoutJour>0?(r.coutJ/totalCoutJour*100).toFixed(0)+'%':'-'}</td></tr>`).join('')+
@@ -5149,7 +5517,6 @@ async function renderFicheSynthese() {
   try { anim = e.last_ration_data ? JSON.parse(e.last_ration_data) : {}; } catch(err) { anim = {}; }
 
   const benchmarkHtml = await benchmarkBlockHtml(e, anim);
-  const crossBenchHtml = await crossBenchmarkHtml(e, anim);
 
   const score = e.last_score || null;
   const lastDate = e.last_session_date ? new Date(e.last_session_date) : null;
@@ -5209,48 +5576,7 @@ async function renderFicheSynthese() {
     </div>
     ${objectifsBlockHtml(e, anim, score)}
     ${benchmarkHtml}
-    ${crossBenchHtml}
     ${lastNoteHtml}`;
-}
-
-// ══ BENCHMARK INTER-ORGANISMES (anonymisé, réel) ════════════════════════════
-// Agrège les données de TOUS les conseillers via une fonction SQL SECURITY DEFINER
-// qui ne renvoie que des médianes (jamais de ligne individuelle), et seulement si
-// au moins 3 organismes distincts contribuent — sinon le résultat est masqué.
-async function crossBenchmarkHtml(e, anim) {
-  const supa = getSupa();
-  try {
-    const { data, error } = await supa.rpc('get_cross_benchmark', { p_type: e.type||'lait', p_exclude_exp: e.id });
-    if (error) throw error;
-    const r = Array.isArray(data) ? data[0] : data;
-    if (!r || (r.nb_organismes||0) < 3) {
-      return `<div class="card" style="margin-bottom:0;margin-top:16px;">
-        <div class="card-header"><div class="card-title">🌍 Benchmark inter-organismes</div></div>
-        <div style="font-size:.82rem;color:var(--text-muted);">Pas encore assez de données partagées entre organismes pour comparer anonymement (minimum 3 organismes distincts requis${r?', actuellement '+(r.nb_organismes||0):''}). Ce compteur grandit automatiquement à mesure que d'autres conseillers utilisent RumiCORE.</div>
-      </div>`;
-    }
-    const row = (label, cur, med, unit, higherBetter) => {
-      if (med==null || cur==null) return '';
-      const better = higherBetter ? cur>=med : cur<=med;
-      const col = better?'#15803d':'#dc2626';
-      return `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;">
-        <span style="color:var(--text-muted);">${label}</span>
-        <span><strong style="color:${col};">${cur}${unit}</strong> <span style="color:#94a3b8;">vs médiane ${(+med).toFixed(1)}${unit}</span></span>
-      </div>`;
-    };
-    return `<div class="card" style="margin-bottom:0;margin-top:16px;">
-      <div class="card-header"><div class="card-title">🌍 Benchmark inter-organismes</div></div>
-      <p style="font-size:.72rem;color:#94a3b8;margin-bottom:8px;">Données anonymisées · ${r.nb_exploitations} exploitations · ${r.nb_organismes} organismes distincts</p>
-      ${row('🥛 Lait', anim.prod, r.med_lait, ' L/j', true)}
-      ${row('🧈 TB', anim.tb, r.med_tb, ' %', true)}
-      ${row('💰 Coût', (typeof window._lastCoutJour==='number'?window._lastCoutJour:null), r.med_cout, ' €/VL/j', false)}
-    </div>`;
-  } catch(err) {
-    return `<div class="card" style="margin-bottom:0;margin-top:16px;">
-      <div class="card-header"><div class="card-title">🌍 Benchmark inter-organismes</div></div>
-      <div style="font-size:.78rem;color:#dc2626;">Fonction indisponible (exécutez migration_conseiller_v2.sql ?) : ${escHtml(err.message||String(err))}</div>
-    </div>`;
-  }
 }
 
 // ══ BENCHMARK INTERNE AU PORTEFEUILLE ════════════════════════════
@@ -5722,8 +6048,107 @@ async function loadConseillerAliments() {
       <td style="font-weight:600;">${escHtml(a.nom)}</td>
       <td>${a.prix ?? '—'}</td><td>${a.ufl ?? '—'}</td><td>${a.pdi ?? '—'}</td><td>${a.ms ?? '—'}</td>
       <td>${escHtml(a.fournisseur||'—')}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteConseillerAliment('${a.id}')">🗑</button></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" onclick="editConseillerAliment('${a.id}')" title="Modifier">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="duplicateConseillerAliment('${a.id}')" title="Dupliquer">⎘</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteConseillerAliment('${a.id}')" title="Supprimer">🗑</button>
+      </td>
     </tr>`).join('')}</tbody></table>`;
+}
+function fillConseillerAlimentForm(a) {
+  if(_$('ca-nom'))_$('ca-nom').value=a.nom||'';
+  if(_$('ca-prix'))_$('ca-prix').value=a.prix??'';
+  if(_$('ca-ufl'))_$('ca-ufl').value=a.ufl??'';
+  if(_$('ca-pdi'))_$('ca-pdi').value=a.pdi??'';
+  if(_$('ca-ms'))_$('ca-ms').value=a.ms??'';
+  if(_$('ca-fournisseur'))_$('ca-fournisseur').value=a.fournisseur||'';
+}
+function editConseillerAliment(id) {
+  const a = (window._conseillerAliments||[]).find(x=>x.id===id); if(!a) return;
+  fillConseillerAlimentForm(a);
+  if(_$('ca-edit-id'))_$('ca-edit-id').value=id;
+  if(_$('ca-save-btn'))_$('ca-save-btn').textContent='💾 Enregistrer les modifications';
+  if(_$('ca-cancel-btn'))_$('ca-cancel-btn').style.display='';
+  _$('ca-nom')?.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function duplicateConseillerAliment(id) {
+  const a = (window._conseillerAliments||[]).find(x=>x.id===id); if(!a) return;
+  fillConseillerAlimentForm({...a, nom:(a.nom||'')+' (copie)'});
+  if(_$('ca-edit-id'))_$('ca-edit-id').value='';
+  if(_$('ca-save-btn'))_$('ca-save-btn').textContent='➕ Ajouter';
+  if(_$('ca-cancel-btn'))_$('ca-cancel-btn').style.display='none';
+  _$('ca-nom')?.scrollIntoView({behavior:'smooth',block:'center'});
+  showToast('Copie prête — ajustez le nom/les valeurs puis Ajouter.', 'info');
+}
+// ── Import groupé CSV (base conseiller + base par exploitation) ──
+// Parseur CSV simple avec support des champs entre guillemets. En-tête requis, colonnes
+// reconnues par nom (ordre libre) : nom, prix, ufl, pdi, ms, fournisseur.
+function parseCsvLine(line) {
+  const out = []; let cur=''; let inQ=false;
+  for (let i=0;i<line.length;i++) {
+    const c=line[i];
+    if (inQ) { if (c==='"') { if (line[i+1]==='"') { cur+='"'; i++; } else inQ=false; } else cur+=c; }
+    else { if (c==='"') inQ=true; else if (c===',') { out.push(cur); cur=''; } else cur+=c; }
+  }
+  out.push(cur);
+  return out.map(s=>s.trim());
+}
+function parseAlimentsCsvText(text) {
+  const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
+  if (!lines.length) return null;
+  const header = parseCsvLine(lines[0]).map(h=>h.toLowerCase());
+  const idx = { nom:header.indexOf('nom'), prix:header.indexOf('prix'), ufl:header.indexOf('ufl'), pdi:header.indexOf('pdi'), ms:header.indexOf('ms'), fournisseur:header.indexOf('fournisseur') };
+  if (idx.nom === -1) return null;
+  const rows = [];
+  for (let i=1;i<lines.length;i++) {
+    const c = parseCsvLine(lines[i]);
+    const nom = (c[idx.nom]||'').trim();
+    if (!nom) continue;
+    rows.push({
+      nom,
+      prix: idx.prix>=0 ? (parseFloat(c[idx.prix])||null) : null,
+      ufl: idx.ufl>=0 ? (parseFloat(c[idx.ufl])||null) : null,
+      pdi: idx.pdi>=0 ? (parseFloat(c[idx.pdi])||null) : null,
+      ms: idx.ms>=0 ? (parseFloat(c[idx.ms])||null) : null,
+      fournisseur: idx.fournisseur>=0 ? (c[idx.fournisseur]||null) : null,
+    });
+  }
+  return rows;
+}
+async function importConseillerAlimentsCsv(event) {
+  const file = event.target.files?.[0]; if (!file) return;
+  const text = await file.text();
+  const rows = parseAlimentsCsvText(text);
+  event.target.value='';
+  if (!rows) { showToast('CSV invalide : colonne "nom" introuvable dans l\'en-tête (attendu : nom, prix, ufl, pdi, ms, fournisseur).', 'error', 6000); return; }
+  if (!rows.length) { showToast('Aucune ligne valide dans ce fichier.', 'warn'); return; }
+  const supa = getSupa();
+  const payload = rows.map(r => ({ advisor_id: currentUser.id, nom:r.nom, prix:r.prix, ufl:r.ufl, pdi:r.pdi, ms:r.ms, fournisseur:r.fournisseur, updated_at:new Date().toISOString() }));
+  const { error } = await supa.from('conseiller_aliments').insert(payload);
+  if (error) { showToast('Erreur import : ' + error.message, 'error', 6000); return; }
+  showToast(`${payload.length} aliment(s) importé(s).`, 'success');
+  loadConseillerAliments();
+}
+async function importExpAlimentsCsv(event) {
+  if (!currentExp) { showToast('Ouvrez une exploitation.', 'warn'); return; }
+  const file = event.target.files?.[0]; if (!file) return;
+  const text = await file.text();
+  const rows = parseAlimentsCsvText(text);
+  event.target.value='';
+  if (!rows) { showToast('CSV invalide : colonne "nom" introuvable dans l\'en-tête (attendu : nom, prix, ufl, pdi, ms, fournisseur).', 'error', 6000); return; }
+  if (!rows.length) { showToast('Aucune ligne valide dans ce fichier.', 'warn'); return; }
+  const supa = getSupa();
+  const payload = rows.map(r => ({ exploitation_id:currentExp.id, nom:r.nom, prix:r.prix, ufl:r.ufl, pdi:r.pdi, ms:r.ms, fournisseur:r.fournisseur, updated_at:new Date().toISOString() }));
+  const { error } = await supa.from('exploitation_aliments').insert(payload);
+  if (error) { showToast('Erreur import : ' + error.message, 'error', 6000); return; }
+  showToast(`${payload.length} aliment(s) importé(s).`, 'success');
+  loadExpAliments();
+}
+
+function cancelEditConseillerAliment() {
+  ['ca-nom','ca-prix','ca-ufl','ca-pdi','ca-ms','ca-fournisseur','ca-edit-id'].forEach(id => { if(_$(id)) _$(id).value=''; });
+  if(_$('ca-save-btn'))_$('ca-save-btn').textContent='➕ Ajouter';
+  if(_$('ca-cancel-btn'))_$('ca-cancel-btn').style.display='none';
 }
 async function addConseillerAliment() {
   const nom = (_$('ca-nom')?.value||'').trim();
@@ -5740,15 +6165,18 @@ async function addConseillerAliment() {
     fournisseur: (_$('ca-fournisseur').value||'').trim()||null,
     updated_at: new Date().toISOString(),
   };
-  // "Ajouter / mettre à jour" : si un aliment du même nom existe déjà pour ce conseiller,
-  // on le met à jour plutôt que de créer un doublon.
-  const existing = (window._conseillerAliments||[]).find(a => (a.nom||'').toLowerCase().trim() === nom.toLowerCase());
-  const { error } = existing
-    ? await supa.from('conseiller_aliments').update(payload).eq('id', existing.id)
+  const editId = _$('ca-edit-id')?.value||'';
+  // Modification explicite (bouton ✏️) : mise à jour par id, le nom peut changer.
+  // Sinon, "Ajouter" : si un aliment du même nom existe déjà, on le met à jour plutôt
+  // que de créer un doublon (comportement historique conservé).
+  const existing = editId ? null : (window._conseillerAliments||[]).find(a => (a.nom||'').toLowerCase().trim() === nom.toLowerCase());
+  const targetId = editId || existing?.id;
+  const { error } = targetId
+    ? await supa.from('conseiller_aliments').update(payload).eq('id', targetId)
     : await supa.from('conseiller_aliments').insert(payload);
   if (error) { showToast('Erreur : ' + error.message, 'error', 5000); return; }
-  ['ca-nom','ca-prix','ca-ufl','ca-pdi','ca-ms','ca-fournisseur'].forEach(id => { if(_$(id)) _$(id).value=''; });
-  showToast(existing ? 'Aliment mis à jour.' : 'Aliment enregistré.', 'success');
+  cancelEditConseillerAliment();
+  showToast(targetId ? 'Aliment mis à jour.' : 'Aliment enregistré.', 'success');
   loadConseillerAliments();
 }
 async function deleteConseillerAliment(id) {
@@ -5790,13 +6218,15 @@ async function addExpAliment() {
     fournisseur: (_$('ea-fournisseur').value||'').trim()||null,
     updated_at: new Date().toISOString(),
   };
-  const existing = (window._expAliments||[]).find(a => (a.nom||'').toLowerCase().trim() === nom.toLowerCase());
-  const { error } = existing
-    ? await supa.from('exploitation_aliments').update(payload).eq('id', existing.id)
+  const editId = _$('ea-edit-id')?.value||'';
+  const existing = editId ? null : (window._expAliments||[]).find(a => (a.nom||'').toLowerCase().trim() === nom.toLowerCase());
+  const targetId = editId || existing?.id;
+  const { error } = targetId
+    ? await supa.from('exploitation_aliments').update(payload).eq('id', targetId)
     : await supa.from('exploitation_aliments').insert(payload);
   if (error) { showToast('Erreur : ' + error.message + ' (exécutez exploitation_aliments.sql dans Supabase ?)', 'error', 6000); return; }
-  ['ea-nom','ea-prix','ea-ufl','ea-pdi','ea-ms','ea-fournisseur'].forEach(id => { if(_$(id)) _$(id).value=''; });
-  showToast(existing ? 'Aliment mis à jour.' : 'Aliment enregistré pour cette exploitation.', 'success');
+  cancelEditExpAliment();
+  showToast(targetId ? 'Aliment mis à jour.' : 'Aliment enregistré pour cette exploitation.', 'success');
   loadExpAliments();
 }
 async function deleteExpAliment(id) {
@@ -5808,6 +6238,34 @@ async function deleteExpAliment(id) {
     loadExpAliments();
   }, 'Supprimer', true);
 }
+function fillExpAlimentForm(a) {
+  if(_$('ea-nom'))_$('ea-nom').value=a.nom||'';
+  if(_$('ea-prix'))_$('ea-prix').value=a.prix??'';
+  if(_$('ea-ufl'))_$('ea-ufl').value=a.ufl??'';
+  if(_$('ea-pdi'))_$('ea-pdi').value=a.pdi??'';
+  if(_$('ea-ms'))_$('ea-ms').value=a.ms??'';
+  if(_$('ea-fournisseur'))_$('ea-fournisseur').value=a.fournisseur||'';
+}
+function editExpAliment(id) {
+  const a = (window._expAliments||[]).find(x=>x.id===id); if(!a) return;
+  fillExpAlimentForm(a);
+  if(_$('ea-edit-id'))_$('ea-edit-id').value=id;
+  if(_$('ea-save-btn'))_$('ea-save-btn').textContent='💾 Enregistrer les modifications';
+  if(_$('ea-cancel-btn'))_$('ea-cancel-btn').style.display='';
+}
+function duplicateExpAliment(id) {
+  const a = (window._expAliments||[]).find(x=>x.id===id); if(!a) return;
+  fillExpAlimentForm({...a, nom:(a.nom||'')+' (copie)'});
+  if(_$('ea-edit-id'))_$('ea-edit-id').value='';
+  if(_$('ea-save-btn'))_$('ea-save-btn').textContent='➕ Ajouter';
+  if(_$('ea-cancel-btn'))_$('ea-cancel-btn').style.display='none';
+  showToast('Copie prête — ajustez le nom/les valeurs puis Ajouter.', 'info');
+}
+function cancelEditExpAliment() {
+  ['ea-nom','ea-prix','ea-ufl','ea-pdi','ea-ms','ea-fournisseur','ea-edit-id'].forEach(id => { if(_$(id)) _$(id).value=''; });
+  if(_$('ea-save-btn'))_$('ea-save-btn').textContent='➕ Ajouter';
+  if(_$('ea-cancel-btn'))_$('ea-cancel-btn').style.display='none';
+}
 function renderExpAlimentsUI() {
   const listEl = _$('ea-list'); if (!listEl) return;
   const data = window._expAliments||[];
@@ -5816,7 +6274,11 @@ function renderExpAlimentsUI() {
     <tbody>${data.map(a => `<tr>
       <td style="font-weight:600;">${escHtml(a.nom)}</td>
       <td>${a.prix ?? '—'}</td><td>${a.ufl ?? '—'}</td><td>${a.pdi ?? '—'}</td><td>${a.ms ?? '—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteExpAliment('${a.id}')">🗑</button></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" onclick="editExpAliment('${a.id}')" title="Modifier">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="duplicateExpAliment('${a.id}')" title="Dupliquer">⎘</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteExpAliment('${a.id}')" title="Supprimer">🗑</button>
+      </td>
     </tr>`).join('')}</tbody></table>`;
 }
 
