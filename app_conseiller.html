@@ -2419,11 +2419,13 @@ const INDICATEURS_LIST = [
   {id:'energie',label:'⚡ Énergie'},
   {id:'proteines',label:'🧬 Protéines (PDI)'},
   {id:'equilibre',label:'⚖️ Équilibre E/P'},
-  {id:'acidose',label:'🔥 Risque Acidose'},
+  {id:'acidose',label:'🔥 Risque Acidose (SARA)'},
+  {id:'ingestion',label:'🐄 Ingestion / Saturation'},
+  {id:'msca',label:'💶 MSCA'},
+  {id:'ic',label:'⚖️ Indice de Consommation (IC)'},
   {id:'mineraux',label:'⚗️ Minéraux & BACA'},
   {id:'aa',label:'🔬 Acides aminés'},
-  {id:'ingestion',label:'🐄 Ingestion / Saturation'},
-  {id:'ferment',label:'🌾 Fermentescibilité (SARA)'},
+  {id:'ferment',label:'🌾 Fermentescibilité des glucides'},
   {id:'densite',label:'📊 Densité énergétique'},
   {id:'bpr',label:'🧪 Balance Protéique du Rumen'},
   {id:'ue',label:'📦 Encombrement réel (UE)'},
@@ -2432,8 +2434,6 @@ const INDICATEURS_LIST = [
   {id:'glucides',label:'🌽 Glucides totaux'},
   {id:'ndf',label:'🧵 Structure & fibres (NDF/ADF)'},
   {id:'diversite',label:'🔀 Diversité de la ration'},
-  {id:'msca',label:'💶 MSCA'},
-  {id:'ic',label:'⚖️ Indice de Consommation (IC)'},
 ];
 const IND_LS_KEY = 'rumi-conseiller-indicateurs-masques';
 function getIndicateursMasques() {
@@ -3454,8 +3454,22 @@ function buildRapportBody() {
   const poids = document.getElementById('r-pv')?.value||'';
   const prod  = document.getElementById('r-prod')?.value||'';
   const tb    = document.getElementById('r-tb')?.value||'';
+  const tp    = document.getElementById('r-tp')?.value||'';
   const gmq   = document.getElementById('r-gmq')?.value||'';
   const acti  = document.getElementById('r-activite')?.value==='paturage'?'Pâturage':'Stabulation';
+
+  // Lait permis par la ration (voir renderIndicateurs pour le détail de la méthode) —
+  // affiché en tête du rapport, aussi mis en avant qu'à l'écran.
+  let laitPermisBrutRp = null, laitPermisLimitantRp = null;
+  if (a && b && b.typeLabel==='vache-laitiere' && parseFloat(poids)>0) {
+    const pvRp = parseFloat(poids);
+    const coefRp = acti==='Pâturage'?1.1:1;
+    const lpUFL = (a.totalUFL/coefRp - (1.4+0.006*pvRp)) / 0.44;
+    const lpPDI = (a.totalPDI/coefRp - (95+0.5*pvRp)) / 48;
+    const lpStd = Math.max(0, Math.min(lpUFL, lpPDI));
+    laitPermisLimitantRp = lpUFL<=lpPDI ? 'énergie (UFL)' : 'protéines (PDI)';
+    laitPermisBrutRp = tb ? lpStd*40/parseFloat(tb) : lpStd;
+  }
 
   const kv=(l,v)=>'<div class="rp-kv"><span class="rp-kv-label">'+l+'</span><span class="rp-kv-val">'+v+'</span></div>';
   const ir=(ico,lbl,val,cls,badge)=>'<div class="rp-indicator-row"><span class="rp-ind-icon">'+ico+'</span><span class="rp-ind-label">'+lbl+'</span><span class="rp-ind-val">'+val+'</span>'+rpBadge(cls,badge)+'</div>';
@@ -3503,9 +3517,11 @@ function buildRapportBody() {
     + '</div>'
     + '<div class="rp-box"><div class="rp-box-title">Paramètres</div>'
     + (poids?kv('Poids vif',poids+' kg'):'')
-    + (prod?kv('Production',prod+' kg lait/j'):'')
+    + (prod?kv('Production visée',prod+' kg lait/j'):'')
     + (tb?kv('TB',tb+' g/L'):'')
+    + (tp?kv('TP',tp+' g/L'):'')
     + (gmq?kv('GMQ',gmq+' kg/j'):'')
+    + (laitPermisBrutRp!=null?kv('Lait permis par la ration','<strong>'+laitPermisBrutRp.toFixed(1)+' kg/j</strong> (limité '+laitPermisLimitantRp+')'):'')
     + '</div></div></div>';
 
   if (!a || !b) {
@@ -3596,11 +3612,31 @@ function buildRapportBody() {
   }
 
   // ── 5. INDICATEURS ───────────────────────────────────
+  // Score Acidose (SARA) — même méthode multi-facteurs que l'écran (concentrés, glucides
+  // rapides, NDF total, NDF fourrages, BACA, ingestion), condensée pour l'impression.
+  const ndfPctRp=(a.totalNDF||0)/(a.totalMS||1)/10;
+  const fibreCovRp=a.totalMS>0?(a.msAvecFibre||0)/a.totalMS:0;
+  const ndfFourrageRp=a.items.filter(i=>i.isFourrage).reduce((s,i)=>s+(i.ndf||0),0)/(a.totalMS||1)/10;
+  const fermentRapideRp=((a.totalAR||0)+(a.totalSS||0))/(a.totalMS||1);
+  const ingestionRatioRp=b.ingestionCapacite>0?a.totalMS/b.ingestionCapacite:null;
+  const facteursRp=[{pts:pctConc3<35?25:pctConc3<45?18:pctConc3<55?10:pctConc3<65?4:0,max:25}];
+  facteursRp.push({pts:fermentRapideRp<160?20:fermentRapideRp<200?10:0,max:20});
+  if(fibreCovRp>=0.3){
+    facteursRp.push({pts:(ndfPctRp>=28&&ndfPctRp<=45)?20:((ndfPctRp>=22&&ndfPctRp<50)?12:4),max:20});
+    facteursRp.push({pts:ndfFourrageRp>=21?20:(ndfFourrageRp>=15?10:0),max:20});
+  }
+  if(hasBaca){const devRp=Math.abs(baca);facteursRp.push({pts:devRp<=100?15:(devRp<=150?8:0),max:15});}
+  if(ingestionRatioRp!=null){facteursRp.push({pts:ingestionRatioRp<=0.95?15:(ingestionRatioRp<=1.05?10:(ingestionRatioRp<=1.15?5:0)),max:15});}
+  const maxRp=facteursRp.reduce((s,f)=>s+f.max,0), ptsRp=facteursRp.reduce((s,f)=>s+f.pts,0);
+  const pctSaraRp=maxRp>0?ptsRp/maxRp*100:null;
+  const saraLabelRp=pctSaraRp==null?'Non disponible':pctSaraRp>=75?'Risque faible':pctSaraRp>=50?'Risque modéré':'Risque élevé';
+  const saraStatusRp=pctSaraRp==null?'warn':pctSaraRp>=75?'ok':pctSaraRp>=50?'warn':'bad';
+
   h += '<div class="rp-section"><div class="rp-section-title">5 — Analyse par indicateur</div>'
     + ir('⚡','Énergie',a.totalUFL.toFixed(2)+'/'+b.bUFL.toFixed(2)+' '+eu+' ('+(rUFL*100).toFixed(0)+'%)',rpStatus(rUFL),rpStatus(rUFL)==='ok'?'Optimal':rpStatus(rUFL)==='bad'?'Déficit':'Excès')
     + ir('🧬','Protéines PDI',a.totalPDI.toFixed(0)+'/'+b.bPDI.toFixed(0)+' g ('+(rPDI*100).toFixed(0)+'%)',rpStatus(rPDI),rpStatus(rPDI)==='ok'?'Optimal':rpStatus(rPDI)==='bad'?'Déficit':'Excès')
     + ir('⚖️','Équilibre PDI/'+eu,ppu.toFixed(0)+' g/'+eu+' (cible 90–105)',ppu>=90&&ppu<=105?'ok':ppu>=82&&ppu<=115?'warn':'bad',ppu>=90&&ppu<=105?'Optimal':ppu>=82&&ppu<=115?'À ajuster':'Déséquilibre')
-    + ir('🔥','Acidose (% concentrés)',pctConc3.toFixed(0)+'% concentrés / '+(100-pctConc3).toFixed(0)+'% fourrages',pctConc3<35?'ok':pctConc3<50?'warn':'bad',pctConc3<35?'Faible':pctConc3<50?'Modéré':'Élevé')
+    + ir('🔥','Acidose (SARA)',pctConc3.toFixed(0)+'% concentrés · NDF '+(fibreCovRp>=0.3?ndfPctRp.toFixed(0)+'%':'—')+' · score sur '+facteursRp.length+'/6 facteurs',saraStatusRp,saraLabelRp)
     + ir('🫁','Ingestion MS',a.totalMS.toFixed(1)+' kg MS/j'+(b.ingestionCapacite>0?' / max '+b.ingestionCapacite.toFixed(1)+' kg':''),b.ingestionCapacite>0&&a.totalMS>b.ingestionCapacite*1.08?'bad':b.ingestionCapacite>0&&a.totalMS>b.ingestionCapacite?'warn':'ok',b.ingestionCapacite>0&&a.totalMS>b.ingestionCapacite*1.08?'Surcharge':b.ingestionCapacite>0&&a.totalMS>b.ingestionCapacite?'Limite':'OK')
     + (hasBaca?ir('⚗️','BACA',(baca?.toFixed(0)||'?')+' mEq/kg MS (cible −100 à +100)',Math.abs(baca||0)<=100?'ok':'warn',Math.abs(baca||0)<=100?'Optimal':baca<0?'Anionique':'Alcalin'):'')
     + (metA>0?ir('💊','Méthionine',metA.toFixed(0)+' g/j = '+metP.toFixed(1)+'% PDI (≥ 2.4%)',metP>=2.4?'ok':metP>=2.0?'warn':'bad',metP>=2.4?'Optimal':metP>=2.0?'Correct':'Déficit'):'')
@@ -3768,10 +3804,13 @@ async function renderScorePanel(a, b) {
   const bg={A:'#dcfce7',B:'#dbeafe',C:'#fef3c7',D:'#fee2e2'};
   const msgs={A:'Ration excellente — tous les indicateurs sont dans les cibles optimales.',B:'Bonne ration — quelques ajustements mineurs amélioreraient encore l\'équilibre.',C:'Ration acceptable — des déséquilibres notables nécessitent des corrections.',D:'Ration à revoir — des déficits ou excès importants peuvent nuire aux performances.'};
   const bar=(s,m,c)=>`<div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:2px;"><div style="width:${(s/m*100).toFixed(0)}%;height:100%;background:${c};border-radius:3px;"></div></div>`;
-  const axisCol = v => v>=75?'#15803d':v>=50?'#d97706':'#dc2626';
+  // Deuxième note (multicritère) : présentée en lettres A-D comme la note principale,
+  // sans afficher de points chiffrés — seule la barre reste un repère visuel de niveau.
+  const valToGrade = v => v>=85?'A':v>=70?'B':v>=50?'C':'D';
+  const axisCol = v => colors[valToGrade(v)];
   const axis = (label, val, icon) => `<div style="text-align:center;">
       <div style="font-size:.63rem;font-weight:800;color:#64748b;text-transform:uppercase;">${icon} ${label}</div>
-      <div style="font-size:1.1rem;font-weight:900;color:${axisCol(val)};margin-top:1px;">${val}</div>
+      <div style="font-size:1.3rem;font-weight:900;color:${axisCol(val)};margin-top:1px;">${valToGrade(val)}</div>
       <div style="height:4px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:3px;"><div style="width:${val}%;height:100%;background:${axisCol(val)};"></div></div>
     </div>`;
 
@@ -3784,7 +3823,7 @@ async function renderScorePanel(a, b) {
       </div>
       <div style="text-align:center;flex-shrink:0;padding-left:10px;border-left:1px solid rgba(0,0,0,.08);">
         <div style="font-size:.62rem;font-weight:800;color:#64748b;text-transform:uppercase;">Multicritère</div>
-        <div style="font-size:1.5rem;font-weight:900;color:${axisCol(ms.global)};line-height:1;">${ms.global}</div>
+        <div style="font-size:1.5rem;font-weight:900;color:${axisCol(ms.global)};line-height:1;">${valToGrade(ms.global)}</div>
       </div>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(0,0,0,.08);margin-top:6px;">
@@ -3828,6 +3867,16 @@ function svgRadarChart(axes) {
   </svg>`;
 }
 
+// Jauge horizontale à zones de couleur (0-100, rouge/orange/vert) avec repère de position —
+// schéma visuel réutilisable pour les scores de risque (Acidose SARA, etc.).
+function riskGaugeBar(pct) {
+  const pos = Math.max(2, Math.min(98, pct));
+  return `<div style="position:relative;height:14px;border-radius:7px;margin:10px 2px 16px;background:linear-gradient(to right, #dc2626 0%, #dc2626 50%, #d97706 50%, #d97706 75%, #15803d 75%, #15803d 100%);">
+    <div style="position:absolute;left:${pos.toFixed(0)}%;top:-7px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid #1e293b;"></div>
+    <div style="position:absolute;left:${pos.toFixed(0)}%;top:16px;transform:translateX(-50%);font-size:.68rem;font-weight:800;color:#1e293b;white-space:nowrap;">${pct.toFixed(0)}%</div>
+  </div>`;
+}
+
 /* ══ SCORE MULTICRITÈRE + POURQUOI + COÛT DU LITRE SUPPLÉMENTAIRE ══ */
 const FOURRAGE_KEYWORDS = ['ensilage','foin','herbe','paille','enrubann','pâture','pature','maïs plante','mais plante','pulpe','betterave fourr','luzerne désh','luzerne desh','regain','ray-grass','dactyle'];
 function isFourrageFood(nom) {
@@ -3860,69 +3909,6 @@ function computeMultiScore(a, b, medCout) {
 
   const global = Math.round((perf+eco+autonomie+secu+env)/5);
   return { perf, eco, autonomie, secu, env, global, hasCoutRef: curCout!=null && !!medCout };
-}
-
-function computePourquoi(a, b) {
-  const rUFL = b.bUFL>0 ? a.totalUFL/b.bUFL : 1;
-  const rPDI = b.bPDI>0 ? a.totalPDI/b.bPDI : 1;
-  if (rUFL>=0.95 && rUFL<=1.1 && rPDI>=0.95 && rPDI<=1.15) return null;
-
-  const defUFL = b.bUFL - a.totalUFL;
-  const defPDI = b.bPDI - a.totalPDI;
-  let limitant, deficitTxt, cause;
-  const energyIsWorse = Math.abs(1-rUFL) >= Math.abs(1-rPDI);
-
-  if (rUFL < 0.95 && energyIsWorse) {
-    limitant = 'l\'énergie';
-    deficitTxt = `${defUFL.toFixed(2)} UFL/j de déficit`;
-    const foragekgMS = a.items.filter(i=>isFourrageFood(i.nom)).reduce((s,i)=>s+i.qty,0);
-    cause = (foragekgMS/(a.totalMS||1)) > 0.55
-      ? 'proportion importante de fourrage à faible densité énergétique'
-      : 'apport énergétique global insuffisant au regard des besoins';
-  } else if (rPDI < 0.95) {
-    limitant = 'les protéines (PDI)';
-    deficitTxt = `${defPDI.toFixed(0)} g PDI/j de déficit`;
-    cause = 'apport insuffisant en sources protéiques (tourteaux, correcteurs azotés)';
-  } else if (rUFL > 1.1) {
-    limitant = 'un excès d\'énergie';
-    deficitTxt = `${(a.totalUFL-b.bUFL).toFixed(2)} UFL/j en excès`;
-    cause = 'quantité de concentrés énergétiques supérieure aux besoins';
-  } else {
-    limitant = 'un excès de PDI';
-    deficitTxt = `${(a.totalPDI-b.bPDI).toFixed(0)} g PDI/j en excès`;
-    cause = 'sur-couverture azotée, risque de gaspillage et de rejet azoté';
-  }
-
-  const isExces = limitant.startsWith('un excès');
-  const bestEnergy = a.items.length ? [...a.items].sort((x,y)=>(y.ufl/y.qty)-(x.ufl/x.qty))[0] : null;
-  const bestProtein = a.items.length ? [...a.items].sort((x,y)=>(y.pdi/y.qty)-(x.pdi/x.qty))[0] : null;
-  const solutions = [];
-
-  if (!isExces && limitant === 'l\'énergie' && bestEnergy) {
-    const uPerKg = bestEnergy.ufl/bestEnergy.qty;
-    const dq = Math.min(2, Math.abs(defUFL)/(uPerKg||1));
-    solutions.push({ label:'Solution A', detail:`+${dq.toFixed(1)} kg MS de "${bestEnergy.nom}"`, ufl:`+${(dq*uPerKg).toFixed(2)} UFL`, note:'Correction directe, autonomie peu affectée si déjà utilisé', feed:bestEnergy.nom, sign:'+', qty:dq.toFixed(1) });
-  }
-  if (!isExces && bestProtein) {
-    solutions.push({ label:solutions.length?'Solution B':'Solution A', detail:`+0.5 kg MS de "${bestProtein.nom}"`, ufl:`+${(0.5*(bestProtein.ufl/bestProtein.qty)).toFixed(2)} UFL`, note:'Renforce aussi l\'énergie, à surveiller si PDI déjà suffisant', feed:bestProtein.nom, sign:'+', qty:'0.5' });
-  }
-  if (limitant === 'un excès d\'énergie') {
-    const worst = a.items.length ? [...a.items].sort((x,y)=>(y.ufl/y.qty)-(x.ufl/x.qty))[0] : null;
-    if (worst) {
-      const dq = Math.min(worst.qty*0.4, Math.abs(a.totalUFL-b.bUFL)/((worst.ufl/worst.qty)||1)).toFixed(1);
-      solutions.push({ label:'Solution A', detail:`-${dq} kg MS de "${worst.nom}"`, ufl:`-${(dq*(worst.ufl/worst.qty)).toFixed(2)} UFL`, note:'Réduction directe de l\'excès énergétique', feed:worst.nom, sign:'-', qty:dq });
-    }
-  }
-  if (limitant === 'un excès de PDI') {
-    const worstP = a.items.length ? [...a.items].sort((x,y)=>(y.pdi/y.qty)-(x.pdi/x.qty))[0] : null;
-    if (worstP) {
-      const dq = Math.min(worstP.qty*0.3, Math.abs(a.totalPDI-b.bPDI)/((worstP.pdi/worstP.qty)||1)).toFixed(1);
-      solutions.push({ label:'Solution A', detail:`-${dq} kg MS de "${worstP.nom}"`, ufl:null, note:'Réduit le risque de gaspillage azoté et le coût', feed:worstP.nom, sign:'-', qty:dq });
-    }
-  }
-  solutions.push({ label:solutions.length?(solutions.length===1?'Solution B':'Solution C'):'Solution A', detail:'Revoir la qualité du fourrage principal (analyse récente conseillée)', ufl:null, note:'Aucun coût immédiat mais nécessite une analyse de fourrage à jour', feed:null, sign:null, qty:null });
-
-  return { limitant, deficitTxt, cause, solutions: solutions.slice(0,3) };
 }
 
 // Optimiseur combinatoire : part de la ration actuelle et fait converger itérativement
@@ -4011,24 +3997,7 @@ async function renderAdvancedInsights(a, b) {
   const cont = _$('bilan-advanced');
   if (!cont) return;
 
-  const pourquoi = computePourquoi(a, b);
   let html = '';
-
-  if (pourquoi) {
-    html += `<div class="card" style="margin-bottom:10px;border-left:4px solid #d97706;">
-      <div class="card-header"><div class="card-title">💡 Pourquoi cette ration est limitée ?</div></div>
-      <p style="font-size:.82rem;margin-bottom:10px;">⚠️ Limitée principalement par ${pourquoi.limitant} — <strong>${pourquoi.deficitTxt}</strong>. Cause probable : ${pourquoi.cause}.</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;">
-        ${pourquoi.solutions.map(s => `<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:9px 10px;">
-          <div style="font-weight:800;font-size:.74rem;color:#d97706;margin-bottom:3px;">${s.label}</div>
-          <div style="font-size:.8rem;font-weight:600;">${s.detail}</div>
-          ${s.ufl?`<div style="font-size:.74rem;color:#15803d;margin-top:2px;">${s.ufl}</div>`:''}
-          <div style="font-size:.7rem;color:var(--text-muted);margin-top:3px;">${s.note}</div>
-          ${s.feed?`<button class="btn btn-primary btn-sm" style="margin-top:6px;width:100%;" onclick="applySuggestionQty('${s.feed.replace(/'/g,"\\'")}','${s.sign}','${s.qty}',this)">Appliquer</button>`:''}
-        </div>`).join('')}
-      </div>
-    </div>`;
-  }
 
   const variants = computeOptimizerVariants(a, b);
   const anyCostUnknown = variants.some(v => !v.costKnown);
@@ -4159,17 +4128,28 @@ function renderIndicateurs(a,b) {
     laitPermisBrut = tb ? laitPermisStd*40/tb : laitPermisStd;
   }
   if(!prod){prodCls='info';prodBadge='Non renseigné';prodBadgeCls='rb-badge-gray';prodResume='Production non saisie';prodDetail=adv('Renseignez la production laitière visée (onglet Ration) pour que le bilan soit calculé au bon niveau de production.');}
-  else{
-    prodResume=`Visée ${prod.toFixed(1)} L/j${tb?` · TB ${(tb/10).toFixed(2)}%`:''}${laitPermisBrut!=null?` · permis par la ration ${laitPermisBrut.toFixed(1)} L/j`:''}`;
+  else if(laitPermisBrut!=null){
+    // Le lait permis par la ration est la donnée principale de cette carte — mise en avant
+    // dans le badge et en tête du résumé, avant la production simplement visée/saisie.
+    const ecartPermis = laitPermisBrut - prod;
+    const ecartOk = ecartPermis>=-0.5;
+    prodBadge=`${laitPermisBrut.toFixed(1)} L/j permis`;
+    prodBadgeCls=ecartOk?'rb-badge-green':'rb-badge-orange';
+    prodCls=ecartOk?'ok':'warn';
+    prodResume=`🥛 Permis par la ration : <strong>${laitPermisBrut.toFixed(1)} L/j</strong> (limité par ${laitPermisLimitant}) — visée ${prod.toFixed(1)} L/j${tb?` · TB ${(tb/10).toFixed(2)}%`:''}`;
+    const permisPct = prod>0 ? (laitPermisBrut/prod*100) : 0;
+    prodDetail=adv(`<strong style="font-size:1.05em;">Lait permis par la ration : ${laitPermisBrut.toFixed(1)} L/j</strong> (${laitPermisStd.toFixed(1)} L/j en lait standard 4% MG), limité par ${laitPermisLimitant} — c'est la production que cette ration peut réellement soutenir, calculée à partir de ses apports réels (UFL, PDI) et non de la valeur saisie.`)
+      + `<div style="display:flex;justify-content:space-between;font-size:.68rem;color:#94a3b8;margin-top:8px;"><span>Permis : ${laitPermisBrut.toFixed(1)} L/j</span><span>Visée : ${prod.toFixed(1)} L/j</span></div>
+         <div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:2px 0 4px;"><div style="width:${Math.min(100,permisPct).toFixed(0)}%;height:100%;background:${ecartOk?'#15803d':'#d97706'};border-radius:4px;"></div></div>`
+      + tip(ecartOk?'ok':'warn', ecartOk?'✅':'⚠️', `${ecartOk?'Cohérent avec la production visée.':`Inférieur de ${Math.abs(ecartPermis).toFixed(1)} L/j à la production visée (${prod.toFixed(1)} L/j)`} — ${ecartOk?'la ration couvre la production annoncée.':'la ration ne couvre pas la production annoncée, risque de mobilisation des réserves ou de non-atteinte du niveau visé.'}`)
+      + adv(`Production visée saisie : <strong>${prod.toFixed(1)} L/j</strong>${tb?`, TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?`, soit ${laitStdInd.toFixed(1)} L/j de lait standard (4% MG)`:''}.`);
+  } else {
+    prodResume=`${prod.toFixed(1)} L/j${tb?` · TB ${(tb/10).toFixed(2)}%`:''}`;
     prodBadge=`${prod.toFixed(1)} L/j`;prodBadgeCls='rb-badge-gray';prodCls='info';
-    prodDetail=adv(`Cette ration est calculée pour une production visée de <strong>${prod.toFixed(1)} L/j</strong>${tb?`, TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?`, soit <strong>${laitStdInd.toFixed(1)} L/j de lait standard (4% MG)</strong>`:''}.`);
-    if(laitPermisBrut!=null){
-      const ecartPermis = laitPermisBrut - prod;
-      prodDetail += tip(ecartPermis>=-0.5?'ok':'warn', '🥛', `<strong>Lait permis par la ration : ${laitPermisBrut.toFixed(1)} L/j</strong> (${laitPermisStd.toFixed(1)} L/j en lait standard 4% MG), limité par ${laitPermisLimitant} — c'est la production que cette ration peut réellement soutenir, calculée à partir de ses apports réels et non de la valeur saisie. ${ecartPermis>=-0.5?'Cohérent avec la production visée.':`${ecartPermis<0?'Inférieur':'Supérieur'} de ${Math.abs(ecartPermis).toFixed(1)} L/j à la production visée.`}`);
-      if(ecartPermis<-1.5){prodCls='warn';prodBadge='Ration sous-dimensionnée';prodBadgeCls='rb-badge-orange';}
-    } else if(b.typeLabel!=='vache-laitiere'){
-      prodDetail += tip('info','📖','Le "lait permis par la ration" ne s\'applique qu\'aux vaches laitières.');
-    }
+    prodDetail=adv(`Cette ration est calculée pour une production visée de <strong>${prod.toFixed(1)} L/j</strong>${tb?`, TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?`, soit <strong>${laitStdInd.toFixed(1)} L/j de lait standard (4% MG)</strong>`:''}.`)
+      + tip('info','📖','Le "lait permis par la ration" ne s\'applique qu\'aux vaches laitières.');
+  }
+  if(prod){
     if(objLaitInd||objLaitStdInd){
       const gapLait = objLaitInd!=null?prod-objLaitInd:null;
       const gapStd = (objLaitStdInd!=null&&laitStdInd!=null)?laitStdInd-objLaitStdInd:null;
@@ -4205,13 +4185,6 @@ function renderIndicateurs(a,b) {
   else if(ppu>=82&&ppu<=115){eCls2='warn';eBadge2='Acceptable';eBadgeCls2='rb-badge-orange';eDetail2=adv(`Ratio PDI/${eu} = ${ppu.toFixed(0)} g/${eu} (cible 90–105). Acceptable mais peut être amélioré.`);}
   else if(ppu<82){eCls2='bad';eBadge2='Trop bas';eBadgeCls2='rb-badge-red';eDetail2=adv(`Ratio PDI/${eu} trop bas (${ppu.toFixed(0)}). Manque de protéines relative à l'énergie.`)+tip('warn','🌱','Ajouter un tourteau protéique');}
   else{eCls2='bad';eBadge2='Trop élevé';eBadgeCls2='rb-badge-red';eDetail2=adv(`Ratio PDI/${eu} trop élevé (${ppu.toFixed(0)}). Excès protéique relatif.`)+tip('warn','🌽','Ajouter un aliment énergétique');}
-
-  // 4. ACIDOSE
-  let aCls,aBadge,aBadgeCls,aDetail;
-  if(pctConc<35){aCls='ok';aBadge='Risque faible';aBadgeCls='rb-badge-green';aDetail=adv(`Ration équilibrée (${pctConc.toFixed(0)}% concentrés). Risque d'acidose très faible.`)+tip('ok','✅','Proportion fourrages/concentrés optimale');}
-  else if(pctConc<50){aCls='warn';aBadge='Risque modéré';aBadgeCls='rb-badge-orange';aDetail=adv(`${pctConc.toFixed(0)}% concentrés. Risque de SARA si distribution en un seul repas.`)+tip('warn','⏰','Fractionner en ≥ 3 repas/jour')+tip('warn','🌾','Garantir foin/paille à disposition')+tip('info','💊','Tampon possible : bicarbonate 200 g/j');}
-  else if(pctConc<62){aCls='bad';aBadge='Risque élevé';aBadgeCls='rb-badge-red';aDetail=adv(`Ration très concentrée (${pctConc.toFixed(0)}%). Risque SARA/acidose clinique.`)+tip('danger','🚨','Réduire les concentrés (objectif < 50% MS)')+tip('danger','🌾','Augmenter fourrages grossiers impérativement')+tip('danger','💊','NaHCO₃ 200g + MgO 50g/j indispensable');}
-  else{aCls='bad';aBadge='Danger acidose';aBadgeCls='rb-badge-red';aDetail=adv(`⚠️ Proportion dangereuse (${pctConc.toFixed(0)}%). Acidose clinique très probable.`)+tip('danger','🚨','ARRÊTER ce niveau de concentrés')+tip('danger','🏥','Consulter un vétérinaire si signes cliniques');}
 
   // 5. MINÉRAUX
   let mCls,mBadge,mBadgeCls,mResume,mDetail;
@@ -4323,6 +4296,72 @@ function renderIndicateurs(a,b) {
     if(fibreCoverage<0.9)ndfDetail+=tip('info','ℹ️',`${(fibreCoverage*100).toFixed(0)}% seulement de la MS dispose de valeurs NDF/ADF connues (base partiellement enrichie) — estimation partielle, à affiner à mesure que la base s'enrichit.`);
     ndfDetail+=tip('info','📖','Source : tables INRAE-CIRAD-AFZ (Feedipedia), valeurs moyennes par famille d\'aliment — vos analyses de fourrage propres restent plus précises si disponibles.');}
 
+  // 15c. RISQUE ACIDOSE (SARA) — score composite réel, plus un simple seuil sur les concentrés.
+  // Facteurs intégrés (données réellement disponibles dans l'application) : proportion de
+  // concentrés, type de glucides fermentescibles (amidon rapide + sucres solubles), NDF
+  // total, NDF apporté par les fourrages (mesure de la "vraie" fibrosité), bilan
+  // électrolytique (BACA), niveau d'ingestion. Facteurs cités dans la littérature mais NON
+  // intégrés faute de données disponibles dans RumiCORE : taille des particules (non
+  // mesurée), matière organique dégradable dans le rumen (non présente dans la base
+  // aliments) — signalés explicitement plutôt que passés sous silence.
+  let saraCls,saraBadge,saraBadgeCls,saraResume,saraDetail;
+  {
+    const ndfPctS=(a.totalNDF||0)/(a.totalMS||1)/10;
+    const ndfFourrageMS=a.items.filter(i=>i.isFourrage).reduce((s,i)=>s+(i.ndf||0),0);
+    const ndfFourragePct=ndfFourrageMS/(a.totalMS||1)/10;
+    const fermentRapide=((a.totalAR||0)+(a.totalSS||0))/(a.totalMS||1);
+    const ingestionRatio=b.ingestionCapacite>0?a.totalMS/b.ingestionCapacite:null;
+
+    const facteurs=[];
+    const ptsConc = pctConc<35?25:pctConc<45?18:pctConc<55?10:pctConc<65?4:0;
+    facteurs.push({label:'Proportion de concentrés',val:`${pctConc.toFixed(0)}%`,pts:ptsConc,max:25,note:'généralement plus fermentescible que les fourrages'});
+    const ptsFerm = fermentRapide<160?20:fermentRapide<200?10:0;
+    facteurs.push({label:'Type de glucides (amidon rapide + sucres)',val:`${fermentRapide.toFixed(0)} g/kg MS`,pts:ptsFerm,max:20,note:'fermentation vive, potentiel acidogène'});
+    if(fibreCoverage>=0.3){
+      const ptsNdf=(ndfPctS>=28&&ndfPctS<=45)?20:((ndfPctS>=22&&ndfPctS<50)?12:4);
+      facteurs.push({label:'NDF total',val:`${ndfPctS.toFixed(0)}% MS`,pts:ptsNdf,max:20,note:'fibre → mastication → salive tampon'});
+      const ptsNdfF=ndfFourragePct>=21?20:(ndfFourragePct>=15?10:0);
+      facteurs.push({label:'NDF apporté par les fourrages',val:`${ndfFourragePct.toFixed(0)}% MS`,pts:ptsNdfF,max:20,note:'mesure de la "vraie" fibrosité (repère indicatif ≥21% MS)'});
+    } else {
+      facteurs.push({label:'NDF total',val:'non disponible',pts:null,max:20,note:`NDF connu pour ${(fibreCoverage*100).toFixed(0)}% seulement de la ration`});
+      facteurs.push({label:'NDF apporté par les fourrages',val:'non disponible',pts:null,max:20,note:'nécessite les valeurs NDF des aliments'});
+    }
+    if(hasBaca){
+      const dev=Math.abs(baca);
+      const ptsBaca=dev<=100?15:(dev<=150?8:0);
+      facteurs.push({label:'Bilan électrolytique (BACA)',val:`${baca.toFixed(0)} mEq/kg MS`,pts:ptsBaca,max:15,note:'participe à la sécurisation de la ration'});
+    } else {
+      facteurs.push({label:'Bilan électrolytique (BACA)',val:'non disponible',pts:null,max:15,note:'nécessite Na, K, Ca, Mg, Cl, S'});
+    }
+    if(ingestionRatio!=null){
+      const ptsIng=ingestionRatio<=0.95?15:(ingestionRatio<=1.05?10:(ingestionRatio<=1.15?5:0));
+      facteurs.push({label:"Niveau d'ingestion",val:`${(ingestionRatio*100).toFixed(0)}% de la capacité`,pts:ptsIng,max:15,note:"plus l'ingestion est élevée, plus le risque peut augmenter"});
+    } else {
+      facteurs.push({label:"Niveau d'ingestion",val:'non disponible',pts:null,max:15,note:"capacité d'ingestion non calculée"});
+    }
+
+    const known=facteurs.filter(f=>f.pts!=null);
+    const totalMax=known.reduce((s,f)=>s+f.max,0);
+    const totalPts=known.reduce((s,f)=>s+f.pts,0);
+    const pctSara=totalMax>0?totalPts/totalMax*100:null;
+
+    if(pctSara==null){saraCls='info';saraBadge='Non disponible';saraBadgeCls='rb-badge-gray';saraResume='Données insuffisantes';saraDetail=adv('Aucun des facteurs du score Acidose (SARA) n\'est calculable pour cette ration.');}
+    else{
+      saraCls=pctSara>=75?'ok':pctSara>=50?'warn':'bad';
+      saraBadge=pctSara>=75?'Risque faible':pctSara>=50?'Risque modéré':'Risque élevé';
+      saraBadgeCls=pctSara>=75?'rb-badge-green':pctSara>=50?'rb-badge-orange':'rb-badge-red';
+      saraResume=`${saraBadge} — ${pctConc.toFixed(0)}% concentrés${fibreCoverage>=0.3?`, NDF ${ndfPctS.toFixed(0)}% MS`:''}`;
+      saraDetail=adv(`Score composite sur ${known.length} facteur${known.length>1?'s':''} disponible${known.length>1?'s':''} (sur 6 pertinents) : <strong>${saraBadge}</strong>.`)+riskGaugeBar(pctSara);
+      facteurs.forEach(f=>{
+        if(f.pts==null){saraDetail+=tip('info','ℹ️',`${f.label} : ${f.val} — ${f.note}, non intégré au score.`);}
+        else{const ok3=f.pts>=f.max*0.75;saraDetail+=tip(ok3?'ok':f.pts>0?'warn':'danger',ok3?'✅':'⚠️',`${f.label} : ${f.val} — ${f.note}.`);}
+      });
+      if(saraCls==='warn')saraDetail+=tip('warn','⏰','Fractionner la distribution en ≥ 3 repas/jour et garantir du fourrage grossier à disposition en continu.');
+      else if(saraCls==='bad')saraDetail+=tip('danger','🚨','Réduire les concentrés et/ou augmenter la fibre efficace en priorité — tampon (bicarbonate, MgO) en soutien, pas en substitut.');
+      saraDetail+=tip('info','📖','Facteurs cités dans la littérature mais non intégrés faute de données disponibles dans l\'application : taille des particules (non mesurée), matière organique dégradable dans le rumen (non présente dans la base aliments) — à apprécier sur le terrain par le conseiller.');
+    }
+  }
+
   // 16. MSCA — MARGE SUR COÛT ALIMENTAIRE (indicateur de référence filière lait)
   let mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail;
   const prixLaitMsca=parseFloat(_$('cout-prix-lait')?.value)||0.40;
@@ -4379,11 +4418,13 @@ function renderIndicateurs(a,b) {
     mask('energie',card('energie','⚡','Énergie',eCls,eBadge,eBadgeCls,`${a.totalUFL.toFixed(2)} / ${b.bUFL.toFixed(2)} ${eu} — ${(rUFL*100).toFixed(0)}%`,eDetail))+
     mask('proteines',card('proteines','🧬','Protéines (PDI)',pCls,pBadge,pBadgeCls,`${a.totalPDI.toFixed(0)} / ${b.bPDI.toFixed(0)} g/j — ${(rPDI*100).toFixed(0)}%`,pDetail))+
     mask('equilibre',card('equilibre','⚖️',`Équilibre E/P`,eCls2,eBadge2,eBadgeCls2,`PDI/${eu} = ${ppu.toFixed(0)} g/${eu}`,eDetail2))+
-    mask('acidose',card('acidose','🔥','Risque Acidose',aCls,aBadge,aBadgeCls,`${pctConc.toFixed(0)}% concentrés / ${pctFourrage.toFixed(0)}% fourrages`,aDetail))+
+    mask('acidose',card('acidose','🔥','Risque Acidose (SARA)',saraCls,saraBadge,saraBadgeCls,saraResume,saraDetail))+
+    mask('ingestion',card('ingestion','🐄','Ingestion / Saturation',ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail))+
+    mask('msca',card('msca','💶','Marge sur Coût Alimentaire (MSCA)',mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail))+
+    mask('ic',card('ic','⚖️','Indice de Consommation (IC)',icCls,icBadge,icBadgeCls,icResume,icDetail))+
     mask('mineraux',card('mineraux','⚗️','Minéraux & BACA',mCls,mBadge,mBadgeCls,mResume,mDetail))+
     mask('aa',card('aa','🔬','Acides aminés',aaCls,aaBadge,aaBadgeCls,aaResume,aaDetail))+
-    mask('ingestion',card('ingestion','🐄','Ingestion / Saturation',ingCls,ingBadge,ingBadgeCls,ingResume,ingDetail))+
-    mask('ferment',card('ferment','🌾','Fermentescibilité (SARA)',fCls,fBadge,fBadgeCls,fResume,fDetail))+
+    mask('ferment',card('ferment','🌾','Fermentescibilité des glucides',fCls,fBadge,fBadgeCls,fResume,fDetail))+
     mask('densite',card('densite','📊','Densité énergétique',dCls,dBadge,dBadgeCls,dResume,dDetail))+
     mask('bpr',card('bpr','🧪','Balance Protéique du Rumen',bprCls,bprBadge,bprBadgeCls,`${bprPerKg.toFixed(0)} g/kg MS`,bprDetail))+
     mask('ue',card('ue','📦','Encombrement réel (UE)',ueCls,ueBadge,ueBadgeCls,ueResume,ueDetail))+
@@ -4391,9 +4432,7 @@ function renderIndicateurs(a,b) {
     mask('pdia',card('pdia','🧬','PDIA — protéines non dégradables',pdiaCls,pdiaBadge,pdiaBadgeCls,pdiaResume,pdiaDetail))+
     mask('glucides',card('glucides','🌽','Glucides totaux (AL+AR+SS)',glCls,glBadge,glBadgeCls,glResume,glDetail))+
     mask('ndf',card('ndf','🧵','Structure & fibres (NDF/ADF)',ndfCls,ndfBadge,ndfBadgeCls,ndfResume,ndfDetail))+
-    mask('diversite',card('diversite','🔀','Diversité de la ration',divCls,divBadge,divBadgeCls,divResume,divDetail))+
-    mask('msca',card('msca','💶','Marge sur Coût Alimentaire (MSCA)',mscaCls,mscaBadge,mscaBadgeCls,mscaResume,mscaDetail))+
-    mask('ic',card('ic','⚖️','Indice de Consommation (IC)',icCls,icBadge,icBadgeCls,icResume,icDetail));
+    mask('diversite',card('diversite','🔀','Diversité de la ration',divCls,divBadge,divBadgeCls,divResume,divDetail));
 }
 
 /* ══ BAC À SABLE / SIMULATEUR WHAT-IF ══ */
@@ -4600,29 +4639,6 @@ function renderCompare(pA, pB, pRows, pScore, pDate, pAnimal) {
 }
 
 /* ══ APPLICATION D'UNE SUGGESTION (bouton "Appliquer" du bloc Pourquoi) ══ */
-function applySuggestionQty(feed, sign, qtyStr, btn) {
-  const qty = parseFloat(qtyStr);
-  const rows = document.querySelectorAll('#ration-rows .ration-row');
-  let applied = false;
-  for (const row of rows) {
-    const nom = row.querySelector('.ration-input-nom')?.value || '';
-    if (nom.toLowerCase().includes(feed.toLowerCase())) {
-      const inp = row.querySelector('.ration-input-qty');
-      const cur = parseFloat(inp?.value) || 0;
-      if (inp) inp.value = Math.max(0, sign === '+' ? cur + qty : cur - qty).toFixed(1);
-      applied = true; break;
-    }
-  }
-  if (!applied && sign === '+') {
-    addRationRow();
-    const rows2 = document.querySelectorAll('#ration-rows .ration-row');
-    const last = rows2[rows2.length - 1];
-    if (last) { last.querySelector('.ration-input-nom').value = feed; last.querySelector('.ration-input-qty').value = qty.toFixed(1); }
-    applied = true;
-  }
-  if (applied && btn) { btn.textContent = '✅ Appliqué'; btn.disabled = true; showToast('Quantité mise à jour — recalculez le bilan.', 'success'); }
-}
-
 /* ══ COÛTS ══ */
 function chargerRationCouts() {
   const a=parseRation(); if(!a.items.length){showToast('Aucun aliment dans la ration.', 'warn');return;}
