@@ -436,6 +436,7 @@ function setTheme(t) {
         <button class="tab-btn" onclick="switchTab('tab-notes',this)">📝 Visites</button>
         <button class="tab-btn" onclick="switchTab('tab-rapport',this)">📄 Rapport</button>
         <button class="tab-btn" onclick="switchTab('tab-strategie',this)">🗓️ Stratégie 12 mois</button>
+        <button class="tab-btn" onclick="switchTab('tab-structure',this)">🏗️ Structure exploitation</button>
       </div>
 
       <!-- TAB: RATION -->
@@ -927,6 +928,53 @@ function setTheme(t) {
           <button class="btn btn-primary btn-sm" onclick="genererStrategie()">🗓️ Générer le calendrier</button>
         </div>
         <div id="strat-result" style="margin-top:16px;"></div>
+      </div>
+
+      <!-- TAB: STRUCTURE EXPLOITATION -->
+      <div class="tab-content" id="tab-structure">
+        <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px;">Fondation du futur diagnostic technico-économique global de l'exploitation (au-delà de la seule ration). Tout est optionnel — renseignez ce que vous savez.</p>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><div class="card-title">🐄 Troupeau</div></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Nb vaches laitières (VL)</label><input type="number" class="form-input" id="st-nb-vl" min="0"></div>
+            <div class="form-group"><label>Nb génisses de renouvellement</label><input type="number" class="form-input" id="st-nb-genisses" min="0"></div>
+            <div class="form-group"><label>Âge au 1er vêlage (mois)</label><input type="number" class="form-input" id="st-age-velage" min="0" step="0.5"></div>
+            <div class="form-group"><label>Taux de renouvellement (%)</label><input type="number" class="form-input" id="st-taux-renouv" min="0" max="100"></div>
+            <div class="form-group"><label>Taux de réforme (%)</label><input type="number" class="form-input" id="st-taux-reforme" min="0" max="100"></div>
+            <div class="form-group"><label>Durée de lactation moyenne (j)</label><input type="number" class="form-input" id="st-duree-lact" min="0"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><div class="card-title">🌾 Surfaces</div></div>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <div class="form-group"><label>Surface totale (ha)</label><input type="number" class="form-input" id="st-surf-totale" min="0" step="0.5"></div>
+            <div class="form-group"><label>Surface fourragère (ha)</label><input type="number" class="form-input" id="st-surf-fourragere" min="0" step="0.5"></div>
+            <div class="form-group"><label>Rendement fourrager moyen (t MS/ha)</label><input type="number" class="form-input" id="st-rdt-fourrager" min="0" step="0.1" placeholder="Ex: 10"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;">Cultures de vente</div>
+            <button class="btn btn-ghost btn-sm" onclick="addCultureRow()">+ Ajouter</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 100px 120px 32px;gap:6px;margin-bottom:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);">
+            <span>Culture</span><span>ha</span><span>Rendement t/ha</span><span></span>
+          </div>
+          <div id="st-cultures-lines"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><div class="card-title">👷 Main-d'œuvre</div></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Nb UTH (unités travail humain)</label><input type="number" class="form-input" id="st-nb-uth" min="0" step="0.1"></div>
+            <div class="form-group"><label>Heures de travail / semaine (estimé)</label><input type="number" class="form-input" id="st-heures-semaine" min="0"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveStructure()">💾 Enregistrer la structure</button>
+
+        <div id="st-diagnostic" style="margin-top:20px;"></div>
+        <div id="st-scenario" style="margin-top:16px;"></div>
       </div>
     </div>
 
@@ -1747,6 +1795,7 @@ function switchTab(tabId, btn) {
   if (tabId === 'tab-historique') loadSessionsForCurrentExp();
   if (tabId === 'tab-notes') { loadVisitNotes(); if (_$('note-date') && !_$('note-date').value) _$('note-date').value = new Date().toISOString().slice(0,10); }
   if (tabId === 'tab-strategie') loadStrategie();
+  if (tabId === 'tab-structure') loadStructure();
 }
 
 function toggleSidebar() {
@@ -5049,6 +5098,229 @@ function loadStrategie() {
   }
   onStratProfilChange();
   if (s) genererStrategie(); else if (_$('strat-result')) _$('strat-result').innerHTML = '';
+}
+
+// ══ STRUCTURE D'EXPLOITATION (fondation diagnostic technico-économique) ══════════════════
+function addCultureRow(nom, ha, rendement) {
+  const cont = _$('st-cultures-lines');
+  if (!cont) return;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 100px 120px 32px;gap:6px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" class="form-input st-culture-nom" placeholder="Ex: Blé, Maïs grain, Colza…" value="${nom?escHtml(nom):''}" style="margin:0;">
+    <input type="number" class="form-input st-culture-ha" min="0" step="0.5" value="${ha||''}" style="margin:0;">
+    <input type="number" class="form-input st-culture-rdt" min="0" step="0.1" value="${rendement||''}" style="margin:0;">
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;">✕</button>`;
+  cont.appendChild(row);
+}
+
+function loadStructure() {
+  if (!currentExp) return;
+  const s = currentExp.structure || {};
+  const t = s.troupeau||{}, sf = s.surfaces||{}, mo = s.mainOeuvre||{};
+  if (_$('st-nb-vl')) _$('st-nb-vl').value = t.nbVL||'';
+  if (_$('st-nb-genisses')) _$('st-nb-genisses').value = t.nbGenisses||'';
+  if (_$('st-age-velage')) _$('st-age-velage').value = t.ageVelageMois||'';
+  if (_$('st-taux-renouv')) _$('st-taux-renouv').value = t.tauxRenouvellementPct||'';
+  if (_$('st-taux-reforme')) _$('st-taux-reforme').value = t.tauxReformePct||'';
+  if (_$('st-duree-lact')) _$('st-duree-lact').value = t.dureeLactationJours||'';
+  if (_$('st-surf-totale')) _$('st-surf-totale').value = sf.totalHa||'';
+  if (_$('st-surf-fourragere')) _$('st-surf-fourragere').value = sf.fourragereHa||'';
+  if (_$('st-rdt-fourrager')) _$('st-rdt-fourrager').value = sf.rendementFourragerTMsHa||'';
+  if (_$('st-nb-uth')) _$('st-nb-uth').value = mo.nbUTH||'';
+  if (_$('st-heures-semaine')) _$('st-heures-semaine').value = mo.heuresParSemaine||'';
+  const cont = _$('st-cultures-lines');
+  if (cont) {
+    cont.innerHTML = '';
+    (sf.cultures||[]).forEach(c => addCultureRow(c.nom, c.ha, c.rendementTHa));
+  }
+  renderStructureDiagnostic(s);
+  renderScenarioTroupeau(s);
+}
+
+async function saveStructure() {
+  if (!currentExp) return;
+  const cultures = [];
+  document.querySelectorAll('#st-cultures-lines > div').forEach(row => {
+    const nom = row.querySelector('.st-culture-nom')?.value?.trim();
+    const ha = parseFloat(row.querySelector('.st-culture-ha')?.value)||0;
+    const rendement = parseFloat(row.querySelector('.st-culture-rdt')?.value)||0;
+    if (nom && ha>0) cultures.push({ nom, ha, rendementTHa: rendement||null });
+  });
+  const structure = {
+    troupeau: {
+      nbVL: parseFloat(_$('st-nb-vl')?.value)||null,
+      nbGenisses: parseFloat(_$('st-nb-genisses')?.value)||null,
+      ageVelageMois: parseFloat(_$('st-age-velage')?.value)||null,
+      tauxRenouvellementPct: parseFloat(_$('st-taux-renouv')?.value)||null,
+      tauxReformePct: parseFloat(_$('st-taux-reforme')?.value)||null,
+      dureeLactationJours: parseFloat(_$('st-duree-lact')?.value)||null,
+    },
+    surfaces: {
+      totalHa: parseFloat(_$('st-surf-totale')?.value)||null,
+      fourragereHa: parseFloat(_$('st-surf-fourragere')?.value)||null,
+      rendementFourragerTMsHa: parseFloat(_$('st-rdt-fourrager')?.value)||null,
+      cultures,
+    },
+    mainOeuvre: {
+      nbUTH: parseFloat(_$('st-nb-uth')?.value)||null,
+      heuresParSemaine: parseFloat(_$('st-heures-semaine')?.value)||null,
+    },
+  };
+  const supa = getSupa();
+  try {
+    const { error } = await supa.from('exploitations').update({ structure }).eq('id', currentExp.id);
+    if (error) throw error;
+    currentExp.structure = structure;
+    showToast('Structure enregistrée.', 'success');
+    renderStructureDiagnostic(structure);
+    renderScenarioTroupeau(structure);
+  } catch(e) {
+    showToast('Erreur : ' + (e.message||e) + ' (exécutez structure_exploitation.sql ?)', 'error', 6000);
+  }
+}
+
+function renderStructureDiagnostic(s) {
+  const cont = _$('st-diagnostic');
+  if (!cont) return;
+  const t = (s||{}).troupeau||{}, sf = (s||{}).surfaces||{};
+  if (!t.nbVL || !sf.fourragereHa) {
+    cont.innerHTML = '<p style="font-size:.8rem;color:var(--text-muted);">Renseignez au moins le nombre de VL et la surface fourragère pour voir apparaître un premier diagnostic.</p>';
+    return;
+  }
+  const chargement = t.nbVL / sf.fourragereHa;
+  const pctFourrage = sf.totalHa ? (sf.fourragereHa/sf.totalHa*100) : null;
+  const surfaceCultures = (sf.cultures||[]).reduce((s,c)=>s+(c.ha||0),0);
+  cont.innerHTML = `<div class="card" style="margin-bottom:0;">
+    <div class="card-header"><div class="card-title">📊 Diagnostic structure (fondation)</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
+      <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;">Chargement</div>
+        <div style="font-size:1.2rem;font-weight:900;color:var(--text);">${chargement.toFixed(2)} VL/ha SFP</div>
+      </div>
+      ${pctFourrage!=null?`<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;">Part surface fourragère</div>
+        <div style="font-size:1.2rem;font-weight:900;color:var(--text);">${pctFourrage.toFixed(0)}%</div>
+      </div>`:''}
+      ${surfaceCultures>0?`<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;">Cultures de vente</div>
+        <div style="font-size:1.2rem;font-weight:900;color:var(--text);">${surfaceCultures.toFixed(1)} ha</div>
+      </div>`:''}
+    </div>
+    <p style="font-size:.7rem;color:#94a3b8;margin-top:10px;margin-bottom:0;">Chargement = nb VL / surface fourragère principale (approximation, 1 VL ≈ 1 UGB — génisses et autres animaux non comptés ici).</p>
+  </div>`;
+}
+
+// ══ SCÉNARIO TROUPEAU (moteur de simulation what-if à l'échelle de l'exploitation) ══
+// Principe : ne rien inventer — on relit les calculs déjà produits par le moteur INRA de
+// l'onglet Ration (bilan de référence figé via 🧪 Simulation, bilan courant recalculé après
+// changement de production visée) et on les combine à la structure d'exploitation (troupeau,
+// surfaces) pour obtenir un impact chiffré à l'échelle du troupeau. Aucune couche IA ici.
+function renderScenarioTroupeau(s) {
+  const cont = _$('st-scenario');
+  if (!cont) return;
+  const t = (s||{}).troupeau||{}, sf = (s||{}).surfaces||{};
+  const rdt = sf.rendementFourragerTMsHa || null;
+
+  if (!t.nbVL) {
+    cont.innerHTML = '';
+    return;
+  }
+
+  const base = window._sandboxBase;
+  if (!base || typeof base.animalParams?.prod !== 'number' || !base.apports) {
+    cont.innerHTML = `<div class="card" style="margin-bottom:0;border-left:4px solid #6366f1;">
+      <div class="card-header"><div class="card-title">🔮 Scénario troupeau</div></div>
+      <p style="font-size:.8rem;color:var(--text-muted);margin:0;">Pour simuler un scénario à l'échelle du troupeau (ex : "et si je vise +2 L/VL/j ?") : allez dans l'onglet <strong>🥣 Ration</strong>, cliquez <strong>🧪 Simulation</strong> pour figer une référence, changez la production visée, recalculez le bilan et le coût, puis revenez sur cet onglet.</p>
+    </div>`;
+    return;
+  }
+
+  const prodRef = base.animalParams.prod || 0;
+  const prodNow = gN('r-prod');
+  const msRef = base.apports.totalMS || 0;
+  const msNow = (lastApports && lastApports.totalMS) || 0;
+  const dLait = prodNow - prodRef;
+
+  if (Math.abs(dLait) < 0.05 || !lastApports) {
+    cont.innerHTML = `<div class="card" style="margin-bottom:0;border-left:4px solid #6366f1;">
+      <div class="card-header"><div class="card-title">🔮 Scénario troupeau</div></div>
+      <p style="font-size:.8rem;color:var(--text-muted);margin:0;">Référence figée à ${prodRef} L/VL/j. Modifiez la production visée dans l'onglet Ration et recalculez le bilan pour voir l'impact à l'échelle du troupeau (${t.nbVL} VL).</p>
+    </div>`;
+    return;
+  }
+
+  // Effectif constant : nbVL inchangé, seule la production individuelle change.
+  const volRefTroupeau = t.nbVL * prodRef * 365;
+  const volNowConstant = t.nbVL * prodNow * 365;
+  const besoinMSRefT = t.nbVL * msRef * 365 / 1000;
+  const besoinMSNowConstT = t.nbVL * msNow * 365 / 1000;
+  const dBesoinMSConst = besoinMSNowConstT - besoinMSRefT;
+  const surfLibConst = rdt ? (-dBesoinMSConst / rdt) : null;
+
+  // Effectif ajusté : on recherche le nb de VL qui donne le même volume total qu'avant.
+  const nbVLEquiv = prodNow > 0 ? (t.nbVL * prodRef / prodNow) : t.nbVL;
+  const deltaVL = nbVLEquiv - t.nbVL;
+  const besoinMSNowEquivT = nbVLEquiv * msNow * 365 / 1000;
+  const dBesoinMSEquiv = besoinMSNowEquivT - besoinMSRefT;
+  const surfLibEquiv = rdt ? (-dBesoinMSEquiv / rdt) : null;
+
+  // Marge alimentaire troupeau (même logique que "Coût du litre supplémentaire", à l'échelle du cheptel réel).
+  let margeHtml = '';
+  if (typeof base.coutJour === 'number' && typeof window._lastCoutJour === 'number') {
+    const dCout = window._lastCoutJour - base.coutJour;
+    const coutParL = dCout / dLait;
+    const prixLait = parseFloat(_$('cout-prix-lait')?.value) || 0.40;
+    const margeParL = prixLait - coutParL;
+    const margeAnnuelleConst = margeParL * dLait * t.nbVL * 365;
+    margeHtml = `<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+      <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Marge alimentaire troupeau (eff. constant)</div>
+      <div style="font-size:1.05rem;font-weight:900;color:${margeAnnuelleConst>=0?'#15803d':'#dc2626'};">${margeAnnuelleConst>=0?'+':''}${Math.round(margeAnnuelleConst).toLocaleString('fr-FR')} €/an</div>
+    </div>`;
+  }
+
+  const fmtL = n => Math.round(n).toLocaleString('fr-FR');
+  const fmtT = n => (Math.abs(n)<10?n.toFixed(1):Math.round(n).toLocaleString('fr-FR'));
+
+  cont.innerHTML = `<div class="card" style="margin-bottom:0;border-left:4px solid #6366f1;">
+    <div class="card-header"><div class="card-title">🔮 Scénario troupeau — ${dLait>0?'+':''}${dLait.toFixed(1)} L/VL/j (${prodRef} → ${prodNow} L)</div></div>
+    <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:12px;">Calculé à partir du bilan de ration réel (référence figée vs bilan courant), appliqué au troupeau de <strong>${t.nbVL} VL</strong>${sf.fourragereHa?` sur ${sf.fourragereHa} ha SFP`:''}.</p>
+
+    <div style="font-size:.72rem;font-weight:800;color:#6366f1;text-transform:uppercase;margin-bottom:6px;">A · Effectif constant (${t.nbVL} VL)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px;">
+      <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Volume troupeau/an</div>
+        <div style="font-size:1.05rem;font-weight:900;">${fmtL(volRefTroupeau)} → ${fmtL(volNowConstant)} L</div>
+      </div>
+      <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Besoin MS troupeau/an</div>
+        <div style="font-size:1.05rem;font-weight:900;color:${dBesoinMSConst>=0?'#d97706':'#15803d'};">${dBesoinMSConst>=0?'+':''}${fmtT(dBesoinMSConst)} t MS</div>
+      </div>
+      ${surfLibConst!=null?`<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Surface ${surfLibConst>=0?'libérée':'nécessaire en plus'}</div>
+        <div style="font-size:1.05rem;font-weight:900;color:${surfLibConst>=0?'#15803d':'#dc2626'};">${Math.abs(surfLibConst).toFixed(1)} ha</div>
+      </div>`:''}
+      ${margeHtml}
+    </div>
+
+    <div style="font-size:.72rem;font-weight:800;color:#6366f1;text-transform:uppercase;margin-bottom:6px;">B · Effectif ajusté pour produire le même volume total</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
+      <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Effectif équivalent</div>
+        <div style="font-size:1.05rem;font-weight:900;">${t.nbVL} → ${Math.round(nbVLEquiv)} VL (${deltaVL>=0?'+':''}${Math.round(deltaVL)})</div>
+      </div>
+      <div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Besoin MS troupeau/an</div>
+        <div style="font-size:1.05rem;font-weight:900;color:${dBesoinMSEquiv>=0?'#d97706':'#15803d'};">${dBesoinMSEquiv>=0?'+':''}${fmtT(dBesoinMSEquiv)} t MS</div>
+      </div>
+      ${surfLibEquiv!=null?`<div style="background:var(--bg-app,#f8fafc);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.64rem;font-weight:800;color:#64748b;text-transform:uppercase;">Surface ${surfLibEquiv>=0?'libérée':'nécessaire en plus'}</div>
+        <div style="font-size:1.05rem;font-weight:900;color:${surfLibEquiv>=0?'#15803d':'#dc2626'};">${Math.abs(surfLibEquiv).toFixed(1)} ha</div>
+      </div>`:''}
+    </div>
+    ${!rdt?`<p style="font-size:.68rem;color:#94a3b8;margin-top:10px;margin-bottom:0;">Renseignez le rendement fourrager moyen (t MS/ha) ci-dessus pour estimer la surface libérée ou nécessaire.</p>`:''}
+    <p style="font-size:.68rem;color:#94a3b8;margin-top:10px;margin-bottom:0;">Hypothèse simplificatrice : le besoin en MS/VL/jour est celui de la ration actuellement calculée dans l'onglet Ration (même ration appliquée à tout le troupeau). Le besoin réel dépend aussi de l'état physiologique individuel de chaque animal (lactation, tarissement, génisses).</p>
+  </div>`;
 }
 
 // ══ AGENDA ════════════════════════════
