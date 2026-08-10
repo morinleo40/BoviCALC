@@ -540,6 +540,10 @@ function setTheme(t) {
                   <label>TB (g/L)</label>
                   <input type="number" class="form-input" id="r-tb" min="20" step="0.5" placeholder="38">
                 </div>
+                <div class="form-group" id="rg-tp">
+                  <label>TP (g/L)</label>
+                  <input type="number" class="form-input" id="r-tp" min="20" step="0.5" placeholder="32">
+                </div>
                 <div class="form-group" id="rg-gmq" style="display:none;">
                   <label>GMQ (kg/j)</label>
                   <input type="number" class="form-input" id="r-gmq" min="0" max="2" step="0.1" placeholder="1.0">
@@ -1255,6 +1259,10 @@ function setTheme(t) {
         <label>TB cible (%)</label>
         <input type="number" step="0.01" class="form-input" id="obj-tb" placeholder="Ex: 4.10">
       </div>
+      <div class="form-group">
+        <label>TP cible (%)</label>
+        <input type="number" step="0.01" class="form-input" id="obj-tp" placeholder="Ex: 3.30">
+      </div>
       <div class="form-group" style="grid-column:1/-1;">
         <label>Score minimum souhaité</label>
         <select class="form-select" id="obj-score">
@@ -1301,6 +1309,9 @@ function setTheme(t) {
       <button class="modal-close" onclick="closeAlimentsBrowser()">×</button>
     </div>
     <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px;">Base RumiCORE (INRA 2018, ~240 aliments) + vos aliments personnalisés (Paramètres → Base aliments & prix). Les aliments personnalisés sans UFL/PDI renseignés ne peuvent pas être utilisés dans une ration.</p>
+
+    <div id="ab-exp-section" style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;"></div>
+
     <input type="text" id="ab-search" class="form-input" placeholder="Rechercher un aliment…" style="margin-bottom:10px;" oninput="filterAlimentsBrowser()">
     <div id="ab-results" style="max-height:420px;overflow-y:auto;"></div>
   </div>
@@ -1661,15 +1672,22 @@ const alimentNames = alimentsDb.map(a=>a.nom);
 
 function findFood(nom) {
   const n = nom.toLowerCase().trim();
+  const asCustomFood = c => ({ nom: c.nom, ms: c.ms||88, uflPerKgMS: c.ufl, pdiPerKgMS: c.pdi });
+  // Priorité 1 : aliment propre à CETTE exploitation (ex: analyse de fourrage de la ferme) —
+  // prime sur tout le reste, y compris un aliment du même nom dans la base générique.
+  const exp = (window._expAliments||[]).find(a=>(a.nom||'').toLowerCase().trim()===n && a.ufl!=null && a.pdi!=null)
+    || (window._expAliments||[]).find(a=>(a.nom||'').toLowerCase().includes(n) && a.ufl!=null && a.pdi!=null);
+  if (exp) return asCustomFood(exp);
+  // Priorité 2 : base RumiCORE standard (~240 aliments, INRA 2018).
   const std = alimentsDb.find(a=>a.nom.toLowerCase()===n)||alimentsDb.find(a=>a.nom.toLowerCase().includes(n));
   if (std) return std;
-  // Aliments personnalisés du conseiller (Paramètres → Base aliments) : utilisables dans une
-  // ration seulement si UFL et PDI sont renseignés. Les autres valeurs (minéraux, AA, fibres...)
-  // ne sont pas disponibles pour ces aliments — les indicateurs concernés le signalent déjà
-  // honnêtement ("données insuffisantes") plutôt que d'inventer une valeur.
+  // Priorité 3 : aliments personnalisés du conseiller, partagés entre toutes ses exploitations
+  // (Paramètres → Base aliments). Utilisables dans une ration seulement si UFL et PDI sont
+  // renseignés — les autres valeurs (minéraux, AA, fibres...) ne sont pas disponibles pour ces
+  // aliments ; les indicateurs concernés le signalent déjà honnêtement plutôt que d'inventer une valeur.
   const custom = (window._conseillerAliments||[]).find(a=>(a.nom||'').toLowerCase().trim()===n && a.ufl!=null && a.pdi!=null)
     || (window._conseillerAliments||[]).find(a=>(a.nom||'').toLowerCase().includes(n) && a.ufl!=null && a.pdi!=null);
-  if (custom) return { nom: custom.nom, ms: custom.ms||88, uflPerKgMS: custom.ufl, pdiPerKgMS: custom.pdi };
+  if (custom) return asCustomFood(custom);
   return null;
 }
 
@@ -2473,6 +2491,7 @@ async function openExp(id) {
     (currentExp.adresse?' · '+currentExp.adresse:'');
 
   renderFicheSynthese();
+  loadExpAliments();
 
   // Restore last session data if any
   if (currentExp.last_ration_data) {
@@ -2752,7 +2771,10 @@ function buildDatalist() {
   dl.id = 'aliments-list';
   const customNames = (window._conseillerAliments||[])
     .filter(a=>a.ufl!=null && a.pdi!=null).map(a=>a.nom);
-  const allNames = alimentNames.concat(customNames.filter(n=>!alimentNames.includes(n)));
+  const expNames = (window._expAliments||[])
+    .filter(a=>a.ufl!=null && a.pdi!=null).map(a=>a.nom);
+  let allNames = alimentNames.concat(customNames.filter(n=>!alimentNames.includes(n)));
+  allNames = allNames.concat(expNames.filter(n=>!allNames.includes(n)));
   allNames.forEach(n => { const o=document.createElement('option'); o.value=n; dl.appendChild(o); });
   cont.appendChild(dl);
 }
@@ -2761,22 +2783,44 @@ function buildDatalist() {
 function openAlimentsBrowser() {
   _$('aliments-browser-modal').classList.remove('hidden');
   if (_$('ab-search')) _$('ab-search').value = '';
+  renderExpAlimentsSection();
   filterAlimentsBrowser();
   setTimeout(()=>_$('ab-search')?.focus(),80);
+}
+function renderExpAlimentsSection() {
+  const cont = _$('ab-exp-section'); if (!cont) return;
+  if (!currentExp) {
+    cont.innerHTML = '<p style="font-size:.78rem;color:var(--text-muted);margin:0;">Ouvrez une exploitation pour lui ajouter des aliments propres (ex: analyse de fourrage de cette ferme) — prioritaires sur la base générique lorsqu\'ils portent le même nom.</p>';
+    return;
+  }
+  cont.innerHTML = `
+    <div style="font-size:.78rem;font-weight:800;color:#15803d;text-transform:uppercase;margin-bottom:8px;">🌾 Aliments propres à ${escHtml(currentExp.nom)}</div>
+    <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin-bottom:8px;">
+      <input type="text" class="form-input" id="ea-nom" placeholder="Nom" style="margin:0;">
+      <input type="number" step="0.1" class="form-input" id="ea-prix" placeholder="Prix €/t" style="margin:0;">
+      <input type="number" step="0.01" class="form-input" id="ea-ufl" placeholder="UFL/kg MS" style="margin:0;">
+      <input type="number" step="1" class="form-input" id="ea-pdi" placeholder="PDI g/kg MS" style="margin:0;">
+      <input type="number" step="0.1" class="form-input" id="ea-ms" placeholder="MS %" style="margin:0;">
+      <input type="text" class="form-input" id="ea-fournisseur" placeholder="Fournisseur" style="margin:0;">
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="addExpAliment()" style="margin-bottom:10px;">➕ Ajouter / mettre à jour</button>
+    <div id="ea-list"></div>`;
+  renderExpAlimentsUI();
 }
 function closeAlimentsBrowser() { _$('aliments-browser-modal').classList.add('hidden'); }
 function filterAlimentsBrowser() {
   const q = (_$('ab-search')?.value||'').toLowerCase().trim();
   const cont = _$('ab-results'); if (!cont) return;
-  const std = alimentsDb.map(a => ({ nom:a.nom, ms:a.ms, ufl:a.uflPerKgMS, pdi:a.pdiPerKgMS, ca:a.ca_gkgms, p:a.p_gkgms, custom:false }));
-  const custom = (window._conseillerAliments||[]).map(a => ({ nom:a.nom, ms:a.ms, ufl:a.ufl, pdi:a.pdi, prix:a.prix, custom:true }));
-  let rows = custom.concat(std);
+  const std = alimentsDb.map(a => ({ nom:a.nom, ms:a.ms, ufl:a.uflPerKgMS, pdi:a.pdiPerKgMS, ca:a.ca_gkgms, p:a.p_gkgms, tag:null }));
+  const custom = (window._conseillerAliments||[]).map(a => ({ nom:a.nom, ms:a.ms, ufl:a.ufl, pdi:a.pdi, prix:a.prix, tag:'perso' }));
+  const exp = (window._expAliments||[]).map(a => ({ nom:a.nom, ms:a.ms, ufl:a.ufl, pdi:a.pdi, prix:a.prix, tag:'ferme' }));
+  let rows = exp.concat(custom, std);
   if (q) rows = rows.filter(r => (r.nom||'').toLowerCase().includes(q));
   rows = rows.slice(0, 400);
   if (!rows.length) { cont.innerHTML = '<p style="font-size:.82rem;color:var(--text-muted);text-align:center;padding:20px;">Aucun aliment ne correspond à cette recherche.</p>'; return; }
   cont.innerHTML = `<table class="data-table"><thead><tr><th>Aliment</th><th>MS %</th><th>UFL/kg MS</th><th>PDI g/kg MS</th><th></th></tr></thead>
     <tbody>${rows.map(r => `<tr>
-      <td style="font-weight:600;">${escHtml(r.nom)}${r.custom?' <span class="badge badge-gray" style="font-size:.62rem;">perso</span>':''}</td>
+      <td style="font-weight:600;">${escHtml(r.nom)}${r.tag==='ferme'?' <span class="badge badge-green" style="font-size:.62rem;">ferme</span>':r.tag==='perso'?' <span class="badge badge-gray" style="font-size:.62rem;">perso</span>':''}</td>
       <td>${r.ms!=null?r.ms:'—'}</td>
       <td>${r.ufl!=null?(typeof r.ufl==='number'?r.ufl.toFixed(2):r.ufl):'—'}</td>
       <td>${r.pdi!=null?(typeof r.pdi==='number'?r.pdi.toFixed(0):r.pdi):'—'}</td>
@@ -2980,7 +3024,7 @@ async function updateExpScore(a,b) {
   const eu = ['genisse','genisse-engrais','vache-reforme','veau'].includes(b.typeLabel)?'UFV':'UFL';
   const rationData = JSON.stringify({
     type: document.getElementById('r-type-animal').value,
-    pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), gmq: gN('r-gmq'),
+    pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), tp: gN('r-tp'), gmq: gN('r-gmq'),
     activite: document.getElementById('r-activite').value,
     rows: getRationRows(),
   });
@@ -3018,6 +3062,7 @@ function restoreRationData(data) {
   if (data.pv) document.getElementById('r-pv').value = data.pv;
   if (data.prod) document.getElementById('r-prod').value = data.prod;
   if (data.tb) document.getElementById('r-tb').value = data.tb;
+  if (data.tp) document.getElementById('r-tp').value = data.tp;
   if (data.gmq) document.getElementById('r-gmq').value = data.gmq;
   if (data.activite) document.getElementById('r-activite').value = data.activite;
   onAnimalTypeChange();
@@ -3136,7 +3181,7 @@ async function confirmSaveSession() {
     apports: lastApports,
     animalParams: {
       type: document.getElementById('r-type-animal').value,
-      pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), gmq: gN('r-gmq'),
+      pv: gN('r-pv'), prod: gN('r-prod'), tb: gN('r-tb'), tp: gN('r-tp'), gmq: gN('r-gmq'),
       activite: document.getElementById('r-activite').value,
     },
     rows: getRationRows(),
@@ -3214,6 +3259,7 @@ function restoreSession(id) {
     document.getElementById('r-pv').value = p.pv||'';
     document.getElementById('r-prod').value = p.prod||'';
     document.getElementById('r-tb').value = p.tb||'';
+    document.getElementById('r-tp').value = p.tp||'';
     document.getElementById('r-gmq').value = p.gmq||'';
     document.getElementById('r-activite').value = p.activite||'stabulation';
     onAnimalTypeChange();
@@ -3511,6 +3557,7 @@ function buildRapportBody() {
 
   // ── 3. RATION ─────────────────────────────────────────
   h += '<div class="rp-section"><div class="rp-section-title">3 — Composition de la ration</div>'
+    + renderCompositionChart(a)
     + '<table class="rp-table"><thead><tr><th>Aliment</th><th class="rp-num">kg MS/j</th><th class="rp-num">% MS</th><th class="rp-num">'+eu+'</th><th class="rp-num">PDI g</th></tr></thead><tbody>'
     + a.items.map(i=>'<tr><td>'+escHtml(i.nom)+'</td><td class="rp-num">'+i.qty.toFixed(1)+'</td>'
       +'<td class="rp-num">'+(a.totalMS>0?(i.qty/a.totalMS*100).toFixed(0)+'%':'')+'</td>'
@@ -3534,6 +3581,19 @@ function buildRapportBody() {
     + '<div style="margin-top:5px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">'
     + '<div style="width:'+q.total+'%;height:100%;background:'+gc+';border-radius:3px;"></div></div></div></div>'
     + '</div>';
+
+  // ── Radar multicritère (schéma visuel, imprimable) ─────
+  {
+    const msPrint = computeMultiScore(a, b, null);
+    h += '<div class="rp-section"><div class="rp-section-title">Score multicritère</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;">'
+      + svgRadarChart([
+          {label:'Perf.',icon:'🧬',val:msPrint.perf},{label:'Éco.',icon:'💰',val:msPrint.eco},
+          {label:'Autonomie',icon:'🌱',val:msPrint.autonomie},{label:'Sécurité',icon:'🐄',val:msPrint.secu},
+          {label:'Environ.',icon:'🌍',val:msPrint.env},
+        ])
+      + '</div></div>';
+  }
 
   // ── 5. INDICATEURS ───────────────────────────────────
   h += '<div class="rp-section"><div class="rp-section-title">5 — Analyse par indicateur</div>'
@@ -3873,6 +3933,7 @@ function computePourquoi(a, b) {
 function computeRationVariant(a, b, strategy) {
   const priceMap = {};
   (window._conseillerAliments||[]).forEach(x => { if (x.nom && x.prix!=null) priceMap[x.nom.toLowerCase()] = x.prix; });
+  (window._expAliments||[]).forEach(x => { if (x.nom && x.prix!=null) priceMap[x.nom.toLowerCase()] = x.prix; }); // prix propres à l'exploitation : prioritaires
 
   let items = a.items.map(i => ({ nom: i.nom, qty: i.qty, uflPerKg: i.qty>0?i.ufl/i.qty:0, pdiPerKg: i.qty>0?i.pdi/i.qty:0 }));
   const origQty = {}; a.items.forEach(i => origQty[i.nom] = i.qty);
@@ -4078,22 +4139,44 @@ function renderIndicateurs(a,b) {
     </div>`;
   }
 
-  // 0. NIVEAU DE PRODUCTION DE LA RATION — à quel niveau (L/j, lait standard 4% MG) ce bilan est calculé
+  // 0. NIVEAU DE PRODUCTION DE LA RATION + LAIT PERMIS PAR LA RATION
+  // Lait permis (méthode standard des conseillers en élevage laitier) : à partir des
+  // apports RÉELS de la ration (UFL, PDI) et de l'entretien de l'animal (poids vif), on
+  // inverse les mêmes formules INRA que celles utilisées pour calculer les besoins — ce
+  // qui donne la production que CETTE ration peut soutenir, indépendamment de la
+  // production visée saisie. C'est le minimum entre lait permis par l'énergie et lait
+  // permis par les PDI (le facteur limitant).
   let prodCls,prodBadge,prodBadgeCls,prodResume,prodDetail;
   const laitStdInd = (prod&&tb) ? (prod*tb/40) : null;
   const objLaitInd = currentExp?.objectifs?.lait, objLaitStdInd = currentExp?.objectifs?.laitStandard;
+  let laitPermisStd=null, laitPermisBrut=null, laitPermisLimitant=null;
+  if(b.typeLabel==='vache-laitiere'&&pv>0){
+    const coefLait = (document.getElementById('r-activite')?.value==='paturage')?1.1:1;
+    const laitPermisUFL = (a.totalUFL/coefLait - (1.4+0.006*pv)) / 0.44;
+    const laitPermisPDI = (a.totalPDI/coefLait - (95+0.5*pv)) / 48;
+    laitPermisStd = Math.max(0, Math.min(laitPermisUFL, laitPermisPDI));
+    laitPermisLimitant = laitPermisUFL<=laitPermisPDI ? 'énergie (UFL)' : 'protéines (PDI)';
+    laitPermisBrut = tb ? laitPermisStd*40/tb : laitPermisStd;
+  }
   if(!prod){prodCls='info';prodBadge='Non renseigné';prodBadgeCls='rb-badge-gray';prodResume='Production non saisie';prodDetail=adv('Renseignez la production laitière visée (onglet Ration) pour que le bilan soit calculé au bon niveau de production.');}
   else{
-    prodResume=`${prod.toFixed(1)} L/j${tb?` · TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?` · lait standard ${laitStdInd.toFixed(1)} L/j`:''}`;
+    prodResume=`Visée ${prod.toFixed(1)} L/j${tb?` · TB ${(tb/10).toFixed(2)}%`:''}${laitPermisBrut!=null?` · permis par la ration ${laitPermisBrut.toFixed(1)} L/j`:''}`;
     prodBadge=`${prod.toFixed(1)} L/j`;prodBadgeCls='rb-badge-gray';prodCls='info';
-    prodDetail=adv(`Cette ration est calculée pour une production de <strong>${prod.toFixed(1)} L/j</strong>${tb?`, TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?`, soit <strong>${laitStdInd.toFixed(1)} L/j de lait standard (4% MG)</strong> — la référence utilisée pour comparer des vaches ou périodes différentes.`:''}`);
+    prodDetail=adv(`Cette ration est calculée pour une production visée de <strong>${prod.toFixed(1)} L/j</strong>${tb?`, TB ${(tb/10).toFixed(2)}%`:''}${laitStdInd?`, soit <strong>${laitStdInd.toFixed(1)} L/j de lait standard (4% MG)</strong>`:''}.`);
+    if(laitPermisBrut!=null){
+      const ecartPermis = laitPermisBrut - prod;
+      prodDetail += tip(ecartPermis>=-0.5?'ok':'warn', '🥛', `<strong>Lait permis par la ration : ${laitPermisBrut.toFixed(1)} L/j</strong> (${laitPermisStd.toFixed(1)} L/j en lait standard 4% MG), limité par ${laitPermisLimitant} — c'est la production que cette ration peut réellement soutenir, calculée à partir de ses apports réels et non de la valeur saisie. ${ecartPermis>=-0.5?'Cohérent avec la production visée.':`${ecartPermis<0?'Inférieur':'Supérieur'} de ${Math.abs(ecartPermis).toFixed(1)} L/j à la production visée.`}`);
+      if(ecartPermis<-1.5){prodCls='warn';prodBadge='Ration sous-dimensionnée';prodBadgeCls='rb-badge-orange';}
+    } else if(b.typeLabel!=='vache-laitiere'){
+      prodDetail += tip('info','📖','Le "lait permis par la ration" ne s\'applique qu\'aux vaches laitières.');
+    }
     if(objLaitInd||objLaitStdInd){
       const gapLait = objLaitInd!=null?prod-objLaitInd:null;
       const gapStd = (objLaitStdInd!=null&&laitStdInd!=null)?laitStdInd-objLaitStdInd:null;
       const sousObjectif = (gapLait!=null&&gapLait<0)||(gapStd!=null&&gapStd<0);
-      if(sousObjectif){prodCls='warn';prodBadge='Sous objectif';prodBadgeCls='rb-badge-orange';
+      if(sousObjectif){if(prodCls==='info'){prodCls='warn';prodBadge='Sous objectif';prodBadgeCls='rb-badge-orange';}
         prodDetail+=tip('warn','🎯',`Objectif${objLaitInd!=null?` lait ${objLaitInd} L/j`:''}${objLaitStdInd!=null?`${objLaitInd!=null?' /':''} lait standard ${objLaitStdInd} L/j`:''} non atteint actuellement.`);}
-      else{prodCls='ok';prodBadge='Objectif atteint';prodBadgeCls='rb-badge-green';
+      else{if(prodCls==='info'){prodCls='ok';prodBadge='Objectif atteint';prodBadgeCls='rb-badge-green';}
         prodDetail+=tip('ok','✅','Production au niveau de l\'objectif fixé pour cette exploitation.');}
     } else {
       prodDetail+=tip('info','📖','Définissez un objectif de production (bouton "🎯 Objectifs" sur la fiche exploitation) pour comparer ce niveau à une cible.');
@@ -4245,18 +4328,29 @@ function renderIndicateurs(a,b) {
   const prixLaitMsca=parseFloat(_$('cout-prix-lait')?.value)||0.40;
   let coutRationMsca=(typeof window._lastCoutJour==='number')?window._lastCoutJour:null;
   let coutMscaEstime=false;
+  let mscaCoverage=null;
   if(coutRationMsca===null){
-    // Pas de coût calculé via l'onglet Coûts : on estime directement depuis les prix de la
-    // Base aliments du conseiller (Paramètres), uniquement si TOUS les aliments de la ration
-    // ont un prix connu — sinon on n'invente rien, l'indicateur reste "Non disponible".
+    // Pas de coût calculé via l'onglet Coûts : on estime directement depuis les prix connus
+    // (aliments propres à l'exploitation en priorité, puis Base aliments du conseiller).
+    // Si SEULS certains aliments ont un prix, on extrapole proportionnellement à la part de
+    // MS couverte (≥50% de la ration en valeur MS) plutôt que d'exiger 100% des aliments
+    // tarifés — sinon on n'invente rien, l'indicateur reste "Non disponible".
     const priceMapMsca={};
     (window._conseillerAliments||[]).forEach(x=>{if(x.nom&&x.prix!=null)priceMapMsca[x.nom.toLowerCase()]=x.prix;});
-    const known=a.items.length>0&&a.items.every(i=>priceMapMsca[i.nom.toLowerCase()]!=null);
-    if(known){coutRationMsca=a.items.reduce((s,i)=>s+i.qty*priceMapMsca[i.nom.toLowerCase()]/1000,0);coutMscaEstime=true;}
+    (window._expAliments||[]).forEach(x=>{if(x.nom&&x.prix!=null)priceMapMsca[x.nom.toLowerCase()]=x.prix;});
+    if(a.items.length){
+      let knownCost=0, knownMS=0;
+      a.items.forEach(i=>{const p=priceMapMsca[i.nom.toLowerCase()];if(p!=null){knownCost+=i.qty*p/1000;knownMS+=i.qty;}});
+      mscaCoverage = a.totalMS>0 ? knownMS/a.totalMS : 0;
+      if(mscaCoverage>=0.5){
+        coutRationMsca = mscaCoverage>=0.999 ? knownCost : knownCost/mscaCoverage;
+        coutMscaEstime=true;
+      }
+    }
   }
-  if(!prod||!prixLaitMsca||coutRationMsca===null){mscaCls='info';mscaBadge='Non disponible';mscaBadgeCls='rb-badge-gray';mscaResume='Prix du lait et coût ration requis';mscaDetail=adv('La MSCA (Marge sur Coût Alimentaire) nécessite la production laitière (onglet Ration), le prix du lait (ci-dessus ou onglet Coûts) et le coût de la ration — calculé dans l\'onglet Coûts, ou estimé automatiquement si tous les aliments de la ration ont un prix dans votre Base aliments (Paramètres → Base aliments & prix).')+tip('info','📖','MSCA = (Lait × Prix du lait) − Coût de la ration, en €/vache/jour — l\'indicateur de référence utilisé par les organismes de conseil en élevage laitier pour piloter la rentabilité.');}
-  else{const msca=prod*prixLaitMsca-coutRationMsca;mscaResume=`${msca>=0?'+':''}${msca.toFixed(2)} €/vache/j${coutMscaEstime?' (coût estimé)':''}`;
-    if(msca>=4){mscaCls='ok';mscaBadge='Bonne marge';mscaBadgeCls='rb-badge-green';mscaDetail=adv(`MSCA = ${prod.toFixed(1)} L × ${prixLaitMsca.toFixed(2)} €/L − ${coutRationMsca.toFixed(2)} € de ration${coutMscaEstime?' (estimé depuis votre Base aliments)':''} = ${msca.toFixed(2)} €/vache/j. Marge confortable.`)+tip('ok','✅','Conduite alimentaire rentable');}
+  if(!prod||!prixLaitMsca||coutRationMsca===null){mscaCls='info';mscaBadge='Non disponible';mscaBadgeCls='rb-badge-gray';mscaResume='Prix du lait et coût ration requis';mscaDetail=adv(`La MSCA (Marge sur Coût Alimentaire) nécessite la production laitière (onglet Ration), le prix du lait (ci-dessus ou onglet Coûts) et le coût de la ration — calculé dans l'onglet Coûts, ou estimé automatiquement dès qu'au moins la moitié de la MS de la ration a un prix connu (Paramètres → Base aliments, ou aliments propres à cette exploitation via 🔍 Base aliments).${mscaCoverage!=null?` Actuellement ${(mscaCoverage*100).toFixed(0)}% de la ration a un prix renseigné.`:''}`)+tip('info','📖','MSCA = (Lait × Prix du lait) − Coût de la ration, en €/vache/jour — l\'indicateur de référence utilisé par les organismes de conseil en élevage laitier pour piloter la rentabilité.');}
+  else{const msca=prod*prixLaitMsca-coutRationMsca;mscaResume=`${msca>=0?'+':''}${msca.toFixed(2)} €/vache/j${coutMscaEstime?` (coût ${mscaCoverage>=0.999?'estimé':'extrapolé, '+(mscaCoverage*100).toFixed(0)+'% tarifé'})`:''}`;
+    if(msca>=4){mscaCls='ok';mscaBadge='Bonne marge';mscaBadgeCls='rb-badge-green';mscaDetail=adv(`MSCA = ${prod.toFixed(1)} L × ${prixLaitMsca.toFixed(2)} €/L − ${coutRationMsca.toFixed(2)} € de ration${coutMscaEstime?(mscaCoverage>=0.999?' (estimé depuis vos prix)':' (extrapolé, seulement '+(mscaCoverage*100).toFixed(0)+'% de la ration tarifée)'):''} = ${msca.toFixed(2)} €/vache/j. Marge confortable.`)+tip('ok','✅','Conduite alimentaire rentable');}
     else if(msca>=2){mscaCls='warn';mscaBadge='Marge moyenne';mscaBadgeCls='rb-badge-orange';mscaDetail=adv(`MSCA = ${msca.toFixed(2)} €/vache/j — marge correcte mais avec de la marge de progression.`);}
     else{mscaCls='bad';mscaBadge='Marge faible';mscaBadgeCls='rb-badge-red';mscaDetail=adv(`MSCA = ${msca.toFixed(2)} €/vache/j — marge faible${msca<0?' voire négative':''}. La ration coûte cher au regard du produit lait généré.`)+tip('warn','💰','Comparer au coût de la ration et chercher des leviers d\'économie (optimiseur, autonomie fourragère)');}
     mscaDetail+=tip('info','📖','MSCA (Marge sur Coût Alimentaire) : indicateur de référence des organismes de conseil en élevage laitier pour piloter la rentabilité — produit lait moins coût alimentaire de la ration, en €/vache/jour.');}
@@ -4310,7 +4404,7 @@ function startSandbox() {
     besoins: lastBesoins,
     rows: getRationRows(),
     score: computeScore(lastApports, lastBesoins),
-    animalParams: { prod: gN('r-prod'), tb: gN('r-tb') },
+    animalParams: { prod: gN('r-prod'), tb: gN('r-tb'), tp: gN('r-tp') },
     coutJour: (typeof window._lastCoutJour === 'number') ? window._lastCoutJour : null,
     label: 'référence (' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) + ')',
   };
@@ -4361,7 +4455,7 @@ function renderCompare(pA, pB, pRows, pScore, pDate, pAnimal) {
   const cA = lastApports, cB = lastBesoins;
   const eu = UFV_TYPES.includes(cB.typeLabel) ? 'UFV' : 'UFL';
   pAnimal = pAnimal || {};
-  const cAnimal = { prod: gN('r-prod'), tb: gN('r-tb') };
+  const cAnimal = { prod: gN('r-prod'), tb: gN('r-tb'), tp: gN('r-tp') };
 
   const pRUFL = pB.bUFL > 0 ? pA.totalUFL / pB.bUFL : 0;
   const pRPDI = pB.bPDI > 0 ? pA.totalPDI / pB.bPDI : 0;
@@ -5651,6 +5745,65 @@ async function deleteConseillerAliment(id) {
   }, 'Supprimer', true);
 }
 
+// ══ ALIMENTS PROPRES À UNE EXPLOITATION (ex: analyse de fourrage de cette ferme) ══════
+// Distinct de conseiller_aliments (partagé entre toutes les exploitations du conseiller) :
+// ici, réservé à l'exploitation actuellement ouverte, prioritaire sur tout le reste.
+async function loadExpAliments() {
+  window._expAliments = [];
+  if (!currentExp) { buildDatalist(); return; }
+  const supa = getSupa();
+  const { data, error } = await supa.from('exploitation_aliments')
+    .select('*').eq('exploitation_id', currentExp.id).order('nom');
+  if (!error) window._expAliments = data || [];
+  buildDatalist();
+  renderExpAlimentsUI();
+}
+async function addExpAliment() {
+  if (!currentExp) { showToast('Ouvrez une exploitation.', 'warn'); return; }
+  const nom = (_$('ea-nom')?.value||'').trim();
+  if (!nom) { showToast('Nom requis.', 'warn'); return; }
+  const ufl = parseFloat(_$('ea-ufl').value)||null;
+  const pdi = parseFloat(_$('ea-pdi').value)||null;
+  if (ufl==null || pdi==null) showToast('UFL et PDI non renseignés — cet aliment sera enregistré mais ne pourra pas être utilisé dans une ration tant que ces deux valeurs manquent.', 'warn', 6000);
+  const supa = getSupa();
+  const payload = {
+    exploitation_id: currentExp.id, nom,
+    prix: parseFloat(_$('ea-prix').value)||null,
+    ufl, pdi,
+    ms: parseFloat(_$('ea-ms').value)||null,
+    fournisseur: (_$('ea-fournisseur').value||'').trim()||null,
+    updated_at: new Date().toISOString(),
+  };
+  const existing = (window._expAliments||[]).find(a => (a.nom||'').toLowerCase().trim() === nom.toLowerCase());
+  const { error } = existing
+    ? await supa.from('exploitation_aliments').update(payload).eq('id', existing.id)
+    : await supa.from('exploitation_aliments').insert(payload);
+  if (error) { showToast('Erreur : ' + error.message + ' (exécutez exploitation_aliments.sql dans Supabase ?)', 'error', 6000); return; }
+  ['ea-nom','ea-prix','ea-ufl','ea-pdi','ea-ms','ea-fournisseur'].forEach(id => { if(_$(id)) _$(id).value=''; });
+  showToast(existing ? 'Aliment mis à jour.' : 'Aliment enregistré pour cette exploitation.', 'success');
+  loadExpAliments();
+}
+async function deleteExpAliment(id) {
+  rbConfirm('Supprimer cet aliment de cette exploitation ?', async function() {
+    const supa = getSupa();
+    const { error } = await supa.from('exploitation_aliments').delete().eq('id', id);
+    if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+    showToast('Aliment supprimé.', 'info');
+    loadExpAliments();
+  }, 'Supprimer', true);
+}
+function renderExpAlimentsUI() {
+  const listEl = _$('ea-list'); if (!listEl) return;
+  const data = window._expAliments||[];
+  if (!data.length) { listEl.innerHTML = '<div style="padding:8px 0;color:var(--text-muted);font-size:.78rem;">Aucun aliment propre à cette exploitation.</div>'; return; }
+  listEl.innerHTML = `<table class="data-table" style="font-size:.78rem;"><thead><tr><th>Nom</th><th>Prix €/t</th><th>UFL</th><th>PDI</th><th>MS %</th><th></th></tr></thead>
+    <tbody>${data.map(a => `<tr>
+      <td style="font-weight:600;">${escHtml(a.nom)}</td>
+      <td>${a.prix ?? '—'}</td><td>${a.ufl ?? '—'}</td><td>${a.pdi ?? '—'}</td><td>${a.ms ?? '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteExpAliment('${a.id}')">🗑</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
 // ══ ANALYSES DE FOURRAGE ════════════════════════════
 async function saveAnalyseFourrage() {
   if (!currentExp) { showToast('Ouvrez une exploitation.', 'warn'); return; }
@@ -5731,7 +5884,7 @@ async function addAnalyseToBase(id) {
 // ══ OBJECTIFS DE SUIVI ════════════════════════════
 function objectifsBlockHtml(e, anim, score) {
   const o = e.objectifs || {};
-  const hasAny = o.lait || o.laitStandard || o.tb || o.score;
+  const hasAny = o.lait || o.laitStandard || o.tb || o.tp || o.score;
   const scoreVal = { A:4, B:3, C:2, D:1 };
   const row = (label, curVal, unit, target, higherBetter, isScore) => {
     if (target === undefined || target === null || target === '') return '';
@@ -5748,11 +5901,13 @@ function objectifsBlockHtml(e, anim, score) {
   // Lait standard (4% MG) = production brute × TB / 4 — même formule que le calcul de besoins
   // INRA (onglet Ration). anim.tb est stocké en ‰ (ex: 40 = 4,0%), d'où /40 et non /4.
   const laitStdActuel = (anim.prod && anim.tb) ? (anim.prod*anim.tb/40) : null;
-  const tbPctActuel = anim.tb!=null ? anim.tb/10 : null; // ‰ → % pour comparaison à l'objectif (saisi en %)
+  const tbPctActuel = anim.tb!=null ? anim.tb/10 : null; // g/L → % pour comparaison à l'objectif (saisi en %)
+  const tpPctActuel = anim.tp!=null ? anim.tp/10 : null;
   const body = hasAny ? [
     row('🥛 Lait', anim.prod||null, ' L/j', o.lait, true, false),
     row('🥛 Lait standard (4% MG)', laitStdActuel, ' L/j', o.laitStandard, true, false),
     row('🧈 TB', tbPctActuel, ' %', o.tb, true, false),
+    row('🧀 TP', tpPctActuel, ' %', o.tp, true, false),
     row('🏆 Score', score||null, '', o.score, true, true),
   ].join('') : '<div style="font-size:.8rem;color:var(--text-muted);">Aucun objectif défini pour cette exploitation.</div>';
   return `<div class="card" style="margin-bottom:0;margin-top:16px;">
@@ -5769,6 +5924,7 @@ function openObjectifsModal() {
   _$('obj-lait').value = o.lait || '';
   _$('obj-lait-std').value = o.laitStandard || '';
   _$('obj-tb').value = o.tb || '';
+  _$('obj-tp').value = o.tp || '';
   _$('obj-score').value = o.score || '';
   _$('objectifs-modal').classList.remove('hidden');
 }
@@ -5779,6 +5935,7 @@ async function saveObjectifs() {
     lait: parseFloat(_$('obj-lait').value) || null,
     laitStandard: parseFloat(_$('obj-lait-std').value) || null,
     tb: parseFloat(_$('obj-tb').value) || null,
+    tp: parseFloat(_$('obj-tp').value) || null,
     score: _$('obj-score').value || null,
   };
   const supa = getSupa();
