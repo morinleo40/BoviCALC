@@ -1123,8 +1123,26 @@ async function submitAuth() {
 
 async function onAuthenticated() {
   if (!currentUser) return;
-  const storedRole = currentUser.user_metadata?.role;
-  if (!storedRole) return; // Pas de rôle → auth wall reste visible
+  let storedRole = currentUser.user_metadata?.role;
+  if (!storedRole) {
+    // Compte existant sans rôle Éducation (ex: compte créé sur une autre app RumiCORE, ou
+    // avant l'introduction du système de rôle) : on utilise le rôle choisi sur le portail
+    // (?role=teacher/student) plutôt que d'abandonner en silence.
+    if (_urlRole) {
+      const { data, error } = await getSupa().auth.updateUser({ data: { role: _urlRole } });
+      if (error) {
+        $('aw-err').textContent = 'Impossible d\'attribuer le rôle : ' + error.message;
+        $('aw-err').style.display = 'block';
+        return;
+      }
+      currentUser = data.user;
+      storedRole = _urlRole;
+    } else {
+      $('aw-err').textContent = 'Ce compte n\'a pas encore de rôle Éducation (professeur/élève). Reconnectez-vous depuis le portail en choisissant "Je suis professeur" ou "Je suis élève".';
+      $('aw-err').style.display = 'block';
+      return;
+    }
+  }
   userRole = storedRole;
   $('auth-wall').style.display = 'none';
   $('app-layout').style.display = 'flex';
