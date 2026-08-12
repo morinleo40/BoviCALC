@@ -1062,13 +1062,14 @@ function getSupa() {
 }
 function $(id) { return document.getElementById(id); }
 
-const _urlRole = new URLSearchParams(location.search).get('role');
+let _urlRole = new URLSearchParams(location.search).get('role');
 
 // Portail obligatoire : accès direct sans rôle → redirection
 if (!_urlRole) {
   const _storedRole = localStorage.getItem('edu-role');
   if (_storedRole) {
     history.replaceState(null, '', 'app_education.html?role=' + _storedRole);
+    _urlRole = _storedRole; // history.replaceState ne met pas à jour location.search rétroactivement
   } else {
     window.location.replace('index_education.html');
   }
