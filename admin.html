@@ -125,9 +125,9 @@ document.addEventListener('DOMContentLoaded', initAdminAuth);
       <table class="data-table" id="adm-table">
         <thead><tr>
           <th>Email</th><th>Créé le</th><th>Dernière connexion</th><th>Plan</th><th>Organisation</th>
-          <th>Exploit.</th><th>Sessions</th><th>Statut</th><th>Actions</th>
+          <th>Exploit.</th><th>Sessions</th><th>Éduc.</th><th>Statut</th><th>Actions</th>
         </tr></thead>
-        <tbody id="adm-tbody"><tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Chargement…</td></tr></tbody>
+        <tbody id="adm-tbody"><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted);">Chargement…</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -141,10 +141,10 @@ document.addEventListener('DOMContentLoaded', initAdminAuth);
 async function loadUsers() {
   const supa = getSupa();
   const tbody = _$('adm-tbody');
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Chargement…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted);">Chargement…</td></tr>';
   const { data, error } = await supa.rpc('get_admin_users');
   if (error) {
-    tbody.innerHTML = `<tr><td colspan="9" style="padding:24px;color:#dc2626;font-size:.85rem;">Erreur : ${error.message} (exécutez migration_conseiller_v2.sql dans Supabase ?)</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="padding:24px;color:#dc2626;font-size:.85rem;">Erreur : ${error.message} (exécutez migration_conseiller_v2.sql dans Supabase ?)</td></tr>`;
     return;
   }
   window._adminUsers = data || [];
@@ -177,7 +177,7 @@ function renderUsersTable() {
     return true;
   });
 
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun compte trouvé.</td></tr>'; return; }
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun compte trouvé.</td></tr>'; return; }
 
   tbody.innerHTML = list.map(u => {
     const isPro = u.plan === 'pro';
@@ -197,10 +197,12 @@ function renderUsersTable() {
       </td>
       <td style="text-align:center;">${u.nb_exploitations||0}</td>
       <td style="text-align:center;">${u.nb_sessions||0}</td>
+      <td>${u.education_access ? '<span class="badge badge-blue">✅ Accordé</span>' : '<span class="badge badge-gray">Restreint</span>'}</td>
       <td>${isBanned ? '<span class="badge badge-red">Suspendu</span>' : '<span class="badge badge-green">Actif</span>'}</td>
       <td>
         <div style="display:flex;gap:4px;flex-wrap:wrap;">
           <button class="btn btn-ghost btn-sm" onclick="togglePlan('${u.id}','${u.email}',${isPro})">${isPro?'⬇️ Repasser gratuit':'⭐ Passer pro'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleEducationAccess('${u.id}','${u.email}',${!!u.education_access})">${u.education_access?'🔒 Retirer Éduc.':'🎓 Accorder Éduc.'}</button>
           <button class="btn btn-ghost btn-sm" onclick="editOrganisation('${u.id}')">🏢 Organisation</button>
           <button class="btn btn-ghost btn-sm" onclick="toggleBanned('${u.id}','${u.email}',${isBanned})">${isBanned?'✅ Réactiver':'🚫 Suspendre'}</button>
           <button class="btn btn-danger btn-sm" onclick="deleteUserAdmin('${u.id}','${u.email}')">🗑️ Supprimer</button>
@@ -223,6 +225,15 @@ async function togglePlan(id, email, isPro) {
     const { error } = await supa.rpc('admin_set_plan', { p_user_id: id, p_plan: 'pro', p_until: until });
     if (error) { alert('Erreur : ' + error.message); return; }
   }
+  loadUsers();
+}
+
+async function toggleEducationAccess(id, email, hasAccess) {
+  const action = hasAccess ? 'retirer' : 'accorder';
+  if (!confirm(`Confirmer : ${action} l'accès RumiCORE Éducation pour ${email} ?`)) return;
+  const supa = getSupa();
+  const { error } = await supa.rpc('admin_set_education_access', { p_user_id: id, p_allowed: !hasAccess });
+  if (error) { alert('Erreur : ' + error.message); return; }
   loadUsers();
 }
 

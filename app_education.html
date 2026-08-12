@@ -652,6 +652,16 @@
 </div>
 
 <!-- ════════════════════════════════════════
+     ACCÈS ÉDUCATION RESTREINT (géré depuis l'admin RumiCORE)
+════════════════════════════════════════ -->
+<div id="edu-access-denied" style="display:none;position:fixed;inset:0;z-index:99998;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#2e1065 100%);align-items:center;justify-content:center;padding:20px;flex-direction:column;gap:16px;text-align:center;">
+  <div style="font-size:3rem;">🔒</div>
+  <div style="color:#fff;font-size:1.15rem;font-weight:700;">Accès RumiCORE Éducation restreint</div>
+  <div style="color:#c4b5fd;font-size:.85rem;max-width:380px;">Ce compte n'a pas encore accès à RumiCORE Éducation. L'accès est désormais accordé individuellement par l'équipe RumiCORE — contactez-nous pour l'activer.</div>
+  <button class="btn btn-ghost" onclick="logoutUser()" style="color:#fff;border-color:#475569;">Se déconnecter</button>
+</div>
+
+<!-- ════════════════════════════════════════
      APP LAYOUT
 ════════════════════════════════════════ -->
 <div id="app-layout" style="display:none;flex;height:100vh;">
@@ -1124,6 +1134,22 @@ async function submitAuth() {
 
 async function onAuthenticated() {
   if (!currentUser) return;
+
+  // Accès Éducation restreint par défaut, accordé individuellement depuis le panneau
+  // admin RumiCORE (admin_set_education_access). On relit l'utilisateur en frais (pas le
+  // JWT en cache côté client) pour qu'un changement fait par l'admin prenne effet dès la
+  // prochaine connexion, sans attendre l'expiration du token.
+  try {
+    const { data: freshUserData, error: freshUserErr } = await getSupa().auth.getUser();
+    if (!freshUserErr && freshUserData?.user) currentUser = freshUserData.user;
+  } catch(e) {}
+  if (currentUser.user_metadata?.education_access !== true) {
+    $('auth-wall').style.display = 'none';
+    $('app-layout').style.display = 'none';
+    $('edu-access-denied').style.display = 'flex';
+    return;
+  }
+
   let storedRole = currentUser.user_metadata?.role;
   if (!storedRole) {
     // Compte existant sans rôle Éducation (ex: compte créé sur une autre app RumiCORE, ou
