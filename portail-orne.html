@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RumiCORE — Portail Chambre d'agriculture de l'Orne</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="Logo RumiCORE.png">
+<link rel="stylesheet" href="./style_conseiller.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { margin: 0; }
+  .portail-wall { min-height: 100vh; background: linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f2718 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .portail-card { width: 100%; max-width: 420px; }
+  .portail-chip { display: inline-block; background: rgba(21,128,61,.18); border: 1px solid rgba(34,197,94,.35); color: #86efac; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 4px 10px; border-radius: 20px; margin-bottom: 10px; }
+  .portail-intro { color: #cbd5e1; font-size: .82rem; line-height: 1.6; margin-bottom: 18px; text-align: center; }
+  .portail-toggle { text-align: center; margin-top: 14px; }
+  .portail-toggle a { color: #86efac; font-size: .8rem; text-decoration: none; cursor: pointer; }
+  .portail-toggle a:hover { text-decoration: underline; }
+  .auth-ok { color: #86efac; font-size: .82rem; padding: 10px 12px; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); border-radius: 8px; margin-bottom: 10px; line-height: 1.5; }
+  #form-login { display: none; }
+</style>
+</head>
+<body>
+<div class="portail-wall">
+  <div class="auth-card portail-card">
+    <div class="auth-logo">
+      <img src="Logo RumiCORE.png" alt="Rumicore" onerror="this.style.display='none'">
+      <h1>Rumicore <span style="color:#22c55e;">Conseiller</span></h1>
+    </div>
+    <div style="text-align:center;">
+      <span class="portail-chip">🤝 Chambre d'agriculture de l'Orne</span>
+    </div>
+    <p class="portail-intro">Vous avez reçu un code d'activation de la Chambre d'agriculture de l'Orne. Créez votre compte RumiCORE ci-dessous pour activer <strong>3 mois d'accès Pro offerts</strong>.</p>
+
+    <div id="form-create">
+      <input type="text" id="p-code" class="auth-input" placeholder="Code d'activation (ex: RUMI-XXXX-XXXX)" style="text-transform:uppercase;">
+      <input type="email" id="p-email" class="auth-input" placeholder="votre@email.com" autocomplete="email">
+      <input type="password" id="p-pass" class="auth-input" placeholder="Mot de passe (6 caractères min.)" autocomplete="new-password">
+      <input type="password" id="p-pass2" class="auth-input" placeholder="Confirmer le mot de passe" autocomplete="new-password">
+      <div id="p-create-err" class="auth-error" style="display:none;"></div>
+      <div id="p-create-ok" class="auth-ok" style="display:none;"></div>
+      <button id="p-create-btn" class="auth-btn" onclick="submitCreate()">Créer mon compte et activer</button>
+      <div class="portail-toggle"><a onclick="toggleForms()">Compte déjà créé et email confirmé ? Connectez-vous ici</a></div>
+    </div>
+
+    <div id="form-login">
+      <input type="email" id="p-login-email" class="auth-input" placeholder="votre@email.com" autocomplete="email">
+      <input type="password" id="p-login-pass" class="auth-input" placeholder="Mot de passe" autocomplete="current-password">
+      <input type="text" id="p-login-code" class="auth-input" placeholder="Code d'activation (si pas déjà appliqué)" style="text-transform:uppercase;">
+      <div id="p-login-err" class="auth-error" style="display:none;"></div>
+      <div id="p-login-ok" class="auth-ok" style="display:none;"></div>
+      <button id="p-login-btn" class="auth-btn" onclick="submitLogin()">Se connecter et activer mon code</button>
+      <div class="portail-toggle"><a onclick="toggleForms()">Pas encore de compte ? Revenir à la création</a></div>
+    </div>
+
+    <div style="text-align:center;margin-top:18px;padding-top:16px;border-top:1px solid #334155;">
+      <a href="./index_conseiller.html" style="font-size:.78rem;color:#475569;text-decoration:none;">← Retour à RumiCORE Conseiller</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var SUPA_URL = 'https://avdhymzmdlyiuetaihtk.supabase.co';
+var SUPA_KEY = 'sb_publishable_T1Welw6jNC27w5_HeNyDhA_nVKvYonz';
+var _supa = null;
+function getSupa() { if (!_supa && window.supabase) _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY); return _supa; }
+var PENDING_CODE_KEY = 'rumi_pending_promo_code';
+
+function toggleForms() {
+  var c = document.getElementById('form-create'), l = document.getElementById('form-login');
+  var showLogin = c.style.display !== 'none';
+  c.style.display = showLogin ? 'none' : '';
+  l.style.display = showLogin ? '' : 'none';
+}
+
+// Reprend exactement la logique de redemption de app.html (redeemPromo) : le code n'est
+// consommable que par un utilisateur authentifié (RLS), donc appelé après signUp (si une
+// session est immédiatement active) ou après signInWithPassword (retour post-confirmation email).
+async function redeemCode(code, errElId, okElId) {
+  var errEl = document.getElementById(errElId), okEl = document.getElementById(okElId);
+  var supa = getSupa();
+  var { data: { user } } = await supa.auth.getUser();
+  if (!user) return false;
+  code = (code || '').trim().toUpperCase();
+  if (!code) { if (errEl) { errEl.textContent = 'Compte actif, mais aucun code saisi à activer.'; errEl.style.display = 'block'; } return false; }
+  try {
+    var sel = await supa.from('promo_codes').select('*').eq('code', code).eq('used', false).maybeSingle();
+    if (sel.error) { if (errEl) { errEl.textContent = 'Erreur : ' + sel.error.message; errEl.style.display = 'block'; } return false; }
+    if (!sel.data) { if (errEl) { errEl.textContent = 'Code invalide ou déjà utilisé — votre compte est bien créé, contactez-nous pour vérifier votre code.'; errEl.style.display = 'block'; } return false; }
+    var upd = await supa.from('promo_codes').update({ used: true, used_by: user.id, used_at: new Date().toISOString(), used_email: user.email || null }).eq('code', code).eq('used', false);
+    if (upd.error) { if (errEl) { errEl.textContent = 'Erreur (activation) : ' + upd.error.message; errEl.style.display = 'block'; } return false; }
+    var durationDays = sel.data.duration_days || 90;
+    var until = new Date(); until.setDate(until.getDate() + durationDays);
+    var plan = await supa.auth.updateUser({ data: { plan: 'pro', plan_until: until.toISOString() } });
+    if (plan.error) { if (errEl) { errEl.textContent = 'Erreur (plan) : ' + plan.error.message; errEl.style.display = 'block'; } return false; }
+    localStorage.removeItem(PENDING_CODE_KEY);
+    var untilStr = until.toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+    if (okEl) { okEl.innerHTML = '🎉 Accès Pro activé jusqu\'au <strong>' + untilStr + '</strong> ! Vous pouvez maintenant vous rendre sur <a href="./app_conseiller.html" style="color:#86efac;">RumiCORE Conseiller</a>.'; okEl.style.display = 'block'; }
+    if (errEl) errEl.style.display = 'none';
+    return true;
+  } catch(e) {
+    if (errEl) { errEl.textContent = 'Erreur : ' + (e.message||e); errEl.style.display = 'block'; }
+    return false;
+  }
+}
+
+async function submitCreate() {
+  var errEl = document.getElementById('p-create-err'), okEl = document.getElementById('p-create-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  var code = document.getElementById('p-code').value.trim().toUpperCase();
+  var email = document.getElementById('p-email').value.trim();
+  var pass = document.getElementById('p-pass').value;
+  var pass2 = document.getElementById('p-pass2').value;
+  if (!code) { errEl.textContent = 'Le code d\'activation est requis.'; errEl.style.display = 'block'; return; }
+  if (!email || !pass) { errEl.textContent = 'Email et mot de passe requis.'; errEl.style.display = 'block'; return; }
+  if (pass.length < 6) { errEl.textContent = 'Le mot de passe doit faire au moins 6 caractères.'; errEl.style.display = 'block'; return; }
+  if (pass !== pass2) { errEl.textContent = 'Les mots de passe ne correspondent pas.'; errEl.style.display = 'block'; return; }
+  var btn = document.getElementById('p-create-btn');
+  btn.disabled = true; btn.textContent = 'Création en cours…';
+  localStorage.setItem(PENDING_CODE_KEY, code);
+  var supa = getSupa();
+  var r = await supa.auth.signUp({ email: email, password: pass });
+  btn.disabled = false; btn.textContent = 'Créer mon compte et activer';
+  if (r.error) { errEl.textContent = r.error.message; errEl.style.display = 'block'; return; }
+  if (r.data && r.data.session) {
+    await redeemCode(code, 'p-create-err', 'p-create-ok');
+  } else {
+    okEl.innerHTML = 'Compte créé ! Vérifiez votre boîte mail et cliquez sur le lien de confirmation, puis revenez sur cette page et utilisez "Compte déjà créé et email confirmé ?" ci-dessous pour activer votre code.';
+    okEl.style.display = 'block';
+  }
+}
+
+async function submitLogin() {
+  var errEl = document.getElementById('p-login-err'), okEl = document.getElementById('p-login-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  var email = document.getElementById('p-login-email').value.trim();
+  var pass = document.getElementById('p-login-pass').value;
+  var code = document.getElementById('p-login-code').value.trim() || localStorage.getItem(PENDING_CODE_KEY) || '';
+  if (!email || !pass) { errEl.textContent = 'Email et mot de passe requis.'; errEl.style.display = 'block'; return; }
+  var btn = document.getElementById('p-login-btn');
+  btn.disabled = true; btn.textContent = 'Connexion…';
+  var supa = getSupa();
+  var r = await supa.auth.signInWithPassword({ email: email, password: pass });
+  btn.disabled = false; btn.textContent = 'Se connecter et activer mon code';
+  if (r.error) { errEl.textContent = r.error.message; errEl.style.display = 'block'; return; }
+  await redeemCode(code, 'p-login-err', 'p-login-ok');
+}
+
+// Retour possible après confirmation email si une session est déjà active sur ce navigateur.
+document.addEventListener('DOMContentLoaded', async function() {
+  var supa = getSupa(); if (!supa) return;
+  var pending = localStorage.getItem(PENDING_CODE_KEY);
+  if (!pending) return;
+  var { data } = await supa.auth.getSession();
+  if (data && data.session) { await redeemCode(pending, 'p-create-err', 'p-create-ok'); }
+});
+</script>
+</body>
+</html>
