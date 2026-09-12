@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RumiCORE — Portail Chambre d'agriculture de l'Orne</title>
+<title>Portail Chambre d'agriculture de Normandie — RumiCORE</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="Logo RumiCORE.png">
 <link rel="stylesheet" href="./style_conseiller.css">
@@ -14,24 +14,49 @@
   .portail-card { width: 100%; max-width: 420px; }
   .portail-chip { display: inline-block; background: rgba(21,128,61,.18); border: 1px solid rgba(34,197,94,.35); color: #86efac; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 4px 10px; border-radius: 20px; margin-bottom: 10px; }
   .portail-intro { color: #cbd5e1; font-size: .82rem; line-height: 1.6; margin-bottom: 18px; text-align: center; }
+  .portail-tabs { display: flex; gap: 8px; margin-bottom: 18px; background: rgba(15,23,42,.5); border: 1px solid #334155; border-radius: 10px; padding: 4px; }
+  .portail-tab { flex: 1; background: transparent; border: none; color: #94a3b8; font-size: .82rem; font-weight: 600; padding: 10px 8px; border-radius: 7px; cursor: pointer; transition: all .15s; }
+  .portail-tab:hover { color: #e2e8f0; }
+  .portail-tab.active { background: #15803d; color: #fff; }
   .portail-toggle { text-align: center; margin-top: 14px; }
   .portail-toggle a { color: #86efac; font-size: .8rem; text-decoration: none; cursor: pointer; }
   .portail-toggle a:hover { text-decoration: underline; }
   .auth-ok { color: #86efac; font-size: .82rem; padding: 10px 12px; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); border-radius: 8px; margin-bottom: 10px; line-height: 1.5; }
   #form-login { display: none; }
+  .portail-brand { text-align: center; margin-bottom: 6px; }
+  .portail-brand img { max-height: 72px; max-width: 100%; }
+  .portail-powered { text-align: center; color: #64748b; font-size: .68rem; margin: 0 0 16px; text-transform: uppercase; letter-spacing: .06em; }
+  .portail-steps { background: rgba(15,23,42,.5); border: 1px solid #334155; border-radius: 10px; padding: 14px 14px 14px 12px; margin-bottom: 18px; }
+  .portail-step { display: flex; gap: 10px; align-items: flex-start; }
+  .portail-step + .portail-step { margin-top: 10px; }
+  .portail-step-num { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; background: #15803d; color: #fff; font-size: .72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .portail-step-text { color: #cbd5e1; font-size: .78rem; line-height: 1.5; }
+  .portail-step-text strong { color: #e2e8f0; }
 </style>
 </head>
 <body>
 <div class="portail-wall">
   <div class="auth-card portail-card">
-    <div class="auth-logo">
-      <img src="Logo RumiCORE.png" alt="Rumicore" onerror="this.style.display='none'">
-      <h1>Rumicore <span style="color:#22c55e;">Conseiller</span></h1>
+    <div class="portail-brand">
+      <img src="Chambre Normandie Logo.png" alt="Chambre d'agriculture de Normandie" onerror="this.style.display='none'">
     </div>
+    <p class="portail-powered">Portail d'activation — propulsé par RumiCORE</p>
     <div style="text-align:center;">
-      <span class="portail-chip">🤝 Chambre d'agriculture de l'Orne</span>
+      <span class="portail-chip">🤝 Chambre d'agriculture de Normandie</span>
     </div>
-    <p class="portail-intro">Vous avez reçu un code d'activation de la Chambre d'agriculture de l'Orne. Créez votre compte RumiCORE ci-dessous pour activer <strong>3 mois d'accès Pro offerts</strong>.</p>
+    <p class="portail-intro">Accédez à votre offre <strong>3 mois Pro offerts</strong> sur RumiCORE Conseiller, réservée aux adhérents de la Chambre d'agriculture de Normandie.</p>
+
+    <div class="portail-steps">
+      <div class="portail-step"><span class="portail-step-num">1</span><div class="portail-step-text"><strong>Vous avez reçu un code</strong> à usage unique de la Chambre d'agriculture de Normandie (ex. RUMI-XXXX-XXXX).</div></div>
+      <div class="portail-step"><span class="portail-step-num">2</span><div class="portail-step-text"><strong>Créez votre compte</strong> ci-dessous avec ce code, votre email et un mot de passe — onglet « J'ai un code ».</div></div>
+      <div class="portail-step"><span class="portail-step-num">3</span><div class="portail-step-text"><strong>Votre accès Pro s'active automatiquement</strong> pour 3 mois, sans carte bancaire ni engagement.</div></div>
+      <div class="portail-step"><span class="portail-step-num">4</span><div class="portail-step-text"><strong>Vous êtes redirigé</strong> vers RumiCORE Conseiller pour calculer vos rations tout de suite.</div></div>
+    </div>
+
+    <div class="portail-tabs">
+      <button type="button" class="portail-tab active" id="tab-btn-code" onclick="setMode('code')">🔑 J'ai un code</button>
+      <button type="button" class="portail-tab" id="tab-btn-login" onclick="setMode('login')">👤 J'ai un compte</button>
+    </div>
 
     <div id="form-create">
       <input type="text" id="p-code" class="auth-input" placeholder="Code d'activation (ex: RUMI-XXXX-XXXX)" style="text-transform:uppercase;">
@@ -41,17 +66,15 @@
       <div id="p-create-err" class="auth-error" style="display:none;"></div>
       <div id="p-create-ok" class="auth-ok" style="display:none;"></div>
       <button id="p-create-btn" class="auth-btn" onclick="submitCreate()">Créer mon compte et activer</button>
-      <div class="portail-toggle"><a onclick="toggleForms()">Compte déjà créé et email confirmé ? Connectez-vous ici</a></div>
     </div>
 
     <div id="form-login">
       <input type="email" id="p-login-email" class="auth-input" placeholder="votre@email.com" autocomplete="email">
       <input type="password" id="p-login-pass" class="auth-input" placeholder="Mot de passe" autocomplete="current-password">
-      <input type="text" id="p-login-code" class="auth-input" placeholder="Code d'activation (si pas déjà appliqué)" style="text-transform:uppercase;">
+      <input type="text" id="p-login-code" class="auth-input" placeholder="Code d'activation (si vous en avez un nouveau à activer)" style="text-transform:uppercase;">
       <div id="p-login-err" class="auth-error" style="display:none;"></div>
       <div id="p-login-ok" class="auth-ok" style="display:none;"></div>
-      <button id="p-login-btn" class="auth-btn" onclick="submitLogin()">Se connecter et activer mon code</button>
-      <div class="portail-toggle"><a onclick="toggleForms()">Pas encore de compte ? Revenir à la création</a></div>
+      <button id="p-login-btn" class="auth-btn" onclick="submitLogin()">Se connecter</button>
     </div>
 
     <div style="text-align:center;margin-top:18px;padding-top:16px;border-top:1px solid #334155;">
@@ -67,11 +90,14 @@ var _supa = null;
 function getSupa() { if (!_supa && window.supabase) _supa = window.supabase.createClient(SUPA_URL, SUPA_KEY); return _supa; }
 var PENDING_CODE_KEY = 'rumi_pending_promo_code';
 
-function toggleForms() {
+function setMode(mode) {
   var c = document.getElementById('form-create'), l = document.getElementById('form-login');
-  var showLogin = c.style.display !== 'none';
-  c.style.display = showLogin ? 'none' : '';
-  l.style.display = showLogin ? '' : 'none';
+  var tc = document.getElementById('tab-btn-code'), tl = document.getElementById('tab-btn-login');
+  var isLogin = mode === 'login';
+  c.style.display = isLogin ? 'none' : '';
+  l.style.display = isLogin ? '' : 'none';
+  tc.classList.toggle('active', !isLogin);
+  tl.classList.toggle('active', isLogin);
 }
 
 // Reprend exactement la logique de redemption de app.html (redeemPromo) : le code n'est
@@ -96,8 +122,9 @@ async function redeemCode(code, errElId, okElId) {
     if (plan.error) { if (errEl) { errEl.textContent = 'Erreur (plan) : ' + plan.error.message; errEl.style.display = 'block'; } return false; }
     localStorage.removeItem(PENDING_CODE_KEY);
     var untilStr = until.toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
-    if (okEl) { okEl.innerHTML = '🎉 Accès Pro activé jusqu\'au <strong>' + untilStr + '</strong> ! Vous pouvez maintenant vous rendre sur <a href="./app_conseiller.html" style="color:#86efac;">RumiCORE Conseiller</a>.'; okEl.style.display = 'block'; }
+    if (okEl) { okEl.innerHTML = '🎉 Accès Pro activé jusqu\'au <strong>' + untilStr + '</strong> ! Redirection vers RumiCORE Conseiller…'; okEl.style.display = 'block'; }
     if (errEl) errEl.style.display = 'none';
+    setTimeout(function() { window.location.href = './app_conseiller.html'; }, 1800);
     return true;
   } catch(e) {
     if (errEl) { errEl.textContent = 'Erreur : ' + (e.message||e); errEl.style.display = 'block'; }
@@ -126,7 +153,7 @@ async function submitCreate() {
   if (r.data && r.data.session) {
     await redeemCode(code, 'p-create-err', 'p-create-ok');
   } else {
-    okEl.innerHTML = 'Compte créé ! Vérifiez votre boîte mail et cliquez sur le lien de confirmation, puis revenez sur cette page et utilisez "Compte déjà créé et email confirmé ?" ci-dessous pour activer votre code.';
+    okEl.innerHTML = 'Compte créé ! Vérifiez votre boîte mail et cliquez sur le lien de confirmation, puis revenez ici et utilisez l\'onglet « 👤 J\'ai un compte » ci-dessus pour vous connecter et activer votre code.';
     okEl.style.display = 'block';
   }
 }
@@ -142,7 +169,7 @@ async function submitLogin() {
   btn.disabled = true; btn.textContent = 'Connexion…';
   var supa = getSupa();
   var r = await supa.auth.signInWithPassword({ email: email, password: pass });
-  btn.disabled = false; btn.textContent = 'Se connecter et activer mon code';
+  btn.disabled = false; btn.textContent = 'Se connecter';
   if (r.error) { errEl.textContent = r.error.message; errEl.style.display = 'block'; return; }
   await redeemCode(code, 'p-login-err', 'p-login-ok');
 }
