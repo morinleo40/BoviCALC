@@ -330,8 +330,8 @@ async function resetPassword() {
   if (!res.error) showToast('📧 Email de réinitialisation envoyé à ' + email, 'info', 5000);
   else showAuthError(res.error.message);
 }
-var STRIPE_MONTHLY = 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00';
-var STRIPE_ANNUAL  = 'https://buy.stripe.com/9B614faqs8iS9312TGbMQ01';
+var STRIPE_MONTHLY = 'https://buy.stripe.com/cNi6oG3bX8jj95f5iO1B602';
+var STRIPE_ANNUAL  = 'https://buy.stripe.com/14AdR8h2NarrdlvdPk1B601';
 
 function openStripeCheckout() {
   var m = _$$('billing-modal'); if (m) m.classList.remove('hidden');
@@ -462,6 +462,12 @@ async function loadUserPlan() {
   updateAuthUI();
 }
 
+async function touchActivity() {
+  try {
+    var supa = getSupa(); if (!supa || !currentUser) return;
+    await supa.from('user_activity').upsert({ user_id: currentUser.id, last_active_at: new Date().toISOString() });
+  } catch(e) {}
+}
 async function initAuth() {
   showAuthWall();
   var supa = getSupa(); if (!supa) return;
@@ -471,6 +477,7 @@ async function initAuth() {
       currentUser = sd.data.session.user;
       await loadUserPlan();
       hideAuthWall();
+      touchActivity();
       setTimeout(function(){ if(typeof initEduBar==='function') initEduBar(); }, 1500);
       setTimeout(loadCustomFeeds, 1000);
     }
@@ -479,6 +486,7 @@ async function initAuth() {
       if (currentUser) {
         await loadUserPlan(); hideAuthWall();
         if (evt === 'SIGNED_IN') {
+          touchActivity();
           try { localStorage.setItem('bovicalc-last-login', Date.now().toString()); } catch(e) {}
           setTimeout(restoreAutoSave, 500); setTimeout(maybeShowTutorial, 800); setTimeout(showRumiTip, 1200);
           setTimeout(function(){ if(typeof initEduBar==='function') initEduBar(); }, 1500);
@@ -6179,7 +6187,7 @@ GRANT EXECUTE ON FUNCTION public.get_admin_stats() TO authenticated;</pre>
           </div>
           <div style="margin-bottom:8px;">
             <label style="font-size:.72rem;font-weight:700;color:#64748b;display:block;margin-bottom:3px;">Note (client, pack…)</label>
-            <input type="text" id="admin-promo-note" class="rb-input" placeholder="Ex: Pack 3 sièges — GAEC Dupont" style="padding:6px 10px;font-size:.82rem;">
+            <input type="text" id="admin-promo-note" class="rb-input" placeholder="Ex: Essai offert — GAEC Dupont" style="padding:6px 10px;font-size:.82rem;">
           </div>
           <button class="rb-btn rb-btn-primary" style="width:100%;margin-bottom:10px;" onclick="generatePromoCode()">➕ Générer les codes</button>
           <!-- Codes nouvellement générés -->

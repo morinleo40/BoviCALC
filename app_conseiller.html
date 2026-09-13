@@ -111,6 +111,12 @@ async function activateCode() {
   if(btn){btn.disabled=false;btn.textContent='Activer mon accès';}
 }
 
+async function touchActivity() {
+  try {
+    var supa=getSupa(); if(!supa||!currentUser) return;
+    await supa.from('user_activity').upsert({ user_id: currentUser.id, last_active_at: new Date().toISOString() });
+  } catch(e) {}
+}
 async function initAuth() {
   showAuthWall();
   var supa=getSupa(); if(!supa)return;
@@ -119,6 +125,7 @@ async function initAuth() {
     if(sd.data&&sd.data.session&&sd.data.session.user){
       currentUser=sd.data.session.user;
       hideAuthWall();
+      touchActivity();
       var hasAccess=await checkConseillerAccess();
       if(hasAccess) onSignIn(); else showAccessWall();
     }
@@ -127,6 +134,7 @@ async function initAuth() {
       if(currentUser){
         hideAuthWall();
         if(evt==='SIGNED_IN'){
+          touchActivity();
           var hasAccess=await checkConseillerAccess();
           if(hasAccess) onSignIn(); else showAccessWall();
         }

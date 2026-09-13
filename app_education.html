@@ -1132,8 +1132,15 @@ async function submitAuth() {
   }
 }
 
+async function touchActivity() {
+  try {
+    const supa = getSupa(); if (!supa || !currentUser) return;
+    await supa.from('user_activity').upsert({ user_id: currentUser.id, last_active_at: new Date().toISOString() });
+  } catch(e) {}
+}
 async function onAuthenticated() {
   if (!currentUser) return;
+  touchActivity();
 
   // Accès Éducation restreint par défaut, accordé individuellement depuis le panneau
   // admin RumiCORE (admin_set_education_access). On relit l'utilisateur en frais (pas le
