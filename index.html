@@ -32,7 +32,7 @@
     "inLanguage": "fr",
     "offers": [
       { "@type": "Offer", "price": "0", "priceCurrency": "EUR", "name": "Gratuit" },
-      { "@type": "Offer", "price": "15", "priceCurrency": "EUR", "name": "Pro mensuel" }
+      { "@type": "Offer", "price": "25", "priceCurrency": "EUR", "name": "Pro mensuel" }
     ],
     "featureList": ["Rationnement bovin INRA 2018", "Calcul UFL UFV PDI", "Rationneur vache laitière", "Calcul ration bovins viande", "Bilan fourrager troupeau", "Export PDF", "115 aliments"],
     "author": { "@type": "Organization", "name": "Rumicore", "email": "rumicore1@gmail.com" }
@@ -394,18 +394,18 @@ const PRICING_CONFIG = {
     },
     {
       id: 'pro', name: 'Pro', description: 'Accès complet pour les éleveurs exigeants.',
-      badge: '🔥 Lancement −25 %', highlighted: true,
+      badge: '⭐ Le plus populaire', highlighted: true,
       ctaStyle: 'primary',
       monthly: {
-        price: 20, priceLabel: '20 €', period: '/ mois TTC · offre jusqu\'au 15 août',
-        ctaText: 'Souscrire au Pro — 20 €/mois', ctaLink: 'https://buy.stripe.com/dRm7sDbuwbv4cfd65SbMQ04',
-        savingsBadge: '−20 % lancement · au lieu de 25 €',
+        price: 25, priceLabel: '25 €', period: '/ mois TTC',
+        ctaText: 'Souscrire au Pro — 25 €/mois', ctaLink: 'https://buy.stripe.com/4gM4gr6ac6aKgvteCobMQ00',
+        savingsBadge: null,
       },
       annual: {
-        price: 220, priceLabel: '220 €', period: '/ an TTC · offre jusqu\'au 15 août',
-        ctaText: 'Souscrire au Pro — 220 €/an',
-        ctaLink: 'https://buy.stripe.com/4gM28j2Y042CdjhcugbMQ03',
-        savingsBadge: 'Économie 20 € · soit 5 €/mois de moins',
+        price: 240, priceLabel: '240 €', period: '/ an TTC · soit 20 €/mois',
+        ctaText: 'Souscrire au Pro — 240 €/an',
+        ctaLink: 'https://buy.stripe.com/9B614faqs8iS9312TGbMQ01',
+        savingsBadge: 'Économie 60 € · −20 %',
       },
       features: [
         { text: 'Ration de A à Z complète',            ok: true },
@@ -849,12 +849,12 @@ const PRICING_CONFIG = {
       <p id="pricing-subtitle"></p>
     </div>
 
-    <!-- Bulle Rumi promo -->
+    <!-- Bulle Rumi -->
     <div style="display:flex;align-items:flex-start;gap:14px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:18px 22px;max-width:680px;margin:0 auto 36px;">
       <img src="Logo RumiCORE.png" alt="Rumi" style="width:48px;height:48px;border-radius:50%;flex-shrink:0;">
       <div style="font-size:.9rem;color:#166534;line-height:1.6;">
-        <strong>🐄 Rumi fête le lancement !</strong><br>
-        Offre exclusive jusqu'au <strong>15 août 2026</strong> : Pro à <strong>20 €/mois</strong> au lieu de 25 € (−20 %), ou <strong>220 €/an</strong>. Souscrivez maintenant et gardez ce tarif à vie.
+        <strong>🐄 Rumi vous parle !</strong><br>
+        Le plan Pro débloque la ration automatique, le bilan fourrager, l'export PDF et bien plus : <strong>25 €/mois</strong>, ou <strong>240 €/an</strong> (soit 20 €/mois). Sans engagement.
       </div>
     </div>
 
@@ -868,7 +868,7 @@ const PRICING_CONFIG = {
         <button id="toggle-annual" onclick="setBilling('annual')"
           style="padding:9px 22px;border-radius:9px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:#64748b;">
           Annuel
-          <span id="annual-badge" style="margin-left:6px;background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:800;padding:2px 7px;border-radius:20px;">🔥 210 €</span>
+          <span id="annual-badge" style="margin-left:6px;background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:800;padding:2px 7px;border-radius:20px;">−20 %</span>
         </button>
       </div>
     </div>
@@ -946,7 +946,7 @@ const PRICING_CONFIG = {
 
     <details style="border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:10px;background:#fff;">
       <summary style="font-weight:600;font-size:.9rem;color:#1e293b;cursor:pointer;">Le rationnement bovin en ligne est-il gratuit ?</summary>
-      <p style="font-size:.85rem;color:#64748b;line-height:1.7;margin-top:10px;">Oui, Rumicore propose un accès <strong>gratuit au rationnement bovin en ligne</strong>. L'outil de base (calcul de ration simple, analyse des apports) est accessible sans abonnement. La version Pro débloque la ration automatique, le bilan fourrager, les rapports PDF et les profils sauvegardés — <strong>20 €/mois en offre lancement jusqu'au 15 août 2026</strong> (25 €/mois ensuite), ou 220 €/an.</p>
+      <p style="font-size:.85rem;color:#64748b;line-height:1.7;margin-top:10px;">Oui, Rumicore propose un accès <strong>gratuit au rationnement bovin en ligne</strong>. L'outil de base (calcul de ration simple, analyse des apports) est accessible sans abonnement. La version Pro débloque la ration automatique, le bilan fourrager, les rapports PDF et les profils sauvegardés — <strong>25 €/mois</strong>, ou <strong>240 €/an</strong> (soit 20 €/mois).</p>
     </details>
 
     <details style="border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:10px;background:#fff;">

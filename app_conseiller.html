@@ -81,6 +81,13 @@ function showCodeErr(m) { var e=_$('code-err'); if(e){e.textContent=m;e.style.di
 
 async function checkConseillerAccess() {
   var supa=getSupa(); if(!supa||!currentUser) return false;
+  // 1. Métadonnées (codes promo activés via app.html ou un portail dédié, ex. portail-orne.html)
+  var meta=currentUser.user_metadata||{};
+  if(meta.plan==='pro'){
+    var planUntil=meta.plan_until?new Date(meta.plan_until):null;
+    if(!planUntil||planUntil>new Date()) return true;
+  }
+  // 2. Fallback : table user_plans (abonnés Stripe / codes conseiller dédiés)
   try {
     var res=await supa.from('user_plans').select('plan').eq('user_id',currentUser.id).single();
     return res.data&&(res.data.plan==='conseiller'||res.data.plan==='pro');
