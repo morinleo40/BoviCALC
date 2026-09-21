@@ -176,7 +176,7 @@ function setTheme(t) {
     <div id="wall-disclaimer-group" style="display:none;margin-bottom:12px;padding:11px 13px;background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:8px;">
       <label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:.77rem;color:#0c4a6e;line-height:1.5;">
         <input type="checkbox" id="wall-disclaimer-check" style="margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:#0369a1;">
-        <span>Je reconnais que <strong>RumiCORE Conseiller est un outil d'aide à la décision</strong> basé sur les normes INRA 2018. Les résultats sont fournis à titre indicatif. Leur utilisation dans le cadre du conseil agricole relève de ma seule responsabilité professionnelle.</span>
+        <span>Je reconnais que <strong>RumiCORE Conseiller est un outil d'aide à la décision</strong> compatible INRA 2007 et 2018. Les résultats sont fournis à titre indicatif. Leur utilisation dans le cadre du conseil agricole relève de ma seule responsabilité professionnelle.</span>
       </label>
     </div>
     <div id="wall-err" class="auth-error" style="display:none;"></div>
@@ -215,7 +215,7 @@ function setTheme(t) {
         <div style="font-size:.75rem;color:#64748b;margin:6px 0 16px;">Sans engagement · Résiliable à tout moment</div>
         <ul style="list-style:none;text-align:left;font-size:.82rem;color:#94a3b8;margin-bottom:18px;display:flex;flex-direction:column;gap:6px;">
           <li>✅ Exploitations illimitées</li>
-          <li>✅ Calculs INRA 2018 complets</li>
+          <li>✅ Calculs INRA 2007/2018</li>
           <li>✅ Historique et PDF avec votre nom</li>
           <li>✅ Code d'accès unique et personnel</li>
         </ul>
@@ -1259,7 +1259,7 @@ function setTheme(t) {
 </div><!-- /app-layout -->
 
 <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:7px 20px;text-align:center;font-size:.7rem;color:#94a3b8;line-height:1.5;position:fixed;bottom:0;left:0;right:0;z-index:10;">
-  ⚠️ <strong style="color:#64748b;">RumiCORE Conseiller est un outil d'aide à la décision.</strong> Les résultats sont indicatifs (normes INRA 2018). Leur usage dans le cadre du conseil relève de la seule responsabilité du technicien.
+  ⚠️ <strong style="color:#64748b;">RumiCORE Conseiller est un outil d'aide à la décision.</strong> Les résultats sont indicatifs (normes INRA 2007/2018). Leur usage dans le cadre du conseil relève de la seule responsabilité du technicien.
 </div>
 
 <!-- ────────── MODAL: EXPLOITATION ────────── -->
@@ -1454,7 +1454,7 @@ function setTheme(t) {
       <h3>🔍 Base aliments</h3>
       <button class="modal-close" onclick="closeAlimentsBrowser()">×</button>
     </div>
-    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px;">Base RumiCORE (INRA 2018, ~240 aliments) + vos aliments personnalisés (Paramètres → Base aliments & prix). Les aliments personnalisés sans UFL/PDI renseignés ne peuvent pas être utilisés dans une ration.</p>
+    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px;">Base RumiCORE (~240 aliments, INRA 2007/2018) + vos aliments personnalisés (Paramètres → Base aliments & prix). Les aliments personnalisés sans UFL/PDI renseignés ne peuvent pas être utilisés dans une ration.</p>
 
     <div id="ab-exp-section" style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;"></div>
 
@@ -4383,7 +4383,7 @@ function buildRapportBody() {
       const agKgRp = a.totalAG/a.totalMS;
       const pctRp = x => a.totalAG>0 ? x/a.totalAG*100 : 0;
       h += '<div class="rp-section"><div class="rp-section-title">5d — Profil en acides gras</div>'
-        + '<p style="font-size:.78rem;color:#475569;margin-bottom:6px;">Matière grasse totale : <strong>'+agKgRp.toFixed(1)+' g/kg MS</strong> ('+a.totalAG.toFixed(0)+' g/j), calculée sur '+(covAGRp*100).toFixed(0)+'% de la ration (tables INRA 2018).</p>'
+        + '<p style="font-size:.78rem;color:#475569;margin-bottom:6px;">Matière grasse totale : <strong>'+agKgRp.toFixed(1)+' g/kg MS</strong> ('+a.totalAG.toFixed(0)+' g/j), calculée sur '+(covAGRp*100).toFixed(0)+'% de la ration (tables INRA 2007/2018).</p>'
         + faCompositionBar([
             {label:'C16:0 (palmitique)', pct:pctRp(a.totalC160)}, {label:'C18:0 (stéarique)', pct:pctRp(a.totalC180)},
             {label:'C18:1 (oléique)', pct:pctRp(a.totalC181)}, {label:'C18:2 (linoléique)', pct:pctRp(a.totalC182)},
@@ -4403,7 +4403,7 @@ function buildRapportBody() {
       const isGestanteRp = b.typeLabel==='vache-tarie'||b.typeLabel==='vache-prepa-velage';
       const seReqRp=(isGestanteRp?0.3:0.1)*msRefRp, iReqRp=(isGestanteRp?0.8:0.2)*msRefRp, cuReqRp=12*msRefRp, znReqRp=50*msRefRp, mnReqRp=50*msRefRp, coReqRp=0.3*msRefRp;
       h += '<div class="rp-section"><div class="rp-section-title">5e — Vitamines et oligo-éléments</div>'
-        + '<p style="font-size:.68rem;color:#94a3b8;margin-bottom:6px;">Apport calculé sur '+(covVORp*100).toFixed(0)+'% de la ration (tables INRA 2018). Vitamines A et D : non disponibles (source insuffisamment fiable).</p>'
+        + '<p style="font-size:.68rem;color:#94a3b8;margin-bottom:6px;">Apport calculé sur '+(covVORp*100).toFixed(0)+'% de la ration (tables INRA 2007/2018). Vitamines A et D : non disponibles (source insuffisamment fiable).</p>'
         + '<div style="display:flex;gap:14px;flex-wrap:wrap;">'
         + rowRp('Cu', a.totalCu, cuReqRp) + rowRp('Zn', a.totalZn, znReqRp) + rowRp('Mn', a.totalMn, mnReqRp)
         + rowRp('Co', a.totalCo, coReqRp) + rowRp('Se', a.totalSe, seReqRp) + rowRp('I', a.totalI, iReqRp)
@@ -5087,7 +5087,7 @@ function renderIndicateurs(a,b) {
       const msRef = a.totalMS;
       vBadge=`Calculé (${(covVO*100).toFixed(0)}% ration)`;
       vResume=`Cu ${(a.totalCu/msRef).toFixed(1)} · Zn ${(a.totalZn/msRef).toFixed(0)} · Se ${(a.totalSe/msRef).toFixed(2)} mg/kg MS`;
-      vDetail=adv(`Apport réel calculé à partir des teneurs des aliments (tables INRA 2018, couverture ${(covVO*100).toFixed(0)}% de la ration en MS).`)
+      vDetail=adv(`Apport réel calculé à partir des teneurs des aliments (tables INRA, couverture ${(covVO*100).toFixed(0)}% de la ration en MS).`)
         + row('Cu', a.totalCu, cuReq*msRef) + row('Zn', a.totalZn, znReq*msRef) + row('Mn', a.totalMn, mnReq*msRef)
         + row('Co', a.totalCo, coReq*msRef) + row('Se', a.totalSe, seReq*msRef) + row('I', a.totalI, iReq*msRef)
         + row('Vit.E', a.totalVitE, vitEReq)
@@ -5114,14 +5114,14 @@ function renderIndicateurs(a,b) {
       const ratioInsat = p183>0 ? (p181+p182)/p183 : null;
       agCls='ok';agBadge=`${agKg.toFixed(1)} g/kg MS`;agBadgeCls='rb-badge-gray';
       agResume=`${agKg.toFixed(1)} g MG/kg MS · C18:3 ${p183.toFixed(0)}% · C18:2 ${p182.toFixed(0)}%`;
-      agDetail=adv(`Matière grasse totale de la ration : <strong>${agKg.toFixed(1)} g/kg MS</strong> (${a.totalAG.toFixed(0)} g/j), calculée sur ${(covAG*100).toFixed(0)}% de la ration en MS (tables INRA 2018).`)
+      agDetail=adv(`Matière grasse totale de la ration : <strong>${agKg.toFixed(1)} g/kg MS</strong> (${a.totalAG.toFixed(0)} g/j), calculée sur ${(covAG*100).toFixed(0)}% de la ration en MS (tables INRA 2007/2018).`)
         + faCompositionBar([
             {label:'C16:0 (palmitique)', pct:p160}, {label:'C18:0 (stéarique)', pct:p180},
             {label:'C18:1 (oléique)', pct:p181}, {label:'C18:2 (linoléique)', pct:p182},
             {label:'C18:3 (n-3)', pct:p183},
           ])
         + tip('info','🌱',`Le C18:3 (n-3) est majoritairement apporté par l'herbe pâturée et les fourrages verts/ensilés jeunes — une part élevée est associée à un meilleur profil en acides gras du lait/de la viande.`)
-        + tip('info','📖','Source : teneurs par aliment des tables INRA 2018 (inration.fr). Pas de seuil réglementaire ou de besoin animal fiable trouvé pour la matière grasse totale — indicateur de profil, pas de couverture d\'un besoin.');
+        + tip('info','📖','Source : teneurs par aliment des tables INRA (inration.fr). Pas de seuil réglementaire ou de besoin animal fiable trouvé pour la matière grasse totale — indicateur de profil, pas de couverture d\'un besoin.');
     }
   }
 
@@ -5167,15 +5167,15 @@ function renderIndicateurs(a,b) {
   const bprPerKg=a.totalMS>0?(a.totalBPR||0)/a.totalMS:0;
   if(bprPerKg<-30){bprCls='bad';bprBadge='Déficit azoté';bprBadgeCls='rb-badge-red';bprDetail=adv(`BPR très négatif (${bprPerKg.toFixed(0)} g/kg MS). Azote insuffisant dans le rumen par rapport à l'énergie fermentescible — la synthèse microbienne est freinée, le PDI théorique n'est pas pleinement valorisé.`)+tip('danger','🧬','Ajouter une source azotée rapidement dégradable (tourteau de colza, jeune herbe)')+tip('warn','📉','Risque de sous-valorisation du PDI de la ration');}
   else if(bprPerKg<-10){bprCls='warn';bprBadge='Légèrement déficitaire';bprBadgeCls='rb-badge-orange';bprDetail=adv(`BPR modérément négatif (${bprPerKg.toFixed(0)} g/kg MS). Léger manque d'azote fermentescible par rapport à l'énergie disponible.`)+tip('warn','🌱','Un peu plus de protéines dégradables améliorerait l\'efficacité microbienne');}
-  else if(bprPerKg<=10){bprCls='ok';bprBadge='Équilibré';bprBadgeCls='rb-badge-green';bprDetail=adv(`BPR équilibré (${bprPerKg.toFixed(0)} g/kg MS) — azote et énergie fermentescibles bien synchronisés. Indicateur INRA 2018, remplace le couple PDIN/PDIE.`)+tip('ok','✅','Bonne efficacité de synthèse des protéines microbiennes');}
+  else if(bprPerKg<=10){bprCls='ok';bprBadge='Équilibré';bprBadgeCls='rb-badge-green';bprDetail=adv(`BPR équilibré (${bprPerKg.toFixed(0)} g/kg MS) — azote et énergie fermentescibles bien synchronisés. Indicateur INRA 2018 (mode 2018 — en mode 2007, voir PDIN/PDIE).`)+tip('ok','✅','Bonne efficacité de synthèse des protéines microbiennes');}
   else if(bprPerKg<=30){bprCls='warn';bprBadge='Léger excès';bprBadgeCls='rb-badge-orange';bprDetail=adv(`BPR légèrement positif (${bprPerKg.toFixed(0)} g/kg MS). Léger excès d'azote dégradable par rapport à l'énergie disponible.`)+tip('warn','💧','Excès partiellement perdu en urée — surveiller le taux d\'urée du lait');}
   else{bprCls='bad';bprBadge='Excès azoté';bprBadgeCls='rb-badge-red';bprDetail=adv(`BPR très positif (${bprPerKg.toFixed(0)} g/kg MS). Excès important d'azote dégradable — transformé en urée, coûteux et polluant.`)+tip('danger','✂️','Réduire les sources très dégradables (tourteaux, jeune herbe) ou augmenter l\'énergie fermentescible')+tip('warn','💰','Azote gaspillé = surcoût + pollution (urée lait, lisier)');}
-  bprDetail+=tip('info','📖','BPR = (MAT × dégradabilité azote − protéines microbiennes) − 14,2 — formule officielle INRA 2018, seuils indicatifs.');
+  bprDetail+=tip('info','📖','BPR = (MAT × dégradabilité azote − protéines microbiennes) − 14,2 — formule INRA 2018, seuils indicatifs.');
 
   // 11. ENCOMBREMENT RÉEL (UE) — INRA 2018
   let ueCls,ueBadge,ueBadgeCls,ueResume,ueDetail;
   const ueCoverage=a.totalMS>0?(a.msAvecUE||0)/a.totalMS:0;
-  if(ueCoverage<0.5||!cap){ueCls='info';ueBadge='Données insuffisantes';ueBadgeCls='rb-badge-gray';ueResume='Encombrement non calculable';ueDetail=adv('La capacité d\'ingestion en UE (unités d\'encombrement INRA 2018) nécessite que la majorité des aliments de la ration aient une valeur d\'encombrement renseignée.');}
+  if(ueCoverage<0.5||!cap){ueCls='info';ueBadge='Données insuffisantes';ueBadgeCls='rb-badge-gray';ueResume='Encombrement non calculable';ueDetail=adv('La capacité d\'ingestion en UE (unités d\'encombrement INRA) nécessite que la majorité des aliments de la ration aient une valeur d\'encombrement renseignée.');}
   else{const ratioUE=cap>0?(a.totalUE||0)/cap:0;const densiteUE=a.msAvecUE>0?(a.totalUE||0)/a.msAvecUE:0;ueResume=`${(a.totalUE||0).toFixed(1)} / ${cap.toFixed(1)} UE — densité ${densiteUE.toFixed(2)} UE/kg MS`;
     if(ratioUE>1.08){ueCls='bad';ueBadge='Sature la capacité';ueBadgeCls='rb-badge-red';ueDetail=adv(`La ration occupe ${(ratioUE*100).toFixed(0)}% de la capacité d'ingestion réelle en UE — au-delà du seuil de saturation. Une ration encombrante sature l'appétit avant d'atteindre la quantité de MS visée.`)+tip('danger','🌾','Réduire la part de fourrages très encombrants ou améliorer leur qualité')+tip('warn','✂️','Densifier avec des aliments à faible encombrement (céréales, tourteaux)');}
     else if(ratioUE>0.95){ueCls='warn';ueBadge='Proche de la saturation';ueBadgeCls='rb-badge-orange';ueDetail=adv(`La ration occupe ${(ratioUE*100).toFixed(0)}% de la capacité d'ingestion en UE. Marge de sécurité réduite.`)+tip('warn','📋','Surveiller le comportement alimentaire et les refus au cornadis');}

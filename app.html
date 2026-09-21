@@ -575,7 +575,7 @@ async function initAuth() {
       <div id="wall-disclaimer-group" class="hidden" style="margin-top:14px;padding:12px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.8rem;color:#166534;line-height:1.5;">
           <input type="checkbox" id="wall-disclaimer-check" style="margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:#15803d;">
-          <span>Je reconnais que <strong>RumiCORE est un outil d'aide à la décision</strong> basé sur les normes INRA 2018. Les résultats sont fournis à titre indicatif uniquement. L'utilisation des recommandations relève de ma seule responsabilité. RumiCORE ne saurait être tenu responsable de toute conséquence résultant de l'usage de l'application. <a href="a-propos.html" target="_blank" style="color:#15803d;font-weight:700;">En savoir plus →</a></span>
+          <span>Je reconnais que <strong>RumiCORE est un outil d'aide à la décision</strong> compatible INRA 2007 et 2018. Les résultats sont fournis à titre indicatif uniquement. L'utilisation des recommandations relève de ma seule responsabilité. RumiCORE ne saurait être tenu responsable de toute conséquence résultant de l'usage de l'application. <a href="a-propos.html" target="_blank" style="color:#15803d;font-weight:700;">En savoir plus →</a></span>
         </label>
       </div>
 
@@ -1593,7 +1593,7 @@ async function initAuth() {
 </main>
 
 <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:8px 24px;text-align:center;font-size:.72rem;color:#94a3b8;line-height:1.5;flex-shrink:0;">
-  ⚠️ <strong style="color:#64748b;">RumiCORE est un outil d'aide à la décision.</strong> Les résultats sont fournis à titre indicatif sur la base des normes INRA 2018. L'utilisation des recommandations relève de la seule responsabilité de l'utilisateur. RumiCORE ne peut être tenu responsable de toute conséquence résultant de l'usage de l'application.
+  ⚠️ <strong style="color:#64748b;">RumiCORE est un outil d'aide à la décision.</strong> Les résultats sont fournis à titre indicatif selon les r\u00e9f\u00e9rentiels INRA 2007/2018. L'utilisation des recommandations relève de la seule responsabilité de l'utilisateur. RumiCORE ne peut être tenu responsable de toute conséquence résultant de l'usage de l'application.
 </div>
 
 </div><!-- /rb-app-shell -->
@@ -2869,12 +2869,12 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         ${b.bMet > 0 ? `<div class="rb-metric" style="border-left:3px solid #7c3aed;">
           <div class="rb-metric-head"><div class="rb-metric-title">Méthionine (Met)</div></div>
           <div class="result-value" style="color:#7c3aed;">${b.bMet.toFixed(1)}<span class="result-unit">g/j</span></div>
-          <div class="result-sub">≈ 24 g/kg PDI (INRA 2018)</div>
+          <div class="result-sub">≈ 24 g/kg PDI (INRA)</div>
         </div>` : ''}
         ${b.bLys > 0 ? `<div class="rb-metric" style="border-left:3px solid #0e7490;">
           <div class="rb-metric-head"><div class="rb-metric-title">Lysine (Lys)</div></div>
           <div class="result-value" style="color:#0e7490;">${b.bLys.toFixed(1)}<span class="result-unit">g/j</span></div>
-          <div class="result-sub">≈ 70 g/kg PDI (INRA 2018)</div>
+          <div class="result-sub">≈ 70 g/kg PDI (INRA)</div>
         </div>` : ''}
       </div>
       <div class="rb-detail-block">
@@ -3653,7 +3653,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         tip('warn','🌱','Un peu plus de protéines dégradables améliorerait l\'efficacité microbienne');
     } else if (bprPerKg <= 10) {
       bprCls='ok'; bprBadge='Équilibré'; bprBadgeCls='rb-badge-green';
-      bprDetail = adv(`BPR équilibré (${bprPerKg.toFixed(0)} g/kg MS). Azote et énergie fermentescibles sont bien synchronisés pour une synthèse microbienne optimale — indicateur introduit par le système INRA 2018 en remplacement du couple PDIN/PDIE.`) +
+      bprDetail = adv(`BPR équilibré (${bprPerKg.toFixed(0)} g/kg MS). Azote et énergie fermentescibles sont bien synchronisés pour une synthèse microbienne optimale — indicateur INRA 2018 (remplace PDIN/PDIE en mode 2018).`) +
         tip('ok','✅','BPR dans la cible — bonne efficacité de synthèse des protéines microbiennes');
     } else if (bprPerKg <= 30) {
       bprCls='warn'; bprBadge='Léger excès'; bprBadgeCls='rb-badge-orange';
@@ -3665,7 +3665,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         tip('danger','✂️','Réduire les sources très dégradables (tourteaux, jeune herbe) ou augmenter l\'énergie fermentescible (céréales)') +
         tip('warn','💰','Excès azoté = azote gaspillé + surcoût + pollution (urée lait, lisier)');
     }
-    bprDetail += tip('info','📖','BPR = (MAT × dégradabilité de l\'azote − protéines microbiennes) − 14,2 — formule officielle INRA 2018, seuils indicatifs.');
+    bprDetail += tip('info','📖','BPR = (MAT × dégradabilité de l\'azote − protéines microbiennes) − 14,2 — formule INRA 2018, seuils indicatifs.');
 
     // ── 8. ENCOMBREMENT RÉEL (UE) — INRA 2018 ────────────
     let ueCls, ueBadge, ueBadgeCls, ueResume, ueDetail;
@@ -3673,7 +3673,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     if (ueCoverage < 0.5 || !b.ingestionCapacite) {
       ueCls='info'; ueBadge='Données insuffisantes'; ueBadgeCls='rb-badge-gray';
       ueResume = 'Encombrement non calculable';
-      ueDetail = adv('La capacité d\'ingestion exprimée en UE (unités d\'encombrement, système INRA 2018) nécessite que la majorité des aliments de la ration disposent d\'une valeur d\'encombrement renseignée dans la base.');
+      ueDetail = adv('La capacité d\'ingestion exprimée en UE (unités d\'encombrement, système INRA) nécessite que la majorité des aliments de la ration disposent d\'une valeur d\'encombrement renseignée dans la base.');
     } else {
       const ratioUE = b.ingestionCapacite > 0 ? a.totalUE / b.ingestionCapacite : 0;
       const densiteUE = a.msAvecUE > 0 ? a.totalUE / a.msAvecUE : 0;
@@ -3689,7 +3689,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
           tip('warn','📋','Surveiller le comportement alimentaire et les refus au cornadis');
       } else {
         ueCls='ok'; ueBadge='Marge confortable'; ueBadgeCls='rb-badge-green';
-        ueDetail = adv(`La ration occupe ${(ratioUE*100).toFixed(0)} % de la capacité d'ingestion en UE — marge confortable. L'encombrement réel des aliments (valeur d'encombrement INRA 2018, pas un simple poids de matière sèche) est pris en compte ici.`) +
+        ueDetail = adv(`La ration occupe ${(ratioUE*100).toFixed(0)} % de la capacité d'ingestion en UE — marge confortable. L'encombrement réel des aliments (valeur d'encombrement INRA, pas un simple poids de matière sèche) est pris en compte ici.`) +
           tip('ok','✅','Capacité d\'ingestion non limitante avec cette composition de ration');
       }
       if (ueCoverage < 0.9) {
@@ -4334,7 +4334,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const kv=(l,v)=>'<div class="rp-kv"><span class="rp-kv-label">'+l+'</span><span class="rp-kv-val">'+v+'</span></div>';
     const ir=(ico,lbl,val,cls,badge)=>'<div class="rp-indicator-row"><span class="rp-ind-icon">'+ico+'</span><span class="rp-ind-label">'+lbl+'</span><span class="rp-ind-val">'+val+'</span>'+rpBadge(cls,badge)+'</div>';
 
-    let h='<div class="rp-header"><div class="rp-logo"><img src="Logo RumiCORE.png" alt="RumiCORE" style="height:36px;vertical-align:middle;border-radius:6px;background:#fff;padding:2px 4px;" onerror="this.outerHTML=\'<span style=&quot;font-weight:900;color:#15803d;&quot;>RumiCORE</span>\'"> <span style="font-size:.7rem;color:rgba(255,255,255,.7);vertical-align:middle;margin-left:6px;">Analyse INRA 2018</span></div>'
+    let h='<div class="rp-header"><div class="rp-logo"><img src="Logo RumiCORE.png" alt="RumiCORE" style="height:36px;vertical-align:middle;border-radius:6px;background:#fff;padding:2px 4px;" onerror="this.outerHTML=\'<span style=&quot;font-weight:900;color:#15803d;&quot;>RumiCORE</span>\'"> <span style="font-size:.7rem;color:rgba(255,255,255,.7);vertical-align:middle;margin-left:6px;">Analyse INRA '+(window.RB_SYSTEM||'2007')+'</span></div>'
      +'<div class="rp-title-block"><div class="rp-title">Rapport de ration complet</div>'
      +'<div class="rp-subtitle">'+animalLabel+(race?' · '+race:'')+' — '+date+'</div></div>'
      +'<div class="rp-grade-badge" style="color:'+gc+';">'+q.grade+'<span class="rp-grade-sub">'+q.total+'/100</span></div></div>'
