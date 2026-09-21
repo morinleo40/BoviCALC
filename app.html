@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rumicore — Application de rationnement bovin en ligne</title>
-  <meta name="description" content="Calculez et optimisez les rations de vos bovins : UFL, PDI, bilan nutritionnel complet, bilan fourrager et export PDF. Basé sur les normes INRA 2018.">
+  <meta name="description" content="Calculez et optimisez les rations de vos bovins : UFL, PDI, bilan nutritionnel complet, bilan fourrager et export PDF. Compatible INRA 2007 (feedtables) et INRA 2018.">
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="./style.css">
   <link rel="icon" type="image/png" href="./Logo RumiCORE.png">
@@ -767,6 +767,12 @@ async function initAuth() {
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span class="inra-sys-badge" style="display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:.78rem;font-weight:700;border:1.5px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;cursor:pointer;"
+          onclick="setInraSystem(window.RB_SYSTEM==='2007'?'2018':'2007')" title="Cliquer pour changer de référentiel">INRA&nbsp;2007</span>
+        <select id="inra-system-select" class="rb-select" style="font-size:.8rem;padding:4px 10px;min-width:120px;" onchange="setInraSystem(this.value)" title="Référentiel nutritionnel INRA">
+          <option value="2007" selected>INRA 2007 (feedtables)</option>
+          <option value="2018">INRA 2018 (tables révisées)</option>
+        </select>
         <button class="rb-btn rb-btn-ghost" onclick="saveCurrentSession()" title="Sauvegarder la session courante">💾 Sauvegarder</button>
         <button class="rb-btn rb-btn-ghost" onclick="openSessionsModal()" title="Voir toutes les sessions">📁 Mes sessions</button>
         <button class="rb-btn rb-btn-ghost" onclick="openCompareModal()" title="Comparer deux sessions">⚖️ Comparer</button>
@@ -908,6 +914,26 @@ async function initAuth() {
             <label>TP (g/L) <span class="tt-q" data-tt="tp">?</span></label>
             <input type="number" id="tp" min="20" step="0.5" placeholder="Ex: 32">
           </div>
+          <div id="nec-group" class="rb-form-group" style="display:none;">
+            <label>NEC actuelle (1–5)</label>
+            <input type="number" id="nec-actuelle" min="1" max="5" step="0.25" placeholder="Ex: 3.0">
+            <small class="form-hint">Note d'état corporel du troupeau</small>
+          </div>
+          <div id="nec-obj-group" class="rb-form-group" style="display:none;">
+            <label>NEC objectif (1–5)</label>
+            <input type="number" id="nec-objectif" min="1" max="5" step="0.25" placeholder="Ex: 3.25">
+            <small class="form-hint">NEC cible au vêlage</small>
+          </div>
+          <div id="primipares-group" class="rb-form-group" style="display:none;">
+            <label>Primipares dans le lot (%)</label>
+            <input type="number" id="prop-primipares" min="0" max="100" step="1" placeholder="Ex: 25">
+            <small class="form-hint">% de génisses 1ère lactation</small>
+          </div>
+          <div class="rb-form-group">
+            <label>Ingestion manuelle (kg MS) <span class="tt-q" data-tt="cap">?</span></label>
+            <input type="number" id="ingestion-override" min="0" max="40" step="0.5" placeholder="Auto">
+            <small class="form-hint">Laisser vide = valeur calculée INRA</small>
+          </div>
         </div>
 
         <div class="wizard-actions">
@@ -978,7 +1004,15 @@ async function initAuth() {
             <option value="">Sélectionner...</option>
           </select>
           <button type="button" id="btn-edit-custom-aliment" class="rb-btn">✏️ Modifier</button>
+          <button type="button" id="btn-duplicate-custom-aliment" class="rb-btn" style="background:#0369a1;color:white;">⧉ Dupliquer</button>
           <button type="button" id="btn-delete-custom-aliment" class="rb-btn" style="background:var(--danger);color:white;">🗑️</button>
+        </div>
+        <div class="rb-form-actions" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;">
+          <button type="button" id="btn-open-melange-modal" class="rb-btn" style="background:#7c3aed;color:white;">🧪 Créer un mélange</button>
+          <label class="rb-btn" style="background:#0e7490;color:white;cursor:pointer;margin:0;">
+            📥 Importer CSV
+            <input type="file" id="csv-import-input" accept=".csv" style="display:none;">
+          </label>
         </div>
       </div>
 
@@ -1160,6 +1194,11 @@ async function initAuth() {
             <label>GMQ (kg/jour) - viande</label>
             <input type="number" id="cout-gmq" min="0.1" step="0.1" value="1.0" placeholder="Ex: 1.0">
           </div>
+          <div class="rb-form-group">
+            <label>Prix du lait (€/L)</label>
+            <input type="number" id="cout-prix-lait" min="0" step="0.001" placeholder="Ex: 0.42">
+            <small class="form-hint">Pour calculer la marge alimentaire</small>
+          </div>
         </div>
       </div>
 
@@ -1187,6 +1226,14 @@ async function initAuth() {
         <div class="rb-metric" id="metric-ms-vl" style="border-left:4px solid var(--success);">
           <div class="rb-metric-head"><div class="rb-metric-title">MS / VL / jour</div></div>
           <div class="rb-metric-sub" id="cout-ms-vl" style="font-size:1.4rem;font-weight:bold;color:var(--success);margin-top:8px;">—</div>
+        </div>
+        <div class="rb-metric" id="metric-marge-jour" style="border-left:4px solid #7c3aed;display:none;">
+          <div class="rb-metric-head"><div class="rb-metric-title">Marge alimentaire / VL / jour</div></div>
+          <div class="rb-metric-sub" id="marge-cout-jour" style="font-size:1.4rem;font-weight:bold;color:#7c3aed;margin-top:8px;">—</div>
+        </div>
+        <div class="rb-metric" id="metric-marge-1000l" style="border-left:4px solid #0e7490;display:none;">
+          <div class="rb-metric-head"><div class="rb-metric-title">Marge / 1000 L</div></div>
+          <div class="rb-metric-sub" id="marge-cout-1000l" style="font-size:1.4rem;font-weight:bold;color:#0e7490;margin-top:8px;">—</div>
         </div>
       </div>
 
@@ -1479,6 +1526,12 @@ async function initAuth() {
       </div>
     </div>
 
+    <div class="rb-panel" style="margin-bottom:20px;">
+      <h4 style="margin:0 0 10px;">💬 Commentaires / Conseils du conseiller</h4>
+      <textarea id="rapport-commentaire" rows="4" style="width:100%;box-sizing:border-box;border:1.5px solid var(--border);border-radius:var(--r-md);padding:10px 14px;font-size:.88rem;font-family:inherit;resize:vertical;line-height:1.5;background:var(--bg);color:var(--text);" placeholder="Ajoutez des observations, conseils ou recommandations à inclure dans le rapport PDF…"></textarea>
+      <small style="color:var(--text-muted);font-size:.78rem;">Ces commentaires apparaîtront en bas de tous les rapports exportés en PDF.</small>
+    </div>
+
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:8px;">
 
       <!-- Rapport Ration A→Z -->
@@ -1719,6 +1772,37 @@ async function initAuth() {
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
       <button class="rb-btn rb-btn-ghost" onclick="$('custom-feed-modal').classList.add('hidden')">Annuler</button>
       <button class="rb-btn rb-btn-primary" id="cfm-save-btn" onclick="saveCustomFeed()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL MÉLANGES FOURRAGERS ====== -->
+<div id="melange-modal" class="rb-modal hidden">
+  <div class="rb-modal-card" style="max-width:580px;">
+    <div class="rb-modal-header">
+      <h3>🧪 Créer un mélange fourrager</h3>
+      <span class="rb-modal-close" onclick="document.getElementById('melange-modal').classList.add('hidden')">&times;</span>
+    </div>
+    <div class="rb-form-grid">
+      <div class="rb-form-group" style="grid-column:1/-1;">
+        <label>Nom du mélange *</label>
+        <input type="text" id="melange-nom" class="rb-input" placeholder="Ex: TMR Lactation, Pré-mélange vaches hautes…">
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Composants (en % MS — total = 100%)</div>
+      <div class="rb-ration-lines-head" style="grid-template-columns:1fr 110px;">
+        <div>Aliment</div><div style="text-align:right;">% MS</div>
+      </div>
+      <div id="melange-lines"></div>
+      <button type="button" onclick="addMelangeLine()" class="rb-btn rb-btn-ghost" style="margin-top:8px;width:100%;font-size:.85rem;">+ Ajouter un aliment</button>
+    </div>
+    <div id="melange-preview" style="margin-top:14px;padding:12px 14px;background:var(--green-50);border-radius:8px;font-size:.85rem;display:none;"></div>
+    <div id="melange-err" style="display:none;color:var(--danger);font-size:.82rem;padding:8px 12px;background:#fee2e2;border-radius:6px;margin-top:10px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;">
+      <button class="rb-btn rb-btn-ghost" onclick="document.getElementById('melange-modal').classList.add('hidden')">Annuler</button>
+      <button class="rb-btn" style="background:#7c3aed;color:#fff;" onclick="previewMelange()">Aperçu valeurs</button>
+      <button class="rb-btn rb-btn-primary" onclick="saveMelange()">Créer l'aliment composite</button>
     </div>
   </div>
 </div>
@@ -2168,6 +2252,81 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   let alimentsDb = [];
   let customFoodsDb = [];
   let lastB = null;
+
+  // ─── Référentiel nutritionnel INRA 2007 / 2018 ───────────────────────────
+  window.RB_SYSTEM = '2007'; // '2007' = valeurs feedtables (défaut) | '2018' = INRA 2018 rév.
+
+  // Valeurs UFL INRA 2018 pour les aliments dont la valeur diffère significativement de 2007
+  // Source : tables INRA 2018 (Sauvant et al.) / alimentation-ruminants.fr
+  window.RB_ALIMENTS_2018 = {
+    // Céréales grains
+    'Avoine':0.99,'Avoine décortiquée':1.16,'Avoine floconnée':0.99,
+    'Blé dur':1.19,'Blé tendre':1.19,'Blé aplati':1.19,
+    'Maïs':1.24,'Maïs extrudé':1.24,'Maïs floconné':1.24,'Maïs humide':1.23,'Maïs aplati':1.24,
+    'Orge':1.09,'Orge aplatie':1.09,
+    'Seigle':1.19,'Sorgho grain':1.21,'Triticale':1.17,'Triticale aplati':1.17,
+    'Riz cargo':1.28,'Manioc':1.07,'Sorgho grain humide':1.10,
+    // Coproduits céréales
+    'Son de blé':0.91,'Remoulage de blé':1.04,'Farine de blé':1.29,
+    'Son de maïs':1.10,'Farine de maïs':1.27,'Gluten de maïs':1.04,
+    'DDGS maïs':1.15,'DDGS blé':1.10,
+    'Drêches de maïs fraîches':1.04,'Corn gluten feed':1.04,
+    'Drêches de brasserie fraîches':0.83,'Drêches de brasserie séchées':0.83,
+    'Son de riz':0.93,
+    // Tourteaux d'oléagineux
+    'Tourteau de colza':0.99,'Tourteau de colza décortiqué':1.20,
+    "Tourteau de soja 44":1.26,"Tourteau de soja 48":1.28,
+    'Tourteau de tournesol':0.86,'Tourteau de tournesol décortiqué':1.04,
+    'Tourteau de tournesol partiellement décortiqué':0.86,
+    'Tourteau de lin':1.03,'Tourteau de palmiste':0.93,
+    'Tourteau de coton':0.95,'Tourteau de coprah':1.07,
+    "Tourteau d'arachide":1.03,
+    'Corn gluten meal (proteines)':1.20,
+    // Légumineuses graines
+    'Féverole':1.25,'Feverole graine':1.25,'Lupin blanc':1.43,'Lupin jaune':1.34,
+    'Pois protéagineux':1.25,'Pois proteagineux':1.25,
+    // Coproduits sucreries/amidonneries
+    'Pulpe de betterave':1.01,'Pulpe de betterave déshydratée':1.04,
+    "Pulpe d'agrumes déshydratée":1.12,"Pulpe d'agrumes fraiche":1.12,
+    'Pomme de terre':1.02,'Pomme de terre déshydratée':1.08,
+    'Mélasse de betterave':0.95,'Mélasse de canne':0.79,'Mélasse de soja':0.79,
+    // Produits laitiers / levures
+    'Lactosérum':1.04,'Lactosérum en poudre':1.04,
+    'Levure de brasserie':1.18,'Levure seche de brasserie':1.18,
+    // Huiles et graisses
+    'Huile de palme':3.61,'Huile de soja':3.61,'Huile de colza':3.61,'Graisse de palme':3.61,
+    // Coproduits fruits
+    'Marc de raisin déshydraté':0.42,'Marc de pomme':0.73,
+    'Pulpe de tomate déshydratée':0.70,'Pulpe de tomate fraiche':0.60,
+    'Farine de gluten de ble':1.05,
+    // Pailles (différence notable)
+    'Paille de blé':0.43,"Paille d'orge":0.46,'Paille de maïs':0.63,
+    'Paille de sorgho':0.56,'Paille de triticale':0.43,'Paille de seigle':0.43,
+    // Ensilages (quelques différences)
+    'Ensilage maïs mûr':0.96,"Ensilage d'épi de maïs":1.08,
+    // Fourrages verts (valeurs proches, peu de différences)
+    'Herbe pâturée précoce':0.99,'Luzerne fraîche':0.74,
+    'Luzerne déshydratée':0.75,
+    // Minéraux (UFL nul dans les 2 systèmes)
+    'Vinasse de betterave':0.91,
+  };
+
+  function setInraSystem(sys) {
+    window.RB_SYSTEM = sys;
+    const sel = document.getElementById('inra-system-select');
+    if (sel) sel.value = sys;
+    document.querySelectorAll('.inra-sys-badge').forEach(b => {
+      b.innerHTML         = 'INRA ' + sys;
+      b.style.background = sys==='2018' ? '#dcfce7' : '#eff6ff';
+      b.style.color      = sys==='2018' ? '#15803d' : '#1d4ed8';
+      b.style.borderColor= sys==='2018' ? '#bbf7d0' : '#bfdbfe';
+    });
+    showToast('Référentiel passé en INRA ' + sys, 'info', 2500);
+    if (typeof calcApports === 'function') try { calcApports(); } catch(e) {}
+    if (typeof calcBilan  === 'function') try { calcBilan();   } catch(e) {}
+    if (typeof calcCout   === 'function') try { calcCout();    } catch(e) {}
+  }
+  window.setInraSystem = setInraSystem;
   let lastA = null;
   let currentStep = 1;
   let visitedSteps = new Set([1]);
@@ -2207,10 +2366,13 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       const ms  = parseFloat(c[1]) || 0;
       if (!nom || !ms) continue;
       // Colonnes: Nom,MS,UFL,PDI,Ca,P,Na,Mg,K,Met,Lys,AL,AR,SS[,UFV,Categorie]
-      const ufvVal = parseFloat(c[14]);
+      const ufvVal  = parseFloat(c[14]);
+      const ufl2007 = parseFloat(c[2]) || 0;
+      const ufl2018 = window.RB_ALIMENTS_2018?.[nom];
       result.push({
         nom, ms,
-        uflPerKgMS:  parseFloat(c[2]) || 0,
+        uflPerKgMS:    ufl2007,
+        ufl2018PerKgMS: ufl2018 != null ? ufl2018 : ufl2007,
         pdiPerKgMS:  parseFloat(c[3]) || 0,
         ca_gkgms:    parseFloat(c[4]) || 0,
         p_gkgms:     parseFloat(c[5]) || 0,
@@ -2485,11 +2647,17 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
   // -- Animal type fields
   $('type-animal')?.addEventListener('change', function() {
     const v = this.value;
-    $('prod-group') && ($('prod-group').style.display = LAIT_TYPES.includes(v) ? '' : 'none');
-    $('tb-group')   && ($('tb-group').style.display   = LAIT_TYPES.includes(v) ? '' : 'none');
-    $('tp-group')   && ($('tp-group').style.display   = LAIT_TYPES.includes(v) ? '' : 'none');
-    $('gmq-group')  && ($('gmq-group').style.display  = GMQ_TYPES.includes(v)  ? '' : 'none');
-    $('age-group')  && ($('age-group').style.display  = GMQ_TYPES.includes(v)  ? '' : 'none');
+    const isLait  = LAIT_TYPES.includes(v);
+    const isGmq   = GMQ_TYPES.includes(v);
+    const isVLait = v === 'vache-laitiere' || v === 'genisse';
+    $('prod-group')       && ($('prod-group').style.display       = isLait  ? '' : 'none');
+    $('tb-group')         && ($('tb-group').style.display         = isLait  ? '' : 'none');
+    $('tp-group')         && ($('tp-group').style.display         = isLait  ? '' : 'none');
+    $('gmq-group')        && ($('gmq-group').style.display        = isGmq   ? '' : 'none');
+    $('age-group')        && ($('age-group').style.display        = isGmq   ? '' : 'none');
+    $('nec-group')        && ($('nec-group').style.display        = isVLait ? '' : 'none');
+    $('nec-obj-group')    && ($('nec-obj-group').style.display    = isVLait ? '' : 'none');
+    $('primipares-group') && ($('primipares-group').style.display = isVLait ? '' : 'none');
     updateUfBadge('type-animal','uf-badge-main');
   });
 
@@ -2505,14 +2673,31 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       case 'vache-laitiere': {
         // Lait corrigé : LC = (prod × TB g/kg) / 40
         lait = (prod * (tb||40)) / 40;
-        const uEnt = 1.4 + 0.006*pv, uProd = 0.44*lait;
-        const pEnt = 95 + 0.5*pv, pProd = lait*48;
+        const uProd = 0.44*lait;
+        let uEnt;
+        if ((window.RB_SYSTEM||'2007')==='2007') {
+          uEnt = 0.041*pv075n;  // INRA 2007 : 0.041 × PV^0.75
+          dUFL = [{l:'Entretien (INRA 2007)', f:`0.041 × ${pv075}⁰·⁷⁵`, v:uEnt},
+                  {l:'Production', f:`0.44 × ${lait.toFixed(1)} kg LC`, v:uProd}];
+        } else {
+          uEnt = 1.4 + 0.006*pv;  // INRA 2018 : 1.4 + 0.006 × PV
+          dUFL = [{l:'Entretien (INRA 2018)', f:`1.4 + 0.006 × ${pv} kg`, v:uEnt},
+                  {l:'Production', f:`0.44 × ${lait.toFixed(1)} kg LC`, v:uProd}];
+        }
+        let pEnt, pProd;
+        if ((window.RB_SYSTEM||'2007')==='2007') {
+          pEnt  = 3.25*pv075n;   // INRA 2007 : 3.25 × PV^0.75
+          pProd = lait*46;       // INRA 2007 : ~46 g PDI/kg LC
+          dPDI = [{l:'Entretien (INRA 2007)', f:`3.25 \xd7 ${pv075}⁰⋅⁷⁵`, v:pEnt},
+                  {l:'Lait corrigé', f:`${lait.toFixed(1)} kg \xd7 46 g/L`, v:pProd}];
+        } else {
+          pEnt  = 95 + 0.5*pv;  // INRA 2018 : 95 + 0.5 × PV
+          pProd = lait*48;       // INRA 2018 : 48 g PDI/kg LC
+          dPDI = [{l:'Entretien (INRA 2018)', f:`95 + 0.5 \xd7 ${pv} kg`, v:pEnt},
+                  {l:'Lait corrigé', f:`${lait.toFixed(1)} kg \xd7 48 g/L`, v:pProd}];
+        }
         bUFL = (uEnt+uProd)*coef; bPDI = (pEnt+pProd)*coef;
         cap  = (0.025*pv + 0.1*prod)*coef;
-        dUFL = [{l:'Entretien', f:`1.4 + 0.006 × ${pv} kg`, v:uEnt},
-                {l:'Production', f:`0.44 × ${lait.toFixed(1)} kg LC`, v:uProd}];
-        dPDI = [{l:'Entretien', f:`95 + 0.5 × ${pv} kg`, v:pEnt},
-                {l:'Lait corrigé', f:`${lait.toFixed(1)} kg × 48 g/L`, v:pProd}];
         break;
       }
       case 'vache-tarie': {
@@ -2635,7 +2820,10 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       dUFL.push({l:'Bonus pâturage', f:'× 1.1', v:bUFL - bUFL/coef, coef:true});
       dPDI.push({l:'Bonus pâturage', f:'× 1.1', v:bPDI - bPDI/coef, coef:true});
     }
-    return { bUFL, bPDI, laitStandard:lait, ingestionCapacite:cap, typeLabel:type, dUFL, dPDI };
+    // Met/Lys INRA 2018 — vache laitière : Met ≈ 24 g/kg PDI, Lys ≈ 70 g/kg PDI
+    const bMet = LAIT_TYPES.includes(type) ? (bPDI * 24 / 1000) : 0;
+    const bLys = LAIT_TYPES.includes(type) ? (bPDI * 70 / 1000) : 0;
+    return { bUFL, bPDI, laitStandard:lait, ingestionCapacite:cap, typeLabel:type, dUFL, dPDI, bMet, bLys };
   }
 
   // -- Rendu partagé des besoins
@@ -2654,7 +2842,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       <div style="float:right;width:140px;height:105px;overflow:hidden;border-radius:10px;border:1.5px solid var(--border);margin:0 0 12px 16px;">
         <img src="${imgSrc}" alt="${raceVal}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.remove()">
       </div>` : '';
-    cont.innerHTML = imgHtml + `
+    const sysBadgeHtml = `<span class="inra-sys-badge" style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:.75rem;font-weight:700;border:1.5px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;cursor:pointer;margin-bottom:10px;" onclick="setInraSystem(window.RB_SYSTEM==='2007'?'2018':'2007')" title="Cliquer pour changer de référentiel">INRA&nbsp;${window.RB_SYSTEM||'2007'}</span>`;
+    cont.innerHTML = imgHtml + sysBadgeHtml + `
       <div class="rb-metric-grid">
         <div class="rb-metric">
           <div class="rb-metric-head"><div class="rb-metric-title">Énergie (${eu}/j) <span class="tt-q" data-tt="${eu==='UFL'?'ufl':'ufv'}">?</span></div></div>
@@ -2677,6 +2866,16 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
           <div class="result-value">${b.bUFL > 0 ? (b.bPDI/b.bUFL).toFixed(0) : '—'}<span class="result-unit">g/${eu}</span></div>
           <div class="result-sub">Cible : 90–105 g/${eu}</div>
         </div>
+        ${b.bMet > 0 ? `<div class="rb-metric" style="border-left:3px solid #7c3aed;">
+          <div class="rb-metric-head"><div class="rb-metric-title">Méthionine (Met)</div></div>
+          <div class="result-value" style="color:#7c3aed;">${b.bMet.toFixed(1)}<span class="result-unit">g/j</span></div>
+          <div class="result-sub">≈ 24 g/kg PDI (INRA 2018)</div>
+        </div>` : ''}
+        ${b.bLys > 0 ? `<div class="rb-metric" style="border-left:3px solid #0e7490;">
+          <div class="rb-metric-head"><div class="rb-metric-title">Lysine (Lys)</div></div>
+          <div class="result-value" style="color:#0e7490;">${b.bLys.toFixed(1)}<span class="result-unit">g/j</span></div>
+          <div class="result-sub">≈ 70 g/kg PDI (INRA 2018)</div>
+        </div>` : ''}
       </div>
       <div class="rb-detail-block">
         <div class="rb-detail-section">
@@ -2715,6 +2914,12 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     lastB = computeBesoins(pv, getNum('production-lait'), $('activite')?.value||'stabulation',
                            getNum('tb'), getNum('tp'), type, getNum('gmq'));
     lastB.typeLabel = type;
+    const ingOvr = getNum('ingestion-override');
+    if (ingOvr > 0) lastB.ingestionCapacite = ingOvr;
+    lastB.nec    = getNum('nec-actuelle');
+    lastB.necObj = getNum('nec-objectif');
+    lastB.primip = getNum('prop-primipares');
+    lastB.lait   = getNum('production-lait');
     renderBesoinsResult(lastB, 'resultat-besoins-content');
     $('resultat-besoins')?.classList.remove('hidden');
   }
@@ -2752,7 +2957,9 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       const f = findFood(nom);
       if (f) {
         const useUFV = lastB && UFV_TYPES.includes(lastB.typeLabel);
-        const energyVal = useUFV ? (f.ufvPerKgMS||f.uflPerKgMS) : f.uflPerKgMS;
+        const sys = window.RB_SYSTEM || '2007';
+        const uflBase = sys==='2018' ? (f.ufl2018PerKgMS||f.uflPerKgMS) : f.uflPerKgMS;
+        const energyVal = useUFV ? (f.ufvPerKgMS||f.uflPerKgMS) : uflBase;
         const ueVal = useUFV ? (f.ueb_gkgms||f.uel_gkgms||0) : (f.uel_gkgms||f.ueb_gkgms||0);
         items.push({
           nom: f.nom, qty,
@@ -2764,6 +2971,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
           ar:  (f.ar_gkgms||0)*qty,
           ss:  (f.ss_gkgms||0)*qty,
           bpr: (f.bprPerKgMS||0)*qty,
+          pdin: f.pdiPerKgMS*qty + Math.max(0,(f.bprPerKgMS||0)*qty),
+          pdie: f.pdiPerKgMS*qty + Math.max(0,-(f.bprPerKgMS||0)*qty),
           ue:  ueVal*qty,
           hasUE: !!(f.uel_gkgms||f.ueb_gkgms),
           ca:  (f.ca_gkgms||0)*qty,
@@ -2786,6 +2995,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       totalAR:  items.reduce((s,i)=>s+i.ar,0),
       totalSS:  items.reduce((s,i)=>s+i.ss,0),
       totalBPR: items.reduce((s,i)=>s+i.bpr,0),
+      totalPDIN: items.reduce((s,i)=>s+(i.pdin!=null?i.pdin:i.pdi),0),
+      totalPDIE: items.reduce((s,i)=>s+(i.pdie!=null?i.pdie:i.pdi),0),
       totalUE:  items.reduce((s,i)=>s+i.ue,0),
       msAvecUE: items.filter(i=>i.hasUE).reduce((s,i)=>s+i.qty,0),
       totalCa:  items.reduce((s,i)=>s+i.ca,0),
@@ -2914,7 +3125,10 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const totalE = UFV_TYPES.includes(b.typeLabel)
       ? a.items.reduce((s, i) => s + (i.ufvRaw || i.ufl), 0) : a.totalUFL;
     const rE = b.bUFL > 0 ? totalE / b.bUFL : 0;
-    const rP = b.bPDI > 0 ? a.totalPDI / b.bPDI : 0;
+    const _pdin2 = (a.totalPDIN != null) ? a.totalPDIN : a.totalPDI;
+    const _pdie2 = (a.totalPDIE != null) ? a.totalPDIE : a.totalPDI;
+    const _effPDI = (window.RB_SYSTEM||'2007')==='2007' ? Math.min(_pdin2,_pdie2) : a.totalPDI;
+    const rP = b.bPDI > 0 ? _effPDI / b.bPDI : 0;
     const col = r => r >= 0.9 && r <= 1.12 ? '#16a34a' : r < 0.9 ? '#dc2626' : '#d97706';
     const bg  = r => r >= 0.9 && r <= 1.12 ? '#f0fdf4' : r < 0.9 ? '#fef2f2' : '#fffbeb';
     const lbl = r => r >= 0.9 && r <= 1.12 ? '✓ OK' : r < 0.9 ? '▼ Déficit' : '▲ Excès';
@@ -2964,7 +3178,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
 
     return `
       ${coverBar(`⚡ Énergie (${eu}/j)`, totalE, b.bUFL, eu, rE)}
-      ${coverBar('🧬 Protéines (PDI)', a.totalPDI, b.bPDI, 'g/j', rP)}
+      ${coverBar(`🧬 Prot\xe9ines (${(window.RB_SYSTEM||'2007')==='2007'?'PDI effectif':'PDI'})`, _effPDI, b.bPDI, 'g/j', rP)}
       <div style="margin-top:14px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;">
         <div style="font-size:.8rem;font-weight:700;color:#374151;margin-bottom:8px;">🥗 Composition ration — ${totalMS.toFixed(1)} kg MS/j</div>
         <div style="display:flex;height:22px;border-radius:6px;overflow:hidden;gap:1px;">${segments}</div>
@@ -2977,8 +3191,13 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     if (!lastB) { showToast('Calculez d\'abord les besoins — Étape 1.', 'warn'); return; }
     if (!lastA || !lastA.items.length) calcApports();
     const a=lastA, b=lastB;
+    const sys2 = window.RB_SYSTEM || '2007';
+    const totalPDIN2 = (a.totalPDIN != null) ? a.totalPDIN : a.totalPDI;
+    const totalPDIE2 = (a.totalPDIE != null) ? a.totalPDIE : a.totalPDI;
+    const effectivePDI = sys2==='2007' ? Math.min(totalPDIN2, totalPDIE2) : a.totalPDI;
+    const pdinLimiting = totalPDIN2 <= totalPDIE2;
     const rUFL = b.bUFL>0 ? a.totalUFL/b.bUFL : 0;
-    const rPDI = b.bPDI>0 ? a.totalPDI/b.bPDI : 0;
+    const rPDI = b.bPDI>0 ? (sys2==='2007' ? effectivePDI : a.totalPDI)/b.bPDI : 0;
     const ppu  = a.totalUFL>0 ? a.totalPDI/a.totalUFL : 0;
     const eu   = UFV_TYPES.includes(b.typeLabel) ? 'UFV' : 'UFL';
     const badgeCls = r => r>=0.9&&r<=1.1?'rb-badge-green':r<0.9?'rb-badge-red':'rb-badge-orange';
@@ -2987,7 +3206,9 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const cont = $('resultat-bilan-content');
     if (!cont) return;
     const pctCls = r => r>=0.9&&r<=1.1 ? '' : r<0.9 ? 'low' : 'high';
-    cont.innerHTML = `
+    const sysLabel = window.RB_SYSTEM||'2007';
+    const sysBadge = `<span class="inra-sys-badge" style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:.75rem;font-weight:700;border:1.5px solid ${sysLabel==='2018'?'#bbf7d0':'#bfdbfe'};background:${sysLabel==='2018'?'#dcfce7':'#eff6ff'};color:${sysLabel==='2018'?'#15803d':'#1d4ed8'};cursor:pointer;margin-bottom:8px;" onclick="setInraSystem(window.RB_SYSTEM==='2007'?'2018':'2007')" title="Cliquer pour changer de référentiel">Référentiel INRA&nbsp;${sysLabel}</span>`;
+    cont.innerHTML = sysBadge + `
       <div class="rb-metric-grid">
         <div class="rb-metric">
           <div class="rb-metric-head">
@@ -3006,19 +3227,40 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         </div>
         <div class="rb-metric">
           <div class="rb-metric-head">
-            <div class="rb-metric-title">PDI (g/j) <span class="tt-q" data-tt="pdi">?</span></div>
+            <div class="rb-metric-title">${sys2==='2007'?'PDI effectif (g/j)':'PDI (g/j)'} <span class="tt-q" data-tt="pdi">?</span></div>
             <span class="rb-badge ${badgeCls(rPDI)}">${badgeLbl(rPDI)}</span>
           </div>
           <div class="rb-progress ${barCls(rPDI)}"><span style="width:${Math.min(100,rPDI*100)}%"></span></div>
           <div class="bilan-compare">
             <div class="bilan-compare-head"><div class="bilan-compare-cell">Apport</div><div class="bilan-compare-cell">Besoin</div><div class="bilan-compare-cell">Couverture</div></div>
             <div class="bilan-compare-row" style="display:contents;">
-              <div class="bilan-compare-cell"><span class="bilan-compare-val">${a.totalPDI.toFixed(0)} g</span></div>
+              <div class="bilan-compare-cell"><span class="bilan-compare-val">${(sys2==='2007'?effectivePDI:a.totalPDI).toFixed(0)} g</span></div>
               <div class="bilan-compare-cell"><span class="bilan-compare-val">${b.bPDI.toFixed(0)} g</span></div>
               <div class="bilan-compare-cell"><span class="bilan-compare-pct ${pctCls(rPDI)}">${(rPDI*100).toFixed(0)} %</span></div>
             </div>
           </div>
         </div>
+        ${sys2==='2007'?`
+        <div class="rb-metric" style="background:#fffbeb;border-color:#fde68a;">
+          <div class="rb-metric-head">
+            <div class="rb-metric-title">PDIN / PDIE <span style="font-size:.7rem;color:#78350f;font-weight:600;">(INRA 2007)</span></div>
+            <span class="rb-badge" style="background:${pdinLimiting?'#eff6ff':'#fff7ed'};color:${pdinLimiting?'#1d4ed8':'#c2410c'};border:1px solid ${pdinLimiting?'#bfdbfe':'#fed7aa'};">${pdinLimiting?'N limitant':'E limitant'}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+            <div style="text-align:center;padding:8px;background:${pdinLimiting?'#fef2f2':'#f0fdf4'};border-radius:8px;">
+              <div style="font-size:.7rem;color:#64748b;margin-bottom:2px;">PDIN (azote)</div>
+              <div style="font-size:1.1rem;font-weight:700;color:${pdinLimiting?'#dc2626':'#15803d'};">${totalPDIN2.toFixed(0)}<span style="font-size:.73rem;font-weight:400;color:#64748b;"> g/j</span></div>
+            </div>
+            <div style="text-align:center;padding:8px;background:${!pdinLimiting?'#fef2f2':'#f0fdf4'};border-radius:8px;">
+              <div style="font-size:.7rem;color:#64748b;margin-bottom:2px;">PDIE (énergie)</div>
+              <div style="font-size:1.1rem;font-weight:700;color:${!pdinLimiting?'#dc2626':'#15803d'};">${totalPDIE2.toFixed(0)}<span style="font-size:.73rem;font-weight:400;color:#64748b;"> g/j</span></div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:.73rem;color:#92400e;text-align:center;line-height:1.4;">
+            PDI effectif = min(PDIN, PDIE) = <strong>${effectivePDI.toFixed(0)} g/j</strong>
+            ${rPDI<0.92?`<br><em>${!pdinLimiting?'→ Compl\xe9ter en azote d\xe9gradable (colza, luzerne)':'→ Ajouter \xe9nergie fermentescible (ma\xefs, c\xe9r\xe9ales)'}</em>`:''}
+          </div>
+        </div>`:''}
         <div class="rb-metric">
           <div class="rb-metric-head">
             <div class="rb-metric-title">PDI / ${eu} <span class="tt-q" data-tt="pdi_ufl">?</span></div>
@@ -3040,14 +3282,36 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       <div class="rb-panel" style="margin-top:16px;">
         <h4>Composition de la ration</h4>
         <table class="rb-table">
-          <thead><tr><th>Aliment</th><th>kg MS</th><th style="color:#f97316;">${eu}</th><th style="color:#2563eb;">PDI (g)</th></tr></thead>
+          <thead><tr><th>Aliment</th><th>kg MS</th><th style="color:#f97316;">${eu}</th>${sys2==='2007'?'<th style="color:#1d4ed8;">PDIN (g)</th><th style="color:#0891b2;">PDIE (g)</th>':'<th style="color:#2563eb;">PDI (g)</th>'}</tr></thead>
           <tbody>
-            ${a.items.map(i=>`<tr><td>${i.nom}</td><td>${i.qty.toFixed(1)}</td><td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td></tr>`).join('')}
-            <tr style="font-weight:700;background:var(--green-50);"><td>TOTAL</td><td>${a.totalMS.toFixed(1)}</td><td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td></tr>
+            ${a.items.map(i=>`<tr><td>${i.nom}</td><td>${i.qty.toFixed(1)}</td><td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td>${sys2==='2007'?`<td style="color:#1d4ed8;font-weight:600;">${(i.pdin!=null?i.pdin:i.pdi).toFixed(0)}</td><td style="color:#0891b2;font-weight:600;">${(i.pdie!=null?i.pdie:i.pdi).toFixed(0)}</td>`:`<td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td>`}</tr>`).join('')}
+            <tr style="font-weight:700;background:var(--green-50);"><td>TOTAL</td><td>${a.totalMS.toFixed(1)}</td><td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td>${sys2==='2007'?`<td style="color:#1d4ed8;">${totalPDIN2.toFixed(0)}</td><td style="color:#0891b2;">${totalPDIE2.toFixed(0)}</td>`:`<td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td>`}</tr>
           </tbody>
         </table>
       </div>
-      ${renderGlucides(a)}`;
+      ${renderGlucides(a)}
+      ${(()=>{
+        const laitEau = b.lait || getNum('production-lait') || 0;
+        const baseEau = 40, laitFact = 3.5 * laitEau;
+        const paturFact = (($('activite')?.value||'stabulation') === 'paturage') ? 10 : 0;
+        const eauMin = Math.round(baseEau + laitFact + paturFact);
+        const eauMax = Math.round(eauMin * 1.25);
+        if (!LAIT_TYPES.includes(b.typeLabel)) return '';
+        return `<div class="rb-panel" style="margin-top:16px;border-left:4px solid #0ea5e9;">
+          <h4 style="margin:0 0 10px;color:#0369a1;">💧 Besoins en eau estimés</h4>
+          <div class="rb-metric-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+            <div class="rb-metric">
+              <div class="rb-metric-head"><div class="rb-metric-title">Eau abreuvement</div></div>
+              <div class="result-value" style="color:#0369a1;">${eauMin}–${eauMax}<span class="result-unit">L/VL/j</span></div>
+              <div class="result-sub">Base ${baseEau} L + ${laitFact.toFixed(0)} L (lait)${paturFact?' + '+paturFact+' L (pâturage)':''}</div>
+            </div>
+            <div class="rb-metric" style="background:#f0f9ff;">
+              <div class="rb-metric-head"><div class="rb-metric-title">Points de vigilance</div></div>
+              <div style="font-size:.82rem;color:#0369a1;line-height:1.6;margin-top:6px;">• Accès libre 24h/24<br>• T° eau &lt; 20°C recommandée${laitEau>30?'<br>• Hautes productrices : vérifier abreuvoirs':''}</div>
+            </div>
+          </div>
+        </div>`;
+      })()}`;
     $('resultat-bilan')?.classList.remove('hidden');
     $('btn-optimize')?.classList.remove('hidden');
     $('btn-compare-last')?.classList.remove('hidden');
@@ -3061,7 +3325,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       const q2 = computeQualityScore(a, b);
       const gc2 = scoreColor(q2.grade);
       const rUFL2 = b.bUFL > 0 ? a.totalUFL / b.bUFL : 1;
-      const rPDI2 = b.bPDI > 0 ? a.totalPDI / b.bPDI : 1;
+      const rPDI2 = b.bPDI > 0 ? (sys2==='2007' ? effectivePDI : a.totalPDI) / b.bPDI : 1;
       const ppu2  = a.totalUFL > 0 ? a.totalPDI / a.totalUFL : 0;
       const tips2 = [];
       if      (rUFL2 < 0.80) tips2.push({icon:'⚡', txt:`Déficit énergétique sévère (${(rUFL2*100).toFixed(0)}%) — augmentez ensilage maïs ou céréales aplaties. Risque cétose.`});
@@ -3073,9 +3337,9 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       if (ppu2 < 82 && rUFL2 >= 0.88) tips2.push({icon:'⚖️', txt:`Ratio PDI/UFL bas (${ppu2.toFixed(0)} g/UFL — cible 90–105) : ajoutez un tourteau pour équilibrer.`});
       if (ppu2 > 115 && rPDI2 >= 0.95) tips2.push({icon:'⚖️', txt:`Ratio PDI/UFL élevé (${ppu2.toFixed(0)} g/UFL) : ajoutez maïs ou céréales pour équilibrer énergie/protéines.`});
       if (b.ingestionCapacite > 0 && a.totalMS > b.ingestionCapacite * 1.05) tips2.push({icon:'🫁', txt:`MS totale (${a.totalMS.toFixed(1)} kg) proche ou au-dessus de la capacité (${b.ingestionCapacite.toFixed(1)} kg) — risque de refus.`});
-      if (tips2.length === 0) tips2.push({icon:'✅', txt:'Ration bien équilibrée — énergie, PDI et ratio PDI/UFL dans les cibles INRA 2018.'});
+      if (tips2.length === 0) tips2.push({icon:'✅', txt:`Ration bien \xe9quilibr\xe9e — \xe9nergie, PDI et ratio PDI/UFL dans les cibles INRA ${sys2}.`});
       const rumiReaction = {
-        A: { emoji:'🎉', msg:'Ration <strong>excellente</strong> ! Énergie, PDI et équilibre sont dans les cibles INRA 2018. Tes vaches sont entre de bonnes mains — maintiens ce cap !', bg:'rgba(74,222,128,.18)', border:'rgba(74,222,128,.35)' },
+        A: { emoji:'🎉', msg:`Ration <strong>excellente</strong> ! \xc9nergie, PDI et \xe9quilibre sont dans les cibles INRA ${sys2}. Tes vaches sont entre de bonnes mains — maintiens ce cap !`, bg:'rgba(74,222,128,.18)', border:'rgba(74,222,128,.35)' },
         B: { emoji:'😊', msg:'Très <strong>bonne ration</strong> — quelques petits points à affiner pour atteindre l\'excellence. Consulte les indicateurs ci-dessous pour voir où optimiser.', bg:'rgba(96,165,250,.18)', border:'rgba(96,165,250,.35)' },
         C: { emoji:'😟', msg:'Ration <strong>passable</strong>, mais avec des déséquilibres à corriger. Tes vaches ne donnent probablement pas leur plein potentiel. Regarde les indicateurs rouges en priorité.', bg:'rgba(251,191,36,.18)', border:'rgba(251,191,36,.35)' },
         D: { emoji:'😰', msg:'Ration <strong>déséquilibrée</strong> — des corrections urgentes sont nécessaires. Des déficits importants peuvent impacter la santé, la production et la fertilité du troupeau. Agis vite !', bg:'rgba(248,113,113,.18)', border:'rgba(248,113,113,.35)' },
@@ -3085,7 +3349,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
           <img src="Logo RumiCORE.png" alt="RumiCORE" style="height:36px;border-radius:8px;background:#fff;padding:3px 6px;box-shadow:0 2px 8px rgba(0,0,0,.2);" onerror="this.style.display='none'">
           <div style="flex:1;">
-            <div style="font-weight:800;color:#fff;font-size:.92rem;">Analyse RumiCORE — INRA 2018</div>
+            <div style="font-weight:800;color:#fff;font-size:.92rem;">Analyse RumiCORE — INRA ${sys2}</div>
             <div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px;">Score qualité : <strong style="color:${gc2};font-size:.88rem;">${q2.grade} — ${q2.total}/100</strong> · Énergie ${q2.eS}/35 · PDI ${q2.pS}/35 · Équilibre ${q2.bS}/20 · Fourrages ${q2.aS}/10</div>
           </div>
         </div>
@@ -4110,7 +4374,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
      +'</tbody></table></div>';
 
     // 4 Bilan
-    h+='<div class="rp-section"><div class="rp-section-title">4 — Bilan nutritionnel</div>'
+    const sysPDF = window.RB_SYSTEM||'2007';
+    h+='<div class="rp-section"><div class="rp-section-title">4 — Bilan nutritionnel <small style="font-weight:400;font-size:.75rem;color:#64748b;">(Référentiel INRA '+sysPDF+')</small></div>'
      +'<table class="rp-table"><thead><tr><th>Indicateur</th><th>Apport</th><th>Besoin</th><th>Couverture</th><th>Statut</th></tr></thead><tbody>'
      +'<tr><td>\xc9nergie ('+eu+'/j)</td><td class="rp-num">'+lastA.totalUFL.toFixed(2)+'</td><td class="rp-num">'+lastB.bUFL.toFixed(2)+'</td>'
      +'<td class="rp-num"><strong>'+(rUFL*100).toFixed(0)+'%</strong></td><td class="rp-status-'+rpStatus(rUFL)+'">'+rpIcon(rUFL)+'</td></tr>'
@@ -4215,6 +4480,14 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         + '<div style="padding:12px 16px;background:#f0fdf4;border-radius:8px;border-left:4px solid #16a34a;font-size:.9rem;color:#15803d;font-weight:600;">✅ Ration bien équilibrée — aucun ajustement nécessaire</div></div>';
     }
 
+    // 8 Commentaires conseiller
+    const commentRapport = ($('rapport-commentaire')?.value||'').trim();
+    if (commentRapport) {
+      h += '<div class="rp-section"><div class="rp-section-title">8 — Commentaires / Conseils</div>'
+        + '<div style="padding:12px 16px;background:#f8fafc;border-radius:8px;border-left:4px solid #64748b;font-size:.87rem;color:#1e293b;line-height:1.7;white-space:pre-wrap;">'
+        + commentRapport.replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        + '</div></div>';
+    }
     h+='</div><div class="rp-footer"><span>Rumicore · Rumicore.com</span><span>'+date+'</span></div>';
     return h;
   }
@@ -4326,6 +4599,18 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     setText('cout-1000l', laitJour>0?((totalCost/laitJour)*1000).toFixed(2)+' €':'---');
     setText('cout-kg-ms', totalMS>0?((totalCost/totalMS)*1000).toFixed(2)+' €/t':'---');
     setText('cout-ms-vl', totalMS.toFixed(1)+' kg');
+    const prixLait = parseFloat($('cout-prix-lait')?.value)||0;
+    if (prixLait > 0 && laitJour > 0) {
+      const revenuLait = prixLait * laitJour;
+      const margeJour  = revenuLait - totalCost;
+      const marge1000  = (margeJour / laitJour) * 1000;
+      setText('marge-cout-jour',  (margeJour>=0?'+':'')+margeJour.toFixed(2)+' €');
+      setText('marge-cout-1000l', (marge1000>=0?'+':'')+marge1000.toFixed(2)+' €');
+      const mj=$('marge-cout-jour'); if(mj) mj.style.color=margeJour>=0?'#15803d':'#dc2626';
+      const mk=$('marge-cout-1000l'); if(mk) mk.style.color=marge1000>=0?'#0e7490':'#dc2626';
+      $('metric-marge-jour')?.style.removeProperty('display');
+      $('metric-marge-1000l')?.style.removeProperty('display');
+    }
     $('cout-resultats')?.classList.remove('hidden');
     const tbody = document.querySelector('#cout-table tbody');
     if (tbody) tbody.innerHTML = lastA.items.map(i=>{
@@ -4713,12 +4998,104 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
     const idx=parseInt($('select-custom-aliment')?.value);
     if(isNaN(idx)){showToast('Sélectionnez un aliment dans la liste.', 'warn');return;} openCustomModal(idx);
   });
+  $('btn-duplicate-custom-aliment')?.addEventListener('click',()=>{
+    const idx=parseInt($('select-custom-aliment')?.value);
+    if(isNaN(idx)){showToast('Sélectionnez un aliment à dupliquer.','warn');return;}
+    const orig=customFoodsDb[idx]; if(!orig) return;
+    const copy=Object.assign({},orig,{nom:'Copie de '+orig.nom});
+    customFoodsDb.push(copy); saveLS(LS.customFoods,customFoodsDb); hydrate();
+    showToast('Dupliqué : '+copy.nom,'success');
+  });
   $('btn-delete-custom-aliment')?.addEventListener('click',()=>{
     const idx=parseInt($('select-custom-aliment')?.value);
     if(isNaN(idx)){return;}
     rbConfirm('Supprimer cet aliment personnalisé ?', () => {
       customFoodsDb.splice(idx,1); saveLS(LS.customFoods,customFoodsDb); hydrate();
     });
+  });
+
+  // ── Mélanges fourragers ──
+  $('btn-open-melange-modal')?.addEventListener('click',()=>{
+    document.getElementById('melange-modal')?.classList.remove('hidden');
+    $('melange-nom').value=''; $('melange-err').style.display='none';
+    $('melange-preview').style.display='none';
+    $('melange-lines').innerHTML='';
+    addMelangeLine(); addMelangeLine();
+  });
+  function addMelangeLine(){
+    const row=document.createElement('div');
+    row.className='rb-ration-row'; row.style.gridTemplateColumns='1fr 110px 36px';
+    row.innerHTML=`<input list="aliments-list" placeholder="Aliment…" autocomplete="off" class="melange-feed-name">
+      <input type="number" placeholder="%" step="1" min="0" max="100" class="melange-feed-pct">
+      <button type="button" onclick="this.closest('.rb-ration-row').remove()" style="background:var(--danger);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer;padding:4px 8px;font-weight:bold;">×</button>`;
+    $('melange-lines')?.appendChild(row);
+  }
+  window.addMelangeLine=addMelangeLine;
+  function getMelangeComposition(){
+    const items=[];
+    document.querySelectorAll('#melange-lines .rb-ration-row').forEach(row=>{
+      const nom=(row.querySelector('.melange-feed-name')?.value||'').trim();
+      const pct=parseFloat(row.querySelector('.melange-feed-pct')?.value)||0;
+      if(nom&&pct>0){const f=findFood(nom);if(f)items.push({f,pct});}
+    });
+    return items;
+  }
+  function previewMelange(){
+    const items=getMelangeComposition();
+    const errEl=$('melange-err'),prevEl=$('melange-preview');
+    if(!items.length){errEl.textContent='Aucun aliment reconnu.';errEl.style.display='block';return;}
+    const total=items.reduce((s,i)=>s+i.pct,0);
+    if(Math.abs(total-100)>0.5){errEl.textContent=`Total = ${total.toFixed(1)}% (doit être 100%).`;errEl.style.display='block';return;}
+    errEl.style.display='none';
+    const ufl=items.reduce((s,i)=>s+(i.f.uflPerKgMS*i.pct/100),0);
+    const pdi=items.reduce((s,i)=>s+(i.f.pdiPerKgMS*i.pct/100),0);
+    const ms=items.reduce((s,i)=>s+((i.f.ms||i.f.msPct||87)*i.pct/100),0);
+    prevEl.innerHTML=`<strong>Valeurs composites :</strong> MS : ${ms.toFixed(1)} % | UFL/kg MS : ${ufl.toFixed(3)} | PDI : ${pdi.toFixed(1)} g/kg MS`;
+    prevEl.style.display='block';
+  }
+  window.previewMelange=previewMelange;
+  function saveMelange(){
+    const nom=($('melange-nom')?.value||'').trim();
+    const errEl=$('melange-err');
+    if(!nom){errEl.textContent='Renseignez un nom.';errEl.style.display='block';return;}
+    const items=getMelangeComposition();
+    if(!items.length){errEl.textContent='Aucun aliment reconnu.';errEl.style.display='block';return;}
+    const total=items.reduce((s,i)=>s+i.pct,0);
+    if(Math.abs(total-100)>0.5){errEl.textContent=`Total = ${total.toFixed(1)}% (doit être 100%).`;errEl.style.display='block';return;}
+    const ufl=items.reduce((s,i)=>s+(i.f.uflPerKgMS*i.pct/100),0);
+    const pdi=items.reduce((s,i)=>s+(i.f.pdiPerKgMS*i.pct/100),0);
+    const ms=items.reduce((s,i)=>s+((i.f.ms||i.f.msPct||87)*i.pct/100),0);
+    customFoodsDb.push({nom,ms:parseFloat(ms.toFixed(1)),uflPerKgMS:parseFloat(ufl.toFixed(4)),pdiPerKgMS:parseFloat(pdi.toFixed(1)),isMelange:true,components:items.map(i=>({nom:i.f.nom,pct:i.pct}))});
+    saveLS(LS.customFoods,customFoodsDb); hydrate();
+    document.getElementById('melange-modal')?.classList.add('hidden');
+    showToast('Mélange "'+nom+'" créé.','success');
+  }
+  window.saveMelange=saveMelange;
+
+  // ── Import CSV groupé ──
+  $('csv-import-input')?.addEventListener('change',function(e){
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const lines=(ev.target.result||'').split('\n').filter(l=>l.trim());
+      if(!lines.length){showToast('Fichier CSV vide.','warn');return;}
+      let imported=0,errors=0;
+      lines.forEach((line,li)=>{
+        if(li===0&&line.toLowerCase().includes('nom')) return;
+        const cols=line.split(/[;,\t]/);
+        const nom=(cols[0]||'').trim().replace(/^"|"$/g,'');
+        const ms=parseFloat(cols[1])||87;
+        const ufl=parseFloat(cols[2])||0;
+        const pdi=parseFloat(cols[3])||0;
+        if(!nom||ufl<=0){errors++;return;}
+        customFoodsDb.push({nom,ms,uflPerKgMS:ufl,pdiPerKgMS:pdi});
+        imported++;
+      });
+      saveLS(LS.customFoods,customFoodsDb); hydrate();
+      showToast(`${imported} aliment(s) importé(s)${errors?' ('+errors+' ignoré(s))':''}.`,imported>0?'success':'warn');
+      e.target.value='';
+    };
+    reader.readAsText(file);
   });
   ['custom-na','custom-k','custom-ca','custom-mg','custom-cl','custom-s'].forEach(id=>{
     $(id)?.addEventListener('input',()=>{
@@ -4921,7 +5298,8 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       tooltip.style.left = Math.min(r.left + window.scrollX, window.innerWidth - 220) + 'px';
       document.getElementById('ft-name').textContent = f.nom;
       document.getElementById('ft-ms').textContent   = f.ms.toFixed(1) + ' %';
-      document.getElementById('ft-ufl').textContent  = f.uflPerKgMS.toFixed(3);
+      const activeUfl = (window.RB_SYSTEM==='2018') ? (f.ufl2018PerKgMS||f.uflPerKgMS) : f.uflPerKgMS;
+      document.getElementById('ft-ufl').textContent  = activeUfl.toFixed(3) + ' (INRA '+(window.RB_SYSTEM||'2007')+')';
       document.getElementById('ft-pdi').textContent  = f.pdiPerKgMS.toFixed(1) + ' g';
       const ftExtra = document.getElementById('ft-extra');
       if (ftExtra) {
@@ -5139,7 +5517,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
         html2 += '<div class="ar-feed-row">' +
           '<input type="checkbox" id="' + id + '" data-nom="' + f.nom + '" checked class="ar-feed-check">' +
           '<label for="' + id + '" class="ar-feed-name">' + f.nom + '</label>' +
-          '<span class="ar-feed-vals">' + (f.uflPerKgMS||f.ufl||0).toFixed(2) + ' UFL | ' + (f.pdiPerKgMS||f.pdi||0).toFixed(0) + 'g PDI</span>' +
+          '<span class="ar-feed-vals">' + ((window.RB_SYSTEM==='2018'?(f.ufl2018PerKgMS||f.uflPerKgMS):f.uflPerKgMS)||f.ufl||0).toFixed(2) + ' UFL | ' + (f.pdiPerKgMS||f.pdi||0).toFixed(0) + 'g PDI</span>' +
           '<input type="number" placeholder="min kg" min="0" max="50" step="0.5" class="ar-qty-input ar-min" data-nom="' + f.nom + '">' +
           '<input type="number" placeholder="max kg" min="0" max="50" step="0.5" class="ar-qty-input ar-max" data-nom="' + f.nom + '">' +
           '<input type="number" placeholder="€/t MS" min="0" max="1000" step="1" class="ar-qty-input ar-price" data-nom="' + f.nom + '">' +
@@ -5568,7 +5946,7 @@ Triticale aplati,87,1.04,89,0.6,3.5,0.2,1.2,4.8,1.6,3.0,30,540,25,0.97,Cereales 
       <tr>
         <td style="font-weight:600;">${f.nom}</td>
         <td style="text-align:right;">${f.ms?.toFixed(1) || '—'}</td>
-        <td style="text-align:right;color:#f97316;font-weight:700;">${f.uflPerKgMS?.toFixed(3) || '—'}</td>
+        <td style="text-align:right;color:#f97316;font-weight:700;">${((window.RB_SYSTEM==='2018'?(f.ufl2018PerKgMS||f.uflPerKgMS):f.uflPerKgMS))?.toFixed(3) || '—'}</td>
         <td style="text-align:right;color:#2563eb;font-weight:700;">${f.pdiPerKgMS?.toFixed(0) || '—'}</td>
         <td style="text-align:right;">${f.ca_gkgms?.toFixed(1) || '—'}</td>
         <td style="text-align:right;">${f.p_gkgms?.toFixed(1)  || '—'}</td>

@@ -433,7 +433,12 @@ function setTheme(t) {
           <h2 style="font-size:1.2rem;font-weight:900;color:var(--text);margin-bottom:2px;" id="exp-detail-name">Exploitation</h2>
           <div style="font-size:.8rem;color:var(--text-muted);" id="exp-detail-meta"></div>
         </div>
-        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span class="inra-sys-badge" style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:.78rem;font-weight:700;border:1.5px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;cursor:pointer;" onclick="setInraSystem(window.RB_SYSTEM==='2007'?'2018':'2007')" title="Cliquer pour changer de référentiel">INRA&nbsp;2007</span>
+          <select id="inra-system-select" style="font-size:.8rem;padding:4px 8px;border-radius:8px;border:1.5px solid #e2e8f0;min-width:130px;" onchange="setInraSystem(this.value)" title="Référentiel nutritionnel">
+            <option value="2007" selected>INRA 2007 (feedtables)</option>
+            <option value="2018">INRA 2018 (révisé)</option>
+          </select>
           <button class="btn btn-ghost btn-sm" onclick="editCurrentExp()">✏️ Modifier</button>
           <button class="btn btn-primary btn-sm" onclick="saveSession()">💾 Sauvegarder ration</button>
           <button class="btn btn-secondary btn-sm" onclick="printRapport()">📄 PDF / Imprimer</button>
@@ -1811,9 +1816,11 @@ function parseCsv(csv) {
     const c = lines[i].split(',');
     const nom = c[0]?.trim(); const ms = parseFloat(c[1])||0;
     if (!nom||!ms) continue;
+    const ufl2007c = parseFloat(c[2])||0;
     db.push({
       nom, ms,
-      uflPerKgMS: parseFloat(c[2])||0,
+      uflPerKgMS:    ufl2007c,
+      ufl2018PerKgMS: (window.RB_ALIMENTS_2018?.[nom] ?? ufl2007c),
       pdiPerKgMS: parseFloat(c[3])||0,
       ca_gkgms:   parseFloat(c[4])||0,
       p_gkgms:    parseFloat(c[5])||0,
@@ -1862,6 +1869,60 @@ function parseCsv(csv) {
 
 const alimentsDb = parseCsv(RB_CSV);
 const alimentNames = alimentsDb.map(a=>a.nom);
+
+// ─── Référentiel nutritionnel INRA 2007 / 2018 ───────────────────────────
+window.RB_SYSTEM = '2007'; // '2007' = feedtables (défaut) | '2018' = INRA 2018 rév.
+window.RB_ALIMENTS_2018 = {
+  'Avoine':0.99,'Avoine décortiquée':1.16,'Avoine floconnée':0.99,
+  'Blé dur':1.19,'Blé tendre':1.19,'Blé aplati':1.19,
+  'Maïs':1.24,'Maïs extrudé':1.24,'Maïs floconné':1.24,'Maïs humide':1.23,'Maïs aplati':1.24,
+  'Orge':1.09,'Orge aplatie':1.09,
+  'Seigle':1.19,'Sorgho grain':1.21,'Triticale':1.17,'Triticale aplati':1.17,
+  'Riz cargo':1.28,'Manioc':1.07,'Sorgho grain humide':1.10,
+  'Son de blé':0.91,'Remoulage de blé':1.04,'Farine de blé':1.29,
+  'Son de maïs':1.10,'Farine de maïs':1.27,'Gluten de maïs':1.04,
+  'DDGS maïs':1.15,'DDGS blé':1.10,
+  'Drêches de maïs fraîches':1.04,'Corn gluten feed':1.04,
+  'Drêches de brasserie fraîches':0.83,'Drêches de brasserie séchées':0.83,
+  'Son de riz':0.93,
+  'Tourteau de colza':0.99,'Tourteau de colza décortiqué':1.20,
+  "Tourteau de soja 44":1.26,"Tourteau de soja 48":1.28,
+  'Tourteau de tournesol':0.86,'Tourteau de tournesol décortiqué':1.04,
+  'Tourteau de tournesol partiellement décortiqué':0.86,
+  'Tourteau de lin':1.03,'Tourteau de palmiste':0.93,
+  'Tourteau de coton':0.95,'Tourteau de coprah':1.07,
+  "Tourteau d'arachide":1.03,'Corn gluten meal (proteines)':1.20,
+  'Féverole':1.25,'Feverole graine':1.25,'Lupin blanc':1.43,'Lupin jaune':1.34,
+  'Pois protéagineux':1.25,
+  'Pulpe de betterave':1.01,'Pulpe de betterave déshydratée':1.04,
+  "Pulpe d'agrumes déshydratée":1.12,"Pulpe d'agrumes fraiche":1.12,
+  'Pomme de terre':1.02,'Pomme de terre déshydratée':1.08,
+  'Mélasse de betterave':0.95,'Mélasse de canne':0.79,'Mélasse de soja':0.79,
+  'Lactosérum':1.04,'Lactosérum en poudre':1.04,
+  'Levure de brasserie':1.18,'Levure seche de brasserie':1.18,
+  'Huile de palme':3.61,'Huile de soja':3.61,'Huile de colza':3.61,'Graisse de palme':3.61,
+  'Marc de raisin déshydraté':0.42,'Marc de pomme':0.73,
+  'Pulpe de tomate déshydratée':0.70,'Pulpe de tomate fraiche':0.60,
+  'Paille de blé':0.43,"Paille d'orge":0.46,'Paille de maïs':0.63,
+  'Paille de sorgho':0.56,'Paille de triticale':0.43,'Paille de seigle':0.43,
+  'Ensilage maïs mûr':0.96,"Ensilage d'épi de maïs":1.08,
+  'Herbe pâturée précoce':0.99,'Luzerne fraîche':0.74,'Luzerne déshydratée':0.75,
+  'Vinasse de betterave':0.91,
+};
+function setInraSystem(sys) {
+  window.RB_SYSTEM = sys;
+  const sel = document.getElementById('inra-system-select');
+  if (sel) sel.value = sys;
+  document.querySelectorAll('.inra-sys-badge').forEach(b => {
+    b.innerHTML         = 'INRA ' + sys;
+    b.style.background  = sys==='2018' ? '#dcfce7' : '#eff6ff';
+    b.style.color       = sys==='2018' ? '#15803d' : '#1d4ed8';
+    b.style.borderColor = sys==='2018' ? '#bbf7d0' : '#bfdbfe';
+  });
+  if (typeof showToast === 'function') showToast('Référentiel passé en INRA ' + sys, 'info', 2500);
+  if (typeof calcBilan === 'function') try { calcBilan(); } catch(e) {}
+}
+window.setInraSystem = setInraSystem;
 
 function findFood(nom) {
   const n = nom.toLowerCase().trim();
@@ -2912,8 +2973,14 @@ function computeBesoins(pv,prod,activite,tb,type,gmq,semainesVelage) {
   switch(type) {
     case 'vache-laitiere':
       lait = (prod*(tb||40))/40;
-      bUFL = (1.4+0.006*pv+0.44*lait)*coef;
-      bPDI = (95+0.5*pv+lait*48)*coef;
+      bUFL = ((window.RB_SYSTEM||'2007')==='2007'
+        ? (0.041*pv075n + 0.44*lait)   // INRA 2007 : entretien 0.041×PV^0.75
+        : (1.4+0.006*pv + 0.44*lait)   // INRA 2018 : entretien 1.4+0.006×PV
+      )*coef;
+      bPDI = ((window.RB_SYSTEM||'2007')==='2007'
+        ? (3.25*pv075n + lait*46)   // INRA 2007 : entretien 3.25×PV^0.75, 46 g PDI/kg LC
+        : (95+0.5*pv + lait*48)     // INRA 2018 : entretien 95+0.5×PV, 48 g PDI/kg LC
+      )*coef;
       cap  = (0.025*pv+0.1*prod)*coef;
       break;
     case 'vache-tarie':
@@ -3279,11 +3346,15 @@ function parseRation() {
     if (f) {
       const useUFV = lastBesoins && UFV_TYPES.includes(lastBesoins.typeLabel);
       const ueVal = useUFV ? (f.ueb_gkgms||f.uel_gkgms||0) : (f.uel_gkgms||f.ueb_gkgms||0);
+      const _uflBase = (window.RB_SYSTEM==='2018') ? (f.ufl2018PerKgMS||f.uflPerKgMS) : f.uflPerKgMS;
       items.push({
         nom:f.nom, qty, ms:f.ms,
-        ufl:f.uflPerKgMS*qty, pdi:f.pdiPerKgMS*qty,
+        ufl:_uflBase*qty, pdi:f.pdiPerKgMS*qty,
         al:(f.al_gkgms||0)*qty, ar:(f.ar_gkgms||0)*qty, ss:(f.ss_gkgms||0)*qty,
-        bpr:(f.bprPerKgMS||0)*qty, ue:ueVal*qty, hasUE:!!(f.uel_gkgms||f.ueb_gkgms),
+        bpr:(f.bprPerKgMS||0)*qty,
+        pdin:f.pdiPerKgMS*qty + Math.max(0,(f.bprPerKgMS||0)*qty),
+        pdie:f.pdiPerKgMS*qty + Math.max(0,-(f.bprPerKgMS||0)*qty),
+        ue:ueVal*qty, hasUE:!!(f.uel_gkgms||f.ueb_gkgms),
         ca:(f.ca_gkgms||0)*qty, p:(f.p_gkgms||0)*qty, na:(f.na_gkgms||0)*qty,
         mg:(f.mg_gkgms||0)*qty, k:(f.k_gkgms||0)*qty, cl:(f.cl_gkgms||0)*qty, s:(f.s_gkgms||0)*qty,
         met:(f.met_gkgms||0)*qty, lys:(f.lys_gkgms||0)*qty, pdia:(f.pdiaPerKgMS||0)*qty,
@@ -3312,6 +3383,8 @@ function parseRation() {
     totalAR:  items.reduce((s,i)=>s+i.ar,0),
     totalSS:  items.reduce((s,i)=>s+i.ss,0),
     totalBPR: items.reduce((s,i)=>s+i.bpr,0),
+    totalPDIN: items.reduce((s,i)=>s+(i.pdin!=null?i.pdin:i.pdi),0),
+    totalPDIE: items.reduce((s,i)=>s+(i.pdie!=null?i.pdie:i.pdi),0),
     totalUE:  items.reduce((s,i)=>s+i.ue,0),
     msAvecUE: items.filter(i=>i.hasUE).reduce((s,i)=>s+i.qty,0),
     totalCa:  items.reduce((s,i)=>s+i.ca,0),
@@ -3398,15 +3471,22 @@ function calcBilan() {
   lastApports = a;
   if (!lastBesoins) { calcBesoins(); if(!lastBesoins) return; }
   const b = lastBesoins;
+  const _sys2 = window.RB_SYSTEM || '2007';
+  const _pdin2 = (a.totalPDIN != null) ? a.totalPDIN : a.totalPDI;
+  const _pdie2 = (a.totalPDIE != null) ? a.totalPDIE : a.totalPDI;
+  const _effPDI = _sys2==='2007' ? Math.min(_pdin2, _pdie2) : a.totalPDI;
+  const _pdinLim = _pdin2 <= _pdie2;
   const rUFL = b.bUFL>0?a.totalUFL/b.bUFL:0;
-  const rPDI = b.bPDI>0?a.totalPDI/b.bPDI:0;
+  const rPDI = b.bPDI>0?(_sys2==='2007'?_effPDI:a.totalPDI)/b.bPDI:0;
   const ppu  = a.totalUFL>0?a.totalPDI/a.totalUFL:0;
   const eu   = UFV_TYPES.includes(b.typeLabel)?'UFV':'UFL';
   const bcls = r=>r>=0.9&&r<=1.1?'badge-green':r<0.9?'badge-red':'badge-amber';
   const blbl = r=>r>=0.9&&r<=1.1?'OK':r<0.9?'Déficit':'Excès';
   const pbar = r=>`style="width:${Math.min(100,r*100)}%;background:${r>=0.9&&r<=1.1?'#16a34a':r<0.9?'#dc2626':'#d97706'};"`;
 
-  document.getElementById('bilan-result').innerHTML = `
+  const _sysL = window.RB_SYSTEM||'2007';
+  const _sysBadge = `<span class="inra-sys-badge" style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:.75rem;font-weight:700;border:1.5px solid ${_sysL==='2018'?'#bbf7d0':'#bfdbfe'};background:${_sysL==='2018'?'#dcfce7':'#eff6ff'};color:${_sysL==='2018'?'#15803d':'#1d4ed8'};cursor:pointer;margin-bottom:10px;" onclick="setInraSystem(window.RB_SYSTEM==='2007'?'2018':'2007')">Référentiel INRA ${_sysL}</span>`;
+  document.getElementById('bilan-result').innerHTML = _sysBadge + `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
       <div style="background:#fff7ed;border-radius:10px;padding:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -3422,15 +3502,23 @@ function calcBilan() {
       </div>
       <div style="background:#eff6ff;border-radius:10px;padding:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#1e40af;">PDI</div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#1e40af;">${_sys2==='2007'?'PDI effectif':'PDI'}</div>
           <span class="badge ${bcls(rPDI)}">${blbl(rPDI)}</span>
         </div>
         <div class="progress-wrap"><div class="progress-bar" ${pbar(rPDI)}></div></div>
         <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:.82rem;">
-          <span>Apport : <strong style="color:#2563eb;">${a.totalPDI.toFixed(0)} g</strong></span>
+          <span>Apport : <strong style="color:#2563eb;">${(_sys2==='2007'?_effPDI:a.totalPDI).toFixed(0)} g</strong></span>
           <span>Besoin : ${b.bPDI.toFixed(0)} g</span>
         </div>
         <div style="text-align:right;font-size:1.1rem;font-weight:800;color:${rPDI>=0.9&&rPDI<=1.1?'#16a34a':rPDI<0.9?'#dc2626':'#d97706'};">${(rPDI*100).toFixed(0)}%</div>
+        ${_sys2==='2007'?`
+        <div style="margin-top:10px;padding:8px;background:rgba(255,255,255,.6);border-radius:7px;font-size:.73rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="color:${_pdinLim?'#dc2626':'#15803d'};font-weight:700;">PDIN (azote) : ${_pdin2.toFixed(0)} g ${_pdinLim?'▼ limitant':''}</span>
+            <span style="color:${!_pdinLim?'#dc2626':'#15803d'};font-weight:700;">PDIE (\xe9nergie) : ${_pdie2.toFixed(0)} g ${!_pdinLim?'▼ limitant':''}</span>
+          </div>
+          <div style="color:#64748b;">PDI eff. = min = <strong>${_effPDI.toFixed(0)} g/j</strong>${rPDI<0.92?' — '+(_pdinLim?'→ +azote d\xe9grad. (colza, luzerne)':'→ +\xe9nergie (ma\xefs, c\xe9r\xe9ales)'):'&nbsp;— OK'}</div>
+        </div>`:''}
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
@@ -3455,7 +3543,7 @@ function calcBilan() {
     <table class="data-table" style="font-size:.78rem;white-space:nowrap;">
       <thead><tr>
         <th>Aliment</th><th>kg MS</th><th>kg brut</th><th>MS %</th>
-        <th style="color:#f97316;">${eu}</th><th style="color:#2563eb;">PDI (g)</th><th>PDIA (g)</th>
+        <th style="color:#f97316;">${eu}</th>${_sys2==='2007'?'<th style="color:#1d4ed8;">PDIN (g)</th><th style="color:#0891b2;">PDIE (g)</th>':'<th style="color:#2563eb;">PDI (g)</th>'}<th>PDIA (g)</th>
         <th>Ca (g)</th><th>P (g)</th><th>UE</th><th>NDF %MS</th>
       </tr></thead>
       <tbody>
@@ -3463,7 +3551,7 @@ function calcBilan() {
           <td>${escHtml(i.nom)}</td><td>${i.qty.toFixed(1)}</td>
           <td style="color:var(--text-muted);">${i.ms?(i.qty/(i.ms/100)).toFixed(1):'—'}</td>
           <td style="color:var(--text-muted);">${i.ms?i.ms.toFixed(0):'—'}%</td>
-          <td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td><td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td>
+          <td style="color:#f97316;font-weight:600;">${i.ufl.toFixed(3)}</td>${_sys2==='2007'?`<td style="color:#1d4ed8;font-weight:600;">${(i.pdin!=null?i.pdin:i.pdi).toFixed(0)}</td><td style="color:#0891b2;font-weight:600;">${(i.pdie!=null?i.pdie:i.pdi).toFixed(0)}</td>`:`<td style="color:#2563eb;font-weight:600;">${i.pdi.toFixed(0)}</td>`}
           <td style="color:var(--text-muted);">${i.pdia?i.pdia.toFixed(0):'—'}</td>
           <td style="color:var(--text-muted);">${i.ca?i.ca.toFixed(1):'—'}</td><td style="color:var(--text-muted);">${i.p?i.p.toFixed(1):'—'}</td>
           <td style="color:var(--text-muted);">${i.hasUE?i.ue.toFixed(2):'—'}</td>
@@ -3472,7 +3560,7 @@ function calcBilan() {
         <tr style="font-weight:700;">
           <td>Total</td><td>${a.totalMS.toFixed(1)}</td>
           <td>${a.items.every(i=>i.ms)?a.items.reduce((s,i)=>s+i.qty/(i.ms/100),0).toFixed(1):'—'}</td><td></td>
-          <td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td><td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td>
+          <td style="color:#f97316;">${a.totalUFL.toFixed(2)}</td>${_sys2==='2007'?`<td style="color:#1d4ed8;">${_pdin2.toFixed(0)}</td><td style="color:#0891b2;">${_pdie2.toFixed(0)}</td>`:`<td style="color:#2563eb;">${a.totalPDI.toFixed(0)}</td>`}
           <td>${(a.totalPDIA||0).toFixed(0)}</td><td>${(a.totalCa||0).toFixed(1)}</td><td>${(a.totalP||0).toFixed(1)}</td>
           <td>${(a.totalUE||0).toFixed(2)}</td>
           <td>${a.totalMS>0?((a.totalNDF||0)/a.totalMS/10).toFixed(0):'—'}</td>
